@@ -41,6 +41,7 @@ and ranking.
 - Runs locally only (`npm run dev` / `npm start` on the owner's Windows 11 PC,
   Node v24). Not deployed to Vercel: API Anything calls run on the owner's machine,
   network and sessions.
+- **Every store must be its Saudi (KSA) storefront** (owner, 2026-11-27): AliExpress with region SA and shipping to SA, amazon.sa, noon.com/saudi-en and jarir.com/sa-en. Prices are in SAR.
 - Owner is in Saudi Arabia. By default AliExpress serves Arabic titles and SAR
   prices based on IP.
 

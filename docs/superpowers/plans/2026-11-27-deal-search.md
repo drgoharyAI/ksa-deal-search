@@ -18,6 +18,7 @@
 - `API_ANYTHING_LOCAL_ONLY=1` and `API_ANYTHING_HOME=./.aa-home` are always set (in `.env.local` and the npm scripts).
 - AliExpress cookie on every request: `aep_usuc_f=site=glo&c_tp=SAR&region=SA&b_locale=en_US` (English titles, SAR prices).
 - Currency is SAR. There is no currency conversion.
+- **All stores are the Saudi (KSA) storefront.** That means aliexpress.com with `region=SA` and shipping to SA, `www.amazon.sa`, `www.noon.com/saudi-en`, and `www.jarir.com/sa-en`. Each spike verifies the KSA storefront, SAR prices, and (where shown) delivery to Saudi Arabia. Each adapter has a test asserting every product `url` is on its KSA domain/path and `currency === "SAR"`.
 - English only: queries, synonym lists and accessory words.
 - Traffic limits: search pages per term = relevance pages 1–2 + `SortType=price_asc` page 1. Up to 2 extra synonym variants. Detail calls only for the top N=20 (configurable). Concurrency 3 for search calls and 2 for detail calls.
 - Cache TTL: search 10 min, product detail 60 min.
