@@ -262,12 +262,14 @@ tests/**/*.test.ts                 Vitest
 
 Behavior:
 - The form has a query box, site checkboxes (AliExpress checked; list from a static array mirroring `registry` ids), a sort select (Lowest price / Highest discount / Best deal), and min price, max price and min rating number inputs.
-- On submit: POST `/api/search`. Render the cards. Then POST `/api/details` for the top N=20 in batches of 5, updating cards as each batch returns. Re-rank after each batch when sort is `price` or `deal`.
-- Each card shows: image, title (2-line clamp), **final price SAR** (or listed price with a "price unverified" tag when `detailStatus` is `failed` or `pending`, plus a spinner while pending), chosen option, shipping ("Free" / "SAR x" / "shipping unknown"), struck original price, discount badge, rating, sold count, a site badge, and a link opening `url` in a new tab.
+- On submit: POST `/api/search` and render the cards. There is no details step (Task 6 was removed). Searches can take up to about 10 s while noon runs, so show a per-site loading state.
+- Each card shows: image, title (2-line clamp), **price SAR** (AliExpress labelled "from"), "shipping not included", struck original price, discount badge, rating, sold count, a site badge, and a link opening `url` in a new tab.
 - The status bar shows each site's status. `blocked` gets an amber message: "AliExpress blocked the request; try again later".
 - Empty state shows `reason`. A 400 shows its `error`.
 
-- [ ] **Step 1:** Implement the components.
+- **Design (owner, 2026-11-27): use the Hallmark skill** (`.claude/skills/hallmark`, Nutlope/hallmark v2). Invoke it for the page design: the job is a search tool, and the primary action is the query box. Follow its Floor rules (CSS tokens at `:root`, `:focus-visible`, reduced-motion, no eyebrows/tracked caps, no invented metrics, `overflow-x: clip`). Pick one theme with `scripts/theme.mjs deal`, or go `custom`. Translate the result into the Next.js components. Tailwind may be replaced by the CSS that Hallmark produces. **Never run `scripts/imagegen.mjs`**: it calls the Together AI image API, which breaks the no-AI-calls constraint. Product images come from the stores, and no stock photos are needed.
+- [ ] **Step 1:** Implement the components using the Hallmark design.
+- [ ] **Step 1b:** Run `node .claude/skills/hallmark/scripts/sloplint.mjs <built page or route HTML> --render` against the running dev server's page. Fix every `FAIL`, and fix or waive every `REFLEX`.
 - [ ] **Step 2: Verify** with `npm run build` → no type errors. Run `npm run dev`, search `anc earbuds under 100` → cards render, prices fill in, and changing the sort re-orders the cards.
 - [ ] **Step 3: Commit** `feat: search UI`.
 
