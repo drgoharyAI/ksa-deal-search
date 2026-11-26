@@ -63,3 +63,30 @@ describe("expandTerms", () => {
     expect(expandTerms("wireless earphones", 5)).not.toContain("wireless wireless earphones");
   });
 });
+
+describe("parseQuery edge cases", () => {
+  it("does not read 'above 4.5 stars' as a price", () => {
+    const pq = parseQuery("earbuds above 4.5 stars");
+    expect(pq.minRating).toBe(4.5);
+    expect(pq.minPrice).toBeUndefined();
+    expect(pq.terms).toBe("earbuds");
+  });
+
+  it("leaves unit-suffixed numbers in terms", () => {
+    const a = parseQuery("usb-c cable under 2m");
+    expect(a.maxPrice).toBeUndefined();
+    expect(a.terms).toBe("usb-c cable under 2m");
+    const b = parseQuery("charger over 20w");
+    expect(b.minPrice).toBeUndefined();
+    expect(b.terms).toBe("charger over 20w");
+  });
+
+  it("strips currency words and symbols", () => {
+    expect(parseQuery("earbuds under 50 sar")).toMatchObject({ terms: "earbuds", maxPrice: 50 });
+    expect(parseQuery("earbuds under $50")).toMatchObject({ terms: "earbuds", maxPrice: 50 });
+  });
+
+  it("allows a price-only query", () => {
+    expect(parseQuery("under 50")).toMatchObject({ terms: "", maxPrice: 50 });
+  });
+});

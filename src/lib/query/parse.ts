@@ -1,6 +1,9 @@
 import type { ParsedQuery } from "@/src/lib/types";
 
 const NUM = "(\\d+(?:\\.\\d+)?)";
+// Price number: optional currency suffix; rejects digit/letter continuations ("2m", "20w", "4.5").
+const PRICE = `${NUM}(?:\\s*(?:sar|sr|riyals?)\\b)?(?!\\d|\\.\\d|[a-z])`;
+const CUR = "(?:\\$\\s*|\\b(?:sar|sr)\\s*)?";
 
 /** Removes the first match of `re` from `s`, returning the match and the rest. */
 function take(s: string, re: RegExp): { m: RegExpMatchArray | null; rest: string } {
@@ -14,26 +17,26 @@ export function parseQuery(input: string): ParsedQuery {
   const pq: ParsedQuery = { terms: "", exclude: [] };
 
   // Rating first so ">4.5 stars" is not read as a price.
-  let r = take(s, new RegExp(`(?:>\\s*${NUM}|${NUM}\\s*\\+)\\s*stars?\\b`));
+  let r = take(s, new RegExp(`(?:>\\s*${NUM}|${NUM}\\s*\\+|\\b(?:over|above)\\s+${NUM})\\s*stars?\\b`));
   if (r.m) {
-    pq.minRating = parseFloat(r.m[1] ?? r.m[2]);
+    pq.minRating = parseFloat(r.m[1] ?? r.m[2] ?? r.m[3]);
     s = r.rest;
   }
 
-  r = take(s, new RegExp(`(?<![\\w.-])${NUM}\\s*-\\s*${NUM}(?![\\w.-])`));
+  r = take(s, new RegExp(`(?<![\\w.-])${CUR}${NUM}\\s*-\\s*${CUR}${PRICE}(?![\\w.-])`));
   if (r.m) {
     pq.minPrice = parseFloat(r.m[1]);
     pq.maxPrice = parseFloat(r.m[2]);
     s = r.rest;
   }
 
-  r = take(s, new RegExp(`(?:\\b(?:under|below)\\s+|<\\s*)${NUM}`));
+  r = take(s, new RegExp(`(?:\\b(?:under|below)\\s+|<\\s*)${CUR}${PRICE}`));
   if (r.m) {
     pq.maxPrice = parseFloat(r.m[1]);
     s = r.rest;
   }
 
-  r = take(s, new RegExp(`(?:\\b(?:over|above)\\s+|>\\s*)${NUM}(?!\\s*stars?\\b)`));
+  r = take(s, new RegExp(`(?:\\b(?:over|above)\\s+|>\\s*)${CUR}${PRICE}(?!\\s*stars?\\b)`));
   if (r.m) {
     pq.minPrice = parseFloat(r.m[1]);
     s = r.rest;
