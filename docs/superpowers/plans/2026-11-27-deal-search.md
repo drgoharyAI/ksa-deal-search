@@ -284,3 +284,36 @@ Behavior:
   - a repeat search returns instantly from cache
 - [ ] **Step 3: README.** Cover setup (`npm i`, `npm run dev`), how to edit `data/synonyms.json` and `data/accessory-words.json`, and how to add a site (learn the op → put the spec in `api-specs/` → write the adapter → register it in `registry.ts`).
 - [ ] **Step 4: Commit** `docs: readme and e2e verification`.
+
+---
+
+## Scope extension: amazon.sa, noon KSA, jarir.com
+
+Spec section "Scope extension". Site ids are `amazon-sa`, `noon-sa` and `jarir`. On these sites `finalPrice = listPrice`, `detailStatus:"ok"`, `shipping:null`, and cards say "shipping not included". These tasks run after Task 9. Their spikes (Tasks 10a–c) run early and in parallel. They're research only: each uses its own API Anything home `.aa-home-spike-<id>/` (gitignored) and writes only its own files. The controller commits them.
+
+### Task 10a/10b/10c: Spike — `<id>.search` op (one per site, STOP-GATE per site)
+
+**Files:**
+- Create: `api-specs/<id>.json`, `tests/fixtures/<id>-search.json`, `docs/superpowers/spikes/2026-11-27-<id>.md`
+
+**Interfaces:**
+- Produces: op `<id>.search` with params `q` and `page`, plus an optional sort param if the site has one. Item fields picked: `id,title,price,currency,origPrice,discount,rating,reviews,image,url`, with as many as the site exposes. `url` must be an absolute product URL or buildable from `id` (document how).
+
+- [ ] **Step 1:** Find the site's English/SAR search URL: amazon.sa `https://www.amazon.sa/s?k={q}&page={page}&language=en_AE`, noon `https://www.noon.com/saudi-en/search/?q={q}&page={page}`, jarir `https://www.jarir.com/sa-en/catalogsearch/result?search={q}` (verify each). Capture it, find the data (embedded JSON, an xhr/fetch JSON API, or server-rendered HTML for an `--html` recipe), and learn the op with two examples. For Amazon, check the bundled `amazon` op first (`npx api-anything ops amazon`).
+- [ ] **Step 2: Verify** 4 different queries → `ok`, tier ≤ 2, ≥ 10 items each, English titles, SAR prices, and `page=2` returns different items.
+- [ ] **Step 3: STOP-GATE per site.** If Step 2 fails (blocked, tier 3 only, no prices), write findings in the spike notes and report BLOCKED for that site only.
+- [ ] **Step 4:** Save one raw `call()` result to the fixture, copy the spec to `api-specs/<id>.json`, and write spike notes: recipe, field mapping, tiers, timings, whether the site shows bait-style option pricing, and the discount/original-price fields.
+
+### Task 11: Adapters for spiked sites
+
+**Files:**
+- Create: `src/sites/<id>/search.ts` per site that passed its spike. Modify: `src/sites/registry.ts`, the UI site list.
+- Test: `tests/sites/<id>-search.test.ts` per site.
+
+**Interfaces:**
+- Consumes: `SiteAdapter`, `Product`, `slugify` pattern (Task 4), the fixtures (Task 10).
+- Produces: `searchCalls(pq, variants)`, with pages 1–2 per term and a price-ascending page if the site has one. Also `normalizeSearchItem(raw): Product | null` (SAR, `detailStatus:"ok"`, `finalPrice = listPrice`, `shipping:null`, `discountPct` computed from `origPrice` when the site omits it), and `fetchDetail = async p => p`.
+
+- [ ] **Step 1: Write failing tests per site.** Every fixture item normalizes to a Product or `null` with no `NaN`. ≥ 10 are non-null. URLs are absolute `https://`. `searchCalls` count matches the per-term rule. The query encoding test uses `"usb-c cable 100w"` and `"a/b & c"`: only safe characters reach `q`.
+- [ ] **Step 2: Run** → FAIL. **Step 3:** Implement. **Step 4: Run** → PASS. Then search `usb-c cable` across all sites and check the mixed results rank correctly by price.
+- [ ] **Step 5: Commit** `feat: amazon-sa, noon-sa, jarir adapters`.

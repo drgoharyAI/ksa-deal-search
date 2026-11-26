@@ -26,7 +26,7 @@ and ranking.
 
 - Accounts, multi-user, public hosting.
 - Price history, alerts, watchlists.
-- Sites other than AliExpress (architecture must make them easy, but v1 ships one).
+- Sites other than AliExpress, amazon.sa, noon KSA and jarir.com (see Scope extension).
 - Checkout, cart, affiliate links.
 
 ## Anti-goals
@@ -199,6 +199,27 @@ status (ok / blocked / error) so a failing site doesn't hide the others.
   - `Product` gains `listPrice`, `mainOption`, `shipping`, `finalPrice` and
     `detailStatus` (`pending` / `ok` / `failed`). If details fail, the card falls
     back to the listed price with a "price unverified" label.
+
+## Scope extension (owner, 2026-11-27): Amazon KSA, noon KSA, Jarir
+
+The owner asked to add **amazon.sa**, **noon.com (Saudi, English)** and **jarir.com
+(Saudi, English)** alongside AliExpress. "Sites other than AliExpress" moves out of
+non-goals for these three.
+
+- Each site gets its own API Anything op `<site>.search` (spec in `api-specs/`)
+  and its own adapter, following the same contract. Site ids: `amazon-sa`, `noon-sa`, `jarir`.
+- All four sites price in SAR, so cross-site ranking needs no conversion.
+- **Price on these three (my call):** these sites list a single price for the
+  product shown, and none uses AliExpress-style bait options. So `finalPrice =
+  listPrice` and they get no detail call. Shipping is not added; it is usually free
+  or flat locally. Cards mark it "shipping not included". If a site's spike shows
+  bait-style option pricing, add a detail op for that site.
+- Each site is spiked first, the same way as AliExpress (learn the op, check that it
+  answers at tier 1–2 with English titles and SAR prices, record fixtures). A site
+  that can't be learned reliably is dropped from v1 and reported to the owner. It
+  does not block the others.
+- Amazon: API Anything bundles an `amazon` op for amazon.com. Start from it and
+  adapt it to amazon.sa, or learn a new op.
 
 ## Left to the builder
 
