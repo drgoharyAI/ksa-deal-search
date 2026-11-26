@@ -1,0 +1,174 @@
+{
+  "name": "aliexpress",
+  "baseUrl": "https://www.aliexpress.com",
+  "operations": [
+    {
+      "name": "search",
+      "request": {
+        "method": "GET",
+        "url": "https://www.aliexpress.com/w/wholesale-usb-c-cable.html?page=1&SortType=default",
+        "headers": {
+          "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/jxl,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
+          "accept-language": "en-US,en;q=0.9",
+          "priority": "u=0, i",
+          "sec-ch-ua": "\"Chromium\";v=\"158\", \"Not.A/Brand\";v=\"24\", \"Google Chrome\";v=\"158\"",
+          "sec-ch-ua-mobile": "?0",
+          "sec-ch-ua-platform": "\"Windows\"",
+          "sec-fetch-dest": "document",
+          "sec-fetch-mode": "navigate",
+          "sec-fetch-site": "none",
+          "sec-fetch-user": "?1",
+          "upgrade-insecure-requests": "1",
+          "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/158.0.0.0 Safari/537.36",
+          "cookie": "aep_usuc_f=site=glo&c_tp=SAR&region=SA&b_locale=en_US"
+        }
+      },
+      "slots": [
+        {
+          "param": "page",
+          "at": [
+            "query:page"
+          ]
+        },
+        {
+          "param": "sort",
+          "at": [
+            "query:SortType"
+          ]
+        },
+        {
+          "param": "q",
+          "at": [
+            "path:1"
+          ],
+          "template": "wholesale-{q}.html"
+        }
+      ],
+      "volatile": [],
+      "trigger": {
+        "url": "https://www.aliexpress.com/w/wholesale-{q}.html?page={page}&SortType={sort}"
+      },
+      "match": {
+        "method": "GET",
+        "host": "www.aliexpress.com",
+        "path": "/w/*"
+      },
+      "response": {
+        "format": "embedded",
+        "contentType": "text/html;charset=UTF-8",
+        "extract": "data.root.fields.mods.itemList.content",
+        "pick": [
+          "id=productId",
+          "title=title.displayTitle",
+          "price=prices.salePrice.minPrice",
+          "currency=prices.salePrice.currencyCode",
+          "discount=prices.salePrice.discount",
+          "origPrice=prices.originalPrice.minPrice",
+          "rating=evaluation.starRating",
+          "sold=trade.tradeDesc",
+          "image=image.imgUrl"
+        ],
+        "embedded": {
+          "regex": "_init_data_= \\{ data: (\\{)"
+        }
+      },
+      "params": [
+        {
+          "name": "q",
+          "type": "string",
+          "required": true,
+          "example": "usb-c-cable"
+        },
+        {
+          "name": "page",
+          "type": "string",
+          "required": true,
+          "example": "1"
+        },
+        {
+          "name": "sort",
+          "type": "string",
+          "required": true,
+          "example": "default"
+        }
+      ],
+      "readOnly": true,
+      "minTier": 1,
+      "learnedLoggedIn": false,
+      "learnedAt": "2026-11-26T23:17:36.281Z"
+    },
+    {
+      "name": "product",
+      "request": {
+        "method": "GET",
+        "url": "https://acs.aliexpress.com/h5/mtop.aliexpress.pdp.pc.query/1.0/?jsv=2.5.1&appKey=12574478&t=1795735446789&sign=4ea16fc8ee0eb9e79e47868a076fddd7&api=mtop.aliexpress.pdp.pc.query&type=originaljsonp&v=1.0&timeout=15000&dataType=originaljsonp&callback=mtopjsonp1&data=%7B%22productId%22%3A%221005008932971097%22%2C%22_lang%22%3A%22en_SA%22%2C%22_currency%22%3A%22SAR%22%2C%22country%22%3A%22SA%22%2C%22province%22%3A%22%22%2C%22city%22%3A%22%22%2C%22channel%22%3A%22%22%2C%22pdp_ext_f%22%3A%22%22%2C%22pdpNPI%22%3A%22%22%2C%22sourceType%22%3A%22%22%2C%22clientType%22%3A%22pc%22%2C%22ext%22%3A%22%7B%5C%22foreverRandomToken%5C%22%3A%5C%22%5C%22%2C%5C%22site%5C%22%3A%5C%22ara%5C%22%2C%5C%22crawler%5C%22%3Afalse%2C%5C%22x-m-biz-bx-region%5C%22%3A%5C%22%5C%22%2C%5C%22signedIn%5C%22%3Afalse%2C%5C%22host%5C%22%3A%5C%22ar.aliexpress.com%5C%22%7D%22%7D",
+        "headers": {
+          "accept": "*/*",
+          "accept-language": "en-US,en;q=0.9",
+          "referer": "https://ar.aliexpress.com/",
+          "sec-ch-ua": "\"Chromium\";v=\"158\", \"Not.A/Brand\";v=\"24\", \"Google Chrome\";v=\"158\"",
+          "sec-ch-ua-mobile": "?0",
+          "sec-ch-ua-platform": "\"Windows\"",
+          "sec-fetch-dest": "script",
+          "sec-fetch-mode": "no-cors",
+          "sec-fetch-site": "same-site",
+          "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/158.0.0.0 Safari/537.36"
+        }
+      },
+      "slots": [
+        {
+          "param": "id",
+          "at": [
+            "query:data",
+            "json:/productId"
+          ]
+        },
+        {
+          "ref": "session:product/xman_us_f",
+          "at": [
+            "query:data",
+            "json:/ext",
+            "json:/foreverRandomToken"
+          ]
+        }
+      ],
+      "volatile": [],
+      "trigger": {
+        "url": "https://www.aliexpress.com/item/{id}.html"
+      },
+      "match": {
+        "method": "GET",
+        "host": "acs.aliexpress.com",
+        "path": "/h5/mtop.aliexpress.pdp.pc.query/1.0/"
+      },
+      "response": {
+        "format": "embedded",
+        "contentType": "application/json;charset=UTF-8",
+        "extract": "data.result",
+        "pick": [
+          "title=PRODUCT_TITLE.text",
+          "region=PRICE.region",
+          "prices=PRICE.skuIdStrPriceInfoMap",
+          "skuProps=SKU.skuProperties",
+          "skuPaths=SKU.skuPaths",
+          "shipping=SHIPPING.deliveryLayoutInfo[*].bizData"
+        ],
+        "embedded": {
+          "regex": "mtopjsonp\\d+\\((\\{)"
+        }
+      },
+      "params": [
+        {
+          "name": "id",
+          "type": "string",
+          "required": true,
+          "example": "1005008932971097"
+        }
+      ],
+      "readOnly": true,
+      "minTier": 3,
+      "learnedLoggedIn": false,
+      "learnedAt": "2026-11-26T23:27:10.055Z"
+    }
+  ]
+}

@@ -1,0 +1,1008 @@
+[
+  {
+    "args": {
+      "id": "1005008932971097"
+    },
+    "result": {
+      "ok": true,
+      "class": "ok",
+      "tier": 3,
+      "data": {
+        "title": "TWS Wireless Bluetooth Earphones ANC Noise Reduction Earbuds With Microphone Exercise Music Headphones",
+        "region": "SA",
+        "prices": {
+          "12000047256592641": {
+            "originalPrice": {
+              "currency": "SAR",
+              "formatedAmount": "56.08",
+              "value": 56.08
+            },
+            "priceFontColor": "#FD384F",
+            "salePriceLocal": "SAR18.24|18|24",
+            "salePriceString": "SAR18.24"
+          }
+        },
+        "skuProps": [
+          {
+            "hasSkuImage": true,
+            "isShowTypeColor": true,
+            "showType": "colour_atla",
+            "showTypeColor": true,
+            "skuPropertyId": 14,
+            "skuPropertyName": "Color",
+            "skuPropertyValues": [
+              {
+                "propertyValueDefinitionName": "White",
+                "propertyValueDisplayName": "White",
+                "propertyValueIdLong": 29,
+                "propertyValueName": "WHITE",
+                "showHot": false,
+                "skuColorValue": "#FFFFFF",
+                "skuPropertyImagePath": "https://ae-pic-a1.aliexpress-media.com/kf/S4ccb3480260b403c9aa5df57a6d8a37dR.jpg",
+                "skuPropertyImageSummPath": "https://ae-pic-a1.aliexpress-media.com/kf/S4ccb3480260b403c9aa5df57a6d8a37dR.jpg_120x120.jpg_.webp"
+              }
+            ]
+          },
+          {
+            "hasSkuImage": false,
+            "isShowTypeColor": false,
+            "showType": "none",
+            "showTypeColor": false,
+            "sizeInfo": {
+              "hasSizeInfo": false,
+              "icon": "https://ae-pic-a1.aliexpress-media.com/kf/Sbc534a10bc2044448f9aa271540236800/36x36.png",
+              "sizeInfoUrl": "https://www.aliexpress.com/p/secondaryPage/size-chart.html?_pid=1005008932971097&mid=2678280160&_locale=en_US&version=2",
+              "title": "Size Chart"
+            },
+            "skuPropertyId": 200007763,
+            "skuPropertyName": "Ships From",
+            "skuPropertyValues": [
+              {
+                "propertyValueDisplayName": "China Mainland",
+                "propertyValueIdLong": 201336100,
+                "propertyValueName": "China Mainland",
+                "showHot": false,
+                "skuPropertyImagePath": "",
+                "skuPropertyImageSummPath": "",
+                "skuPropertySendGoodsCountryCode": "CN"
+              }
+            ]
+          }
+        ],
+        "skuPaths": [
+          {
+            "path": "14:29;200007763:201336100",
+            "salable": true,
+            "skuAttr": "14:29#White;200007763:201336100",
+            "skuId": "12000047256592641",
+            "skuIdStr": "12000047256592641",
+            "skuStock": 44
+          }
+        ],
+        "shipping": [
+          {
+            "patternId": 2502001,
+            "logisticsComposeThreshold": "SAR0.00",
+            "discount": 0,
+            "tracking": "visible",
+            "workDayOneFourBeforeCutTime": "no",
+            "gtpProvider": "OPERATOR",
+            "delayCompensationTime": "0",
+            "displayTomorrow": "no",
+            "itemScene": "newGlobal",
+            "shipToCode": "SA",
+            "thresholdOverZero": "no",
+            "delayCompensationOriginalCurrency": "SAR",
+            "delayCompensationOriginalAmount": "4",
+            "shipFrom": "China",
+            "deliveryDayMax": 18,
+            "displayEtaMinDate": "Dec. 07",
+            "guaranteedDeliveryTime": 60,
+            "etaVersionDisplayType": "deliveryDateInterval",
+            "meetLogisticsComposeThreshold": "yes",
+            "freightCommitDay": "75",
+            "etaTraceId": "10#18#OPERATOR#1796599664515#1797290864515#CAINIAO_FULFILLMENT_STD#DGU029#CN#1795735664515#CHOICE#ONE_STOP_SERVICE#7200286#NON#SA#185#11000096#NON#",
+            "delayCompensationAmountDisplay": "SAR4.00",
+            "etaVersionStrategyId": 98,
+            "gtpEtaTraceId": "10#18#OPERATOR#1796599664515#1797290864515#CAINIAO_FULFILLMENT_STD#DGU029#CN#1795735664515#CHOICE#ONE_STOP_SERVICE#7200286#NON#SA#185#11000096#NON#",
+            "workDayOneFiveBeforeCutTime": "no",
+            "delayCompensationType": "delivery",
+            "itemId": 1005008932971097,
+            "solutionBusinessType": "qtgSelectSingleX",
+            "etaVersionSceneId": 467,
+            "displayAmount": 19,
+            "shippingFee": "charge",
+            "displayEtaMaxDate": "Dec. 15",
+            "deliveryDayMin": 10,
+            "delayCompensationMode": "passive",
+            "warehouseType": "own_warehouse",
+            "solutionId": 1674001,
+            "deliveryOptionCode": "CAINIAO_FULFILLMENT_STD",
+            "leadTimeSort": [
+              9999
+            ],
+            "deliveryProviderName": "Aliexpress Selection Standard",
+            "subWarehouseType": "AE_China_Warehouse",
+            "utParams": "{\"buyerId\":0,\"categoryId\":63705,\"cmd\":false,\"crowdTypes\":\"{\\\"eta_sensitive_tag\\\":\\\"-730838169\\\",\\\"shipping_cost_sensitive\\\":\\\"-1315857875\\\"}\",\"currency\":\"SAR\",\"deliveryDate\":\"2026-12-15\",\"deliveryDateMin\":\"2026-12-07\",\"deliveryDayMax\":18,\"deliveryDayMin\":10,\"fAmount\":19.0,\"fCurrency\":\"SAR\",\"gtpEtaTraceId\":\"10#18#OPERATOR#1796599664515#1797290864515#CAINIAO_FULFILLMENT_STD#DGU029#CN#1795735664515#CHOICE#ONE_STOP_SERVICE#7200286#NON#SA#185#11000096#NON#\",\"itemId\":1005008932971097,\"meetLogisticsComposeThreshold\":\"yes\",\"preOrder\":false,\"productId\":1005008932971097,\"provider\":\"operator\",\"serviceName\":\"CAINIAO_FULFILLMENT_STD\",\"shipFrom\":\"CN\",\"shipToCountry\":\"SA\",\"shippingFee\":\"19.0\",\"traceId\":\"210178d717957356643187935e0d44\",\"trackingAvailable\":true,\"warehouseCode\":\"DGU029\"}",
+            "warehouseCode": "DGU029",
+            "existEtaMinTime": "yes",
+            "dayOfWeek": "Tuesday",
+            "provider": "operator",
+            "itemShipFromType": "same",
+            "identityType": "ONE_STOP_SERVICE",
+            "currency": "CNY",
+            "company": "AliExpress Selection Standard",
+            "deliveryDate": "Dec. 15",
+            "formattedAmount": "SAR19.00",
+            "passiveDelayCompensationDelayDisplay": "visible",
+            "choiceFreeShipping": "yes",
+            "quantity": 44,
+            "leadTimeType": "cn_select_wh_qtg",
+            "showMoreCount": "1",
+            "existEtaMaxTime": "yes",
+            "solutionBusinessXDays": 0,
+            "guaranteedDeliveryTimeProviderName": "decision_committed_time",
+            "showXDayDeliveryTips": "yes",
+            "shipFromCode": "CN",
+            "displayCurrency": "SAR",
+            "deliveryProviderCode": "CAINIAO_FULFILLMENT_STD",
+            "shipTo": "Saudi Arabia"
+          }
+        ]
+      },
+      "ms": 7747
+    }
+  },
+  {
+    "args": {
+      "id": "1005012033327348"
+    },
+    "result": {
+      "ok": true,
+      "class": "ok",
+      "tier": 3,
+      "data": {
+        "title": "TWS Wireless Bluetooth Earphones ANC Noise Reduction Earbuds With Microphone For IOS Android PC",
+        "region": "SA",
+        "prices": {
+          "12000057351196303": {
+            "originalPrice": {
+              "currency": "SAR",
+              "formatedAmount": "67.75",
+              "value": 67.75
+            },
+            "priceFontColor": "#FD384F",
+            "salePriceLocal": "SAR24.82|24|82",
+            "salePriceString": "SAR24.82"
+          }
+        },
+        "skuProps": [
+          {
+            "hasSkuImage": true,
+            "isShowTypeColor": true,
+            "showType": "colour_atla",
+            "showTypeColor": true,
+            "sizeInfo": {
+              "hasSizeInfo": false,
+              "icon": "https://ae-pic-a1.aliexpress-media.com/kf/Sbc534a10bc2044448f9aa271540236800/36x36.png",
+              "sizeInfoUrl": "https://www.aliexpress.com/p/secondaryPage/size-chart.html?_pid=1005012033327348&mid=6002260859&_locale=en_US&version=2",
+              "title": "Size Chart"
+            },
+            "skuPropertyId": 14,
+            "skuPropertyName": "Color",
+            "skuPropertyValues": [
+              {
+                "propertyValueDefinitionName": "White",
+                "propertyValueDisplayName": "White",
+                "propertyValueIdLong": 29,
+                "propertyValueName": "WHITE",
+                "showHot": false,
+                "skuColorValue": "#FFFFFF",
+                "skuPropertyImagePath": "https://ae-pic-a1.aliexpress-media.com/kf/S4ccb3480260b403c9aa5df57a6d8a37dR.jpg",
+                "skuPropertyImageSummPath": "https://ae-pic-a1.aliexpress-media.com/kf/S4ccb3480260b403c9aa5df57a6d8a37dR.jpg_120x120.jpg_.webp"
+              }
+            ]
+          }
+        ],
+        "skuPaths": [
+          {
+            "path": "14:29",
+            "salable": true,
+            "skuAttr": "14:29#White",
+            "skuId": "12000057351196303",
+            "skuIdStr": "12000057351196303",
+            "skuStock": 44
+          }
+        ],
+        "shipping": [
+          {
+            "patternId": 2502001,
+            "logisticsComposeThreshold": "SAR0.00",
+            "discount": 0,
+            "tracking": "visible",
+            "workDayOneFourBeforeCutTime": "no",
+            "gtpProvider": "OPERATOR",
+            "delayCompensationTime": "0",
+            "displayTomorrow": "no",
+            "itemScene": "newGlobal",
+            "shipToCode": "SA",
+            "thresholdOverZero": "no",
+            "delayCompensationOriginalCurrency": "SAR",
+            "delayCompensationOriginalAmount": "4",
+            "shipFrom": "China",
+            "deliveryDayMax": 18,
+            "displayEtaMinDate": "Dec. 07",
+            "guaranteedDeliveryTime": 60,
+            "etaVersionDisplayType": "deliveryDateInterval",
+            "meetLogisticsComposeThreshold": "yes",
+            "freightCommitDay": "75",
+            "etaTraceId": "10#18#OPERATOR#1796599670875#1797290870875#CAINIAO_FULFILLMENT_STD#DGU029#CN#1795735670875#CHOICE#ONE_STOP_SERVICE#7200286#NON#SA#185#11000096#NON#",
+            "delayCompensationAmountDisplay": "SAR4.00",
+            "etaVersionStrategyId": 98,
+            "gtpEtaTraceId": "10#18#OPERATOR#1796599670875#1797290870875#CAINIAO_FULFILLMENT_STD#DGU029#CN#1795735670875#CHOICE#ONE_STOP_SERVICE#7200286#NON#SA#185#11000096#NON#",
+            "workDayOneFiveBeforeCutTime": "no",
+            "delayCompensationType": "delivery",
+            "itemId": 1005012033327348,
+            "solutionBusinessType": "qtgSelectSingleX",
+            "etaVersionSceneId": 467,
+            "displayAmount": 19,
+            "shippingFee": "charge",
+            "displayEtaMaxDate": "Dec. 15",
+            "deliveryDayMin": 10,
+            "delayCompensationMode": "passive",
+            "warehouseType": "own_warehouse",
+            "solutionId": 1674001,
+            "deliveryOptionCode": "CAINIAO_FULFILLMENT_STD",
+            "leadTimeSort": [
+              9999
+            ],
+            "deliveryProviderName": "Aliexpress Selection Standard",
+            "subWarehouseType": "AE_China_Warehouse",
+            "utParams": "{\"buyerId\":0,\"categoryId\":63705,\"cmd\":false,\"crowdTypes\":\"{\\\"eta_sensitive_tag\\\":\\\"-730838169\\\",\\\"shipping_cost_sensitive\\\":\\\"-1315857875\\\"}\",\"currency\":\"SAR\",\"deliveryDate\":\"2026-12-15\",\"deliveryDateMin\":\"2026-12-07\",\"deliveryDayMax\":18,\"deliveryDayMin\":10,\"fAmount\":19.0,\"fCurrency\":\"SAR\",\"gtpEtaTraceId\":\"10#18#OPERATOR#1796599670875#1797290870875#CAINIAO_FULFILLMENT_STD#DGU029#CN#1795735670875#CHOICE#ONE_STOP_SERVICE#7200286#NON#SA#185#11000096#NON#\",\"itemId\":1005012033327348,\"meetLogisticsComposeThreshold\":\"yes\",\"preOrder\":false,\"productId\":1005012033327348,\"provider\":\"operator\",\"serviceName\":\"CAINIAO_FULFILLMENT_STD\",\"shipFrom\":\"CN\",\"shipToCountry\":\"SA\",\"shippingFee\":\"19.0\",\"traceId\":\"210178d717957356706968043e0d44\",\"trackingAvailable\":true,\"warehouseCode\":\"DGU029\"}",
+            "warehouseCode": "DGU029",
+            "existEtaMinTime": "yes",
+            "dayOfWeek": "Tuesday",
+            "provider": "operator",
+            "itemShipFromType": "same",
+            "identityType": "ONE_STOP_SERVICE",
+            "currency": "CNY",
+            "company": "AliExpress Selection Standard",
+            "deliveryDate": "Dec. 15",
+            "formattedAmount": "SAR19.00",
+            "passiveDelayCompensationDelayDisplay": "visible",
+            "choiceFreeShipping": "yes",
+            "quantity": 44,
+            "leadTimeType": "cn_select_wh_qtg",
+            "showMoreCount": "1",
+            "existEtaMaxTime": "yes",
+            "solutionBusinessXDays": 0,
+            "guaranteedDeliveryTimeProviderName": "decision_committed_time",
+            "showXDayDeliveryTips": "yes",
+            "shipFromCode": "CN",
+            "displayCurrency": "SAR",
+            "deliveryProviderCode": "CAINIAO_FULFILLMENT_STD",
+            "shipTo": "Saudi Arabia"
+          }
+        ]
+      },
+      "ms": 6062
+    }
+  },
+  {
+    "args": {
+      "id": "1005012229399207"
+    },
+    "result": {
+      "ok": true,
+      "class": "ok",
+      "tier": 3,
+      "data": {
+        "title": "ROSESELSA Ceramics Ultra Wireless Earbuds 50dB Hybrid ANC HiFi Earphones LHDC LDAC 4Mic AI Noise Reduction 40H Battery",
+        "region": "SA",
+        "prices": {
+          "12000057813681727": {
+            "originalPrice": {
+              "currency": "SAR",
+              "formatedAmount": "230.50",
+              "value": 230.5
+            },
+            "priceFontColor": "#FD384F",
+            "salePriceLocal": "SAR131.96|131|96",
+            "salePriceString": "SAR131.96",
+            "sellerByLot": false
+          },
+          "12000057813681728": {
+            "originalPrice": {
+              "currency": "SAR",
+              "formatedAmount": "265.16",
+              "value": 265.16
+            },
+            "priceFontColor": "#FD384F",
+            "salePriceLocal": "SAR156.22|156|22",
+            "salePriceString": "SAR156.22",
+            "sellerByLot": false
+          },
+          "12000057813681723": {
+            "originalPrice": {
+              "currency": "SAR",
+              "formatedAmount": "230.50",
+              "value": 230.5
+            },
+            "priceFontColor": "#FD384F",
+            "salePriceLocal": "SAR131.96|131|96",
+            "salePriceString": "SAR131.96",
+            "sellerByLot": false
+          },
+          "12000057813681724": {
+            "originalPrice": {
+              "currency": "SAR",
+              "formatedAmount": "265.16",
+              "value": 265.16
+            },
+            "priceFontColor": "#FD384F",
+            "salePriceLocal": "SAR156.22|156|22",
+            "salePriceString": "SAR156.22",
+            "sellerByLot": false
+          },
+          "12000057813681725": {
+            "originalPrice": {
+              "currency": "SAR",
+              "formatedAmount": "230.50",
+              "value": 230.5
+            },
+            "priceFontColor": "#EB281F",
+            "salePriceLocal": "SAR131.96|131|96",
+            "salePriceString": "SAR131.96",
+            "sellerByLot": false
+          },
+          "12000057813681726": {
+            "originalPrice": {
+              "currency": "SAR",
+              "formatedAmount": "265.16",
+              "value": 265.16
+            },
+            "priceFontColor": "#EB281F",
+            "salePriceLocal": "SAR156.22|156|22",
+            "salePriceString": "SAR156.22",
+            "sellerByLot": false
+          }
+        },
+        "skuProps": [
+          {
+            "hasSkuImage": true,
+            "isShowTypeColor": true,
+            "showType": "colour_atla",
+            "showTypeColor": true,
+            "sizeInfo": {
+              "hasSizeInfo": false,
+              "icon": "https://ae-pic-a1.aliexpress-media.com/kf/Sbc534a10bc2044448f9aa271540236800/36x36.png",
+              "sizeInfoUrl": "https://www.aliexpress.com/p/secondaryPage/size-chart.html?_pid=1005012229399207&mid=6003794533&_locale=en_US&version=2",
+              "title": "Size Chart"
+            },
+            "skuPropertyId": 14,
+            "skuPropertyName": "Color",
+            "skuPropertyValues": [
+              {
+                "propertyValueDefinitionName": "Night",
+                "propertyValueDisplayName": "Night",
+                "propertyValueIdLong": 193,
+                "propertyValueName": "black",
+                "showHot": true,
+                "skuColorValue": "#000000",
+                "skuPropertyImagePath": "https://ae-pic-a1.aliexpress-media.com/kf/Sd31d7fa1f4de421fa09fcc1fd5295af6a.jpg",
+                "skuPropertyImageSummPath": "https://ae-pic-a1.aliexpress-media.com/kf/Sd31d7fa1f4de421fa09fcc1fd5295af6a.jpg_120x120.jpg_.webp",
+                "topSalesCornerIcon": "https://gw.alicdn.com/imgextra/i2/O1CN01kH5r9j1NqTB3tycW7_!!6000000001621-2-tps-86-24.png"
+              },
+              {
+                "propertyValueDefinitionName": "Greige",
+                "propertyValueDisplayName": "Greige",
+                "propertyValueIdLong": 29,
+                "propertyValueName": "WHITE",
+                "showHot": true,
+                "skuColorValue": "#FFFFFF",
+                "skuPropertyImagePath": "https://ae-pic-a1.aliexpress-media.com/kf/S62b60ca3c4bf4c4c9a98bcf343006a9bt.jpg",
+                "skuPropertyImageSummPath": "https://ae-pic-a1.aliexpress-media.com/kf/S62b60ca3c4bf4c4c9a98bcf343006a9bt.jpg_120x120.jpg_.webp"
+              },
+              {
+                "propertyValueDefinitionName": "Night with NC200",
+                "propertyValueDisplayName": "Night with NC200",
+                "propertyValueIdLong": 691,
+                "propertyValueName": "GRAY",
+                "showHot": false,
+                "skuColorValue": "#999",
+                "skuPropertyImagePath": "https://ae-pic-a1.aliexpress-media.com/kf/Sba39f56b95f64829a4ed954d3680cca7V.jpg",
+                "skuPropertyImageSummPath": "https://ae-pic-a1.aliexpress-media.com/kf/Sba39f56b95f64829a4ed954d3680cca7V.jpg_120x120.jpg_.webp"
+              },
+              {
+                "propertyValueDefinitionName": "Dove Gray",
+                "propertyValueDisplayName": "Dove Gray",
+                "propertyValueIdLong": 173,
+                "propertyValueName": "Blue",
+                "showHot": false,
+                "skuColorValue": "#0080FF",
+                "skuPropertyImagePath": "https://ae-pic-a1.aliexpress-media.com/kf/Sb59c9f092350434e87d4754cd8d990ccf.jpg",
+                "skuPropertyImageSummPath": "https://ae-pic-a1.aliexpress-media.com/kf/Sb59c9f092350434e87d4754cd8d990ccf.jpg_120x120.jpg_.webp"
+              },
+              {
+                "propertyValueDefinitionName": "Greige with NC200",
+                "propertyValueDisplayName": "Greige with NC200",
+                "propertyValueIdLong": 201456762,
+                "propertyValueName": "Skin Color",
+                "showHot": false,
+                "skuPropertyImagePath": "https://ae-pic-a1.aliexpress-media.com/kf/S1de95b8700ff4be1b8dfac29b2cfaaecC.jpg",
+                "skuPropertyImageSummPath": "https://ae-pic-a1.aliexpress-media.com/kf/S1de95b8700ff4be1b8dfac29b2cfaaecC.jpg_120x120.jpg_.webp"
+              },
+              {
+                "propertyValueDefinitionName": "Dove Gray with NC200",
+                "propertyValueDisplayName": "Dove Gray with NC200",
+                "propertyValueIdLong": 201800840,
+                "propertyValueName": "Navy Blue",
+                "showHot": false,
+                "skuPropertyImagePath": "https://ae-pic-a1.aliexpress-media.com/kf/S100f614ac6734f0fa1afe68fe2561667X.jpg",
+                "skuPropertyImageSummPath": "https://ae-pic-a1.aliexpress-media.com/kf/S100f614ac6734f0fa1afe68fe2561667X.jpg_120x120.jpg_.webp"
+              }
+            ]
+          }
+        ],
+        "skuPaths": [
+          {
+            "path": "14:201800840",
+            "salable": true,
+            "skuAttr": "14:201800840#Dove Gray with NC200",
+            "skuId": "12000057813681728",
+            "skuIdStr": "12000057813681728",
+            "skuStock": 78
+          },
+          {
+            "path": "14:193",
+            "salable": true,
+            "skuAttr": "14:193#Night",
+            "skuId": "12000057813681723",
+            "skuIdStr": "12000057813681723",
+            "skuStock": 70
+          },
+          {
+            "path": "14:173",
+            "salable": true,
+            "skuAttr": "14:173#Dove Gray",
+            "skuId": "12000057813681727",
+            "skuIdStr": "12000057813681727",
+            "skuStock": 199
+          },
+          {
+            "path": "14:201456762",
+            "salable": true,
+            "skuAttr": "14:201456762#Greige with NC200",
+            "skuId": "12000057813681726",
+            "skuIdStr": "12000057813681726",
+            "skuStock": 73
+          },
+          {
+            "path": "14:29",
+            "salable": true,
+            "skuAttr": "14:29#Greige",
+            "skuId": "12000057813681725",
+            "skuIdStr": "12000057813681725",
+            "skuStock": 173
+          },
+          {
+            "path": "14:691",
+            "salable": true,
+            "skuAttr": "14:691#Night with NC200",
+            "skuId": "12000057813681724",
+            "skuIdStr": "12000057813681724",
+            "skuStock": 70
+          }
+        ],
+        "shipping": [
+          {
+            "patternId": 2502001,
+            "logisticsComposeThreshold": "SAR0.00",
+            "discount": 0,
+            "tracking": "visible",
+            "workDayOneFourBeforeCutTime": "no",
+            "gtpProvider": "OPERATOR",
+            "delayCompensationTime": "0",
+            "displayTomorrow": "no",
+            "itemScene": "newGlobal",
+            "shipToCode": "SA",
+            "thresholdOverZero": "no",
+            "delayCompensationOriginalCurrency": "SAR",
+            "delayCompensationOriginalAmount": "4",
+            "shipFrom": "China",
+            "deliveryDayMax": 18,
+            "displayEtaMinDate": "Dec. 07",
+            "guaranteedDeliveryTime": 60,
+            "etaVersionDisplayType": "deliveryDateInterval",
+            "meetLogisticsComposeThreshold": "yes",
+            "freightCommitDay": "75",
+            "etaTraceId": "10#18#OPERATOR#1796599676908#1797290876908#CAINIAO_CONSOLIDATION_SA#DEFAULT#CN#1795735676908#DOOR_DELIVERY#POP#7200286#NON#SA#185#10500270#NON#",
+            "delayCompensationAmountDisplay": "SAR4.00",
+            "etaVersionStrategyId": 98,
+            "gtpEtaTraceId": "10#18#OPERATOR#1796599676908#1797290876908#CAINIAO_CONSOLIDATION_SA#DEFAULT#CN#1795735676908#DOOR_DELIVERY#POP#7200286#NON#SA#185#10500270#NON#",
+            "workDayOneFiveBeforeCutTime": "no",
+            "delayCompensationType": "delivery",
+            "itemId": 1005012229399207,
+            "solutionBusinessType": "popHBA",
+            "etaVersionSceneId": 467,
+            "displayAmount": 19,
+            "shippingFee": "charge",
+            "displayEtaMaxDate": "Dec. 15",
+            "deliveryDayMin": 10,
+            "delayCompensationMode": "passive",
+            "warehouseType": "dropshipping",
+            "solutionId": 1662001,
+            "deliveryOptionCode": "CAINIAO_CONSOLIDATION_SA",
+            "leadTimeSort": [
+              4600
+            ],
+            "deliveryProviderName": "AliExpress  Direct",
+            "utParams": "{\"aplId\":\"11423\",\"aplLaneOrder\":1,\"aplLevelCode\":\"MODERATE\",\"aplLogisticsAttribute\":\"ELECTRICAL\",\"aplPackageType\":\"SMALL\",\"aplVersionId\":\"20261027201139\",\"buyerId\":0,\"categoryId\":63705,\"cmd\":false,\"crowdTypes\":\"{\\\"eta_sensitive_tag\\\":\\\"-730838169\\\",\\\"shipping_cost_sensitive\\\":\\\"-1315857875\\\"}\",\"currency\":\"SAR\",\"deliveryDate\":\"2026-12-15\",\"deliveryDateMin\":\"2026-12-07\",\"deliveryDayMax\":18,\"deliveryDayMin\":10,\"fAmount\":19.0,\"fCurrency\":\"SAR\",\"gtpEtaTraceId\":\"10#18#OPERATOR#1796599676908#1797290876908#CAINIAO_CONSOLIDATION_SA#DEFAULT#CN#1795735676908#DOOR_DELIVERY#POP#7200286#NON#SA#185#10500270#NON#\",\"itemId\":1005012229399207,\"meetLogisticsComposeThreshold\":\"yes\",\"preOrder\":false,\"productId\":1005012229399207,\"provider\":\"operator\",\"serviceName\":\"CAINIAO_CONSOLIDATION_SA\",\"shipFrom\":\"CN\",\"shipToCountry\":\"SA\",\"shippingFee\":\"19.0\",\"traceId\":\"210178d717957356766658182e0d44\",\"trackingAvailable\":true,\"warehouseCode\":\"ae_marketplace\"}",
+            "warehouseCode": "ae_marketplace",
+            "existEtaMinTime": "yes",
+            "dayOfWeek": "Tuesday",
+            "provider": "operator",
+            "itemShipFromType": "same",
+            "identityType": "POP",
+            "currency": "CNY",
+            "company": "AliExpress  Direct",
+            "deliveryDate": "Dec. 15",
+            "formattedAmount": "SAR19.00",
+            "passiveDelayCompensationDelayDisplay": "visible",
+            "choiceFreeShipping": "yes",
+            "quantity": 70,
+            "showMoreCount": 100,
+            "existEtaMaxTime": "yes",
+            "isApl": "yes",
+            "solutionBusinessXDays": 0,
+            "guaranteedDeliveryTimeProviderName": "decision_committed_time",
+            "showXDayDeliveryTips": "yes",
+            "shipFromCode": "CN",
+            "displayCurrency": "SAR",
+            "deliveryProviderCode": "CAINIAO_CONSOLIDATION_SA",
+            "shipTo": "Saudi Arabia"
+          }
+        ]
+      },
+      "ms": 6535
+    }
+  },
+  {
+    "args": {
+      "id": "1005010750452192"
+    },
+    "result": {
+      "ok": true,
+      "class": "ok",
+      "tier": 3,
+      "data": {
+        "title": "New Air Pro True Wireless Bluetooth Earphones Headphones HiFi Sound Low Latency ANC Noise Reduction Earbuds for IPhone Android",
+        "region": "SA",
+        "prices": {
+          "12000056151434425": {
+            "originalPrice": {
+              "currency": "SAR",
+              "formatedAmount": "53.48",
+              "value": 53.48
+            },
+            "priceFontColor": "#EB281F",
+            "salePriceLocal": "SAR20.94|20|94",
+            "salePriceString": "SAR20.94"
+          },
+          "12000056151434427": {
+            "originalPrice": {
+              "currency": "SAR",
+              "formatedAmount": "55.11",
+              "value": 55.11
+            },
+            "priceFontColor": "#FD384F",
+            "salePriceLocal": "SAR22.35|22|35",
+            "salePriceString": "SAR22.35"
+          },
+          "12000056151434426": {
+            "originalPrice": {
+              "currency": "SAR",
+              "formatedAmount": "55.11",
+              "value": 55.11
+            },
+            "priceFontColor": "#EB281F",
+            "salePriceLocal": "SAR22.35|22|35",
+            "salePriceString": "SAR22.35"
+          },
+          "12000056151434428": {
+            "originalPrice": {
+              "currency": "SAR",
+              "formatedAmount": "55.11",
+              "value": 55.11
+            },
+            "priceFontColor": "#FD384F",
+            "salePriceLocal": "SAR22.35|22|35",
+            "salePriceString": "SAR22.35"
+          }
+        },
+        "skuProps": [
+          {
+            "hasSkuImage": true,
+            "isShowTypeColor": true,
+            "showType": "colour_atla",
+            "showTypeColor": true,
+            "sizeInfo": {
+              "hasSizeInfo": false,
+              "icon": "https://ae-pic-a1.aliexpress-media.com/kf/Sbc534a10bc2044448f9aa271540236800/36x36.png",
+              "sizeInfoUrl": "https://www.aliexpress.com/p/secondaryPage/size-chart.html?_pid=1005010750452192&mid=6004097018&_locale=en_US&version=2",
+              "title": "Size Chart"
+            },
+            "skuPropertyId": 14,
+            "skuPropertyName": "Color",
+            "skuPropertyValues": [
+              {
+                "propertyValueDefinitionName": "A6",
+                "propertyValueDisplayName": "A6",
+                "propertyValueIdLong": 10,
+                "propertyValueName": "Red",
+                "showHot": true,
+                "skuColorValue": "#FF0000",
+                "skuPropertyImagePath": "https://ae-pic-a1.aliexpress-media.com/kf/S86de6e5f83c24254a36290176ba4b5d7O.jpg",
+                "skuPropertyImageSummPath": "https://ae-pic-a1.aliexpress-media.com/kf/S86de6e5f83c24254a36290176ba4b5d7O.jpg_120x120.jpg_.webp",
+                "topSalesCornerIcon": "https://gw.alicdn.com/imgextra/i2/O1CN01kH5r9j1NqTB3tycW7_!!6000000001621-2-tps-86-24.png"
+              },
+              {
+                "propertyValueDefinitionName": "A6-White Anti-lost",
+                "propertyValueDisplayName": "A6-White Anti-lost",
+                "propertyValueIdLong": 175,
+                "propertyValueName": "green",
+                "showHot": false,
+                "skuColorValue": "#007000",
+                "skuPropertyImagePath": "https://ae-pic-a1.aliexpress-media.com/kf/Sc0392cc45e054c4aa503eefe8fba9994Q.jpg",
+                "skuPropertyImageSummPath": "https://ae-pic-a1.aliexpress-media.com/kf/Sc0392cc45e054c4aa503eefe8fba9994Q.jpg_120x120.jpg_.webp"
+              },
+              {
+                "propertyValueDefinitionName": "A6-Lanyard",
+                "propertyValueDisplayName": "A6-Lanyard",
+                "propertyValueIdLong": 173,
+                "propertyValueName": "Blue",
+                "showHot": false,
+                "skuColorValue": "#0080FF",
+                "skuPropertyImagePath": "https://ae-pic-a1.aliexpress-media.com/kf/S8156d4955508487abab7b341fe2f012f7.jpg",
+                "skuPropertyImageSummPath": "https://ae-pic-a1.aliexpress-media.com/kf/S8156d4955508487abab7b341fe2f012f7.jpg_120x120.jpg_.webp"
+              },
+              {
+                "propertyValueDefinitionName": "A6-Black Anti-lost",
+                "propertyValueDisplayName": "A6-Black Anti-lost",
+                "propertyValueIdLong": 193,
+                "propertyValueName": "black",
+                "showHot": true,
+                "skuColorValue": "#000000",
+                "skuPropertyImagePath": "https://ae-pic-a1.aliexpress-media.com/kf/S8b87e4aa2664465ca6b4546e362d9b08R.jpg",
+                "skuPropertyImageSummPath": "https://ae-pic-a1.aliexpress-media.com/kf/S8b87e4aa2664465ca6b4546e362d9b08R.jpg_120x120.jpg_.webp"
+              }
+            ]
+          }
+        ],
+        "skuPaths": [
+          {
+            "path": "14:193",
+            "salable": true,
+            "skuAttr": "14:193#A6-Black Anti-lost",
+            "skuId": "12000056151434428",
+            "skuIdStr": "12000056151434428",
+            "skuStock": 16
+          },
+          {
+            "path": "14:173",
+            "salable": true,
+            "skuAttr": "14:173#A6-Lanyard",
+            "skuId": "12000056151434426",
+            "skuIdStr": "12000056151434426",
+            "skuStock": 19
+          },
+          {
+            "path": "14:175",
+            "salable": true,
+            "skuAttr": "14:175#A6-White Anti-lost",
+            "skuId": "12000056151434427",
+            "skuIdStr": "12000056151434427",
+            "skuStock": 33
+          },
+          {
+            "path": "14:10",
+            "salable": true,
+            "skuAttr": "14:10#A6",
+            "skuId": "12000056151434425",
+            "skuIdStr": "12000056151434425",
+            "skuStock": 89
+          }
+        ],
+        "shipping": [
+          {
+            "patternId": 2502001,
+            "logisticsComposeThreshold": "SAR0.00",
+            "discount": 0,
+            "tracking": "visible",
+            "workDayOneFourBeforeCutTime": "no",
+            "gtpProvider": "OPERATOR",
+            "delayCompensationTime": "0",
+            "displayTomorrow": "no",
+            "itemScene": "newGlobal",
+            "shipToCode": "SA",
+            "thresholdOverZero": "no",
+            "delayCompensationOriginalCurrency": "SAR",
+            "delayCompensationOriginalAmount": "4",
+            "shipFrom": "China",
+            "deliveryDayMax": 18,
+            "displayEtaMinDate": "Dec. 07",
+            "guaranteedDeliveryTime": 60,
+            "etaVersionDisplayType": "deliveryDateInterval",
+            "meetLogisticsComposeThreshold": "yes",
+            "freightCommitDay": "75",
+            "etaTraceId": "10#18#OPERATOR#1796599683368#1797290883368#CAINIAO_FULFILLMENT_STD#DGU029#CN#1795735683368#CHOICE#SEMI_CHOICE_SELF#7200286#NON#SA#185#11000096#NON#",
+            "delayCompensationAmountDisplay": "SAR4.00",
+            "etaVersionStrategyId": 98,
+            "gtpEtaTraceId": "10#18#OPERATOR#1796599683368#1797290883368#CAINIAO_FULFILLMENT_STD#DGU029#CN#1795735683368#CHOICE#SEMI_CHOICE_SELF#7200286#NON#SA#185#11000096#NON#",
+            "workDayOneFiveBeforeCutTime": "no",
+            "delayCompensationType": "delivery",
+            "itemId": 1005010750452192,
+            "solutionBusinessType": "btgSelectSingleX",
+            "etaVersionSceneId": 467,
+            "displayAmount": 19,
+            "shippingFee": "charge",
+            "displayEtaMaxDate": "Dec. 15",
+            "deliveryDayMin": 10,
+            "delayCompensationMode": "passive",
+            "warehouseType": "own_warehouse",
+            "solutionId": 3434001,
+            "deliveryOptionCode": "CAINIAO_FULFILLMENT_STD",
+            "leadTimeSort": [
+              9999
+            ],
+            "deliveryProviderName": "Aliexpress Selection Standard",
+            "subWarehouseType": "AE_China_Warehouse",
+            "utParams": "{\"buyerId\":0,\"categoryId\":63705,\"cmd\":false,\"crowdTypes\":\"{\\\"eta_sensitive_tag\\\":\\\"-730838169\\\",\\\"shipping_cost_sensitive\\\":\\\"-1315857875\\\"}\",\"currency\":\"SAR\",\"deliveryDate\":\"2026-12-15\",\"deliveryDateMin\":\"2026-12-07\",\"deliveryDayMax\":18,\"deliveryDayMin\":10,\"fAmount\":19.0,\"fCurrency\":\"SAR\",\"gtpEtaTraceId\":\"10#18#OPERATOR#1796599683368#1797290883368#CAINIAO_FULFILLMENT_STD#DGU029#CN#1795735683368#CHOICE#SEMI_CHOICE_SELF#7200286#NON#SA#185#11000096#NON#\",\"itemId\":1005010750452192,\"meetLogisticsComposeThreshold\":\"yes\",\"preOrder\":false,\"productId\":1005010750452192,\"provider\":\"operator\",\"serviceName\":\"CAINIAO_FULFILLMENT_STD\",\"shipFrom\":\"CN\",\"shipToCountry\":\"SA\",\"shippingFee\":\"19.0\",\"traceId\":\"210178d717957356831158303e0d44\",\"trackingAvailable\":true,\"warehouseCode\":\"DGU029\"}",
+            "warehouseCode": "DGU029",
+            "existEtaMinTime": "yes",
+            "dayOfWeek": "Tuesday",
+            "provider": "operator",
+            "itemShipFromType": "same",
+            "identityType": "SEMI_CHOICE_SELF",
+            "currency": "CNY",
+            "company": "AliExpress Selection Standard",
+            "deliveryDate": "Dec. 15",
+            "formattedAmount": "SAR19.00",
+            "passiveDelayCompensationDelayDisplay": "visible",
+            "choiceFreeShipping": "yes",
+            "quantity": 89,
+            "leadTimeType": "cn_select_wh_btg",
+            "showMoreCount": "1",
+            "existEtaMaxTime": "yes",
+            "solutionBusinessXDays": 0,
+            "guaranteedDeliveryTimeProviderName": "decision_committed_time",
+            "showXDayDeliveryTips": "yes",
+            "shipFromCode": "CN",
+            "displayCurrency": "SAR",
+            "deliveryProviderCode": "CAINIAO_FULFILLMENT_STD",
+            "shipTo": "Saudi Arabia"
+          }
+        ]
+      },
+      "ms": 6006
+    }
+  },
+  {
+    "args": {
+      "id": "1005012580507258"
+    },
+    "result": {
+      "ok": true,
+      "class": "ok",
+      "tier": 3,
+      "data": {
+        "title": "Elegant Leather Wireless Earphones 3.7g Lightweight ANC Bluetooth Earbuds 30H Play Luxury Metal Strip Headset For Gift",
+        "region": "SA",
+        "prices": {
+          "12000058748827690": {
+            "originalPrice": {
+              "currency": "SAR",
+              "formatedAmount": "46.35",
+              "value": 46.35
+            },
+            "priceFontColor": "#FD384F",
+            "salePriceLocal": "SAR15.47|15|47",
+            "salePriceString": "SAR15.47"
+          },
+          "12000058748827691": {
+            "originalPrice": {
+              "currency": "SAR",
+              "formatedAmount": "45.48",
+              "value": 45.48
+            },
+            "priceFontColor": "#FD384F",
+            "salePriceLocal": "SAR15.04|15|04",
+            "salePriceString": "SAR15.04"
+          },
+          "12000058748827692": {
+            "originalPrice": {
+              "currency": "SAR",
+              "formatedAmount": "46.35",
+              "value": 46.35
+            },
+            "priceFontColor": "#FD384F",
+            "salePriceLocal": "SAR15.47|15|47",
+            "salePriceString": "SAR15.47"
+          },
+          "12000058748827689": {
+            "originalPrice": {
+              "currency": "SAR",
+              "formatedAmount": "46.35",
+              "value": 46.35
+            },
+            "priceFontColor": "#FD384F",
+            "salePriceLocal": "SAR15.47|15|47",
+            "salePriceString": "SAR15.47"
+          }
+        },
+        "skuProps": [
+          {
+            "hasSkuImage": true,
+            "isShowTypeColor": true,
+            "showType": "colour_atla",
+            "showTypeColor": true,
+            "sizeInfo": {
+              "hasSizeInfo": false,
+              "icon": "https://ae-pic-a1.aliexpress-media.com/kf/Sbc534a10bc2044448f9aa271540236800/36x36.png",
+              "sizeInfoUrl": "https://www.aliexpress.com/p/secondaryPage/size-chart.html?_pid=1005012580507258&mid=6000669653&_locale=en_US&version=2",
+              "title": "Size Chart"
+            },
+            "skuPropertyId": 14,
+            "skuPropertyName": "Color",
+            "skuPropertyValues": [
+              {
+                "propertyValueDefinitionName": "PiWenPRO3-White",
+                "propertyValueDisplayName": "PiWenPRO3-White",
+                "propertyValueIdLong": 29,
+                "propertyValueName": "WHITE",
+                "showHot": false,
+                "skuColorValue": "#FFFFFF",
+                "skuPropertyImagePath": "https://ae-pic-a1.aliexpress-media.com/kf/Sb29baaa779a64eef83fed10ea3ce6069A.jpg",
+                "skuPropertyImageSummPath": "https://ae-pic-a1.aliexpress-media.com/kf/Sb29baaa779a64eef83fed10ea3ce6069A.jpg_120x120.jpg_.webp"
+              },
+              {
+                "propertyValueDefinitionName": "PiWenPRO3-Black",
+                "propertyValueDisplayName": "PiWenPRO3-Black",
+                "propertyValueIdLong": 193,
+                "propertyValueName": "black",
+                "showHot": false,
+                "skuColorValue": "#000000",
+                "skuPropertyImagePath": "https://ae-pic-a1.aliexpress-media.com/kf/S569ba7e30a1d408cb7a7b724accb24f9M.jpg",
+                "skuPropertyImageSummPath": "https://ae-pic-a1.aliexpress-media.com/kf/S569ba7e30a1d408cb7a7b724accb24f9M.jpg_120x120.jpg_.webp"
+              },
+              {
+                "propertyValueDefinitionName": "PiWenPRO3-Skin",
+                "propertyValueDisplayName": "PiWenPRO3-Skin",
+                "propertyValueIdLong": 201456762,
+                "propertyValueName": "Skin Color",
+                "showHot": false,
+                "skuPropertyImagePath": "https://ae-pic-a1.aliexpress-media.com/kf/S5605c5d3a49b4427b229a1b032b3cb0fg.jpg",
+                "skuPropertyImageSummPath": "https://ae-pic-a1.aliexpress-media.com/kf/S5605c5d3a49b4427b229a1b032b3cb0fg.jpg_120x120.jpg_.webp"
+              },
+              {
+                "propertyValueDefinitionName": "PiWenPRO3-Blue",
+                "propertyValueDisplayName": "PiWenPRO3-Blue",
+                "propertyValueIdLong": 173,
+                "propertyValueName": "Blue",
+                "showHot": false,
+                "skuColorValue": "#0080FF",
+                "skuPropertyImagePath": "https://ae-pic-a1.aliexpress-media.com/kf/S663ba58a991044c2972e0fbcce67eccbQ.jpg",
+                "skuPropertyImageSummPath": "https://ae-pic-a1.aliexpress-media.com/kf/S663ba58a991044c2972e0fbcce67eccbQ.jpg_120x120.jpg_.webp"
+              }
+            ]
+          }
+        ],
+        "skuPaths": [
+          {
+            "path": "14:201456762",
+            "salable": true,
+            "skuAttr": "14:201456762#PiWenPRO3-Skin",
+            "skuId": "12000058748827692",
+            "skuIdStr": "12000058748827692",
+            "skuStock": 997
+          },
+          {
+            "path": "14:29",
+            "salable": true,
+            "skuAttr": "14:29#PiWenPRO3-White",
+            "skuId": "12000058748827690",
+            "skuIdStr": "12000058748827690",
+            "skuStock": 994
+          },
+          {
+            "path": "14:173",
+            "salable": true,
+            "skuAttr": "14:173#PiWenPRO3-Blue",
+            "skuId": "12000058748827691",
+            "skuIdStr": "12000058748827691",
+            "skuStock": 1000
+          },
+          {
+            "path": "14:193",
+            "salable": true,
+            "skuAttr": "14:193#PiWenPRO3-Black",
+            "skuId": "12000058748827689",
+            "skuIdStr": "12000058748827689",
+            "skuStock": 996
+          }
+        ],
+        "shipping": [
+          {
+            "patternId": 2502001,
+            "logisticsComposeThreshold": "SAR0.00",
+            "discount": 0,
+            "tracking": "visible",
+            "workDayOneFourBeforeCutTime": "no",
+            "gtpProvider": "OPERATOR",
+            "delayCompensationTime": "0",
+            "displayTomorrow": "no",
+            "itemScene": "newGlobal",
+            "shipToCode": "SA",
+            "thresholdOverZero": "no",
+            "delayCompensationOriginalCurrency": "SAR",
+            "delayCompensationOriginalAmount": "4",
+            "shipFrom": "China",
+            "deliveryDayMax": 20,
+            "displayEtaMinDate": "Dec. 07",
+            "guaranteedDeliveryTime": 60,
+            "etaVersionDisplayType": "deliveryDateInterval",
+            "meetLogisticsComposeThreshold": "yes",
+            "freightCommitDay": "75",
+            "etaTraceId": "10#20#OPERATOR#1796599689292#1797463689292#CAINIAO_FULFILLMENT_STD#DGU002-JIT#CN#1795735689292#CHOICE#ONE_STOP_SERVICE#7200286#NON#SA#185#11000114#NON#",
+            "delayCompensationAmountDisplay": "SAR4.00",
+            "etaVersionStrategyId": 98,
+            "gtpEtaTraceId": "10#20#OPERATOR#1796599689292#1797463689292#CAINIAO_FULFILLMENT_STD#DGU002-JIT#CN#1795735689292#CHOICE#ONE_STOP_SERVICE#7200286#NON#SA#185#11000114#NON#",
+            "workDayOneFiveBeforeCutTime": "no",
+            "delayCompensationType": "delivery",
+            "itemId": 1005012580507258,
+            "solutionBusinessType": "qtgSelectSingleX",
+            "etaVersionSceneId": 467,
+            "displayAmount": 19,
+            "shippingFee": "charge",
+            "displayEtaMaxDate": "Dec. 17",
+            "deliveryDayMin": 10,
+            "delayCompensationMode": "passive",
+            "warehouseType": "own_warehouse",
+            "solutionId": 1674001,
+            "deliveryOptionCode": "CAINIAO_FULFILLMENT_STD",
+            "leadTimeSort": [
+              9999
+            ],
+            "deliveryProviderName": "Aliexpress Selection Standard",
+            "subWarehouseType": "AE_China_Warehouse",
+            "utParams": "{\"buyerId\":0,\"categoryId\":63705,\"cmd\":false,\"crowdTypes\":\"{\\\"eta_sensitive_tag\\\":\\\"-730838169\\\",\\\"shipping_cost_sensitive\\\":\\\"-1315857875\\\"}\",\"currency\":\"SAR\",\"deliveryDate\":\"2026-12-17\",\"deliveryDateMin\":\"2026-12-07\",\"deliveryDayMax\":20,\"deliveryDayMin\":10,\"fAmount\":19.0,\"fCurrency\":\"SAR\",\"gtpEtaTraceId\":\"10#20#OPERATOR#1796599689292#1797463689292#CAINIAO_FULFILLMENT_STD#DGU002-JIT#CN#1795735689292#CHOICE#ONE_STOP_SERVICE#7200286#NON#SA#185#11000114#NON#\",\"itemId\":1005012580507258,\"meetLogisticsComposeThreshold\":\"yes\",\"preOrder\":false,\"productId\":1005012580507258,\"provider\":\"operator\",\"serviceName\":\"CAINIAO_FULFILLMENT_STD\",\"shipFrom\":\"CN\",\"shipToCountry\":\"SA\",\"shippingFee\":\"19.0\",\"traceId\":\"210178d717957356891058450e0d44\",\"trackingAvailable\":true,\"warehouseCode\":\"DGU002-JIT\"}",
+            "warehouseCode": "DGU002-JIT",
+            "existEtaMinTime": "yes",
+            "dayOfWeek": "Thursday",
+            "provider": "operator",
+            "itemShipFromType": "same",
+            "identityType": "ONE_STOP_SERVICE",
+            "currency": "CNY",
+            "company": "AliExpress Selection Standard",
+            "deliveryDate": "Dec. 17",
+            "formattedAmount": "SAR19.00",
+            "passiveDelayCompensationDelayDisplay": "visible",
+            "choiceFreeShipping": "yes",
+            "quantity": 1000,
+            "leadTimeType": "cn_select_wh_qtg",
+            "showMoreCount": "1",
+            "existEtaMaxTime": "yes",
+            "solutionBusinessXDays": 0,
+            "guaranteedDeliveryTimeProviderName": "decision_committed_time",
+            "showXDayDeliveryTips": "yes",
+            "shipFromCode": "CN",
+            "displayCurrency": "SAR",
+            "deliveryProviderCode": "CAINIAO_FULFILLMENT_STD",
+            "shipTo": "Saudi Arabia"
+          }
+        ]
+      },
+      "ms": 6340
+    }
+  }
+]
