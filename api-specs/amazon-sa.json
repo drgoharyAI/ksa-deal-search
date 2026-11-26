@@ -1,0 +1,95 @@
+{
+  "name": "amazon-sa",
+  "baseUrl": "https://www.amazon.sa",
+  "operations": [
+    {
+      "name": "search",
+      "request": {
+        "method": "GET",
+        "url": "https://www.amazon.sa/s?k=earbuds&page=2&language=en_AE",
+        "headers": {
+          "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/jxl,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
+          "accept-language": "en-US,en;q=0.9",
+          "device-memory": "16",
+          "downlink": "1.55",
+          "dpr": "1",
+          "ect": "4g",
+          "priority": "u=0, i",
+          "rtt": "150",
+          "sec-ch-device-memory": "16",
+          "sec-ch-dpr": "1",
+          "sec-ch-ua": "\"Chromium\";v=\"158\", \"Not.A/Brand\";v=\"24\", \"Google Chrome\";v=\"158\"",
+          "sec-ch-ua-full-version-list": "\"Chromium\";v=\"158.0.8127.37\", \"Not.A/Brand\";v=\"24.0.0.0\", \"Google Chrome\";v=\"158.0.8127.37\"",
+          "sec-ch-ua-mobile": "?0",
+          "sec-ch-ua-platform": "\"Windows\"",
+          "sec-ch-ua-platform-version": "\"10.0\"",
+          "sec-ch-viewport-width": "1280",
+          "sec-fetch-dest": "document",
+          "sec-fetch-mode": "navigate",
+          "sec-fetch-site": "none",
+          "sec-fetch-user": "?1",
+          "upgrade-insecure-requests": "1",
+          "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/158.0.0.0 Safari/537.36",
+          "viewport-width": "1280"
+        }
+      },
+      "slots": [
+        {
+          "param": "q",
+          "at": [
+            "query:k"
+          ]
+        },
+        {
+          "param": "page",
+          "at": [
+            "query:page"
+          ]
+        }
+      ],
+      "volatile": [],
+      "trigger": {
+        "url": "https://www.amazon.sa/s?k={q}&page={page}&language=en_AE"
+      },
+      "match": {
+        "method": "GET",
+        "host": "www.amazon.sa",
+        "path": "/s"
+      },
+      "response": {
+        "format": "html",
+        "contentType": "text/html;charset=UTF-8",
+        "html": {
+          "items": "div[data-component-type=s-search-result]",
+          "fields": {
+            "id": "@data-asin",
+            "title": "h2",
+            "price": ".a-price:not(.a-text-price) .a-offscreen",
+            "origPrice": ".a-price.a-text-price .a-offscreen",
+            "rating": "span.a-icon-alt",
+            "reviews": "a[aria-label*=ratings]@aria-label",
+            "image": "img.s-image@src"
+          }
+        }
+      },
+      "params": [
+        {
+          "name": "q",
+          "type": "string",
+          "required": true,
+          "example": "earbuds"
+        },
+        {
+          "name": "page",
+          "type": "string",
+          "required": true,
+          "example": "2"
+        }
+      ],
+      "readOnly": true,
+      "minTier": 1,
+      "learnedLoggedIn": false,
+      "learnedAt": "2026-11-26T23:32:24.293Z"
+    }
+  ]
+}
