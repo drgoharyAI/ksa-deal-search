@@ -250,3 +250,14 @@ non-goals for these three.
   the owner's own Chrome with `api-anything login`), then a real-browser tier, then a
   TLS-impersonating client. Personal-volume traffic only, no captcha solving. If none
   is reliable, noon stays out of v1.
+- **noon KSA via Playwright (owner, 2026-11-27): works.** The app starts the
+  installed `chrome.exe` with a dedicated profile (`.noon-profile/`, gitignored),
+  with `--remote-debugging-port` bound to 127.0.0.1 on a random free port and the
+  window off-screen. It attaches with `chromium.connectOverCDP` and reads product cards
+  from the search page HTML. Headless and Playwright-launched Chrome get blocked
+  (403 / HTTP2 errors). Expect 4–9 s per search on a warm session, about 8 s cold. One shared
+  browser runs searches one at a time and closes after 10 min idle. Dedupe by id.
+  Selectors use noon's generated class names, so they will break on site changes;
+  the adapter reports `error` instead of throwing. While Chrome runs, any local
+  process can drive it through the debug port. That's acceptable for a personal PC,
+  and the port is never exposed beyond localhost.
