@@ -229,3 +229,24 @@ non-goals for these three.
 - Page count defaults, cache TTL, concurrency.
 - Project structure, component breakdown, tests.
 - How to bundle the op spec (see above).
+
+## Decisions after spikes (owner, 2026-11-27)
+
+- **AliExpress price = the listed (initial) search price.** This replaces the
+  "real price of main option + shipping" flow above. Product pages only work at
+  tier 3 (6–8 s of Chrome per product), so there are no detail calls in v1. For every
+  site, `finalPrice = listPrice` and `detailStatus:"ok"`. AliExpress cards label the
+  price "from" and say "shipping not included". The `aliexpress.product` op stays in
+  `api-specs/` for later, unused.
+- **AliExpress cookie:** the static header is ignored. The KSA/English cookie is
+  loaded into API Anything's session with `api-anything login aliexpress --cookies <file>`,
+  run by `scripts/install-specs.mjs`. `call()` needs `view: { maxChars: 200000 }`.
+- **Amazon KSA:** passed (tier 1, www.amazon.sa, SAR). Dedupe by `id`, and retry 1–2×
+  on transient `error` results marked retry-safe.
+- **Jarir:** passed (tier 1, via Jarir's Constructor.io search API, store `sa_en`).
+  Currency is a fixed `SAR`, because the payload carries none. There is no rating.
+- **noon KSA:** blocked by Akamai Bot Manager at tiers 1–2. The owner asked for a way
+  through. Second spike: use the owner's real browser session (import cookies from
+  the owner's own Chrome with `api-anything login`), then a real-browser tier, then a
+  TLS-impersonating client. Personal-volume traffic only, no captcha solving. If none
+  is reliable, noon stays out of v1.

@@ -192,7 +192,9 @@ tests/**/*.test.ts                 Vitest
 
 ---
 
-### Task 6: Product detail — main option + final price
+### Task 6: REMOVED (owner 2026-11-27: AliExpress uses listed price; no detail calls). Implementers skip this task; `fetchDetail = async p => p` everywhere, `/api/details` route and detail UI fill-in are dropped.
+
+### (old) Task 6: Product detail — main option + final price
 
 **Files:**
 - Create: `src/sites/aliexpress/detail.ts`, `src/sites/registry.ts`
