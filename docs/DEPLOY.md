@@ -223,6 +223,12 @@ headless Chrome.
 **Health is 503 / `"db":"error"`.** The volume is not writable or full: `docker compose exec app
 ls -la /data`, `df -h` on the VM.
 
+**Public hostname (Cloudflare Tunnel).** `cloudflared` (compose profile `tunnel`) opens an outbound-only
+tunnel; no inbound port is needed. The tunnel `deal-search` is remotely managed in Cloudflare:
+ingress `deals.example.com -> http://app:3000`, DNS `search` CNAME `<tunnel-id>.cfargotunnel.com` (proxied).
+On the VM `.env`: `COMPOSE_PROFILES=tunnel`, `TUNNEL_TOKEN=<token>` and `deals.example.com` in `APP_HOSTS`.
+The app has no login and no limits (owner decision), so anyone with the URL can use it.
+
 **Exposure.** Ports are published on IPv4 only (`${APP_BIND:-0.0.0.0}`). The VM has a global IPv6
 address, and a bare `"3000:3000"` would also listen on `[::]` and be reachable from the internet.
 ufw does not filter Docker-published ports. Set `APP_BIND=192.168.1.48` in `.env` to bind one address.

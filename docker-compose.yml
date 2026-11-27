@@ -64,6 +64,27 @@ services:
         max-size: "10m"
         max-file: "3"
 
+  # Cloudflare Tunnel (outbound only; no inbound port). Enable with COMPOSE_PROFILES=tunnel and
+  # TUNNEL_TOKEN in .env. Routes and DNS live in Cloudflare (remotely managed). See docs/DEPLOY.md.
+  cloudflared:
+    image: cloudflare/cloudflared:2025.11.1
+    profiles: ["tunnel"]
+    restart: unless-stopped
+    depends_on:
+      - app
+    command: tunnel --no-autoupdate run
+    environment:
+      TUNNEL_TOKEN: ${TUNNEL_TOKEN:-}
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
 volumes:
   deal-data:
   caddy-data:
