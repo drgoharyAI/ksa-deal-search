@@ -322,3 +322,24 @@ Spec section "Scope extension". Site ids are `amazon-sa`, `noon-sa` and `jarir`.
 - [ ] **Step 1: Write failing tests per site.** Every fixture item normalizes to a Product or `null` with no `NaN`. ≥ 10 are non-null. URLs are absolute `https://`. `searchCalls` count matches the per-term rule. The query encoding test uses `"usb-c cable 100w"` and `"a/b & c"`: only safe characters reach `q`.
 - [ ] **Step 2: Run** → FAIL. **Step 3:** Implement. **Step 4: Run** → PASS. Then search `usb-c cable` across all sites and check the mixed results rank correctly by price.
 - [ ] **Step 5: Commit** `feat: amazon-sa, noon-sa, jarir adapters`.
+
+---
+
+### Task 12: Quality tuning loop (owner, 2026-11-27: "keep trying and optimizing based on results till reaching the best results")
+
+Runs after Tasks 7, 11, 8 and 9, once all stores work end to end.
+
+**Files:**
+- Create: `eval/queries.json`, `eval/recorded/<store>/<query-slug>.json`, `eval/labels/<query-slug>.json`, `scripts/eval-record.mjs`, `scripts/eval.mjs`, `eval/RESULTS.md`
+
+- [ ] **Step 1: Query set.** Write `eval/queries.json` with 15 realistic KSA shopping queries spanning categories and filter syntax. Examples: `anc earbuds under 300`, `iphone 16`, `usb-c cable 100w`, `air fryer`, `apple watch`, `power bank 20000mah`, `mechanical keyboard -wired`, `gaming mouse`, `samsung galaxy s24`, `laptop backpack`, `4k monitor 27`, `ps5 controller`, `robot vacuum`, `smart watch >4 stars`, `hair dryer`.
+- [ ] **Step 2: Record once, replay offline.** `scripts/eval-record.mjs` runs each query's raw store calls once and saves the raw results under `eval/recorded/`, so tuning never re-hits the stores. Budget: about 2 calls per store per query, sequential, with a 3–5 s pause between noon loads. Re-record only if the stores change.
+- [ ] **Step 3: Labels.** For each query, label every recorded product `relevant`, `accessory`, `wrong-model` or `off-topic`, saved to `eval/labels/<slug>.json`. Labelling is development-time review (a reviewer agent proposes labels, and the owner may correct them). The app itself never calls an LLM.
+- [ ] **Step 4: Metrics.** `scripts/eval.mjs` replays the recorded data through the real pipeline (normalize → filters → rank) and reports per query and overall:
+  - precision@10 (relevant among the top 10)
+  - accessory@10 and wrong-model@10
+  - recall (relevant items kept / relevant items recorded)
+  - whether the cheapest relevant item ranks #1 under the "price" sort
+- [ ] **Step 5: Iterate.** Tune `data/synonyms.json`, `data/accessory-words.json`, the relevance threshold, `PRICE_RATIO`, `GAP_RATIO`, the dedupe variant words and the deal-score weights, plus the deferred minors in the SDD ledger where they move the metrics. After each change: run `npm test` (must stay green) and `node scripts/eval.mjs`, then log the round's change and metrics in `eval/RESULTS.md`. Never tune by special-casing a single query string.
+- [ ] **Step 6: Stop rule.** Stop when overall precision@10 ≥ 0.9, accessory@10 = 0, wrong-model@10 ≤ 0.05, recall ≥ 0.8 and cheapest-relevant-first ≥ 0.9. Also stop if two consecutive rounds show no improvement. Report the final metrics and any queries still below target.
+- [ ] **Step 7: Commit** each kept round (`tune: <what changed> (p@10 x→y)`).
