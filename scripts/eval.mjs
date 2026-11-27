@@ -21,7 +21,12 @@ let queries = JSON.parse(readFileSync(path.join(root, "eval/queries.json"), "utf
 if (flag("--queries")) queries = flag("--queries").split("|").map((q) => q.trim());
 
 const recDir = path.join(root, "eval/recorded");
-const skip = new Set((flag("--skip-stores") ?? "").split(",").filter(Boolean));
+const skipArg = flag("--skip-stores");
+if (argv.includes("--skip-stores") && (!skipArg || skipArg.startsWith("--"))) {
+  console.error("--skip-stores needs a comma-separated list of store ids, e.g. --skip-stores saco-sa");
+  process.exit(2);
+}
+const skip = new Set((skipArg ?? "").split(",").filter(Boolean));
 const storeDirs = existsSync(recDir) ? readdirSync(recDir).filter((s) => ev.sites[s] && !skip.has(s)) : [];
 const readJson = (f) => JSON.parse(readFileSync(f, "utf8"));
 const pct = (x) => (x === null || x === undefined ? "  n/a" : `${(x * 100).toFixed(0).padStart(4)}%`);

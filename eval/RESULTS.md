@@ -675,3 +675,21 @@ Per query with SACO: hair dryer p@10 90% -> 100%; blender 50% -> 40% (a Trendyol
 Milk Blender", off-topic, enters the top 10 once SACO's 29 blenders join the result set: match
 confidence is computed over the whole result set; no SACO product is in the top 10). Grouping: merge precision and recall unchanged (100% / 45.6% and
 100% / 55.4%), 0 wrong merges; multi-store groups 72 -> 78 (tune) and 112 -> 124 (held out).
+
+## Fix round 1: branch pickup only (owner decision) and lettered SKUs
+
+SACO's "Click and pick" listings are now kept as branch pickup only (ranked after the deliverable
+listings of their tier; cheapest-first is checked against the cheapest deliverable relevant
+listing), and lettered SKUs ("S0000002030") are read. 363 newly kept SACO products labelled
+(158 relevant, 9 accessory, 10 wrong-model, 186 off-topic). `--skip-stores saco-sa` still
+reproduces the pre-SACO numbers and grouping exactly.
+
+| run | p@10 | acc@10 | wrong@10 | recall | cheapest-first |
+|---|---|---|---|---|---|
+| 15 tuning queries, with SACO | 100% | 0% | 0% | 92% | 93% |
+| 8 SACO queries, without SACO | 89% | 1% | 4% | 90% | 63% |
+| 8 SACO queries, with SACO | 90% | 0% | 4% | 90% | 63% |
+
+Blender is back to 50% p@10 (40% in the first SACO run). Grouping with SACO: precision 100% in both
+halves, 0 wrong merges, recall unchanged; one tune gold pair is now skipped (a member not in the
+results); multi-store groups 82 (tune) and 132 (held out).

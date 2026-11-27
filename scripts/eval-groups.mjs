@@ -23,7 +23,12 @@ const sets = ["queries", "queries-holdout", "queries-holdout2", "queries-holdout
 const queries = sets.flatMap((f) => JSON.parse(readFileSync(path.join(root, `eval/${f}.json`), "utf8")));
 const recDir = path.join(root, "eval/recorded");
 const si = argv.indexOf("--skip-stores");
-const skip = new Set(si >= 0 ? argv[si + 1].split(",").filter(Boolean) : []);
+const skipArg = si >= 0 ? argv[si + 1] : undefined;
+if (si >= 0 && (!skipArg || skipArg.startsWith("--"))) {
+  console.error("--skip-stores needs a comma-separated list of store ids, e.g. --skip-stores saco-sa");
+  process.exit(2);
+}
+const skip = new Set(skipArg ? skipArg.split(",").filter(Boolean) : []);
 const storeDirs = readdirSync(recDir).filter((s) => ev.sites[s] && !skip.has(s));
 const pct = (x) => (x === null || Number.isNaN(x) ? "  n/a" : `${(x * 100).toFixed(1)}%`);
 const warn = console.warn;
