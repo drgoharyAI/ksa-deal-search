@@ -176,3 +176,6 @@ Every target is met except cheapest-relevant-first (80% vs 90%). The three misse
 samsung galaxy s24, ps5 controller) are queries whose cheapest item labelled "relevant" is an
 accessory (paper liners, a Galaxy S26 screen protector, a PS5 controller silicone cover); see the
 Task 12c report for the suspected label errors.
+
+## Label corrections (controller, 2026-11-27)
+The tuning agent flagged 9 labels as wrong; all were confirmed under the rubric. Liners, a mould, skins, grips and a stand were relabelled accessory, and a recipe book off-topic. Overall after the correction: p@10 98%, acc@10 0%, wrong@10 1%, recall 91%, cheapest-first 100%. Every stop-rule target is met on the tuning set. The one remaining weak query is mechanical keyboard (p@10 70%: membrane keyboard + mouse combos).
