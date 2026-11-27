@@ -18,7 +18,6 @@ export type Product = {
   soldCount: number;
   image: string;
   url: string;
-  mainOption?: string;
   shipping?: number | null;
   finalPrice?: number;
   /** Deal badge from local price observations (src/lib/insights.ts); absent without enough data. */
@@ -70,5 +69,4 @@ export type SiteAdapter = {
   normalizeSearchItem(raw: unknown): Product | null;
   /** Optional custom executor (e.g. Playwright); default is api-anything via aaCall. */
   runCall?(call: { op: string; args: Record<string, string> }): Promise<AaResult>;
-  fetchDetail(p: Product, queryTokens: string[][]): Promise<Product>;
 };

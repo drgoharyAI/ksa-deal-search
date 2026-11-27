@@ -1,5 +1,5 @@
 // Prototype: noon.com Saudi (saudi-en, SAR) search via a real installed Google Chrome driven by Playwright.
-// Spike 2026-11-27 (task 10b3). Not wired into the app yet. Requires the `playwright` package and Google Chrome.
+// Spike 2026-11-27 (task 10b3). Spike archive: the app uses src/sites/noon-sa/. Uses playwright-core (a dependency) and Google Chrome.
 //
 // Why CDP-attach instead of chromium.launchPersistentContext({channel:"chrome"}):
 //   launchPersistentContext starts Chrome with --enable-automation (navigator.webdriver = true) and
@@ -12,7 +12,7 @@
 //
 // CLI: node scripts/noon-search.prototype.mjs "<query>" [page] [--headless|--offscreen] [--profile <dir>] [--out <file.json>]
 
-import { chromium } from "playwright";
+import { chromium } from "playwright-core";
 import { spawn } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";

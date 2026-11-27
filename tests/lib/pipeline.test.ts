@@ -93,7 +93,6 @@ describe("runSearch", () => {
         throw new Error("kaboom");
       },
       normalizeSearchItem: () => null,
-      fetchDetail: async (p: never) => p,
     };
     sites.bad = bad;
     const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
@@ -122,7 +121,6 @@ describe("runSearch", () => {
         throw new Error("sync");
       },
       normalizeSearchItem: () => null,
-      fetchDetail: async (p) => p,
     };
     sites.bad3 = {
       id: "bad3",
@@ -132,7 +130,6 @@ describe("runSearch", () => {
       normalizeSearchItem: () => {
         throw new Error("norm");
       },
-      fetchDetail: async (p) => p,
     };
     try {
       const r = await runSearch({ ...base, sites: ["bad2", "bad3"], query: "anc earbuds" });
@@ -154,7 +151,6 @@ describe("runSearch", () => {
       searchCalls: () => [{ op: "search", args: {} }],
       runCall: async () => ({ ok: true as const, tier: 1, data }),
       normalizeSearchItem: () => null,
-      fetchDetail: async (p: never) => p,
     });
     sites.changed = site("changed", [{ name: "x" }, { name: "y" }]);
     sites.empty = site("empty", []);
@@ -209,7 +205,6 @@ describe("runSearch", () => {
       searchCalls: () => [{ op: "search", args: { q: "x", page: "1" } }],
       runCall: async () => ({ ok: false, class: "drift", reason: "no product cards" }),
       normalizeSearchItem: () => null,
-      fetchDetail: async (p) => p,
     };
     try {
       const r = await runSearch({ ...base, sites: ["driftish"], query: "anc earbuds" });
@@ -334,7 +329,6 @@ describe("runSearch ratings (minRating)", () => {
     searchCalls: () => [{ op: "search", args: { q: "anc earbuds", page: "1" } }],
     runCall: async () => ({ ok: true as const, tier: 1, data: items }),
     normalizeSearchItem: (raw: unknown) => raw as ReturnType<typeof prod>,
-    fetchDetail: async (p: never) => p,
   });
 
   beforeEach(() => {
@@ -404,7 +398,6 @@ describe("runSearch cross-store groups", () => {
         site: id, id: "1", title, listPrice: price, origPrice: null, discountPct: null, currency: "SAR",
         rating: null, soldCount: 0, image: "", url: `https://${id}.example/1`, detailStatus: "ok" as const,
       }),
-      fetchDetail: async (p: never) => p,
     });
     sites.g1 = site("g1", "Sony WH-1000XM5 Wireless Noise Cancelling Headphones Black", 1200);
     sites.g2 = site("g2", "Sony WH1000XM5 Wireless Noise Cancelling Headphones Silver", 1100);
@@ -435,7 +428,6 @@ describe("runSearch keeps one card per look-alike until the grouped card ships",
         origPrice: null, discountPct: null, currency: "SAR", rating: null, soldCount: 0, image: "",
         url: `https://${id}.example/1`, detailStatus: "ok" as const,
       }),
-      fetchDetail: async (p: never) => p,
     });
     sites.t1 = site("t1", 1200);
     sites.t2 = site("t2", 1100);

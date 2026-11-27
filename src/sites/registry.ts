@@ -14,21 +14,18 @@ export const sites: Record<string, SiteAdapter> = {
     label: "AliExpress",
     searchCalls: aliexpress.searchCalls,
     normalizeSearchItem: aliexpress.normalizeSearchItem,
-    fetchDetail: async (p) => p,
   },
   "amazon-sa": {
     id: "amazon-sa",
     label: "Amazon KSA",
     searchCalls: amazonSa.searchCalls,
     normalizeSearchItem: amazonSa.normalizeSearchItem,
-    fetchDetail: async (p) => p,
   },
   jarir: {
     id: "jarir",
     label: "Jarir",
     searchCalls: jarir.searchCalls,
     normalizeSearchItem: jarir.normalizeSearchItem,
-    fetchDetail: async (p) => p,
   },
   "noon-sa": {
     id: "noon-sa",
@@ -36,28 +33,24 @@ export const sites: Record<string, SiteAdapter> = {
     searchCalls: noonSa.searchCalls,
     normalizeSearchItem: noonSa.normalizeSearchItem,
     runCall: noonSa.runCall,
-    fetchDetail: async (p) => p,
   },
   "trendyol-sa": {
     id: "trendyol-sa",
     label: "Trendyol KSA",
     searchCalls: trendyolSa.searchCalls,
     normalizeSearchItem: trendyolSa.normalizeSearchItem,
-    fetchDetail: async (p) => p,
   },
   "extra-sa": {
     id: "extra-sa",
     label: "eXtra",
     searchCalls: extraSa.searchCalls,
     normalizeSearchItem: extraSa.normalizeSearchItem,
-    fetchDetail: async (p) => p,
   },
   "carrefour-sa": {
     id: "carrefour-sa",
     label: "Carrefour KSA",
     searchCalls: carrefourSa.searchCalls,
     normalizeSearchItem: carrefourSa.normalizeSearchItem,
-    fetchDetail: async (p) => p,
   },
   "shein-sa": {
     id: "shein-sa",
@@ -65,6 +58,5 @@ export const sites: Record<string, SiteAdapter> = {
     searchCalls: sheinSa.searchCalls,
     normalizeSearchItem: sheinSa.normalizeSearchItem,
     runCall: sheinSa.runCall,
-    fetchDetail: async (p) => p,
   },
 };
