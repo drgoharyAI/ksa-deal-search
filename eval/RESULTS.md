@@ -521,3 +521,9 @@ label-capped 12e case). Only blender's #1 is wrong (a milk frother). Holdout3 le
 the product's own cheap listings), noise cancelling headphones 70% (wired in-ear earphones that
 call themselves headphones, labelled wrong-model), standing desk 80%, galaxy tab s9 90% (11
 results, 9 relevant: capped).
+
+## Holdout 4 (5 unseen queries, after 12f, rules unchanged)
+| p@10 | acc@10 | wrong@10 | recall | cheapest-first |
+|---|---|---|---|---|
+| 90% | 0% | 6% | 90% | 60% |
+Match-first ranking generalizes: unseen-category p@10 went from 62% (holdout 3, before 12f) to 90%. The only weak query is steam iron (wrong@10 30%: handheld garment steamers, a debatable label). Tuning stops here.
