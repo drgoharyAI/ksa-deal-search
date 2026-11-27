@@ -23,12 +23,28 @@ const CALL_OPTIONS = { view: { maxChars: 200000 }, maxTier: 1, callOnly: true } 
 
 const MAX_RETRIES = 2;
 
-/** After a store answers blocked, rate or drift (at runtime: an anti-bot page), send it nothing for this long. */
+/**
+ * After a store answers blocked or rate, send it nothing for this long. A drift (at runtime usually
+ * an anti-bot page) backs off too, unless the store answered ok within DRIFT_OK_GRACE_MS: then the
+ * drift is one odd page (e.g. a niche synonym query), not a block.
+ */
 export const BACKOFF_MS = 10 * 60_000;
-const BACKOFF_CLASSES = new Set(["blocked", "rate", "drift"]);
+export const DRIFT_OK_GRACE_MS = 60_000;
+const BACKOFF_CLASSES = new Set(["blocked", "rate"]);
 // On globalThis so the back-off survives Next.js dev HMR module reloads.
-const g = globalThis as typeof globalThis & { __aaBackoffUntil?: Map<string, number> };
+const g = globalThis as typeof globalThis & {
+  __aaBackoffUntil?: Map<string, number>;
+  __aaLastOkAt?: Map<string, number>;
+};
 const backoffUntil = (g.__aaBackoffUntil ??= new Map<string, number>());
+const lastOkAt = (g.__aaLastOkAt ??= new Map<string, number>());
+
+function shouldBackOff(site: string, cls: string): boolean {
+  if (BACKOFF_CLASSES.has(cls)) return true;
+  if (cls !== "drift") return false;
+  const ok = lastOkAt.get(site);
+  return ok === undefined || Date.now() - ok >= DRIFT_OK_GRACE_MS;
+}
 
 function backingOff(site: string): AaResult | null {
   const until = backoffUntil.get(site);
@@ -43,6 +59,7 @@ function backingOff(site: string): AaResult | null {
 /** Test helper: clear every store's back-off. */
 export function resetBackoff(): void {
   backoffUntil.clear();
+  lastOkAt.clear();
 }
 
 const limits = { search: pLimit(3), detail: pLimit(2) };
@@ -101,8 +118,10 @@ export async function aaCall(
     for (let i = 0; i < MAX_RETRIES && !out.result.ok && out.retrySafe; i++) {
       out = await callOnce(site, op, args);
     }
-    if (out.result.ok) cache.set(key, out.result);
-    else if (BACKOFF_CLASSES.has(out.result.class)) backoffUntil.set(site, Date.now() + BACKOFF_MS);
+    if (out.result.ok) {
+      cache.set(key, out.result);
+      lastOkAt.set(site, Date.now());
+    } else if (shouldBackOff(site, out.result.class)) backoffUntil.set(site, Date.now() + BACKOFF_MS);
     return out.result;
   });
   inflight.set(key, p);
