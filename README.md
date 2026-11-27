@@ -227,12 +227,50 @@ Your last 20 searches are kept only in your browser (`localStorage`, key
 with Shift+Delete, or clear this site's data in the browser (or run
 `localStorage.removeItem("deal-search:recent-searches")` in its console).
 
+## History & price alerts
+
+Every successful search is saved to a local SQLite file (Node's built-in `node:sqlite`, no
+native dependency): `%LOCALAPPDATA%deal-searchdata.db`, or the path in `DEAL_SEARCH_DB`.
+The file is outside the repository and is never committed.
+
+- **History** (`/history`): newest first, with the stores, time, result count and the cheapest
+  confident match. Re-run opens the search page with the search filled in and runs it; you can
+  delete one entry or clear all.
+- **Watch** on a result card sets a product alert (target prefilled 5% under the current price).
+  **Watch this search** above the results alerts when any confident match (never a "less likely"
+  one) is at or under a max price (prefilled 5% under the cheapest confident match).
+- **Alerts** (`/alerts`): every watch with its target, current and lowest price, last check, a
+  sparkline, pause or resume, edit target and delete; the log of fired alerts; Telegram status.
+
+The checker runs inside the app's server process while the app runs: every `ALERT_CHECK_HOURS`
+hours (default 6), stores fetched one after another about 20 s apart, each store at most once
+per query per cycle, through the normal store adapters, caches and back-offs. A blocked store is
+skipped until the next cycle. A watch that fired notifies again only after the price rose above
+the target and fell back. In development, `POST /api/alerts/run-now` (JSON body `{}`) runs one
+cycle at once; it answers 404 in production.
+
+API (local only, same request guard as `/api/search`): `GET|DELETE /api/history` (`?id=N` or
+`?all=1`), `GET|POST|PATCH|DELETE /api/watches`, `GET /api/alerts`, `POST /api/alerts/seen`,
+`POST /api/alerts/test-telegram`.
+
+### Telegram setup
+
+1. In Telegram, talk to @BotFather → /newbot → copy the token.
+2. Send any message to your new bot.
+3. Open https://api.telegram.org/bot<TOKEN>/getUpdates and copy `"chat":{"id":…}`.
+4. Add `TELEGRAM_BOT_TOKEN=…` and `TELEGRAM_CHAT_ID=…` to `.env.local`.
+5. Restart the app.
+6. Alerts → Send test message.
+
+The token is a secret: keep it only in `.env.local` (gitignored). It is used only on the server
+and never reaches the browser or the logs. Without it, alerts still show on the Alerts page.
+
 ## Privacy
 
 `API_ANYTHING_LOCAL_ONLY=1` keeps API Anything local: specs, cookies and caches stay in
 `.aa-home/`, and it sends no request to the shared API Anything registry (no spec lookups,
-pulls or publishing). The app has no accounts and stores no searches on the server (recent
-searches stay in your browser; see Search suggestions). Requests go straight from your machine
+pulls or publishing). The app has no accounts. Search history and alerts stay in a SQLite file on this machine (see
+History & price alerts); recent-search suggestions stay in your browser. Requests go straight from your machine
 to the stores.
 
 ## Verified (historical: 2026-11-27, before Tasks 9b to 14)
