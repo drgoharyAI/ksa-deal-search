@@ -128,6 +128,12 @@ describe("runSearch", () => {
     }
   });
 
+  it("all calls drift -> error status with generic message", async () => {
+    mock.mockResolvedValue({ ok: false, class: "drift", reason: "no product cards" });
+    const r = await runSearch({ ...base, query: "anc earbuds" });
+    expect(r.statuses[0]).toEqual({ site: "aliexpress", status: "error", message: "Store request failed" });
+  });
+
   it("all calls plain errors -> error status", async () => {
     mock.mockResolvedValue({ ok: false, class: "error", reason: "boom" });
     const r = await runSearch({ ...base, query: "anc earbuds" });

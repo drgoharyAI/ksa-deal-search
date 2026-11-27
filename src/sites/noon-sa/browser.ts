@@ -1,7 +1,6 @@
 import "server-only";
-import { spawn, type ChildProcess } from "node:child_process";
+import { spawn } from "node:child_process";
 import fs from "node:fs";
-import net from "node:net";
 import path from "node:path";
 import type { Browser, Page } from "playwright-core";
 
@@ -107,99 +106,163 @@ export function findChrome(): string | null {
   return null;
 }
 
-function freePort(): Promise<number> {
-  return new Promise((resolve, reject) => {
-    const srv = net.createServer();
-    srv.unref();
-    srv.on("error", reject);
-    srv.listen(0, "127.0.0.1", () => {
-      const addr = srv.address();
-      const port = typeof addr === "object" && addr ? addr.port : 0;
-      srv.close(() => (port ? resolve(port) : reject(new Error("no free port"))));
-    });
-  });
+type ChromeProc = { exitCode: number | null; kill(): boolean };
+
+/** Side effects of the launcher, injectable so tests never spawn Chrome or touch the network. */
+export type ChromeDeps = {
+  profileDir: string;
+  findChrome(): string | null;
+  /** Port from `<profile>/DevToolsActivePort` (written by Chrome), or null. */
+  readActivePort(profileDir: string): number | null;
+  removeActivePort(profileDir: string): void;
+  /** True if `http://127.0.0.1:<port>/json/version` answers. */
+  probe(port: number): Promise<boolean>;
+  spawnChrome(chromePath: string, args: string[]): ChromeProc;
+  connect(port: number): Promise<Browser>;
+  sleep(ms: number): Promise<void>;
+};
+
+const portFile = (profileDir: string) => path.join(profileDir, "DevToolsActivePort");
+
+const realDeps: ChromeDeps = {
+  profileDir: path.join(process.cwd(), ".noon-profile"),
+  findChrome,
+  readActivePort(profileDir) {
+    try {
+      // First line of DevToolsActivePort is the port; parseInt stops at the line break.
+      const port = parseInt(fs.readFileSync(portFile(profileDir), "utf8"), 10);
+      return Number.isInteger(port) && port > 0 && port < 65536 ? port : null;
+    } catch {
+      return null;
+    }
+  },
+  removeActivePort(profileDir) {
+    fs.rmSync(portFile(profileDir), { force: true });
+  },
+  async probe(port) {
+    try {
+      const r = await fetch(`http://127.0.0.1:${port}/json/version`, { signal: AbortSignal.timeout(1000) });
+      return r.ok;
+    } catch {
+      return false;
+    }
+  },
+  spawnChrome(chromePath, args) {
+    const proc = spawn(chromePath, args, { stdio: "ignore" });
+    proc.on("error", () => {});
+    return proc;
+  },
+  async connect(port) {
+    const { chromium } = await import("playwright-core");
+    return chromium.connectOverCDP(`http://127.0.0.1:${port}`);
+  },
+  sleep: (ms) => new Promise((r) => setTimeout(r, ms)),
+};
+
+async function existingPort(d: ChromeDeps): Promise<number | null> {
+  const port = d.readActivePort(d.profileDir);
+  return port !== null && (await d.probe(port)) ? port : null;
 }
 
-async function waitForDebugPort(port: number, proc: ChildProcess, timeoutMs = 15_000) {
+async function waitForNewPort(d: ChromeDeps, proc: ChromeProc, timeoutMs = 15_000): Promise<number> {
   const deadline = Date.now() + timeoutMs;
   while (Date.now() < deadline) {
     if (proc.exitCode !== null) throw new Error(`Chrome exited early (code ${proc.exitCode})`);
-    try {
-      const r = await fetch(`http://127.0.0.1:${port}/json/version`, { signal: AbortSignal.timeout(1000) });
-      if (r.ok) return;
-    } catch {
-      // not up yet
-    }
-    await new Promise((r) => setTimeout(r, 250));
+    const port = await existingPort(d);
+    if (port !== null) return port;
+    await d.sleep(250);
   }
   throw new Error("Chrome debug port did not open");
 }
 
-export async function launchChrome(): Promise<NoonSession> {
-  const chromePath = findChrome();
-  if (!chromePath) throw new Error("Chrome not found");
-  const port = await freePort();
-  const profileDir = path.join(process.cwd(), ".noon-profile");
-  const proc = spawn(
-    chromePath,
-    [
-      `--remote-debugging-port=${port}`,
-      "--remote-debugging-address=127.0.0.1",
-      `--user-data-dir=${profileDir}`,
-      "--window-position=-32000,-32000",
-      "--no-first-run",
-      "--no-default-browser-check",
-      "about:blank",
-    ],
-    { stdio: "ignore" },
-  );
-  proc.on("error", () => {});
-
-  let browser: Browser | null = null;
-  try {
-    await waitForDebugPort(port, proc);
-    const { chromium } = await import("playwright-core");
-    browser = await chromium.connectOverCDP(`http://127.0.0.1:${port}`);
-    const context = browser.contexts()[0] ?? (await browser.newContext());
-    const page = context.pages()[0] ?? (await context.newPage());
-    let connected = true;
-    browser.on("disconnected", () => (connected = false));
-    const b = browser;
-    return {
-      page,
-      isAlive: () => connected && proc.exitCode === null && !page.isClosed(),
-      close: async () => {
-        try {
-          // connectOverCDP's browser.close() only disconnects; ask Chrome itself to quit.
-          const cdp = await b.newBrowserCDPSession();
-          await cdp.send("Browser.close");
-        } catch {
-          // already gone
-        }
-        await b.close().catch(() => {});
-        if (proc.exitCode === null) proc.kill();
-      },
-      kill: () => {
-        if (proc.exitCode === null) proc.kill();
-      },
+/**
+ * Launcher for the owner's Chrome on the `.noon-profile` profile. If a Chrome from an earlier
+ * run (HMR, crashed node) still holds the profile and its debug port answers, adopt it instead
+ * of spawning: a second Chrome on the same profile would only hand off to the first one.
+ */
+export function createChromeLauncher(overrides: Partial<ChromeDeps> = {}): Launcher {
+  const d: ChromeDeps = { ...realDeps, ...overrides };
+  return async () => {
+    let proc: ChromeProc | null = null;
+    let port = await existingPort(d);
+    if (port === null) {
+      const chromePath = d.findChrome();
+      if (!chromePath) throw new Error("Chrome not found");
+      d.removeActivePort(d.profileDir); // stale file from a dead Chrome
+      proc = d.spawnChrome(chromePath, [
+        "--remote-debugging-port=0",
+        "--remote-debugging-address=127.0.0.1",
+        `--user-data-dir=${d.profileDir}`,
+        "--window-position=-32000,-32000",
+        "--no-first-run",
+        "--no-default-browser-check",
+        "about:blank",
+      ]);
+    }
+    const p = proc;
+    const killProc = () => {
+      if (p && p.exitCode === null) p.kill();
     };
-  } catch (e) {
-    await browser?.close().catch(() => {});
-    if (proc.exitCode === null) proc.kill();
-    throw e;
-  }
+
+    let browser: Browser | null = null;
+    try {
+      if (p) port = await waitForNewPort(d, p);
+      browser = await d.connect(port!);
+      const context = browser.contexts()[0] ?? (await browser.newContext());
+      const page = context.pages()[0] ?? (await context.newPage());
+      let connected = true;
+      browser.on("disconnected", () => (connected = false));
+      const b = browser;
+      return {
+        page,
+        isAlive: () => connected && (!p || p.exitCode === null) && !page.isClosed(),
+        close: async () => {
+          try {
+            // connectOverCDP's browser.close() only disconnects; ask Chrome itself to quit.
+            const cdp = await b.newBrowserCDPSession();
+            await cdp.send("Browser.close");
+          } catch {
+            // already gone
+          }
+          await b.close().catch(() => {});
+          killProc();
+        },
+        // An adopted Chrome has no child process here; the next start adopts it again.
+        kill: killProc,
+      };
+    } catch (e) {
+      await browser?.close().catch(() => {});
+      killProc();
+      throw e;
+    }
+  };
 }
+
+export const launchChrome: Launcher = createChromeLauncher();
 
 // ---------------- shared instance ----------------
 
-const shared = createNoonBrowser({ launch: launchChrome });
-process.once("exit", () => shared.killNow());
+type NoonBrowser = ReturnType<typeof createNoonBrowser>;
+const g = globalThis as typeof globalThis & { __noonBrowser?: NoonBrowser; __noonBrowserExitHook?: boolean };
+
+/**
+ * One instance per process, kept on globalThis so Next dev HMR (which re-evaluates this
+ * module) reuses the session instead of losing track of the running Chrome.
+ */
+export function sharedNoonBrowser(): NoonBrowser {
+  g.__noonBrowser ??= createNoonBrowser({ launch: launchChrome });
+  if (!g.__noonBrowserExitHook) {
+    g.__noonBrowserExitHook = true;
+    process.once("exit", () => g.__noonBrowser?.killNow());
+  }
+  return g.__noonBrowser;
+}
 
 /** Run `fn` with the shared noon Chrome page; jobs are serialized. */
 export function withNoonPage<T>(fn: (page: Page) => Promise<T>): Promise<T> {
-  return shared.withPage(fn);
+  return sharedNoonBrowser().withPage(fn);
 }
 
 export function closeNoonBrowser(): Promise<void> {
-  return shared.close();
+  return sharedNoonBrowser().close();
 }

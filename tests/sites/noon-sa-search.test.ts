@@ -1,4 +1,6 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi, afterEach } from "vitest";
+import { TtlCache } from "@/src/lib/cache";
+import type { AaResult } from "@/src/lib/aa";
 import fixture from "../fixtures/noon-sa-search.json";
 import {
   sanitizeQ,
@@ -130,6 +132,7 @@ describe("searchCalls", () => {
 type FakeOpts = {
   status?: number;
   outcome?: "ok" | "denied" | "timeout";
+  gotos?: { n: number };
   captcha?: boolean;
   gotoThrows?: Error;
   cards?: unknown[];
@@ -141,6 +144,7 @@ function fakePage(o: FakeOpts) {
     visited,
     async goto(url: string) {
       visited.push(url);
+      if (o.gotos) o.gotos.n++;
       if (o.gotoThrows) throw o.gotoThrows;
       return { status: () => o.status ?? 200 };
     },
@@ -224,5 +228,71 @@ describe("runCall", () => {
     expect(await run({ op: "search", args: { q: "x", page: "abc", sort: "" } })).toMatchObject({ ok: false, class: "error" });
     expect(await run({ op: "detail", args: { q: "x", page: "1", sort: "" } })).toMatchObject({ ok: false, class: "error" });
     expect(page.visited).toEqual([]);
+  });
+});
+
+const priced = [{ href: "/saudi-en/a/N1/p/", title: "A", price: "10", origPrice: null, rating: null, reviews: null, image: null }];
+
+describe("runCall cache", () => {
+  it("identical call twice -> one search page load (ok results cached)", async () => {
+    const page = fakePage({ cards: priced });
+    const run = createRunCall({ withPage: (fn) => fn(page), minGapMs: 0, cache: new TtlCache<AaResult>(600_000) });
+    const a = await run(call);
+    const b = await run(call);
+    expect(b).toEqual(a);
+    expect(page.visited.filter((u) => u.includes("/search/"))).toHaveLength(1);
+  });
+
+  it("drift is never cached", async () => {
+    const page = fakePage({ outcome: "timeout" });
+    const run = runCallWith(page);
+    await run(call);
+    await run(call);
+    expect(page.visited.filter((u) => u.includes("/search/"))).toHaveLength(2);
+  });
+});
+
+describe("runCall drift", () => {
+  it("no cards and no challenge -> drift", async () => {
+    const r = await runCallWith(fakePage({ outcome: "timeout" }))(call);
+    expect(r).toEqual({ ok: false, class: "drift", reason: "no product cards" });
+  });
+
+  it("cards present but none with a price -> drift", async () => {
+    const r = await runCallWith(
+      fakePage({ cards: [{ ...priced[0], price: null }] }),
+    )(call);
+    expect(r).toMatchObject({ ok: false, class: "drift" });
+  });
+});
+
+describe("runCall blocked short-circuit", () => {
+  afterEach(() => vi.useRealTimers());
+
+  it("after a block, later calls (even queued ones) make no load for 10 min", async () => {
+    vi.useFakeTimers();
+    const gotos = { n: 0 };
+    const page = fakePage({ status: 403, gotos });
+    // Serializing fake provider, like the real browser queue.
+    let tail: Promise<unknown> = Promise.resolve();
+    const withPage = <T,>(fn: (p: NoonPage) => Promise<T>): Promise<T> => {
+      const r = tail.then(() => fn(page));
+      tail = r.catch(() => {});
+      return r;
+    };
+    const run = createRunCall({ withPage, minGapMs: 0 });
+    const p2 = { ...call, args: { ...call.args, page: "2" } };
+    const [r1, r2] = await Promise.all([run(call), run(p2)]);
+    expect(r1).toMatchObject({ ok: false, class: "blocked" });
+    expect(r2).toEqual({ ok: false, class: "blocked", reason: "noon blocked recently" });
+    expect(gotos.n).toBe(1);
+
+    await vi.advanceTimersByTimeAsync(9 * 60_000);
+    expect(await run(p2)).toEqual({ ok: false, class: "blocked", reason: "noon blocked recently" });
+    expect(gotos.n).toBe(1);
+
+    await vi.advanceTimersByTimeAsync(60_000 + 10);
+    await run(p2);
+    expect(gotos.n).toBeGreaterThan(1);
   });
 });

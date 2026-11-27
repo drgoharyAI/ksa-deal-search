@@ -1,6 +1,7 @@
 import type { AaResult } from "@/src/lib/aa";
 import type { ParsedQuery, Product } from "@/src/lib/types";
 import type { Page } from "playwright-core";
+import { TtlCache } from "@/src/lib/cache";
 import { withNoonPage } from "./browser";
 
 /**
@@ -12,6 +13,8 @@ import { withNoonPage } from "./browser";
 const BASE = "https://www.noon.com/saudi-en";
 const LOAD_TIMEOUT_MS = 25_000;
 const MIN_GAP_MS = 2_000;
+const CACHE_TTL_MS = 600_000;
+const BLOCK_BACKOFF_MS = 10 * 60_000;
 const SKU_RE = /\/([A-Za-z0-9]+)\/p\/?$/;
 
 /** Keep letters, digits, spaces, hyphens; collapse spaces. "" if nothing usable. */
@@ -156,6 +159,10 @@ export type NoonPage = Pick<
 >;
 
 class Blocked extends Error {}
+/** Page loaded but did not look like a noon results page (selector drift / interstitial). */
+class Drift extends Error {}
+/** A queued job found the block back-off active; it made no load. */
+class BlockedRecently extends Error {}
 
 const CARD_SEL = '[data-qa="plp-product-box"]';
 const CHALLENGE_SEL = 'iframe[src*="captcha"], #sec-if-cpt-container, [id*="captcha"]';
@@ -193,8 +200,9 @@ export async function loadSearch(page: NoonPage, url: string): Promise<RawNoonIt
   if (outcome === "denied") throw new Blocked("search: Access Denied");
   if (outcome !== "ok") {
     if (await page.$(CHALLENGE_SEL)) throw new Blocked("challenge shown");
-    // No cards and no block signal: treat as an empty result page.
-    return [];
+    // No verified "no results" marker exists (spike), so missing cards means the page or the
+    // selectors changed (or an interstitial never resolved): report breakage, not an empty list.
+    throw new Drift("no product cards");
   }
   // Playwright $$eval: runs the extractor inside the page on the matched cards (no string eval).
   // Keep the callback free of named inner functions: some TS transpilers (esbuild keepNames)
@@ -216,19 +224,30 @@ export async function loadSearch(page: NoonPage, url: string): Promise<RawNoonIt
       };
     }),
   );
-  return toRawItems(cards);
+  const items = toRawItems(cards);
+  if (!items.some((i) => i.price !== null)) throw new Drift("product cards without prices");
+  return items;
 }
 
 type WithPage = <T>(fn: (page: NoonPage) => Promise<T>) => Promise<T>;
 
 /**
  * Build a runCall over a page provider. Loads are serialized by the provider and spaced
- * at least `minGapMs` apart (warm-up included). Never throws.
+ * at least `minGapMs` apart (warm-up included). Ok results are cached for 10 min (keyed q|page).
+ * After any block, every call fails fast for 10 min without loading a page. Never throws.
  */
-export function createRunCall(deps: { withPage: WithPage; minGapMs?: number }) {
+export function createRunCall(deps: {
+  withPage: WithPage;
+  minGapMs?: number;
+  cache?: TtlCache<AaResult>;
+}) {
   const minGap = deps.minGapMs ?? MIN_GAP_MS;
+  const cache = deps.cache ?? new TtlCache<AaResult>(CACHE_TTL_MS);
   const warmed = new WeakSet<object>();
   let lastLoad = 0;
+  let blockedUntil = 0;
+  const recentlyBlocked = () => Date.now() < blockedUntil;
+  const BLOCKED_RECENTLY: AaResult = { ok: false, class: "blocked", reason: "noon blocked recently" };
 
   async function gap() {
     const wait = lastLoad + minGap - Date.now();
@@ -242,9 +261,15 @@ export function createRunCall(deps: { withPage: WithPage; minGapMs?: number }) {
     if (call.op !== "search" || !q || !/^[1-9]\d?$/.test(pageNo)) {
       return { ok: false, class: "error", reason: "invalid noon search call" };
     }
+    const key = `${q}|${pageNo}`;
+    const hit = cache.get(key);
+    if (hit) return hit;
+    if (recentlyBlocked()) return BLOCKED_RECENTLY;
     const url = `${BASE}/search/?q=${encodeURIComponent(q)}&page=${pageNo}`;
     try {
       const items = await deps.withPage(async (page) => {
+        // Re-check inside the queue: a call queued behind a blocked one must not load.
+        if (recentlyBlocked()) throw new BlockedRecently();
         if (!warmed.has(page)) {
           await gap();
           await warmUp(page);
@@ -253,10 +278,17 @@ export function createRunCall(deps: { withPage: WithPage; minGapMs?: number }) {
         await gap();
         return loadSearch(page, url);
       });
-      return { ok: true, tier: 3, data: items };
+      const ok: AaResult = { ok: true, tier: 3, data: items };
+      cache.set(key, ok);
+      return ok;
     } catch (e) {
+      if (e instanceof BlockedRecently) return BLOCKED_RECENTLY;
       const reason = e instanceof Error ? e.message : String(e);
-      return { ok: false, class: e instanceof Blocked ? "blocked" : "error", reason };
+      if (e instanceof Blocked) {
+        blockedUntil = Date.now() + BLOCK_BACKOFF_MS;
+        return { ok: false, class: "blocked", reason };
+      }
+      return { ok: false, class: e instanceof Drift ? "drift" : "error", reason };
     }
   };
 }
