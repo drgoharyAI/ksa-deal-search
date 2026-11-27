@@ -78,9 +78,13 @@ function withInsights(products: Product[]): Product[] {
   }
   try {
     recordObservations(getDb(), products, now);
-    recordSeen(getDb(), products, now);
   } catch (e) {
     console.warn("[insights] could not record price observations", e instanceof Error ? e.message : String(e));
+  }
+  try {
+    recordSeen(getDb(), products, now);
+  } catch (e) {
+    console.warn("[discover] could not record the products seen", e instanceof Error ? e.message : String(e));
   }
   return out;
 }

@@ -12,12 +12,14 @@ type Props = {
   /** "from" before the amount (a store that lists its lowest variant). */
   from?: boolean;
   size?: "sm" | "md" | "lg";
-  /** Words read before the struck price ("was", "seen at"). */
+  /** Words before the struck price ("was", "highest seen"); for screen readers only unless `showOriginalLabel`. */
   originalLabel?: string;
+  /** Show `originalLabel` on screen, e.g. when the struck price is ours, not the store's "was". */
+  showOriginalLabel?: boolean;
 };
 
 /** The current price set large, the struck original after it, and a verified discount. */
-export default function Price({ amount, currency, original, discountPct, verified = false, from = false, size = "md", originalLabel = "was" }: Props) {
+export default function Price({ amount, currency, original, discountPct, verified = false, from = false, size = "md", originalLabel = "was", showOriginalLabel = false }: Props) {
   const showOrig = typeof original === "number" && Number.isFinite(original) && original > amount;
   const pct = verified && typeof discountPct === "number" && discountPct >= 1 ? Math.round(discountPct) : 0;
   return (
@@ -25,10 +27,10 @@ export default function Price({ amount, currency, original, discountPct, verifie
       {from && <span className="price__from">from</span>}
       <span className="price__amount">{formatMoney(amount, currency)}</span>
       {showOrig && (
-        <s className="price__orig">
-          <span className="visually-hidden">{originalLabel} </span>
-          {formatMoney(original, currency)}
-        </s>
+        <span className="price__was">
+          {showOriginalLabel ? <span className="price__was-label">{originalLabel} </span> : <span className="visually-hidden">{originalLabel} </span>}
+          <s className="price__orig">{formatMoney(original, currency)}</s>
+        </span>
       )}
       {pct > 0 && (
         <span className="price__off">

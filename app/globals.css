@@ -122,7 +122,8 @@
 .price--sm .price__amount { font-size: var(--text-lg); }
 .price--md .price__amount { font-size: var(--text-xl); }
 .price--lg .price__amount { font-size: var(--text-3xl); line-height: 1.1; font-variant-numeric: tabular-nums; }
-.price__orig { font-size: var(--text-sm); color: var(--color-muted); white-space: nowrap; }
+.price__was { font-size: var(--text-sm); color: var(--color-muted); white-space: nowrap; }
+.price__orig { color: var(--color-muted); }
 .price__off { font-size: var(--text-sm); font-weight: 600; color: var(--color-accent-strong); }
 
 /* The search options fold behind one line */

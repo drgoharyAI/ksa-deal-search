@@ -6,7 +6,7 @@ import { STORES, defaultSites } from "@/src/lib/stores";
 import SearchForm, { type ErrorField, type FormValues } from "./components/SearchForm";
 import StatusBar from "./components/StatusBar";
 import ResultTiers from "./components/ResultTiers";
-import AppHeader from "./components/AppHeader";
+import AppHeader, { GO_HOME_EVENT } from "./components/AppHeader";
 import AppFooter from "./components/AppFooter";
 import HomeSuggestions from "./components/HomeSuggestions";
 import HomeDiscover from "./components/HomeDiscover";
@@ -87,6 +87,32 @@ export default function Home() {
   const [compareOpen, setCompareOpen] = useState(false);
 
   useEffect(() => () => abortRef.current?.abort(), []);
+
+  // The wordmark or Search link clicked on this page: back to a clean home (AppHeader already put
+  // "/" in the URL). The form remounts (key), so its query, stores and options start over.
+  const [formKey, setFormKey] = useState(0);
+  useEffect(() => {
+    const reset = () => {
+      abortRef.current?.abort();
+      abortRef.current = null;
+      setValues(INITIAL);
+      setPhase("idle");
+      setResults(null);
+      setPending(null);
+      setError(null);
+      setErrorField(null);
+      setWatchOpen(false);
+      setWatchSaved(false);
+      setChips(NO_FILTERS);
+      setKeptChips([]);
+      setCmp(NO_COMPARE);
+      setCompareOpen(false);
+      setFormKey((k) => k + 1);
+      window.scrollTo(0, 0);
+    };
+    window.addEventListener(GO_HOME_EVENT, reset);
+    return () => window.removeEventListener(GO_HOME_EVENT, reset);
+  }, []);
 
   // A History "Re-run" link: fill the form from the URL, clean the URL, and search once.
   // The chip filters come back from the URL too (a refresh or Back keeps them).
@@ -239,6 +265,7 @@ export default function Home() {
           <h1 className="visually-hidden">Deal search</h1>
         )}
         <SearchForm
+          key={formKey}
           values={values}
           onChange={setValues}
           onSubmit={(q) => void search(q)}

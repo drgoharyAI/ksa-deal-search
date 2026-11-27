@@ -52,9 +52,15 @@ export default function SearchForm({ values, onChange, onSubmit, onStop, loading
     );
   const queryError = errorField === "query" ? error : null;
   const sitesError = errorField === "sites" ? error : null;
-  // The options open by themselves when one is set (a History re-run), so a value is never hidden.
-  const [optionsOpen, setOptionsOpen] = useState(false);
+  // Controlled through onToggle. The options also open by themselves when one becomes set (a
+  // History re-run), so a value is never hidden; adjusted during render, not in an effect.
   const optionsSet = values.sort !== "price" || !!values.minPrice || !!values.maxPrice || !!values.minRating;
+  const [optionsOpen, setOptionsOpen] = useState(optionsSet);
+  const [wasSet, setWasSet] = useState(optionsSet);
+  if (optionsSet !== wasSet) {
+    setWasSet(optionsSet);
+    if (optionsSet) setOptionsOpen(true);
+  }
 
   return (
     <form
@@ -127,7 +133,7 @@ export default function SearchForm({ values, onChange, onSubmit, onStop, loading
         </p>
       </fieldset>
 
-      <details className="options" open={optionsOpen || optionsSet} onToggle={(e) => setOptionsOpen(e.currentTarget.open)}>
+      <details className="options" open={optionsOpen} onToggle={(e) => setOptionsOpen(e.currentTarget.open)}>
         <summary className="options__toggle">Sort, price and rating</summary>
         <div className="filters">
           <div className="field">

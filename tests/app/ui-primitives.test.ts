@@ -81,7 +81,7 @@ describe("Price", () => {
   it("shows the current price, a struck higher original, and a verified discount", () => {
     const out = html(h(Price, { amount: 899, currency: "SAR", original: 999, discountPct: 10, verified: true }));
     expect(out).toContain('<span class="price__amount">SAR 899</span>');
-    expect(out).toContain('<s class="price__orig"><span class="visually-hidden">was </span>SAR 999</s>');
+    expect(out).toContain('<span class="price__was"><span class="visually-hidden">was </span><s class="price__orig">SAR 999</s></span>');
     expect(out).toContain("−10%");
   });
   it("hides an unverified discount and an original that is not higher", () => {
@@ -132,7 +132,8 @@ describe("DiscoverCard", () => {
     const out = html(h(DiscoverCard, { item }));
     expect(out).toContain("Jarir");
     expect(out).toContain('href="https://jarir.example/J1" target="_blank" rel="noopener noreferrer" dir="auto"');
-    expect(out).toContain('<span class="visually-hidden">highest seen </span>SAR 500');
+    // Visible: the struck price is our own observation, not the store's "was" price.
+    expect(out).toContain('<span class="price__was-label">highest seen </span><s class="price__orig">SAR 500</s>');
     expect(out).toContain("−10%");
     expect(out).toContain("Lowest in 30 days");
     expect(out).toContain("No image");
