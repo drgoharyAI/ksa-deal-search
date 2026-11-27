@@ -5,7 +5,8 @@ import type { Product } from "@/src/lib/types";
 import { STORES, defaultSites } from "@/src/lib/stores";
 import SearchForm, { type ErrorField, type FormValues } from "./components/SearchForm";
 import StatusBar from "./components/StatusBar";
-import ResultTiers from "./components/ResultTiers";
+import ResultTiers, { RESULTS_STEP } from "./components/ResultTiers";
+import { clearResultsUrlMark, shouldClearMark } from "@/src/lib/results-url-mark";
 import AppHeader, { GO_HOME_EVENT } from "./components/AppHeader";
 import AppFooter from "./components/AppFooter";
 import HomeSuggestions from "./components/HomeSuggestions";
@@ -38,7 +39,7 @@ import { allMembers, buildUnits, viewItems } from "@/src/lib/view";
 import type { GroupRef } from "@/src/lib/match/group";
 import { GroupOpenContext, type GroupOpen } from "./components/GroupCard";
 import {
-  initStream, liveSummary, readEvents, reduceStream, settle, stopStream, storeEntries, streamFromPayload, type SearchPayload, type StreamEvent, type StreamState,
+  initStream, liveSummary, readEvents, reduceStream, settle, showStoppedEmpty, STOPPED_EMPTY, stopStream, storeEntries, streamFromPayload, type SearchPayload, type StreamEvent, type StreamState,
 } from "@/src/lib/search-stream";
 
 type Filters = { minPrice?: number; maxPrice?: number; minRating?: number };
@@ -59,7 +60,7 @@ type Results = {
   filters: Filters;
 };
 /** What "go home" put aside, so Back to the results entry brings them back. */
-type Stash = { run: Run; values: FormValues; chips: ChipFilters };
+type Stash = { run: Run; values: FormValues; chips: ChipFilters; shown: number };
 type Phase = "idle" | "loading" | "done" | "error";
 
 const INITIAL: FormValues = {
@@ -89,11 +90,6 @@ const toNum = (s: string): number | undefined => {
 
 const fieldFor = (msg: string): ErrorField =>
   msg === "Pick at least one store" ? "sites" : msg === "Enter something to search for" || msg === "Search is too long" ? "query" : "form";
-
-/** Drops the pre-paint mark app/layout.tsx sets on a results URL (it hides the prerendered home). */
-function clearResultsUrlMark() {
-  document.documentElement.removeAttribute("data-results-url");
-}
 
 export default function Home() {
   const [values, setValues] = useState<FormValues>(INITIAL);
@@ -142,6 +138,9 @@ export default function Home() {
   // Saved products (hearts on cards, group rows and the compare table), kept in SQLite.
   const favourites = useFavourites();
   const stashRef = useRef<Stash | null>(null);
+  // How many cards ResultTiers draws (RESULTS_STEP at a time); kept with stashed results, so Back
+  // and Forward bring back as many as were on screen and scroll restoration is not cut short.
+  const [shown, setShown] = useState(RESULTS_STEP);
   const [formKey, setFormKey] = useState(0);
 
   useEffect(() => () => abortRef.current?.abort(), []);
@@ -171,7 +170,7 @@ export default function Home() {
     abortRef.current?.abort();
     abortRef.current = null;
     // A search still running is stopped first: Back must not bring back stores "Searching" forever.
-    stashRef.current = stash && run?.stream.results ? { run: { ...run, stream: stopStream(run.stream) }, values, chips } : null;
+    stashRef.current = stash && run?.stream.results ? { run: { ...run, stream: stopStream(run.stream) }, values, chips, shown } : null;
     setValues(INITIAL);
     setPhase("idle");
     setRun(null);
@@ -226,6 +225,7 @@ export default function Home() {
           stashRef.current = null;
           setValues(s.values);
           setRun(s.run);
+          setShown(s.shown);
           setPhase("done");
         }
         setChips(filtersFromSearch(qs));
@@ -274,13 +274,17 @@ export default function Home() {
   // on screen it is the whole shareable link (query, stores, sort, limits, chips, compare);
   // without one, only the chip and compare keys.
   const runForm = run?.form;
+  // The search has something to show: a first result, or it finished on its own (not stopped).
+  const committed = !!payload && (payload.products.length > 0 || (!!run?.stream.done && !run.stream.stopped));
   useEffect(() => {
     if (!chipsRead) return;
     const next = runForm
       ? shareSearch({ ...runForm, sort: values.sort }, chips, cmp.keys)
       : withCompareParam(withChipParams(window.location.search, chips), cmp.keys);
     if (next === window.location.search) return;
-    if (urlWrite(window.location.search, !!runForm) === "push") {
+    const write = urlWrite(window.location.search, !!runForm, committed);
+    if (write === "wait") return;
+    if (write === "push") {
       // A search started from the home: the home keeps its own entry (marked, so Back shows the
       // clean home and stashes these results for Forward), and the results get a new one.
       window.history.replaceState({ ...(window.history.state as object | null), [HOME_ENTRY]: true }, "", window.location.href);
@@ -290,7 +294,7 @@ export default function Home() {
     // A results entry is never the marked "go home" entry, even when a search replaced that entry.
     const state = Object.entries((window.history.state as Record<string, unknown> | null) ?? {}).filter(([k]) => !runForm || k !== HOME_ENTRY);
     window.history.replaceState(Object.fromEntries(state), "", window.location.pathname + next);
-  }, [chips, cmp.keys, chipsRead, runForm, values.sort]);
+  }, [chips, cmp.keys, chipsRead, runForm, values.sort, committed]);
 
   // Cards: a cross-store group is one card, every other product one card. Chips narrow the cards
   // (a group passes when any member does), then sort and the match tiers apply; no new request.
@@ -365,6 +369,7 @@ export default function Home() {
     setError(null);
     setErrorField(null);
     setPhase("loading");
+    setShown(RESULTS_STEP);
     stashRef.current = null;
     // A new query drops the store, brand and price chips of the old results (not on a History re-run).
     const carried = chipsForNewQuery(chips, results?.query, v.query);
@@ -490,7 +495,7 @@ export default function Home() {
   const home = !loading && !results;
   // A results URL kept the home hidden until now (app/layout.tsx); from here the page shows itself.
   useEffect(() => {
-    if (phase !== "idle" || !home) clearResultsUrlMark();
+    if (shouldClearMark(phase, home)) clearResultsUrlMark();
   }, [phase, home]);
   // Searching with nothing to show yet: the skeleton grid holds the space.
   const waiting = loading && all.length === 0;
@@ -628,7 +633,7 @@ export default function Home() {
                 ) : results && items.length ? (
                   <GroupOpenContext value={groupOpen}>
                     <DetailsContext value={details}>
-                      <ResultTiers key={results.query} items={items} query={results.query} compare={compare} view={view} />
+                      <ResultTiers items={items} query={results.query} compare={compare} view={view} limit={shown} onLimit={setShown} />
                     </DetailsContext>
                   </GroupOpenContext>
                 ) : results && filtering ? (
@@ -648,11 +653,11 @@ export default function Home() {
                       </div>
                     }
                   />
-                ) : results && !loading && run?.stream.stopped ? (
+                ) : results && !loading && run && showStoppedEmpty(run.stream, all.length) ? (
                   // Stopped before any store found something: not a "no match" (most stores never answered).
                   <EmptyState
-                    title="The search was stopped before any results came"
-                    body="Search again to see what the stores have."
+                    title={STOPPED_EMPTY.title}
+                    body={STOPPED_EMPTY.body}
                     action={
                       <Button size="sm" variant="secondary" onClick={() => searchWith({})}>
                         Search again

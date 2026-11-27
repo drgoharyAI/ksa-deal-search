@@ -47,10 +47,13 @@ export function historyMove(search: string, state: unknown, s: { stashed: boolea
 }
 
 /**
- * How the search page writes its URL: a search shown over the home (the URL has no query yet)
- * gets a new entry, so Back returns to the home; anything else (chips, sort, compare, a new query
- * on a results URL) replaces the current entry.
+ * How the search page writes its URL. A search started from the home (the URL has no query yet)
+ * gets a new entry, so Back returns to the home, but only once it has something to show
+ * (`committed`: a first result, or the search finished on its own): until then "wait" leaves the
+ * home's URL alone, so a search stopped early or failed leaves no entry behind. Anything else
+ * (chips, sort, compare, a new query on a results URL) replaces the current entry.
  */
-export function urlWrite(current: string, showingResults: boolean): "push" | "replace" {
-  return showingResults && !new URLSearchParams(current).get("q")?.trim() ? "push" : "replace";
+export function urlWrite(current: string, running: boolean, committed: boolean): "push" | "replace" | "wait" {
+  if (!running || new URLSearchParams(current).get("q")?.trim()) return "replace";
+  return committed ? "push" : "wait";
 }

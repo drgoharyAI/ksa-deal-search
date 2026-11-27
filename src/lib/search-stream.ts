@@ -222,3 +222,11 @@ export async function readEvents(body: ReadableStream<Uint8Array>, onEvent: (e: 
   take(takeLines(`${buf}${dec.decode()}\n`).lines);
   return n;
 }
+
+/** The empty state after Stop with nothing found yet: most stores never answered, so not "no match". */
+export const STOPPED_EMPTY = { title: "The search was stopped before any results came", body: "Search again to see what the stores have." } as const;
+
+/** Whether the results area shows STOPPED_EMPTY: stopped, and no product came from any store. */
+export function showStoppedEmpty(s: StreamState, productCount: number): boolean {
+  return !!s.stopped && productCount === 0;
+}

@@ -165,7 +165,8 @@ Searching, "N results" (only with a count from the backend), No results, Tempora
 (with "try after HH:MM" when the back-off end is known), Failed, or Stopped. A store still
 searching shows a short hairline drifting along the cell's foot; it never fills and is still under
 reduced motion. There is no percentage or progress bar. Cells keep their size across states, so
-nothing below moves while stores answer. The page announces one summary (aria-live polite) at the
+nothing below moves while stores answer: each keeps three lines for its state from the start (a wrapped
+"Temporarily unavailable", then its detail on its own line), and nothing is cut off. The page announces one summary (aria-live polite) at the
 start, at the first results and at the end, never per store.
 
 ## States

@@ -153,15 +153,20 @@ describe("Copy link", () => {
   });
 });
 
-describe("urlWrite: a search from the home gets its own history entry", () => {
+describe("urlWrite: a search from the home gets its own history entry once it has results", () => {
   it("pushes when results replace the home (no query in the URL yet)", () => {
-    expect(urlWrite("", true)).toBe("push");
-    expect(urlWrite("?store=jarir", true)).toBe("push");
-    expect(urlWrite("?q=%20", true)).toBe("push");
+    expect(urlWrite("", true, true)).toBe("push");
+    expect(urlWrite("?store=jarir", true, true)).toBe("push");
+    expect(urlWrite("?q=%20", true, true)).toBe("push");
   });
-  it("replaces on a results URL, and with no results on screen", () => {
-    expect(urlWrite("?q=airpods&sort=price", true)).toBe("replace");
-    expect(urlWrite("", false)).toBe("replace");
-    expect(urlWrite("?store=jarir", false)).toBe("replace");
+  it("waits (no entry, no URL change) while nothing has come, so Stop or an error leaves none", () => {
+    expect(urlWrite("", true, false)).toBe("wait");
+    expect(urlWrite("?store=jarir", true, false)).toBe("wait");
+  });
+  it("replaces on a results URL, and with no search on screen", () => {
+    expect(urlWrite("?q=airpods&sort=price", true, true)).toBe("replace");
+    expect(urlWrite("?q=airpods&sort=price", true, false)).toBe("replace");
+    expect(urlWrite("", false, false)).toBe("replace");
+    expect(urlWrite("?store=jarir", false, false)).toBe("replace");
   });
 });

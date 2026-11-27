@@ -166,8 +166,10 @@
 /* Store status: one ledger strip, a cell per store (mark, then its state in words). Cells keep their
  * size from "Searching" to the final state, so nothing below moves as stores answer. */
 .storestatus { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); margin: 0; padding: 0; list-style: none; border: var(--border); border-radius: var(--radius-md); background: var(--color-surface); overflow: hidden; }
-.storestatus__item { position: relative; display: flex; flex-direction: column; justify-content: center; gap: var(--space-3xs); min-width: 0; min-height: 3.75rem; padding: var(--space-xs) var(--space-sm); box-shadow: -1px -1px 0 var(--color-rule); font-variant-numeric: tabular-nums; }
-.storestatus__state { min-width: 0; overflow-wrap: anywhere; font-size: var(--text-sm); color: var(--color-ink-2); }
+.storestatus__item { position: relative; display: flex; flex-direction: column; justify-content: flex-start; gap: var(--space-3xs); min-width: 0; padding: var(--space-xs) var(--space-sm); box-shadow: -1px -1px 0 var(--color-rule); font-variant-numeric: tabular-nums; }
+/* Three lines are kept for the state from the start ("Temporarily unavailable" wraps in a narrow
+ * cell, then its "try after" line), so a state or detail arriving mid-stream never moves the page. */
+.storestatus__state { min-width: 0; min-height: calc(3 * 1.25rem); line-height: 1.25rem; overflow-wrap: anywhere; font-size: var(--text-sm); color: var(--color-ink-2); }
 /* "some pages failed", "try after 12:29 AM": its own line under the state, never cut off */
 .storestatus__detail { display: block; font-weight: 400; color: var(--color-muted); }
 .storestatus__item--ok .storestatus__state { font-weight: 500; color: var(--color-ink); }
@@ -196,6 +198,7 @@
 .copylink__field { flex: 1 1 auto; width: auto; font-size: var(--text-sm); }
 .results__note { display: flex; flex-wrap: wrap; gap: 0 var(--space-md); font-size: var(--text-sm); color: var(--color-muted); font-variant-numeric: tabular-nums; }
 .results__note a { color: var(--color-ink); text-decoration-color: var(--color-accent); }
+.rtiers { display: contents; } /* ResultTiers' wrapper: the grids stay direct flow children */
 .results__more { display: flex; justify-content: center; padding-block: var(--space-md); }
 .results__divider { display: grid; gap: var(--space-2xs); padding-top: var(--space-md); border-top: var(--border); }
 .results__divider h3 { font-size: var(--text-xl); }
