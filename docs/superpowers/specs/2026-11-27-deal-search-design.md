@@ -334,3 +334,10 @@ This supersedes "Runs locally only".
   - A backup script for the DB volume.
   - An update procedure: `git pull` then `docker compose up -d --build`.
 - **Datacenter-IP risk:** noon and SHEIN may block VPS IPs. The UI already shows "blocked"; this is documented.
+
+### Update (owner, 2026-11-27): hosted on a local Proxmox server on the LAN, not a cloud VPS
+- **Host:** a Debian 12 VM on Proxmox (recommended 2 vCPU, 4 GB RAM, 20 GB disk), running Docker plus docker compose. A VM is preferred over LXC so Chrome and Xvfb run without extra privileges.
+- **Network:** LAN only, through the home Saudi residential IP, so the stores serve KSA storefronts. The app container publishes port 3000 on the VM's LAN address. `APP_HOSTS` lists the VM IP and an optional LAN hostname (for example `deals.lan`). Caddy is optional and LAN-only: HTTP by default, or Caddy with its internal CA for LAN HTTPS. There is no public exposure and no login.
+- **Rate limits and caps** stay as above.
+- **The image stays the same:** Node 24, Chrome stable and Xvfb. It has a persistent volume, `/api/health`, restart `unless-stopped`, graceful Chrome shutdown, and a backup script. Proxmox VM backups also cover the volume.
+- **Docs:** create the VM, install Docker, clone, configure `.env`, run `docker compose up -d`, then cover updates, backups, logs, and troubleshooting (a store blocked, or Chrome not starting).
