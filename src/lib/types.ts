@@ -1,3 +1,5 @@
+import type { AaResult } from "./aa";
+
 export type Product = {
   site: string;
   id: string;
@@ -41,5 +43,7 @@ export type SiteAdapter = {
     variants: string[],
   ): { op: string; args: Record<string, string> }[];
   normalizeSearchItem(raw: unknown): Product | null;
+  /** Optional custom executor (e.g. Playwright); default is api-anything via aaCall. */
+  runCall?(call: { op: string; args: Record<string, string> }): Promise<AaResult>;
   fetchDetail(p: Product, queryTokens: string[][]): Promise<Product>;
 };
