@@ -87,6 +87,18 @@ export function highlightParts(text: string, typed: string): { text: string; typ
   return parts.filter((p) => p.text !== "");
 }
 
+/** Identity of an option across list updates (a recent and a suggestion with the same text differ). */
+export const optionKey = (o: SuggestOption): string => `${o.recent ? "r" : "s"}:${o.value}`;
+
+/**
+ * Index of the highlighted option in the current list, or -1 when it is no longer there. The
+ * highlight is tracked by option, not by position: when suggestions land after an arrow press,
+ * Enter must never select an item the user did not highlight.
+ */
+export function activeIndex(options: SuggestOption[], key: string | null): number {
+  return key === null ? -1 : options.findIndex((o) => optionKey(o) === key);
+}
+
 export type ComboState = { open: boolean; active: number; count: number };
 export type ComboAction =
   | { type: "none" }

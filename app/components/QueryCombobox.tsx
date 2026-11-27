@@ -5,11 +5,13 @@ import {
   DEBOUNCE_MS,
   MIN_SUGGEST_CHARS,
   RECENTS_KEY,
+  activeIndex,
   addRecent,
   buildOptions,
   comboKey,
   highlightParts,
   parseRecents,
+  optionKey,
   removeRecent,
 } from "@/src/lib/suggest-ui";
 
@@ -55,7 +57,8 @@ function ClockIcon() {
 
 export default function QueryCombobox({ value, onChange, onSubmit, loading, invalid, describedBy }: Props) {
   const [open, setOpen] = useState(false);
-  const [active, setActive] = useState(-1);
+  // Highlighted option by identity, so a list update never moves the highlight onto another item.
+  const [activeKey, setActiveKey] = useState<string | null>(null);
   // Recents only render while the list is open (never on the server pass), so reading storage
   // in the initializer cannot cause a hydration mismatch.
   const [recents, setRecents] = useState<string[]>(() => (typeof window === "undefined" ? [] : readRecents()));
@@ -102,7 +105,8 @@ export default function QueryCombobox({ value, onChange, onSubmit, loading, inva
   );
   const options = useMemo(() => buildOptions(recents, remoteItems, value), [recents, remoteItems, value]);
   const shown = open && options.length > 0;
-  const activeIdx = shown && active < options.length ? active : -1;
+  const activeIdx = shown ? activeIndex(options, activeKey) : -1;
+  const setActive = (i: number) => setActiveKey(i >= 0 && options[i] ? optionKey(options[i]) : null);
 
   const close = () => {
     setOpen(false);
@@ -128,7 +132,7 @@ export default function QueryCombobox({ value, onChange, onSubmit, loading, inva
     if (!form) return;
     const onFormSubmit = () => {
       setOpen(false);
-      setActive(-1);
+      setActiveKey(null);
       if (valueRef.current.trim()) rememberRef.current(valueRef.current);
     };
     form.addEventListener("submit", onFormSubmit);
@@ -216,7 +220,7 @@ export default function QueryCombobox({ value, onChange, onSubmit, loading, inva
         {shown &&
           options.map((o, i) => (
             <li
-              key={`${o.recent ? "r" : "s"}:${o.value}`}
+              key={optionKey(o)}
               id={optId(i)}
               role="option"
               aria-selected={i === activeIdx}

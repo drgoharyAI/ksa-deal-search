@@ -3,6 +3,8 @@ import {
   addRecent,
   buildOptions,
   comboKey,
+  activeIndex,
+  optionKey,
   highlightParts,
   matchRecents,
   parseRecents,
@@ -98,5 +100,22 @@ describe("comboKey (keyboard model)", () => {
   it("Shift+Delete removes the highlighted option; plain Delete edits text", () => {
     expect(comboKey("Delete", st(true, 1), true)).toEqual({ type: "remove", index: 1 });
     expect(comboKey("Delete", st(true, 1))).toEqual({ type: "none" });
+  });
+});
+
+describe("activeIndex: the highlight follows the option, not its position (final review M7)", () => {
+  const opts = (vals: string[]) => vals.map((value) => ({ value, recent: false }));
+  it("finds the highlighted option after the list changes", () => {
+    const before = opts(["airpods", "air fryer"]);
+    const key = optionKey(before[1]);
+    expect(activeIndex(opts(["airpods pro", "airpods", "air fryer"]), key)).toBe(2);
+  });
+  it("is -1 when the highlighted option is gone (Enter then submits the typed text)", () => {
+    const key = optionKey(opts(["airpods", "air fryer"])[1]);
+    expect(activeIndex(opts(["air purifier", "airtag"]), key)).toBe(-1);
+    expect(activeIndex(opts(["airpods"]), null)).toBe(-1);
+  });
+  it("a recent and a suggestion with the same text are different options", () => {
+    expect(optionKey({ value: "airpods", recent: true })).not.toBe(optionKey({ value: "airpods", recent: false }));
   });
 });
