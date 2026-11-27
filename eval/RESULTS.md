@@ -32,3 +32,10 @@ recall >= 0.8, cheapest-relevant-first >= 0.9.
 ## Rounds
 
 (none yet: labels pending, Task 12 Step 3)
+
+## Round 0: baseline (2026-11-27)
+Labels: 15/15 queries, ~7,500 products. Sorted by price.
+| p@10 | acc@10 | wrong@10 | recall | cheapest-first |
+|---|---|---|---|---|
+| 41% | 39% | 4% | 92% | 33% |
+Worst: samsung galaxy s24 (p@10 0%, accessories 100%), ps5 controller (accessories 90%), mechanical keyboard (p@10 10%), robot vacuum (accessories 80%).

@@ -9,6 +9,8 @@ Label every normalized product recorded for a query. Use the key `<site>:<id>`.
 
 Edge rules:
 - A clone or "replica" that claims to be the named brand/model ("i16 pro max smartphone") → wrong-model.
+- Model families: "iphone 16" → 16 / 16 Plus / 16 Pro / 16 Pro Max all count as relevant (16e is wrong-model). "samsung galaxy s24" → S24 / S24+ / S24 Ultra count as relevant (S24 FE is wrong-model).
+- A title that is only a brand word ("Samsung", "Apple") → off-topic.
 - Ambiguous titles: decide from the words in the title alone. Don't guess from price.
 - "anc earbuds" means true-wireless earbuds with active noise cancelling. Wired earphones → off-topic. Earbuds without ANC → wrong-model.
 - "mechanical keyboard" → keyboards with mechanical switches. Keycaps, switches, tools → accessory. Membrane keyboards → wrong-model.

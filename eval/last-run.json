@@ -1,5 +1,5 @@
 {
-  "at": "2026-11-27T01:31:01.002Z",
+  "at": "2026-11-27T01:45:28.393Z",
   "queries": [
     {
       "query": "anc earbuds under 300",
@@ -56,78 +56,88 @@
       "recordedItems": 682,
       "results": 345,
       "missingCalls": [],
-      "labelled": false,
-      "metrics": null,
+      "labelled": true,
+      "metrics": {
+        "top": 10,
+        "precisionAt10": 0.8,
+        "accessoryAt10": 0,
+        "wrongModelAt10": 0.2,
+        "unlabeledAt10": 0,
+        "recall": 0.8168674698795181,
+        "relevantRecorded": 415,
+        "relevantKept": 339,
+        "cheapestRelevantFirst": false
+      },
       "top": [
         {
           "key": "trendyol-sa:1174016929",
           "store": "trendyol-sa",
           "price": 8.32,
           "title": "A high-quality wireless earbud that delivers a superior stereo sound experience.",
-          "label": null
+          "label": "wrong-model"
         },
         {
           "key": "aliexpress:1005012229570528",
           "store": "aliexpress",
           "price": 9.24,
           "title": "Wireless Bluetooth 5.4 Earbuds Long-Lasting TWS Noise Cancellation Headphones Touch Control Mini Earphones With Mic for Music",
-          "label": null
+          "label": "relevant"
         },
         {
           "key": "aliexpress:1005007925093526",
           "store": "aliexpress",
           "price": 9.75,
           "title": "895B TWS Wireless Earbuds Noise Canceling Waterproof Ear Buds In-Ear Stereo Headphones with LED Display Charging Case",
-          "label": null
+          "label": "relevant"
         },
         {
           "key": "aliexpress:1005008932971097",
           "store": "aliexpress",
           "price": 10.91,
           "title": "TWS Wireless Bluetooth Earphones ANC Noise Reduction Earbuds With Microphone Exercise Music Headphones",
-          "label": null
+          "label": "relevant"
         },
         {
           "key": "aliexpress:1005007097095373",
           "store": "aliexpress",
           "price": 10.91,
           "title": "TWS Pro60 Bluetooth Earphones Wireless Headphones Noise Cancelling Headset with Mic HiFi Stereo Sports Earbuds for Smartphones",
-          "label": null
+          "label": "relevant"
         },
         {
           "key": "aliexpress:1005007568176613",
           "store": "aliexpress",
           "price": 11.25,
           "title": "E6S Wireless Bluetooth Earphones TWS Bluetooth Headset Wireless Earbuds Noise Cancelling Earphones with Microphone Headphones",
-          "label": null
+          "label": "relevant"
         },
         {
           "key": "aliexpress:1005013556532145",
           "store": "aliexpress",
           "price": 11.7,
           "title": "Pro5S wireless Bluetooth Earphones Stereo Headphones in-ear high-fidelity earbuds noise-cancelling mini sports headphones",
-          "label": null
+          "label": "relevant"
         },
         {
           "key": "aliexpress:1005006237174179",
           "store": "aliexpress",
           "price": 12.2,
           "title": "NEW A6S TWS Wireless Bluetooth Headphones Sport in Ear Earphone With Microphone Mini Pods Earbuds Noise Cancelling Headsets",
-          "label": null
+          "label": "relevant"
         },
         {
           "key": "trendyol-sa:1029696897",
           "store": "trendyol-sa",
           "price": 13.15,
           "title": "M5 sports Bluetooth 5.0 Wireless Earbuds Magnetic In-Ear Headset with Mic",
-          "label": null
+          "label": "wrong-model"
         },
         {
           "key": "aliexpress:1005012742101670",
           "store": "aliexpress",
           "price": 13.46,
           "title": "Bluetooth Earbuds Wireless Earphones Bluetooth Earphones Bluetooth Headphones with ANC Improve Focus in Noisy Environments",
-          "label": null
+          "label": "relevant"
         }
       ]
     },
@@ -186,78 +196,88 @@
       "recordedItems": 488,
       "results": 96,
       "missingCalls": [],
-      "labelled": false,
-      "metrics": null,
+      "labelled": true,
+      "metrics": {
+        "top": 10,
+        "precisionAt10": 0,
+        "accessoryAt10": 0.9,
+        "wrongModelAt10": 0,
+        "unlabeledAt10": 0,
+        "recall": 1,
+        "relevantRecorded": 157,
+        "relevantKept": 157,
+        "cheapestRelevantFirst": false
+      },
       "top": [
         {
           "key": "aliexpress:1005012700711804",
           "store": "aliexpress",
           "price": 3.47,
           "title": "Special specification for special needs customers only 17 16 15 14 13 Pro Max Plus please do not order directly without contact",
-          "label": null
+          "label": "off-topic"
         },
         {
           "key": "trendyol-sa:984511278",
           "store": "trendyol-sa",
           "price": 10.89,
           "title": "Tempered glass camera protection for iPhone 16 plus",
-          "label": null
+          "label": "accessory"
         },
         {
           "key": "trendyol-sa:899387116",
           "store": "trendyol-sa",
           "price": 12.42,
           "title": "white-1pcs 3-in-1 USB-C SD TF Card Reader, High-Speed Data Transfer, Plug & Play for iPhone 16 15, f",
-          "label": null
+          "label": "accessory"
         },
         {
           "key": "trendyol-sa:1184251959",
           "store": "trendyol-sa",
           "price": 13.26,
           "title": "B-1PCS Mobile Phone Speaker Charging Port Cleaning Set Dust Plug for iPhone 17 16 15 Earphones Clean",
-          "label": null
+          "label": "accessory"
         },
         {
           "key": "trendyol-sa:1243548956",
           "store": "trendyol-sa",
           "price": 13.37,
           "title": "B-1PCS Mobile Phone Speaker Charging Port Cleaning Set Dust Plug for iPhone 16 15 14 Earphones Clean",
-          "label": null
+          "label": "accessory"
         },
         {
           "key": "trendyol-sa:1243514291",
           "store": "trendyol-sa",
           "price": 13.42,
           "title": "B-1PCS Metal USB C Dust Plug for IPhone 16 15 Pro 14 17 Samsung Xiaomi Android Charging Port Protect",
-          "label": null
+          "label": "accessory"
         },
         {
           "key": "trendyol-sa:1230560461",
           "store": "trendyol-sa",
           "price": 13.43,
           "title": "1Pcs 1-12PCS Retractable Speaker Charging Port Cleaning Set Dust Plug for iPhone 17 16 Earphones Cle",
-          "label": null
+          "label": "accessory"
         },
         {
           "key": "trendyol-sa:1137008112",
           "store": "trendyol-sa",
           "price": 15.84,
           "title": "For iPhone 7-14 For Apple iPhone 17 16 15 14 13 11 12 Pro Max Plus In-ear Lightning 3.5MM Wired Ear",
-          "label": null
+          "label": "accessory"
         },
         {
           "key": "trendyol-sa:1184167852",
           "store": "trendyol-sa",
           "price": 22.05,
           "title": "iPhone17 Pro Navy With Box Luxury Tech Woven for Magsafe Magnetic Phone Case for Iphone 18 17 Air 16",
-          "label": null
+          "label": "accessory"
         },
         {
           "key": "aliexpress:1005011651372808",
           "store": "aliexpress",
           "price": 32.99,
           "title": "WYLIE for IPhone 16 Built-in (MEP) Integrated Card Slot Finished Product Dual Card+eSIM OTA Upgrade 5G Signal US Version Only",
-          "label": null
+          "label": "accessory"
         }
       ]
     },
@@ -269,236 +289,1825 @@
           "store": "aliexpress",
           "complete": true,
           "calls": 3
+        },
+        {
+          "store": "amazon-sa",
+          "complete": true,
+          "calls": 4
+        },
+        {
+          "store": "jarir",
+          "complete": true,
+          "calls": 4
+        },
+        {
+          "store": "noon-sa",
+          "complete": true,
+          "calls": 2
+        },
+        {
+          "store": "trendyol-sa",
+          "complete": true,
+          "calls": 4
         }
       ],
       "statuses": [
         {
           "site": "aliexpress",
           "status": "ok"
+        },
+        {
+          "site": "amazon-sa",
+          "status": "ok"
+        },
+        {
+          "site": "jarir",
+          "status": "ok"
+        },
+        {
+          "site": "noon-sa",
+          "status": "ok"
+        },
+        {
+          "site": "trendyol-sa",
+          "status": "ok"
         }
       ],
-      "recordedItems": 124,
-      "results": 110,
+      "recordedItems": 534,
+      "results": 327,
       "missingCalls": [],
-      "labelled": false,
-      "metrics": null,
+      "labelled": true,
+      "metrics": {
+        "top": 10,
+        "precisionAt10": 1,
+        "accessoryAt10": 0,
+        "wrongModelAt10": 0,
+        "unlabeledAt10": 0,
+        "recall": 0.8743315508021391,
+        "relevantRecorded": 374,
+        "relevantKept": 327,
+        "cheapestRelevantFirst": true
+      },
       "top": [
-        {
-          "key": "aliexpress:1005005912594648",
-          "store": "aliexpress",
-          "price": 4.24,
-          "title": "USB C Cable Baseus Type Baseus USB Type C To USB C Cable For iPhone 18 17 100W/5A PD Fast Charging Charger Cord For Macbook Xiaomi Samsung Type-C Cable",
-          "label": null
-        },
-        {
-          "key": "aliexpress:1005006510589628",
-          "store": "aliexpress",
-          "price": 4.24,
-          "title": "USB C Cable 100W Baseus 100W Type C To USB C Cable For iPhone 18 17 16 Fast Charging Charger Cord For Macbook iPad Samsung Xiaomi Fast USB C Wire",
-          "label": null
-        },
-        {
-          "key": "aliexpress:4000802127824",
-          "store": "aliexpress",
-          "price": 4.24,
-          "title": "USB C Cable Baseus 100W/5A USB C To USB Type C Cable For iPhone 17 16 PD Fast Charging Charger Cord For Macbook Samsung Xiaomi Type-C Cable",
-          "label": null
-        },
         {
           "key": "aliexpress:1005001535435098",
           "store": "aliexpress",
           "price": 4.24,
           "title": "USB C to USB C Cable 3m 100W, WOTOBE Long 10ft USB Type-C 5A E Mark Fast Charging Nylon Braided Cord Compatible MacBook Pro iPad",
-          "label": null
+          "label": "relevant"
         },
         {
           "key": "aliexpress:1005008308756135",
           "store": "aliexpress",
           "price": 4.24,
           "title": "Essager 100W Type C To Type C Cable For IPhone16 15 Xiaomi Samsung Huawei PD Fast Charging For Macbook Tablet Laptop LED Cable",
-          "label": null
-        },
-        {
-          "key": "aliexpress:1005002023404248",
-          "store": "aliexpress",
-          "price": 4.24,
-          "title": "XIAOMI Original Usb Type C Cable 120W 100W 90W 67W 45W Turbo Fast Charger Mi 17 15 14 13 12 T Pro Ultra Poco F8 X8 X7 Redmi Note",
-          "label": null
-        },
-        {
-          "key": "aliexpress:1005013255305743",
-          "store": "aliexpress",
-          "price": 4.91,
-          "title": "Toocki 6A USB To Type C Cable for Huawei Xiaomi PD 100W Fast Charging Charger USB C Data Cord Quick Charge for Samsung Oneplus",
-          "label": null
+          "label": "relevant"
         },
         {
           "key": "aliexpress:1005013266158674",
           "store": "aliexpress",
           "price": 4.91,
           "title": "Toocki 100W Type C to USB C Cable PD 3.0 Quick Charge 4.0 Fast Charging Type C to Type C for iPhone 15 Macbook Samsung Xiaomi",
-          "label": null
+          "label": "relevant"
         },
         {
           "key": "aliexpress:1005008326414705",
           "store": "aliexpress",
           "price": 4.91,
           "title": "3PCS 100W 6A USB Type C USB Cable Super Fast Charing Line for Xiaomi Samsung Huawei Honor Quick Charge USB C Cables Data Cord",
-          "label": null
+          "label": "relevant"
         },
         {
           "key": "aliexpress:1005013652290787",
           "store": "aliexpress",
           "price": 4.99,
           "title": "1-2Pcs Burgundy Braided Cord 100W Quick Charging Data Cord 90 Degree USB Type C Cable for iPhone Duo 18 Pro Max 17 16 Samsung",
-          "label": null
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005013478419574",
+          "store": "aliexpress",
+          "price": 5.39,
+          "title": "PD 100W USB C Fast Charging Cable Right Angle 90 Degree Type C Data Cord Mobile Phone Quick Charge Data Cable for Samsung Xiaomi",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005006150193514",
+          "store": "aliexpress",
+          "price": 5.45,
+          "title": "Essager 7A Type C USB Cable Wire For Samsung S10 Xiaomi Huawei P30 P40 Pro Mobile Phone 100W Fast Charging USB Type C Data Cord",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005013524832728",
+          "store": "aliexpress",
+          "price": 5.46,
+          "title": "2/1PCS Burgundy Braided 90° Elbow Type C To Type C Cable 100W Fast Charging Data Transfer Cord for iPhone 18 ProMax 17 16 15 Duo",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005013524900682",
+          "store": "aliexpress",
+          "price": 5.51,
+          "title": "100W USB A/C To Type C Cable 90 Degree Data Cable for IPad MacBook for iPhone 18 Pro Max Samsung Xiaomi Fast Charging Data Cord",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005012636954000",
+          "store": "aliexpress",
+          "price": 5.52,
+          "title": "Laptop Mobile Phone 20V/5A QC4 Short USB C Cable Fast Charging Cable PD 100W Type C Data Cord",
+          "label": "relevant"
         }
       ]
     },
     {
       "query": "air fryer",
       "slug": "air-fryer",
-      "stores": [],
-      "statuses": [],
-      "recordedItems": 0,
-      "results": 0,
+      "stores": [
+        {
+          "store": "aliexpress",
+          "complete": true,
+          "calls": 2
+        },
+        {
+          "store": "amazon-sa",
+          "complete": true,
+          "calls": 2
+        },
+        {
+          "store": "jarir",
+          "complete": true,
+          "calls": 2
+        },
+        {
+          "store": "noon-sa",
+          "complete": true,
+          "calls": 2
+        },
+        {
+          "store": "trendyol-sa",
+          "complete": true,
+          "calls": 2
+        }
+      ],
+      "statuses": [
+        {
+          "site": "aliexpress",
+          "status": "ok"
+        },
+        {
+          "site": "amazon-sa",
+          "status": "ok"
+        },
+        {
+          "site": "jarir",
+          "status": "ok"
+        },
+        {
+          "site": "noon-sa",
+          "status": "ok"
+        },
+        {
+          "site": "trendyol-sa",
+          "status": "ok"
+        }
+      ],
+      "recordedItems": 465,
+      "results": 370,
       "missingCalls": [],
-      "labelled": false,
-      "metrics": null,
-      "top": []
+      "labelled": true,
+      "metrics": {
+        "top": 10,
+        "precisionAt10": 0.2,
+        "accessoryAt10": 0.8,
+        "wrongModelAt10": 0,
+        "unlabeledAt10": 0,
+        "recall": 0.9168975069252078,
+        "relevantRecorded": 361,
+        "relevantKept": 331,
+        "cheapestRelevantFirst": false
+      },
+      "top": [
+        {
+          "key": "trendyol-sa:924804936",
+          "store": "trendyol-sa",
+          "price": 8.55,
+          "title": "50 Piece Air Fryer Round Nonstick Steamer Pads High Quality Parchment Paper for Baking",
+          "label": "accessory"
+        },
+        {
+          "key": "trendyol-sa:982411288",
+          "store": "trendyol-sa",
+          "price": 9.08,
+          "title": "50pcs 16cm square Air Fryer Paper Airfryer Disposable Containers Airfryer Baking Paper Non-Stick Dis",
+          "label": "accessory"
+        },
+        {
+          "key": "amazon-sa:B09PHRSWH1",
+          "store": "amazon-sa",
+          "price": 10.5,
+          "title": "Air Fryer Disposable Paper Liner, 100PCS Non-stick Disposable Liners, Baking Paper for Air Fryer Oil-proof, Water-proof, Food Grade Parchment for Baking Roasting Microwave (100Pcs-6.3 inch)",
+          "label": "relevant"
+        },
+        {
+          "key": "amazon-sa:B0CFVLS2VT",
+          "store": "amazon-sa",
+          "price": 10.84,
+          "title": "SKY-TOUCH 100 PCS Air Fryer Disposable Paper Liner, Baking Paper for Air Fryer Oil-proof, Water-proof, Food Grade Parchment, Square Baking Paper for Air Fryer, 16cm/6.3inch",
+          "label": "relevant"
+        },
+        {
+          "key": "trendyol-sa:886470355",
+          "store": "trendyol-sa",
+          "price": 13.7,
+          "title": "black 1pcs Air Fryer Silicone Liners Square Airfryer Liners Reusable Air Fryer Accessories Replaceme",
+          "label": "accessory"
+        },
+        {
+          "key": "trendyol-sa:956744740",
+          "store": "trendyol-sa",
+          "price": 14.66,
+          "title": "black Silicone Air Fryer Pot Tray Food Safe Reusable Square BBQ Barbecue Pad Plate Airfryer Oven Bak",
+          "label": "accessory"
+        },
+        {
+          "key": "trendyol-sa:1235627613",
+          "store": "trendyol-sa",
+          "price": 14.78,
+          "title": "Square 10pcs 10-200pcs Disposable Air Fryer Paper Non-Stick Kitchen Baking Airfryer Mat Oilproof Mic",
+          "label": "accessory"
+        },
+        {
+          "key": "trendyol-sa:1102633221",
+          "store": "trendyol-sa",
+          "price": 15.3,
+          "title": "1PCS For Air Fryer Accessories KL50-G3 Timer Switch Knob Button D Type Timer Semi-circular Shaft Swi",
+          "label": "accessory"
+        },
+        {
+          "key": "trendyol-sa:956745318",
+          "store": "trendyol-sa",
+          "price": 15.39,
+          "title": "only oil brush 2 in 1 Pour Spray Sprayer Kitchen Fryer Air Spray Oil Dispenser Bottle for Olive Oil",
+          "label": "accessory"
+        },
+        {
+          "key": "trendyol-sa:1235628771",
+          "store": "trendyol-sa",
+          "price": 15.51,
+          "title": "Black Air Fryer Magnet Silicone Buckle High-temperature Kitchen Air Fryer Parchment Paper Liners Pre",
+          "label": "accessory"
+        }
+      ]
     },
     {
       "query": "apple watch",
       "slug": "apple-watch",
-      "stores": [],
-      "statuses": [],
-      "recordedItems": 0,
-      "results": 0,
+      "stores": [
+        {
+          "store": "aliexpress",
+          "complete": true,
+          "calls": 2
+        },
+        {
+          "store": "amazon-sa",
+          "complete": true,
+          "calls": 2
+        },
+        {
+          "store": "jarir",
+          "complete": true,
+          "calls": 2
+        },
+        {
+          "store": "noon-sa",
+          "complete": true,
+          "calls": 2
+        },
+        {
+          "store": "trendyol-sa",
+          "complete": true,
+          "calls": 2
+        }
+      ],
+      "statuses": [
+        {
+          "site": "aliexpress",
+          "status": "ok"
+        },
+        {
+          "site": "amazon-sa",
+          "status": "ok"
+        },
+        {
+          "site": "jarir",
+          "status": "ok"
+        },
+        {
+          "site": "noon-sa",
+          "status": "ok"
+        },
+        {
+          "site": "trendyol-sa",
+          "status": "ok"
+        }
+      ],
+      "recordedItems": 475,
+      "results": 261,
       "missingCalls": [],
-      "labelled": false,
-      "metrics": null,
-      "top": []
+      "labelled": true,
+      "metrics": {
+        "top": 10,
+        "precisionAt10": 0,
+        "accessoryAt10": 0.3,
+        "wrongModelAt10": 0,
+        "unlabeledAt10": 0,
+        "recall": 1,
+        "relevantRecorded": 158,
+        "relevantKept": 158,
+        "cheapestRelevantFirst": false
+      },
+      "top": [
+        {
+          "key": "trendyol-sa:1197657083",
+          "store": "trendyol-sa",
+          "price": 5.3,
+          "title": "Premium Braided Leather Solo Loop for Apple Watch (44/42mm, S) - Red",
+          "label": "accessory"
+        },
+        {
+          "key": "aliexpress:1005007260133007",
+          "store": "aliexpress",
+          "price": 6.19,
+          "title": "D20 Smart Watch Sport Fitness Tracker Pedometer Smartwatch for Men Women Digital Wristwatch Y68 Pro6 Gift",
+          "label": "off-topic"
+        },
+        {
+          "key": "aliexpress:1005005768028640",
+          "store": "aliexpress",
+          "price": 6.89,
+          "title": "Health Monitor Smart Watch Y68 Men Sports Watches Women Fitness Tracker Bracelet Steps Calorie Bluetooth Wrist Watch D20 Clock",
+          "label": "off-topic"
+        },
+        {
+          "key": "amazon-sa:B0G9264Q6M",
+          "store": "amazon-sa",
+          "price": 7.41,
+          "title": "Braided Solo Loop Compatible with Apple Watch 38mm 40mm 41mm 42mm 44mm 45mm 46mm Ultra/2 49mm Men/Women,Stretchy Nylon Sport wristband Strap for iWatch Bands series 11/10/9/8/7/6 5/4/3/SE",
+          "label": "accessory"
+        },
+        {
+          "key": "amazon-sa:B0GDXVMLZD",
+          "store": "amazon-sa",
+          "price": 8.79,
+          "title": "Mesh Loop Compatible with Apple Watch Bands 40mm 41mm 38mm 42mm 46mm Women Men, Stainless Steel Metal Magnetic Strap for iWatch Series 10 9 8 7 6 5 4 3 2 1 Ultra SE",
+          "label": "accessory"
+        },
+        {
+          "key": "aliexpress:1005008061144294",
+          "store": "aliexpress",
+          "price": 8.91,
+          "title": "Smart Watch 116Plus D13 Y68 Sport Wristband Running Fitness Monitor Track Heart Rate Message Remind Men Smartwatch Woman Clock",
+          "label": "off-topic"
+        },
+        {
+          "key": "aliexpress:1005005017254589",
+          "store": "aliexpress",
+          "price": 10.29,
+          "title": "Multifunctional Smart Watch Men Women Bluetooth Connected Phone Music Fitness Sports Bracelet Sleep Monitor Y68 Smartwatch D20",
+          "label": "off-topic"
+        },
+        {
+          "key": "aliexpress:1005007517165983",
+          "store": "aliexpress",
+          "price": 12,
+          "title": "Smartwatch Men Women Wristwatches Smart Watch Message Fitness Monitor Bracelet Birthday Gift Electronic Clock For Android IOS",
+          "label": "off-topic"
+        },
+        {
+          "key": "aliexpress:1005007691876886",
+          "store": "aliexpress",
+          "price": 12.59,
+          "title": "Smart Watch Sport Wristband Fitness Monitoring Track Heart Rate Call and Message Remind Men Smartwatch Woman 116 Plus Clock D13",
+          "label": "off-topic"
+        },
+        {
+          "key": "aliexpress:1005008151952563",
+          "store": "aliexpress",
+          "price": 19.09,
+          "title": "Smart Watch For Women Men Wristwatch Bluetooth Connected Phone Music Player Fitness Sport Bracelet Sleep Monitor Digital Watches",
+          "label": "off-topic"
+        }
+      ]
     },
     {
       "query": "power bank 20000mah",
       "slug": "power-bank-20000mah",
-      "stores": [],
-      "statuses": [],
-      "recordedItems": 0,
-      "results": 0,
+      "stores": [
+        {
+          "store": "aliexpress",
+          "complete": true,
+          "calls": 3
+        },
+        {
+          "store": "amazon-sa",
+          "complete": true,
+          "calls": 3
+        },
+        {
+          "store": "jarir",
+          "complete": true,
+          "calls": 3
+        },
+        {
+          "store": "noon-sa",
+          "complete": true,
+          "calls": 2
+        },
+        {
+          "store": "trendyol-sa",
+          "complete": true,
+          "calls": 3
+        }
+      ],
+      "statuses": [
+        {
+          "site": "aliexpress",
+          "status": "ok"
+        },
+        {
+          "site": "amazon-sa",
+          "status": "ok"
+        },
+        {
+          "site": "jarir",
+          "status": "ok"
+        },
+        {
+          "site": "noon-sa",
+          "status": "ok"
+        },
+        {
+          "site": "trendyol-sa",
+          "status": "ok"
+        }
+      ],
+      "recordedItems": 554,
+      "results": 221,
       "missingCalls": [],
-      "labelled": false,
-      "metrics": null,
-      "top": []
+      "labelled": true,
+      "metrics": {
+        "top": 10,
+        "precisionAt10": 1,
+        "accessoryAt10": 0,
+        "wrongModelAt10": 0,
+        "unlabeledAt10": 0,
+        "recall": 0.625615763546798,
+        "relevantRecorded": 406,
+        "relevantKept": 254,
+        "cheapestRelevantFirst": false
+      },
+      "top": [
+        {
+          "key": "aliexpress:1005013641902818",
+          "store": "aliexpress",
+          "price": 17.5,
+          "title": "Mini Power Bank 20000mAh Portable Fast Charging External Battery for iPhone12 13 14 15 Huawei and Xiaomi 2-in-1 Type-C Lightning",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005013295367688",
+          "store": "aliexpress",
+          "price": 21.69,
+          "title": "20000mAh Mini Power Bank External Battery Plug Play Power Bank Fast Charging For iPhone Samsung Huawei Xiaomi Portable Powerbank",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005013242327409",
+          "store": "aliexpress",
+          "price": 23.99,
+          "title": "20000mAh Fast Charging Mini Power Bank Large Capacity Supply Multiple Interfaces For IPhone 14 15 16 17 18 Samsung Huawei Xiaomi",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005009925532791",
+          "store": "aliexpress",
+          "price": 31.49,
+          "title": "Portable Power Bank 20000mAh USB Fast Charging Powerbank for iPhone 16 15 8 pro max Samsung Huawei Xiaomi External Spare Battery",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005012205832690",
+          "store": "aliexpress",
+          "price": 31.59,
+          "title": "20000mAh Capacity Power Bank Magnetic Wireless 22.5W Ultra Super Fast Charging Powerbank For Iphone Samsung Huawei and Xiaomi",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005009725003106",
+          "store": "aliexpress",
+          "price": 32.19,
+          "title": "Magnetic Wireless 20000mAh Power Bank Portable External Battery for IPhone 16 15 14 13 Samsung S24 Xiaomi Fast Charge Powerbank",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005013195742439",
+          "store": "aliexpress",
+          "price": 32.39,
+          "title": "20000mAh Solar Power Bank Large Capacity Battery USB 4 in1 Fast Charging LED Light Outdoor Power Bank For iPhone Samsung Xiaomi",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005009723801913",
+          "store": "aliexpress",
+          "price": 32.49,
+          "title": "20000mAh Portable Large Capacity Magnetic Wireless Charging Power Bank with 4 Power Cords for Samsung,Huawei, Xiaomi, and iPhone",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005010641025951",
+          "store": "aliexpress",
+          "price": 33.29,
+          "title": "20000mAh Power Bank with Makeup Mirror Portable Charger Digital Display Power Bank External Battery for iPhone 17 Samsung Xiaomi",
+          "label": "relevant"
+        },
+        {
+          "key": "noon-sa:Z85ECCB5145CAB296831EZ",
+          "store": "noon-sa",
+          "price": 43.2,
+          "title": "20000mAh 20W Power Bank with Built-in Flashlight ,  Tablets, and More | Charge Multiple Devices Simultaneously | Compact, Convenient, and Travel-Friendly",
+          "label": "relevant"
+        }
+      ]
     },
     {
       "query": "mechanical keyboard -wired",
       "slug": "mechanical-keyboard-wired",
-      "stores": [],
-      "statuses": [],
-      "recordedItems": 0,
-      "results": 0,
+      "stores": [
+        {
+          "store": "aliexpress",
+          "complete": true,
+          "calls": 2
+        },
+        {
+          "store": "amazon-sa",
+          "complete": true,
+          "calls": 2
+        },
+        {
+          "store": "jarir",
+          "complete": true,
+          "calls": 2
+        },
+        {
+          "store": "noon-sa",
+          "complete": true,
+          "calls": 2
+        },
+        {
+          "store": "trendyol-sa",
+          "complete": true,
+          "calls": 2
+        }
+      ],
+      "statuses": [
+        {
+          "site": "aliexpress",
+          "status": "ok"
+        },
+        {
+          "site": "amazon-sa",
+          "status": "ok"
+        },
+        {
+          "site": "jarir",
+          "status": "ok"
+        },
+        {
+          "site": "noon-sa",
+          "status": "ok"
+        },
+        {
+          "site": "trendyol-sa",
+          "status": "ok"
+        }
+      ],
+      "recordedItems": 494,
+      "results": 221,
       "missingCalls": [],
-      "labelled": false,
-      "metrics": null,
-      "top": []
+      "labelled": true,
+      "metrics": {
+        "top": 10,
+        "precisionAt10": 0.1,
+        "accessoryAt10": 0.3,
+        "wrongModelAt10": 0,
+        "unlabeledAt10": 0,
+        "recall": 0.9936708860759493,
+        "relevantRecorded": 158,
+        "relevantKept": 157,
+        "cheapestRelevantFirst": false
+      },
+      "top": [
+        {
+          "key": "aliexpress:1005007096723667",
+          "store": "aliexpress",
+          "price": 4.24,
+          "title": "Mini USB Custom Mechanical Keyboard 2/4/6/7/8/9/12/16/24 Keys Gaming Keyboard Sayo Device Shortcut Programmable Keypad Keys New",
+          "label": "off-topic"
+        },
+        {
+          "key": "aliexpress:1005006589231888",
+          "store": "aliexpress",
+          "price": 4.24,
+          "title": "Compact Mechanical Gaming Keyboard with RGB Backlit Computer Keyboard Hot Swappable Keyboard for Windows Laptops and PC Gamers",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005006812527527",
+          "store": "aliexpress",
+          "price": 6.53,
+          "title": "1/2keys Mini Programable Keyboard RGB Gaming Keyboard Programming Keypad Mechanical Keyboard Red Shaft",
+          "label": "off-topic"
+        },
+        {
+          "key": "aliexpress:1005008393094549",
+          "store": "aliexpress",
+          "price": 7.53,
+          "title": "OSU Custom Mini Keypad 2 Key Keyboard Programming Macro Keyboard Copy Paste Cut HID Mechanical Keyboard DIY Keyboard",
+          "label": "off-topic"
+        },
+        {
+          "key": "aliexpress:1005007088963540",
+          "store": "aliexpress",
+          "price": 13.99,
+          "title": "One-key Shortcut Keyboard USB Custom Programmable Macro Mechanical Keyboard Hot Key Mouse One Key Button Mini Keypad",
+          "label": "off-topic"
+        },
+        {
+          "key": "trendyol-sa:1063344358",
+          "store": "trendyol-sa",
+          "price": 14.83,
+          "title": "black Universal 2-In-1 Multi-Purpose Mechanical Keyboard Key Cap Puller Keycap Shaft Remover Button",
+          "label": "accessory"
+        },
+        {
+          "key": "aliexpress:1005007604449188",
+          "store": "aliexpress",
+          "price": 14.91,
+          "title": "RGB 3 Keys Macro Programming Mini Keyboard for Photoshop Gaming Hotswap Programming Keypad Copy Paste Mini Button Macropad",
+          "label": "off-topic"
+        },
+        {
+          "key": "trendyol-sa:893563300",
+          "store": "trendyol-sa",
+          "price": 15.1,
+          "title": "Key Cap Puller 2 In 1 Multi-Purpose Mechanical Keyboard Key Cap Puller Universal Keycap Shaft Remove",
+          "label": "accessory"
+        },
+        {
+          "key": "aliexpress:1005007254591957",
+          "store": "aliexpress",
+          "price": 15.22,
+          "title": "1/2/3/4 Keys OUTEMU Red OSU Keypad Mini Macro Mechanical Keyboard Gaming Programmable Multimedia Control DIY Keyboard For CAD PS",
+          "label": "off-topic"
+        },
+        {
+          "key": "trendyol-sa:1063357777",
+          "store": "trendyol-sa",
+          "price": 15.85,
+          "title": "black 2 in 1 Key Switch Puller Keycaps Puller Unloading Wire Switch Mechanical Keyboard Removal Tool",
+          "label": "accessory"
+        }
+      ]
     },
     {
       "query": "gaming mouse",
       "slug": "gaming-mouse",
-      "stores": [],
-      "statuses": [],
-      "recordedItems": 0,
-      "results": 0,
+      "stores": [
+        {
+          "store": "aliexpress",
+          "complete": true,
+          "calls": 2
+        },
+        {
+          "store": "amazon-sa",
+          "complete": true,
+          "calls": 2
+        },
+        {
+          "store": "jarir",
+          "complete": true,
+          "calls": 2
+        },
+        {
+          "store": "noon-sa",
+          "complete": true,
+          "calls": 2
+        },
+        {
+          "store": "trendyol-sa",
+          "complete": true,
+          "calls": 2
+        }
+      ],
+      "statuses": [
+        {
+          "site": "aliexpress",
+          "status": "ok"
+        },
+        {
+          "site": "amazon-sa",
+          "status": "ok"
+        },
+        {
+          "site": "jarir",
+          "status": "ok"
+        },
+        {
+          "site": "noon-sa",
+          "status": "ok"
+        },
+        {
+          "site": "trendyol-sa",
+          "status": "ok"
+        }
+      ],
+      "recordedItems": 501,
+      "results": 425,
       "missingCalls": [],
-      "labelled": false,
-      "metrics": null,
-      "top": []
+      "labelled": true,
+      "metrics": {
+        "top": 10,
+        "precisionAt10": 0.6,
+        "accessoryAt10": 0.2,
+        "wrongModelAt10": 0,
+        "unlabeledAt10": 0,
+        "recall": 0.9905882352941177,
+        "relevantRecorded": 425,
+        "relevantKept": 421,
+        "cheapestRelevantFirst": true
+      },
+      "top": [
+        {
+          "key": "aliexpress:1005008276391096",
+          "store": "aliexpress",
+          "price": 4.24,
+          "title": "Bluetooth 5.2 Mouse RGB 2.4G Wireless Mouse Dual-Mode Gaming Mouse 6 Buttons Silent Mouse For MacBook Tablet Laptops Computer",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005006938870812",
+          "store": "aliexpress",
+          "price": 4.24,
+          "title": "113 Wireless Mouse 2.4GHz Wireless Optical Mouse with USB Receiver 6 Button Portable Wireless Mouse for Laptops",
+          "label": "off-topic"
+        },
+        {
+          "key": "aliexpress:1005007030574531",
+          "store": "aliexpress",
+          "price": 4.24,
+          "title": "Limei S1 E Sports LED Luminous Backlit Wired Mouse USB Wired For Desktop Laptop Mute Office Computer Gaming Mouse",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005011908664005",
+          "store": "aliexpress",
+          "price": 4.24,
+          "title": "KEBIDUMEI 4 Buttons 2.4G Wireless Mouse 3 Levels DPI Gaming Mouse Optical Mouse Ergonomic Mouse Mice for Computer Laptop Macbook",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005009622055096",
+          "store": "aliexpress",
+          "price": 4.24,
+          "title": "2.4GHz Wireless Optical Game Mouse for PC Laptop Computer USB Receiver Mini Portable Mouse Mice",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005009599066007",
+          "store": "aliexpress",
+          "price": 4.24,
+          "title": "Gaming Mouse Wired M3 Colorful Glowing Electric Office Game USB Mice Laptop Accessories",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005010629297803",
+          "store": "aliexpress",
+          "price": 4.24,
+          "title": "Wireless Bluetooth Mouse 2.4GHz Dual Modes RGB Rechargable Quiet Slim Wireless Mice Compatible For PC iPad Laptop PC Computer",
+          "label": "off-topic"
+        },
+        {
+          "key": "trendyol-sa:887875144",
+          "store": "trendyol-sa",
+          "price": 4.42,
+          "title": "Textured Gaming Mouse Pad",
+          "label": "accessory"
+        },
+        {
+          "key": "aliexpress:1005012355742973",
+          "store": "aliexpress",
+          "price": 4.51,
+          "title": "Wired Gaming Mouse 7 Button Backlit 5500 DPI Adjustable Optical PC Gamer Mice Laptop Computer Ergonomic Mice Silent",
+          "label": "relevant"
+        },
+        {
+          "key": "trendyol-sa:1186336328",
+          "store": "trendyol-sa",
+          "price": 4.63,
+          "title": "Gaming Mouse Pad Textured Surface Length:15.9Cm Width:8Cm",
+          "label": "accessory"
+        }
+      ]
     },
     {
       "query": "samsung galaxy s24",
       "slug": "samsung-galaxy-s24",
-      "stores": [],
-      "statuses": [],
-      "recordedItems": 0,
-      "results": 0,
+      "stores": [
+        {
+          "store": "aliexpress",
+          "complete": true,
+          "calls": 2
+        },
+        {
+          "store": "amazon-sa",
+          "complete": true,
+          "calls": 2
+        },
+        {
+          "store": "jarir",
+          "complete": true,
+          "calls": 2
+        },
+        {
+          "store": "noon-sa",
+          "complete": true,
+          "calls": 2
+        },
+        {
+          "store": "trendyol-sa",
+          "complete": true,
+          "calls": 2
+        }
+      ],
+      "statuses": [
+        {
+          "site": "aliexpress",
+          "status": "ok"
+        },
+        {
+          "site": "amazon-sa",
+          "status": "ok"
+        },
+        {
+          "site": "jarir",
+          "status": "ok"
+        },
+        {
+          "site": "noon-sa",
+          "status": "ok"
+        },
+        {
+          "site": "trendyol-sa",
+          "status": "ok"
+        }
+      ],
+      "recordedItems": 451,
+      "results": 72,
       "missingCalls": [],
-      "labelled": false,
-      "metrics": null,
-      "top": []
+      "labelled": true,
+      "metrics": {
+        "top": 10,
+        "precisionAt10": 0,
+        "accessoryAt10": 1,
+        "wrongModelAt10": 0,
+        "unlabeledAt10": 0,
+        "recall": 0.9818181818181818,
+        "relevantRecorded": 55,
+        "relevantKept": 54,
+        "cheapestRelevantFirst": false
+      },
+      "top": [
+        {
+          "key": "aliexpress:1005007989235640",
+          "store": "aliexpress",
+          "price": 4.24,
+          "title": "Metal Ring+9D Tempered Glass Camera Lens Protector Cap For Samsung Galaxy S24 FE 5G Sumsung Samung S24FE S25FE S 24 FE 24FE 25FE",
+          "label": "accessory"
+        },
+        {
+          "key": "aliexpress:1005006890859888",
+          "store": "aliexpress",
+          "price": 5.9,
+          "title": "SIM1 + SIM2 Card Tray For Samsung Galaxy S24 Ultra 5G SM-S928B Phone Dual SIM Card Tray Spare Part",
+          "label": "accessory"
+        },
+        {
+          "key": "amazon-sa:B0DWWH8Q1L",
+          "store": "amazon-sa",
+          "price": 9.09,
+          "title": "Compatible with Samsung Galaxy S24 Ultra Case Silicone Phone Case Ultra Slim Shockproof Phone Case with Soft Anti-Scratch Microfiber Lining Enhanced Camera Protection 6.8 inch Light Green",
+          "label": "accessory"
+        },
+        {
+          "key": "trendyol-sa:1063355225",
+          "store": "trendyol-sa",
+          "price": 18.63,
+          "title": "100cm with Box black Original 45W PD USB C Cable 1/1.8M 3A For Galaxy S24 S25 Ultra",
+          "label": "accessory"
+        },
+        {
+          "key": "trendyol-sa:1184185074",
+          "store": "trendyol-sa",
+          "price": 18.83,
+          "title": "Galaxy S26 Black For Galaxy S26 S25 S26Plus S26Ultra Edge S24 S23 S22 S21 Ultra FE C",
+          "label": "accessory"
+        },
+        {
+          "key": "trendyol-sa:1067434936",
+          "store": "trendyol-sa",
+          "price": 21.75,
+          "title": "100cm with Box black 65W 45W 5A PD Cable For Galaxy S22 S23 S24 FE S25 Ultra Z Flip",
+          "label": "accessory"
+        },
+        {
+          "key": "trendyol-sa:1063355203",
+          "store": "trendyol-sa",
+          "price": 22.64,
+          "title": "180cm with Box black Original 45W PD USB C Cable 1/1.8M 3A For Galaxy S24 S25 Ultra",
+          "label": "accessory"
+        },
+        {
+          "key": "trendyol-sa:1067434940",
+          "store": "trendyol-sa",
+          "price": 25.13,
+          "title": "180cm with Box black 65W 45W 5A PD Cable For Galaxy S22 S23 S24 FE S25 Ultra Z Flip",
+          "label": "accessory"
+        },
+        {
+          "key": "amazon-sa:B0DHWSFVSS",
+          "store": "amazon-sa",
+          "price": 28.13,
+          "title": "Samsung Galaxy S24+ Case, Premium Leather Case with Card Compartment, RFID Blocking, Flip Case Stand Function Flip Cover Protective Case for Samsung Galaxy S24+, Red",
+          "label": "accessory"
+        },
+        {
+          "key": "jarir:630137",
+          "store": "jarir",
+          "price": 29,
+          "title": "Raptic Raptic Glass 2-in-1 Bundle: Tempered Glass + Camera Lens Protector Smartphone Display Protection, for Samsung Galaxy S24 Ultra, Clear",
+          "label": "accessory"
+        }
+      ]
     },
     {
       "query": "laptop backpack",
       "slug": "laptop-backpack",
-      "stores": [],
-      "statuses": [],
-      "recordedItems": 0,
-      "results": 0,
+      "stores": [
+        {
+          "store": "aliexpress",
+          "complete": true,
+          "calls": 2
+        },
+        {
+          "store": "amazon-sa",
+          "complete": true,
+          "calls": 2
+        },
+        {
+          "store": "jarir",
+          "complete": true,
+          "calls": 2
+        },
+        {
+          "store": "noon-sa",
+          "complete": true,
+          "calls": 2
+        },
+        {
+          "store": "trendyol-sa",
+          "complete": true,
+          "calls": 2
+        }
+      ],
+      "statuses": [
+        {
+          "site": "aliexpress",
+          "status": "ok"
+        },
+        {
+          "site": "amazon-sa",
+          "status": "ok"
+        },
+        {
+          "site": "jarir",
+          "status": "ok"
+        },
+        {
+          "site": "noon-sa",
+          "status": "ok"
+        },
+        {
+          "site": "trendyol-sa",
+          "status": "ok"
+        }
+      ],
+      "recordedItems": 502,
+      "results": 375,
       "missingCalls": [],
-      "labelled": false,
-      "metrics": null,
-      "top": []
+      "labelled": true,
+      "metrics": {
+        "top": 10,
+        "precisionAt10": 0.2,
+        "accessoryAt10": 0,
+        "wrongModelAt10": 0,
+        "unlabeledAt10": 0,
+        "recall": 0.8928571428571429,
+        "relevantRecorded": 420,
+        "relevantKept": 375,
+        "cheapestRelevantFirst": true
+      },
+      "top": [
+        {
+          "key": "aliexpress:1005010254276559",
+          "store": "aliexpress",
+          "price": 8.04,
+          "title": "Informal Spacious Backpack; Suitable for School and Commuting; Unisex Notebook Rucksack; Great Gift for Birthdays and Holidays.",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005012275532829",
+          "store": "aliexpress",
+          "price": 11.59,
+          "title": "Large Capacity Foldable Waterproof Travel Backpack Lightweight Business Laptop Rucksack for Weekend Sports Hiking",
+          "label": "relevant"
+        },
+        {
+          "key": "trendyol-sa:1041584480",
+          "store": "trendyol-sa",
+          "price": 11.86,
+          "title": "Black Embellished Mini Backpack with Chain Straps",
+          "label": "off-topic"
+        },
+        {
+          "key": "trendyol-sa:1160295682",
+          "store": "trendyol-sa",
+          "price": 12.95,
+          "title": "FIFA Boys Green Sudi Backpack",
+          "label": "off-topic"
+        },
+        {
+          "key": "trendyol-sa:1160295744",
+          "store": "trendyol-sa",
+          "price": 12.95,
+          "title": "FIFA Boys Blue And White Argentina Backpack",
+          "label": "off-topic"
+        },
+        {
+          "key": "trendyol-sa:1119052742",
+          "store": "trendyol-sa",
+          "price": 13.65,
+          "title": "Boys Black Printed Backpack",
+          "label": "off-topic"
+        },
+        {
+          "key": "trendyol-sa:1195151844",
+          "store": "trendyol-sa",
+          "price": 14.04,
+          "title": "Printed 19 inches Backpack, UT015",
+          "label": "off-topic"
+        },
+        {
+          "key": "trendyol-sa:1195152248",
+          "store": "trendyol-sa",
+          "price": 14.04,
+          "title": "Printed 19 inches Backpack, UT001",
+          "label": "off-topic"
+        },
+        {
+          "key": "trendyol-sa:1195151786",
+          "store": "trendyol-sa",
+          "price": 14.04,
+          "title": "Printed 19 inches Backpack, UT009",
+          "label": "off-topic"
+        },
+        {
+          "key": "trendyol-sa:1195151851",
+          "store": "trendyol-sa",
+          "price": 14.04,
+          "title": "Printed 19 inches Backpack, UT002",
+          "label": "off-topic"
+        }
+      ]
     },
     {
       "query": "4k monitor 27",
       "slug": "4k-monitor-27",
-      "stores": [],
-      "statuses": [],
-      "recordedItems": 0,
-      "results": 0,
+      "stores": [
+        {
+          "store": "aliexpress",
+          "complete": true,
+          "calls": 2
+        },
+        {
+          "store": "amazon-sa",
+          "complete": true,
+          "calls": 2
+        },
+        {
+          "store": "jarir",
+          "complete": true,
+          "calls": 2
+        },
+        {
+          "store": "noon-sa",
+          "complete": true,
+          "calls": 2
+        },
+        {
+          "store": "trendyol-sa",
+          "complete": true,
+          "calls": 2
+        }
+      ],
+      "statuses": [
+        {
+          "site": "aliexpress",
+          "status": "ok"
+        },
+        {
+          "site": "amazon-sa",
+          "status": "ok"
+        },
+        {
+          "site": "jarir",
+          "status": "ok"
+        },
+        {
+          "site": "noon-sa",
+          "status": "ok"
+        },
+        {
+          "site": "trendyol-sa",
+          "status": "ok"
+        }
+      ],
+      "recordedItems": 408,
+      "results": 277,
       "missingCalls": [],
-      "labelled": false,
-      "metrics": null,
-      "top": []
+      "labelled": true,
+      "metrics": {
+        "top": 10,
+        "precisionAt10": 0.6,
+        "accessoryAt10": 0,
+        "wrongModelAt10": 0.4,
+        "unlabeledAt10": 0,
+        "recall": 0.8494623655913979,
+        "relevantRecorded": 186,
+        "relevantKept": 158,
+        "cheapestRelevantFirst": true
+      },
+      "top": [
+        {
+          "key": "aliexpress:1005011904261092",
+          "store": "aliexpress",
+          "price": 152.49,
+          "title": "Monitor 24 inch direct face e-sports 2K180HZ desktop computer notebook external screen 27 inch IPS high definition 4K",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005012239347016",
+          "store": "aliexpress",
+          "price": 164.82,
+          "title": "Monitor 24 inch curved e-sports 2K180HZ desktop computer notebook external screen 27 inch IPS high definition 4K",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005012743967903",
+          "store": "aliexpress",
+          "price": 219.19,
+          "title": "FY 4K Curved Monitor 240Hz Ultra Wide Gaming Screen for Gamers High Refresh Rate Desktop Display 24 27 32 34 Inch",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005012887746098",
+          "store": "aliexpress",
+          "price": 302.39,
+          "title": "Suitable for E-sports Players, High Update Rate Game Monitor 144Hz 165Hz LCD Screen 2K 4K Resolution 19/21/24/27/28/32 Inches",
+          "label": "relevant"
+        },
+        {
+          "key": "noon-sa:N70182098V",
+          "store": "noon-sa",
+          "price": 347,
+          "title": "Dahua 27\" FHD Monitor – 100Hz, VA Panel, HDMI & VGA, Eye Comfort, Ultra-Slim Design, VESA Mountable Black",
+          "label": "wrong-model"
+        },
+        {
+          "key": "noon-sa:N70082549V",
+          "store": "noon-sa",
+          "price": 399,
+          "title": "GAMEON 27 inch Gaming Monitor FHD 120Hz IPS 1ms, Wide IPS Screen Fast HDMI 2.1 and VGA Display Port Built-in Speakers Support PS5 FHD Black",
+          "label": "wrong-model"
+        },
+        {
+          "key": "noon-sa:Z25BED76E5DF903E2C0A1Z",
+          "store": "noon-sa",
+          "price": 399.89,
+          "title": "Majesty Gaming Monitor 27\" FHD 1920x1080 | IPS | 120Hz | 1ms | HDR | 8-Bit | 100% sRGB | G-SYNC & FreeSync | VGA & HDMI | VESA | Built-in Speakers",
+          "label": "wrong-model"
+        },
+        {
+          "key": "aliexpress:1005012784994627",
+          "store": "aliexpress",
+          "price": 407.79,
+          "title": "Monitor 32 inch desktop computer office 2k 144hz high definition 27 inch 4k display screen",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005012196689992",
+          "store": "aliexpress",
+          "price": 415.9,
+          "title": "New19 /24/27 Inch Curved IPS LED Backlit LCD Monitor  2K/4K 165Hz Gaming for E-SportsDisplay for PC Gamer Desktop Office Work",
+          "label": "relevant"
+        },
+        {
+          "key": "jarir:668034",
+          "store": "jarir",
+          "price": 429,
+          "title": "AOC 27B36X 27\" Gaming Monitor, WLED, FHD (Full HD), 144 Hz, 0.5ms (MPRT), Black",
+          "label": "wrong-model"
+        }
+      ]
     },
     {
       "query": "ps5 controller",
       "slug": "ps5-controller",
-      "stores": [],
-      "statuses": [],
-      "recordedItems": 0,
-      "results": 0,
+      "stores": [
+        {
+          "store": "aliexpress",
+          "complete": true,
+          "calls": 2
+        },
+        {
+          "store": "amazon-sa",
+          "complete": true,
+          "calls": 2
+        },
+        {
+          "store": "jarir",
+          "complete": true,
+          "calls": 2
+        },
+        {
+          "store": "noon-sa",
+          "complete": true,
+          "calls": 2
+        },
+        {
+          "store": "trendyol-sa",
+          "complete": true,
+          "calls": 2
+        }
+      ],
+      "statuses": [
+        {
+          "site": "aliexpress",
+          "status": "ok"
+        },
+        {
+          "site": "amazon-sa",
+          "status": "ok"
+        },
+        {
+          "site": "jarir",
+          "status": "ok"
+        },
+        {
+          "site": "noon-sa",
+          "status": "ok"
+        },
+        {
+          "site": "trendyol-sa",
+          "status": "ok"
+        }
+      ],
+      "recordedItems": 449,
+      "results": 283,
       "missingCalls": [],
-      "labelled": false,
-      "metrics": null,
-      "top": []
+      "labelled": true,
+      "metrics": {
+        "top": 10,
+        "precisionAt10": 0.1,
+        "accessoryAt10": 0.9,
+        "wrongModelAt10": 0,
+        "unlabeledAt10": 0,
+        "recall": 0.9558359621451105,
+        "relevantRecorded": 317,
+        "relevantKept": 303,
+        "cheapestRelevantFirst": false
+      },
+      "top": [
+        {
+          "key": "trendyol-sa:1123172683",
+          "store": "trendyol-sa",
+          "price": 13.61,
+          "title": "Silicone Analog Wireless Controller Thumb Grips Set for Playstation PS5 (4 Pieces)",
+          "label": "relevant"
+        },
+        {
+          "key": "trendyol-sa:1241602892",
+          "store": "trendyol-sa",
+          "price": 13.71,
+          "title": "Black 4PCS for PS5/PS4/PS3/Switchpro Game Controller Accessory Non-slip Silicone Game Joystick Thumb",
+          "label": "accessory"
+        },
+        {
+          "key": "trendyol-sa:1024642267",
+          "store": "trendyol-sa",
+          "price": 13.71,
+          "title": "NO 06 2pcs For PS3 PS4 PS5 Xbox One/360/Series S/X Switch Pro Game Controllers Thumb Silicone St",
+          "label": "accessory"
+        },
+        {
+          "key": "trendyol-sa:1024642446",
+          "store": "trendyol-sa",
+          "price": 13.71,
+          "title": "NO 07 2pcs For PS3 PS4 PS5 Xbox One/360/Series S/X Switch Pro Game Controllers Thumb Silicone St",
+          "label": "accessory"
+        },
+        {
+          "key": "trendyol-sa:1241602816",
+          "store": "trendyol-sa",
+          "price": 13.75,
+          "title": "D 4PCS for PS5/PS4/PS3/Switchpro Game Controller Accessory Non-slip Silicone Game Joystick Thumbstic",
+          "label": "accessory"
+        },
+        {
+          "key": "trendyol-sa:1241603997",
+          "store": "trendyol-sa",
+          "price": 13.8,
+          "title": "red 4PCS for PS5/PS4/PS3/Switchpro Game Controller Accessory Non-slip Silicone Game Joystick Thumbst",
+          "label": "accessory"
+        },
+        {
+          "key": "trendyol-sa:1024496923",
+          "store": "trendyol-sa",
+          "price": 14,
+          "title": "NO 04 2pcs For PS3 PS4 PS5 Xbox One/360/Series S/X Switch Pro Game Controllers Thumb Silicone St",
+          "label": "accessory"
+        },
+        {
+          "key": "trendyol-sa:1024513381",
+          "store": "trendyol-sa",
+          "price": 14.35,
+          "title": "black DATA FROG L2 R2 Buttons Trigger Extensions Thumb Stick For PS5 Gamepad Controller Anti-Slip Th",
+          "label": "accessory"
+        },
+        {
+          "key": "trendyol-sa:1241601044",
+          "store": "trendyol-sa",
+          "price": 14.35,
+          "title": "2 Pieces Black Color Silicone Thumb Grips For PS4/PS5/Xbox Controller, Non-Slip Joystick Caps Thumbs",
+          "label": "accessory"
+        },
+        {
+          "key": "trendyol-sa:1024538723",
+          "store": "trendyol-sa",
+          "price": 14.41,
+          "title": "01 2pcs For PS3 PS4 PS5 Xbox one/360/Series S X Switch Pro Game Controllers Thumb Silicone Stick Gri",
+          "label": "accessory"
+        }
+      ]
     },
     {
       "query": "robot vacuum",
       "slug": "robot-vacuum",
-      "stores": [],
-      "statuses": [],
-      "recordedItems": 0,
-      "results": 0,
+      "stores": [
+        {
+          "store": "aliexpress",
+          "complete": true,
+          "calls": 2
+        },
+        {
+          "store": "amazon-sa",
+          "complete": true,
+          "calls": 2
+        },
+        {
+          "store": "jarir",
+          "complete": true,
+          "calls": 2
+        },
+        {
+          "store": "noon-sa",
+          "complete": true,
+          "calls": 2
+        },
+        {
+          "store": "trendyol-sa",
+          "complete": true,
+          "calls": 2
+        }
+      ],
+      "statuses": [
+        {
+          "site": "aliexpress",
+          "status": "ok"
+        },
+        {
+          "site": "amazon-sa",
+          "status": "ok"
+        },
+        {
+          "site": "jarir",
+          "status": "ok"
+        },
+        {
+          "site": "noon-sa",
+          "status": "ok"
+        },
+        {
+          "site": "trendyol-sa",
+          "status": "ok"
+        }
+      ],
+      "recordedItems": 473,
+      "results": 369,
       "missingCalls": [],
-      "labelled": false,
-      "metrics": null,
-      "top": []
+      "labelled": true,
+      "metrics": {
+        "top": 10,
+        "precisionAt10": 0.2,
+        "accessoryAt10": 0.8,
+        "wrongModelAt10": 0,
+        "unlabeledAt10": 0,
+        "recall": 0.9619883040935673,
+        "relevantRecorded": 342,
+        "relevantKept": 329,
+        "cheapestRelevantFirst": true
+      },
+      "top": [
+        {
+          "key": "aliexpress:1005012950774525",
+          "store": "aliexpress",
+          "price": 4.24,
+          "title": "Auto Rechargeable Smart Robotic Vacuum Cleaner Wet And Dry Dual Use Intelligent Household Floor Sweeping Device",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005012505310784",
+          "store": "aliexpress",
+          "price": 4.77,
+          "title": "3 In 1 Compact Car Robot Vacuum Lightweight Smart Cleaning Machine Automatic Obstacle Avoidance for Pet Hair&Hard Floor&Carpet",
+          "label": "relevant"
+        },
+        {
+          "key": "trendyol-sa:1024463685",
+          "store": "trendyol-sa",
+          "price": 14.82,
+          "title": "grey Convenient Button Lock Power Button Lock For Dyson V6 V7 V8 V10 V11 V12 V15 Robot Vacuum Cleane",
+          "label": "accessory"
+        },
+        {
+          "key": "trendyol-sa:1024466525",
+          "store": "trendyol-sa",
+          "price": 15.03,
+          "title": "red Convenient Button Lock Power Button Lock For Dyson V6 V7 V8 V10 V11 V12 V15 Robot Vacuum Cleaner",
+          "label": "accessory"
+        },
+        {
+          "key": "trendyol-sa:1164080918",
+          "store": "trendyol-sa",
+          "price": 15.45,
+          "title": "3PCS Dust Bin Baffle Dust Box Suction Flap For Xiaomi Mi Robot Vacuum-Mop All-In-One X10+ X20+ B101C",
+          "label": "accessory"
+        },
+        {
+          "key": "trendyol-sa:1024462087",
+          "store": "trendyol-sa",
+          "price": 15.58,
+          "title": "2 pcs Side Brushes For Xiaomi MI 1s 2s Roborock S50 S51 S55 S6 T6 1 / 2 Generation Robot Vacuum Clea",
+          "label": "accessory"
+        },
+        {
+          "key": "trendyol-sa:1164078458",
+          "store": "trendyol-sa",
+          "price": 15.59,
+          "title": "2pcs brush For Xiaomi Side Brush 3C Plus S20 D106 E10C E12 E10 B112 C103 Sweeping Robot Vacuum Clean",
+          "label": "accessory"
+        },
+        {
+          "key": "trendyol-sa:1164079313",
+          "store": "trendyol-sa",
+          "price": 15.64,
+          "title": "2pcs black Universal Robot Vacuum Cleaner Brush Cleaning Tool for Xiaomi for Roborock for Dreame Hai",
+          "label": "accessory"
+        },
+        {
+          "key": "trendyol-sa:1164080679",
+          "store": "trendyol-sa",
+          "price": 15.68,
+          "title": "3PCS Dust Box Suction Flap For Xiaomi Mi Robot Vacuum Mop X10 Plus X20 Plus B101CN Omni Cleaner Dust",
+          "label": "accessory"
+        },
+        {
+          "key": "trendyol-sa:1164080143",
+          "store": "trendyol-sa",
+          "price": 16.16,
+          "title": "2pcs Side Brush for Xiaomi Robot Vacuum Accessories S40 / OV81 /S40 Pro / OV71GL ，For Mijia 5C/ 5/ 5",
+          "label": "accessory"
+        }
+      ]
     },
     {
       "query": "smart watch >4 stars",
       "slug": "smart-watch-4-stars",
-      "stores": [],
-      "statuses": [],
-      "recordedItems": 0,
-      "results": 0,
+      "stores": [
+        {
+          "store": "aliexpress",
+          "complete": true,
+          "calls": 3
+        },
+        {
+          "store": "amazon-sa",
+          "complete": true,
+          "calls": 3
+        },
+        {
+          "store": "jarir",
+          "complete": true,
+          "calls": 3
+        },
+        {
+          "store": "noon-sa",
+          "complete": true,
+          "calls": 2
+        },
+        {
+          "store": "trendyol-sa",
+          "complete": true,
+          "calls": 3
+        }
+      ],
+      "statuses": [
+        {
+          "site": "aliexpress",
+          "status": "ok"
+        },
+        {
+          "site": "amazon-sa",
+          "status": "ok"
+        },
+        {
+          "site": "jarir",
+          "status": "ok"
+        },
+        {
+          "site": "noon-sa",
+          "status": "ok"
+        },
+        {
+          "site": "trendyol-sa",
+          "status": "ok"
+        }
+      ],
+      "recordedItems": 587,
+      "results": 319,
       "missingCalls": [],
-      "labelled": false,
-      "metrics": null,
-      "top": []
+      "labelled": true,
+      "metrics": {
+        "top": 10,
+        "precisionAt10": 0.9,
+        "accessoryAt10": 0.1,
+        "wrongModelAt10": 0,
+        "unlabeledAt10": 0,
+        "recall": 0.981029810298103,
+        "relevantRecorded": 369,
+        "relevantKept": 362,
+        "cheapestRelevantFirst": false
+      },
+      "top": [
+        {
+          "key": "trendyol-sa:1143933750",
+          "store": "trendyol-sa",
+          "price": 2.96,
+          "title": "Protection For Watch 44mm Black",
+          "label": "accessory"
+        },
+        {
+          "key": "aliexpress:1005007226824395",
+          "store": "aliexpress",
+          "price": 4.24,
+          "title": "Smart GPS Tracer Location Bluetooth Watch with Camera Pedometer Remote Monitor Touch Screen Phone Wristwatch for Kids Student",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005010502775230",
+          "store": "aliexpress",
+          "price": 6.14,
+          "title": "2026 New Smart Watch For Android IOS 2.01Inch Color Screen Bluetooth Call Blood Oxygen/Pressure Monitoring SmartWatch Women HT30",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005011805398932",
+          "store": "aliexpress",
+          "price": 10.35,
+          "title": "2025 Smart Watch Android IOS Phone 2.01 Inch Color Screen Bluetooth Answer Call Fitness Watches Tracker Smartwatch Women Men",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005011575522745",
+          "store": "aliexpress",
+          "price": 10.91,
+          "title": "Men Women Smart Watch 1.83''Waterproof Fitness Sports Watch Answer Call Sleep Sport Pedometer Information Alerts Smartwatch HT30",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005005900302218",
+          "store": "aliexpress",
+          "price": 11.52,
+          "title": "Watch Smart Wristwatch Support SIM Card Bracelet Calendar Equipment",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005011965958554",
+          "store": "aliexpress",
+          "price": 11.74,
+          "title": "LAXASFIT Fashion Smart Watch Bluetooth Call Music Playback IP68 Waterproof Fitness Tracking For Men and Women Smart Watch Gift",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005012666843097",
+          "store": "aliexpress",
+          "price": 12.62,
+          "title": "Smart Watch Sport Smartwatch HD Fitness Monitor Smart Watch Bluetooth Call Music Message Notification Gift Watches for Men Women IOS Android",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005012984136220",
+          "store": "aliexpress",
+          "price": 13.28,
+          "title": "Sport Smart Watch Waterproof Fitnes Tracker Wireless Call Message Health Monitor Clock Smartwatch For Men Women iOS Android HT30",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005012816635722",
+          "store": "aliexpress",
+          "price": 15.06,
+          "title": "New Smart Watch 1.88-inch HD Display Bluetooth Calling Heart Rate Activity Tracking Sport Smartwatch Men Women Holiday Gift H10",
+          "label": "relevant"
+        }
+      ]
     },
     {
       "query": "hair dryer",
       "slug": "hair-dryer",
-      "stores": [],
-      "statuses": [],
-      "recordedItems": 0,
-      "results": 0,
+      "stores": [
+        {
+          "store": "aliexpress",
+          "complete": true,
+          "calls": 2
+        },
+        {
+          "store": "amazon-sa",
+          "complete": true,
+          "calls": 2
+        },
+        {
+          "store": "jarir",
+          "complete": true,
+          "calls": 2
+        },
+        {
+          "store": "noon-sa",
+          "complete": true,
+          "calls": 2
+        },
+        {
+          "store": "trendyol-sa",
+          "complete": true,
+          "calls": 2
+        }
+      ],
+      "statuses": [
+        {
+          "site": "aliexpress",
+          "status": "ok"
+        },
+        {
+          "site": "amazon-sa",
+          "status": "ok"
+        },
+        {
+          "site": "jarir",
+          "status": "ok"
+        },
+        {
+          "site": "noon-sa",
+          "status": "ok"
+        },
+        {
+          "site": "trendyol-sa",
+          "status": "ok"
+        }
+      ],
+      "recordedItems": 471,
+      "results": 361,
       "missingCalls": [],
-      "labelled": false,
-      "metrics": null,
-      "top": []
+      "labelled": true,
+      "metrics": {
+        "top": 10,
+        "precisionAt10": 0.4,
+        "accessoryAt10": 0.6,
+        "wrongModelAt10": 0,
+        "unlabeledAt10": 0,
+        "recall": 0.9710526315789474,
+        "relevantRecorded": 380,
+        "relevantKept": 369,
+        "cheapestRelevantFirst": false
+      },
+      "top": [
+        {
+          "key": "aliexpress:1005012818177291",
+          "store": "aliexpress",
+          "price": 8.55,
+          "title": "Hair Blow Dryer Comb Attachment With Curling Interface Hair Styling Curly Dryer For Salon Home Styling Dressing",
+          "label": "accessory"
+        },
+        {
+          "key": "trendyol-sa:1095529897",
+          "store": "trendyol-sa",
+          "price": 14.83,
+          "title": "1pc Hair Nozzle Dryer Air Blow Collecting Wind Nozzle Comb Universal Hair Diffuser Dryer Comb Hair S",
+          "label": "accessory"
+        },
+        {
+          "key": "trendyol-sa:1193565502",
+          "store": "trendyol-sa",
+          "price": 16.45,
+          "title": "Hair Dryer Brush Model OK 723",
+          "label": "relevant"
+        },
+        {
+          "key": "amazon-sa:B0H2LRPJFT",
+          "store": "amazon-sa",
+          "price": 18.01,
+          "title": "Safety Portable Hair Dryer Bonnet Attachment for Hair Styling,Adjustable Soft Hooded Hair Drying Cap for Deep Conditioning (Black)",
+          "label": "accessory"
+        },
+        {
+          "key": "trendyol-sa:1194781843",
+          "store": "trendyol-sa",
+          "price": 18.23,
+          "title": "AB-Wakeel A practical, fast-drying hair dryer featuring a modern aesthetic and a foldable design—ideal for daily use and travel.",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005013092029398",
+          "store": "aliexpress",
+          "price": 18.29,
+          "title": "Home-use Blu-ray negative ion hair salon high-power hair dryer dormitory hot and cold air blow dryer",
+          "label": "relevant"
+        },
+        {
+          "key": "trendyol-sa:1236172283",
+          "store": "trendyol-sa",
+          "price": 18.5,
+          "title": "1pc Universal Barbershop Special Curling Dryer Large Head Professional Hair Diffuser Adaptable for B",
+          "label": "accessory"
+        },
+        {
+          "key": "trendyol-sa:1095533326",
+          "store": "trendyol-sa",
+          "price": 18.89,
+          "title": "one size 1pc Hair Diffuser Professional Hair Styling Curl Dryer Diffuser Universal Hairdressing Blow",
+          "label": "accessory"
+        },
+        {
+          "key": "trendyol-sa:1095523328",
+          "store": "trendyol-sa",
+          "price": 19.61,
+          "title": "1pc Hair Diffuser Professional Hair Styling Curl Dryer 1pc Universal Hairdressing Blower Styling Sal",
+          "label": "accessory"
+        },
+        {
+          "key": "trendyol-sa:1240459766",
+          "store": "trendyol-sa",
+          "price": 21.39,
+          "title": "Ruay R0233 Hair Dryer – Black, Modern Design with Turbine Airflow Technology, Quick Drying & Low Noise",
+          "label": "relevant"
+        }
+      ]
     }
   ],
-  "overall": null
+  "overall": {
+    "queries": 15,
+    "precisionAt10": 0.4066666666666667,
+    "accessoryAt10": 0.3933333333333333,
+    "wrongModelAt10": 0.04000000000000001,
+    "recall": 0.9208010540604121,
+    "cheapestRelevantFirst": 0.3333333333333333
+  }
 }
