@@ -4,7 +4,7 @@ import type { SearchInput, SearchResult } from "@/src/lib/pipeline";
 import type { Product } from "@/src/lib/types";
 import { storeLabel } from "@/src/lib/stores";
 import type { AlertMessage, SendResult } from "@/src/lib/telegram";
-import { addEvent, addPricePoint, listWatches, updateWatch } from "./repo";
+import { addEvent, addPricePoint, listWatches, pendingEvent, updateEvent, updateWatch } from "./repo";
 import { cheapestConfident, priceOf, type Watch } from "./shared";
 
 /**
@@ -20,6 +20,9 @@ import { cheapestConfident, priceOf, type Watch } from "./shared";
  *    null). Firing sets lastFiredPrice; a later price above the target clears it again, so a
  *    watch notifies again only after the price rose above the target and fell back.
  * A blocked or failing store is skipped quietly: the watch keeps its last price.
+ * A failed Telegram send (timeout, 5xx; not "not set up") keeps the watch armed so the next cycle
+ * retries it; the retry updates the same in-app event instead of adding another.
+ * Watches are taken oldest-checked first; a watch whose store is at its siteCaps limit waits.
  */
 export type CheckerDeps = {
   db: Db;
@@ -28,11 +31,15 @@ export type CheckerDeps = {
   sleep: (ms: number) => Promise<void>;
   notify: (m: AlertMessage) => Promise<SendResult>;
   staggerMs?: number;
+  /** Wait before a group for this store; default staggerMs (Chrome-backed stores need longer). */
+  gapMs?: (site: string) => number;
+  /** At most this many groups for a store per cycle (e.g. SHEIN); the rest wait for the next cycle. */
+  siteCaps?: Record<string, number>;
   /** Only watches never checked or last checked before this time (ms). Omitted: every active watch. */
   dueBefore?: number;
 };
 
-export type CycleReport = { checked: number; groups: number; fired: number; failedGroups: number };
+export type CycleReport = { checked: number; groups: number; fired: number; retried: number; failedGroups: number; deferred: number };
 
 type GroupOutcome = { ok: true; products: Product[] } | { ok: false; status: "blocked" | "error" };
 
@@ -42,23 +49,38 @@ const storesOf = (w: Watch): string[] => (w.kind === "product" ? (w.site ? [w.si
 
 export async function runCycle(deps: CheckerDeps): Promise<CycleReport> {
   const { db } = deps;
-  const watches = listWatches(db, { activeOnly: true }).filter(
-    (w) => deps.dueBefore === undefined || w.lastCheckedAt === null || w.lastCheckedAt < deps.dueBefore,
-  );
+  const due = listWatches(db, { activeOnly: true })
+    .filter((w) => deps.dueBefore === undefined || w.lastCheckedAt === null || w.lastCheckedAt < deps.dueBefore)
+    .sort((a, b) => (a.lastCheckedAt ?? -Infinity) - (b.lastCheckedAt ?? -Infinity) || a.id - b.id);
 
   const groups = new Map<string, { site: string; query: string }>();
-  for (const w of watches) {
-    for (const site of storesOf(w)) {
-      const key = `${site}\u0000${normQuery(w.query)}`;
-      if (!groups.has(key)) groups.set(key, { site, query: w.query.trim() });
+  const perSite = new Map<string, number>();
+  const watches: Watch[] = [];
+  let deferred = 0;
+  for (const w of due) {
+    const fresh = storesOf(w)
+      .map((site) => ({ site, key: `${site}\u0000${normQuery(w.query)}` }))
+      .filter((g) => !groups.has(g.key));
+    const over = fresh.some((g) => {
+      const cap = deps.siteCaps?.[g.site];
+      return cap !== undefined && (perSite.get(g.site) ?? 0) + fresh.filter((f) => f.site === g.site).length > cap;
+    });
+    if (over) {
+      deferred += 1; // checked next cycle; still due, and first in line as the oldest checked
+      continue;
     }
+    for (const g of fresh) {
+      groups.set(g.key, { site: g.site, query: w.query.trim() });
+      perSite.set(g.site, (perSite.get(g.site) ?? 0) + 1);
+    }
+    watches.push(w);
   }
 
   const outcomes = new Map<string, GroupOutcome>();
   let first = true;
   let failedGroups = 0;
   for (const [key, g] of groups) {
-    if (!first) await deps.sleep(deps.staggerMs ?? 0);
+    if (!first) await deps.sleep(deps.gapMs ? deps.gapMs(g.site) : (deps.staggerMs ?? 0));
     first = false;
     let outcome: GroupOutcome;
     try {
@@ -74,6 +96,7 @@ export async function runCycle(deps: CheckerDeps): Promise<CycleReport> {
   }
 
   let fired = 0;
+  let retried = 0;
   for (const w of watches) {
     const now = deps.now();
     const outs = storesOf(w).map((site) => outcomes.get(`${site}\u0000${normQuery(w.query)}`)).filter((o): o is GroupOutcome => !!o);
@@ -114,19 +137,28 @@ export async function runCycle(deps: CheckerDeps): Promise<CycleReport> {
         url: hit.url,
       };
       let sent = false;
+      let retry = false;
       try {
-        sent = (await deps.notify(msg)).ok;
+        const r = await deps.notify(msg);
+        sent = r.ok;
+        retry = !r.ok && !r.notConfigured;
       } catch {
-        sent = false;
+        retry = true;
       }
-      addEvent(db, { watchId: w.id, at: now, title: hit.title, site: hit.site, oldPrice: w.lastPrice, newPrice: price, target: w.target, currency: msg.currency, url: hit.url, sent });
-      patch.lastFiredPrice = price;
-      fired += 1;
+      const pending = pendingEvent(db, w.id, w.target);
+      if (pending) {
+        updateEvent(db, pending.id, { newPrice: price, sent });
+        retried += 1;
+      } else {
+        addEvent(db, { watchId: w.id, at: now, title: hit.title, site: hit.site, oldPrice: w.lastPrice, newPrice: price, target: w.target, currency: msg.currency, url: hit.url, sent });
+        fired += 1;
+      }
+      if (!retry) patch.lastFiredPrice = price; // a failed send stays armed and retries next cycle
     }
     updateWatch(db, w.id, patch);
   }
 
-  return { checked: watches.length, groups: groups.size, fired, failedGroups };
+  return { checked: watches.length, groups: groups.size, fired, retried, failedGroups, deferred };
 }
 
 export type Checker = {

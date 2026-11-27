@@ -227,3 +227,80 @@ describe("createChecker", () => {
     }
   });
 });
+
+describe("runCycle: failed Telegram sends", () => {
+  it("keeps the watch armed after a failed send and retries without a duplicate event", async () => {
+    const id = productWatch(450);
+    answers["amazon-sa"] = { products: [prod("amazon-sa", "B0X", 440)] };
+    notify.mockResolvedValueOnce({ ok: false, error: "Telegram did not answer within 10 seconds" });
+    expect((await runCycle(deps())).fired).toBe(1);
+    expect(getWatch(db, id)?.lastFiredPrice).toBeNull();
+    expect(listEvents(db)).toEqual([expect.objectContaining({ sent: false, newPrice: 440 })]);
+
+    answers["amazon-sa"] = { products: [prod("amazon-sa", "B0X", 430)] };
+    clock = 2_000;
+    const r = await runCycle(deps());
+    expect(r).toMatchObject({ fired: 0, retried: 1 });
+    expect(notify).toHaveBeenCalledTimes(2);
+    expect(listEvents(db)).toEqual([expect.objectContaining({ sent: true, newPrice: 430 })]);
+    expect(getWatch(db, id)?.lastFiredPrice).toBe(430);
+  });
+
+  it("treats a throwing notify as a failed send", async () => {
+    const id = productWatch(450);
+    notify.mockRejectedValueOnce(new Error("boom"));
+    answers["amazon-sa"] = { products: [prod("amazon-sa", "B0X", 440)] };
+    await runCycle(deps());
+    expect(getWatch(db, id)?.lastFiredPrice).toBeNull();
+  });
+
+  it("disarms when Telegram is not set up (the alert shows in the app only)", async () => {
+    const id = productWatch(450);
+    notify.mockResolvedValue({ ok: false, error: "Telegram is not set up", notConfigured: true });
+    answers["amazon-sa"] = { products: [prod("amazon-sa", "B0X", 440)] };
+    await runCycle(deps());
+    expect(getWatch(db, id)?.lastFiredPrice).toBe(440);
+    clock = 2_000;
+    expect((await runCycle(deps())).fired).toBe(0);
+    expect(notify).toHaveBeenCalledTimes(1);
+  });
+
+  it("a rise above the target after a failed send makes the next drop a new event", async () => {
+    productWatch(450);
+    notify.mockResolvedValueOnce({ ok: false, error: "Telegram answered 502" });
+    const at = async (price: number) => {
+      answers["amazon-sa"] = { products: [prod("amazon-sa", "B0X", price)] };
+      clock += 1_000;
+      return runCycle(deps());
+    };
+    await at(440);
+    await at(470);
+    expect((await at(445)).fired).toBe(1);
+    expect(listEvents(db).map((e) => [e.newPrice, e.sent])).toEqual([[445, true], [440, false]]);
+  });
+});
+
+describe("runCycle: Chrome-backed stores", () => {
+  it("waits the store's own gap before its group", async () => {
+    productWatch(450, "amazon-sa", "A", "a");
+    productWatch(450, "noon-sa", "N", "b");
+    productWatch(450, "jarir", "J", "c");
+    await runCycle(deps({ gapMs: (site) => (site === "noon-sa" ? 60_000 : 1_000) }));
+    expect(sleep.mock.calls.map((c) => c[0])).toEqual([60_000, 1_000]);
+  });
+
+  it("caps groups per store per cycle and defers the rest, oldest checked first", async () => {
+    const ids = [1, 2, 3, 4].map((i) => productWatch(450, "shein-sa", `S${i}`, `q${i}`));
+    updateWatch(db, ids[0], { lastCheckedAt: 500 });
+    updateWatch(db, ids[1], { lastCheckedAt: 100 });
+    const r = await runCycle(deps({ siteCaps: { "shein-sa": 2 } }));
+    expect(r).toMatchObject({ groups: 2, checked: 2, deferred: 2 });
+    // never checked (ids 2, 3) come first
+    expect(calls.map((c) => c.query).sort()).toEqual(["q3", "q4"]);
+    expect(getWatch(db, ids[0])?.lastCheckedAt).toBe(500);
+    calls = [];
+    clock = 2_000;
+    await runCycle(deps({ siteCaps: { "shein-sa": 2 } }));
+    expect(calls.map((c) => c.query)).toEqual(["q2", "q1"]);
+  });
+});

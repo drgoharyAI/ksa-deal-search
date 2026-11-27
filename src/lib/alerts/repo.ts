@@ -118,3 +118,19 @@ export function unreadCount(db: Db): number {
 export function markEventsSeen(db: Db): void {
   db.prepare("UPDATE alert_events SET seen = 1 WHERE seen = 0").run();
 }
+
+/**
+ * The watch's latest event when its Telegram send failed and is still to be retried: unsent, and
+ * no price above `target` was recorded since (a rise re-arms the watch, so a later drop is a new
+ * alert).
+ */
+export function pendingEvent(db: Db, watchId: number, target: number): AlertEvent | null {
+  const r = db.prepare("SELECT * FROM alert_events WHERE watchId = ? ORDER BY at DESC, id DESC LIMIT 1").get(watchId) as unknown as EventRow | undefined;
+  if (!r || r.sent) return null;
+  const rose = db.prepare("SELECT 1 FROM price_points WHERE watchId = ? AND at > ? AND price > ? LIMIT 1").get(watchId, r.at, target);
+  return rose ? null : { ...r, sent: false, seen: !!r.seen };
+}
+
+export function updateEvent(db: Db, id: number, patch: { newPrice: number; sent: boolean }): void {
+  db.prepare("UPDATE alert_events SET newPrice = ?, sent = ? WHERE id = ?").run(patch.newPrice, patch.sent ? 1 : 0, id);
+}

@@ -15,8 +15,16 @@ export function checkIntervalMs(env: Record<string, string | undefined> = proces
   return hours * 3_600_000;
 }
 
-/** Between store fetches: 20 s plus up to 50% jitter, so a cycle never bursts one store. */
+/**
+ * Between store fetches: 20 s, and at least 60 s before a Chrome-backed store (noon, SHEIN: a real
+ * browser page per search); sleep adds up to 50% jitter. SHEIN's risk control also caps it at 8
+ * searches per cycle; the rest wait for the next cycle, oldest checked first.
+ */
 const STAGGER_MS = 20_000;
+export const CHROME_GAP_MS = 60_000;
+const CHROME_SITES = new Set(["noon-sa", "shein-sa"]);
+export const SITE_CAPS: Record<string, number> = { "shein-sa": 8 };
+export const gapFor = (site: string): number => (CHROME_SITES.has(site) ? CHROME_GAP_MS : STAGGER_MS);
 const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms + Math.random() * ms * 0.5));
 
 export function getChecker(): Checker {
@@ -28,6 +36,8 @@ export function getChecker(): Checker {
         now: Date.now,
         sleep,
         staggerMs: STAGGER_MS,
+        gapMs: gapFor,
+        siteCaps: SITE_CAPS,
         notify: (m) => sendTelegram(formatAlertMessage(m)),
       }),
       { intervalMs: checkIntervalMs(), firstDelayMs: 60_000 },
