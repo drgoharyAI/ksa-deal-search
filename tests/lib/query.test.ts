@@ -94,6 +94,17 @@ describe("parseQuery edge cases", () => {
   });
 });
 
+describe("parseQuery reversed range (final review M3)", () => {
+  it("swaps a range typed high-low", () => {
+    const pq = parseQuery("earbuds 300-50");
+    expect([pq.minPrice, pq.maxPrice]).toEqual([50, 300]);
+    expect(pq.terms).toBe("earbuds");
+  });
+  it("keeps a range typed low-high", () => {
+    expect(parseQuery("earbuds 50-300")).toMatchObject({ minPrice: 50, maxPrice: 300 });
+  });
+});
+
 describe("matchTerms: filler words are not required title words (final review I1)", () => {
   it("drops intent and filler words", () => {
     expect(matchTerms("best wireless earbuds")).toBe("wireless earbuds");

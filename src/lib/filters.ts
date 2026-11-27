@@ -1,4 +1,5 @@
 import type { Product } from "@/src/lib/types";
+import { tokenizeKeepDigits } from "@/src/lib/match/tokenize";
 
 /**
  * The search's per-product filter predicates, shared by the pipeline and the eval metrics so
@@ -11,11 +12,18 @@ const isNum = (n: number | undefined): n is number => typeof n === "number" && N
 
 export const hasValidPrice = (p: Product): boolean => Number.isFinite(p.listPrice) && p.listPrice > 0;
 
-/** A "-word" exclusion: case-insensitive substring of the title. */
+/**
+ * A "-word" exclusion: the word is a whole title word (case-insensitive), a part of a hyphenated
+ * one ("pro-max"), or its plural. Never a substring: "-pro" must keep "Waterproof", "-case"
+ * must keep "Showcase".
+ */
 export function isExcluded(p: Product, exclude: string[]): boolean {
   if (!exclude.length) return false;
-  const t = p.title.toLowerCase();
-  return exclude.some((w) => t.includes(w.toLowerCase()));
+  const words = new Set(tokenizeKeepDigits(p.title).flatMap((t) => [t, ...t.split("-")]));
+  return exclude.some((raw) => {
+    const w = raw.toLowerCase();
+    return words.has(w) || words.has(`${w}s`) || words.has(`${w}es`);
+  });
 }
 
 /**

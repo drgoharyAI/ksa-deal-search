@@ -25,8 +25,9 @@ export function parseQuery(input: string): ParsedQuery {
 
   r = take(s, new RegExp(`(?<![\\w.-])${CUR}${NUM}\\s*-\\s*${CUR}${PRICE}(?![\\w.-])`));
   if (r.m) {
-    pq.minPrice = parseFloat(r.m[1]);
-    pq.maxPrice = parseFloat(r.m[2]);
+    const [a, b] = [parseFloat(r.m[1]), parseFloat(r.m[2])];
+    pq.minPrice = Math.min(a, b); // "300-50" means 50 to 300
+    pq.maxPrice = Math.max(a, b);
     s = r.rest;
   }
 

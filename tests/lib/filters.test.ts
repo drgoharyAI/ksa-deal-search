@@ -26,10 +26,19 @@ describe("shared product filters", () => {
     expect(hasValidPrice(prod({ listPrice: NaN }))).toBe(false);
   });
 
-  it("isExcluded: case-insensitive substring of the title", () => {
+  it("isExcluded: case-insensitive whole title word", () => {
     expect(isExcluded(prod({ title: "Wired Keyboard" }), ["wired"])).toBe(true);
     expect(isExcluded(prod({ title: "Wireless Keyboard" }), ["WIRED"])).toBe(false);
     expect(isExcluded(prod(), [])).toBe(false);
+  });
+
+  it("isExcluded: never matches inside a longer word (final review M1)", () => {
+    expect(isExcluded(prod({ title: "Waterproof Sports Earbuds" }), ["pro"])).toBe(false);
+    expect(isExcluded(prod({ title: "Phone Showcase Stand" }), ["case"])).toBe(false);
+    expect(isExcluded(prod({ title: "AirPods Pro 2" }), ["pro"])).toBe(true);
+    expect(isExcluded(prod({ title: "Silicone Cases for AirPods" }), ["case"])).toBe(true);
+    expect(isExcluded(prod({ title: "Anker USB-C Cable" }), ["usb-c"])).toBe(true);
+    expect(isExcluded(prod({ title: "iPhone 16 Pro-Max Case" }), ["max"])).toBe(true);
   });
 
   it("passesPriceRating: bounds on listPrice, not finalPrice", () => {
