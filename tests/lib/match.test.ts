@@ -167,7 +167,17 @@ describe("review fixes", () => {
     const ps = set([["iPhone 16 Case", 29], ["Silicone Case for iPhone 16", 25]]);
     expect(titles(dropAccessories(ps, ["iphone", "16"]))).toEqual(["iPhone 16 Case"]);
   });
-  it("R3: all-candidate sets use max candidate price as reference", () => {
+  it("R4: one overpriced outlier does not drop real products (no >=4x gap)", () => {
+    const ip = set([["iPhone 16 Case Clear", 5000], ["iPhone 16 Case A", 1000], ["iPhone 16 Case B", 1200], ["iPhone 16 Case C", 1800]]);
+    expect(dropAccessories(ip, ["iphone", "16"]).map((p) => p.id)).toEqual(["0", "1", "2", "3"]);
+    const w = set([
+      ["Apple Watch Ultra Titanium Case Band", 5000],
+      ["Apple Watch Series 9 Aluminium Case", 1599],
+      ["Apple Watch SE Aluminium Case", 899],
+    ]);
+    expect(dropAccessories(w, ["apple", "watch"]).map((p) => p.id)).toEqual(["0", "1", "2"]);
+  });
+  it("R3: all-candidate sets drop the cheap side of a >=4x price gap", () => {
     const w = set([
       ["Apple Watch Series 9 GPS 45mm Midnight Aluminium Case with Sport Band", 1599],
       ["Apple Watch SE GPS 40mm Starlight Aluminium Case with Sport Loop", 899],
@@ -176,9 +186,9 @@ describe("review fixes", () => {
     expect(dropAccessories(w, ["apple", "watch"]).map((p) => p.id)).toEqual(["0", "1"]);
     const f = set([["Xiaomi Smart Band 9 Fitness Tracker", 149], ["Huawei Band 9 Fitness Tracker", 179], ["Fitness Tracker Strap Nylon", 19]]);
     expect(titles(dropAccessories(f, ["fitness", "tracker"]))).toEqual(["Xiaomi Smart Band 9 Fitness Tracker", "Huawei Band 9 Fitness Tracker"]);
-    // all cases: cutoff = 0.4 x 49 = 19.6, so only the cheapest (19) goes
+    // all cases 19-49 SAR: largest consecutive ratio is 39/29 < 4, so no gap and every case is kept
     const c = set([["iPhone 16 Case A", 19], ["iPhone 16 Case B", 25], ["iPhone 16 Case C", 29], ["iPhone 16 Case D", 39], ["iPhone 16 Case E", 49]]);
-    expect(dropAccessories(c, ["iphone", "16"]).map((p) => p.listPrice)).toEqual([25, 29, 39, 49]);
+    expect(dropAccessories(c, ["iphone", "16"]).map((p) => p.listPrice)).toEqual([19, 25, 29, 39, 49]);
   });
   it("I1: variant words block merging", () => {
     const pairs = [

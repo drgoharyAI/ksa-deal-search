@@ -9,6 +9,9 @@ const CONNECTOR = /\b(?:with|includes?|including)\b|[+&]/i;
 /** A candidate accessory is priced below this fraction of the median non-candidate price. */
 const PRICE_RATIO = 0.4;
 
+/** With no non-candidates, a jump of at least this ratio between consecutive candidate prices splits accessories from products. */
+export const GAP_RATIO = 4;
+
 const isAccessoryWord = (t: string) =>
   ACCESSORY.has(t) || (t.endsWith("s") && ACCESSORY.has(t.slice(0, -1)));
 
@@ -45,14 +48,34 @@ function median(xs: number[]): number {
   return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2;
 }
 
-/** Drop strong accessories; drop candidates priced far below the non-candidates' median (or the max candidate price if none). */
+/** Price just above the widest jump between consecutive valid prices, if that jump is >= GAP_RATIO; else null. */
+function gapCutoff(prices: number[]): number | null {
+  const s = prices.filter((x) => Number.isFinite(x) && x > 0).sort((a, b) => a - b);
+  let best = 1;
+  let hi: number | null = null;
+  for (let i = 1; i < s.length; i++) {
+    const r = s[i] / s[i - 1];
+    if (r > best) {
+      best = r;
+      hi = s[i];
+    }
+  }
+  return best >= GAP_RATIO ? hi : null;
+}
+
+/**
+ * Drop strong accessories. Then drop candidates priced far below the non-candidates' median.
+ * With no non-candidates, drop only the candidates below a >= GAP_RATIO price gap, if one exists.
+ */
 export function dropAccessories(products: Product[], queryTokens: string[]): Product[] {
   const live = products.filter((p) => !isStrongAccessory(p.title, queryTokens));
   const mains = live.filter((p) => !isAccessory(p.title, queryTokens));
   if (!live.length) return live;
-  // No clear main product (their own titles may hold "case"/"band"): use the priciest as reference.
-  const cutoff = mains.length
-    ? PRICE_RATIO * median(mains.map((p) => p.listPrice))
-    : PRICE_RATIO * Math.max(...live.map((p) => p.listPrice));
-  return live.filter((p) => !isAccessory(p.title, queryTokens) || p.listPrice >= cutoff);
+  if (mains.length) {
+    const cutoff = PRICE_RATIO * median(mains.map((p) => p.listPrice));
+    return live.filter((p) => !isAccessory(p.title, queryTokens) || p.listPrice >= cutoff);
+  }
+  // No clear main product (their own titles may hold "case"/"band"): split only at a wide price gap.
+  const cutoff = gapCutoff(live.map((p) => p.listPrice));
+  return cutoff === null ? live : live.filter((p) => p.listPrice >= cutoff);
 }
