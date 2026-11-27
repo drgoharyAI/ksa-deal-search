@@ -1,5 +1,5 @@
 {
-  "at": "2026-11-27T07:52:19.692Z",
+  "at": "2026-11-27T09:05:17.185Z",
   "queries": [
     {
       "query": "anc earbuds under 300",
@@ -105,13 +105,6 @@
           "label": "relevant"
         },
         {
-          "key": "aliexpress:1005013556532145",
-          "store": "aliexpress",
-          "price": 11.7,
-          "title": "Pro5S wireless Bluetooth Earphones Stereo Headphones in-ear high-fidelity earbuds noise-cancelling mini sports headphones",
-          "label": "relevant"
-        },
-        {
           "key": "aliexpress:1005013277923646",
           "store": "aliexpress",
           "price": 11.91,
@@ -126,17 +119,24 @@
           "label": "relevant"
         },
         {
-          "key": "aliexpress:1005012742101670",
+          "key": "aliexpress:1005013135242061",
           "store": "aliexpress",
-          "price": 13.46,
-          "title": "Bluetooth Earbuds Wireless Earphones Bluetooth Earphones Bluetooth Headphones with ANC Improve Focus in Noisy Environments",
+          "price": 14.08,
+          "title": "TWS Wireless Bluetooth Earphones ANC Noise Reduction Earbuds With Microphone Outdoor Sports Headphones",
           "label": "relevant"
         },
         {
-          "key": "aliexpress:1005013483959672",
+          "key": "aliexpress:1005012208864665",
           "store": "aliexpress",
-          "price": 13.91,
-          "title": "KEBIDUMEI ANC Bluetooth 6.0 Earphones In Ear Wireless Earbuds HiFi Stereo Noise Cancelling Headphones Sports Gaming Headsets",
+          "price": 14.43,
+          "title": "TWS Bluetooth Earphones for smartphones Wireless Bluetooth Headset Noise Cancelling Earbuds with Mic Wireless Headphones",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005012033327348",
+          "store": "aliexpress",
+          "price": 14.91,
+          "title": "TWS Wireless Bluetooth Earphones ANC Noise Reduction Earbuds With Microphone For IOS Android PC",
           "label": "relevant"
         }
       ]
@@ -217,31 +217,10 @@
           "label": "relevant"
         },
         {
-          "key": "aliexpress:1005012921265814",
-          "store": "aliexpress",
-          "price": 2297.69,
-          "title": "6.1\" Original iPhone 16 Mobile Phone 128GB 256GB ROM Super Retina XDR OLED 48MP Cameras iOS 18 5G LTE Smartphone",
-          "label": "relevant"
-        },
-        {
           "key": "amazon-sa:B0FSKXGNJK",
           "store": "amazon-sa",
           "price": 2349,
           "title": "Apple iPhone 16 (128 GB) - Pink (Renewed)",
-          "label": "relevant"
-        },
-        {
-          "key": "aliexpress:1005010257833190",
-          "store": "aliexpress",
-          "price": 2440.19,
-          "title": "Apple iPhone 16 128GB/256GBGB 6.1inch Super Retina XDR OLED A18 Chip Original Unlocked Cellphone iphone16",
-          "label": "relevant"
-        },
-        {
-          "key": "aliexpress:1005010710620938",
-          "store": "aliexpress",
-          "price": 2479.3,
-          "title": "Original iPhone 16 128GB/256GB/512GB ROM 8GB RAM Unlocked 5G Cell Phone iPhone16 Battery Health Above 90% Looks Like New",
           "label": "relevant"
         },
         {
@@ -277,6 +256,27 @@
           "store": "jarir",
           "price": 2499,
           "title": "Renewed Grade B Apple iPhone 16, 512 GB, Ultramarine, 5G",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005010555358767",
+          "store": "aliexpress",
+          "price": 2594.79,
+          "title": "6.7\" iPhone 16 Plus Mobile Phone Super Retina XDR OLED 48MP Cameras iOS 18 5G Original Smartphone Unlocked",
+          "label": "relevant"
+        },
+        {
+          "key": "jarir:646816",
+          "store": "jarir",
+          "price": 2599,
+          "title": "Renewed Grade B Apple iPhone 16 Pro, 256 GB, Desert Titanium, 5G",
+          "label": "relevant"
+        },
+        {
+          "key": "amazon-sa:B0FSKZGHFJ",
+          "store": "amazon-sa",
+          "price": 2650,
+          "title": "Apple iPhone 16 Pro (128 GB) - Black Titanium (Renewed)",
           "label": "relevant"
         }
       ]
@@ -474,7 +474,7 @@
         }
       ],
       "recordedItems": 465,
-      "results": 354,
+      "results": 360,
       "missingCalls": [],
       "labelled": true,
       "metrics": {
@@ -637,13 +637,6 @@
           "label": "relevant"
         },
         {
-          "key": "aliexpress:1005007906509143",
-          "store": "aliexpress",
-          "price": 897.39,
-          "title": "100% Original Apple Watch Series 6 40mm 44mm GPS Apple Watch S6 Aluminum Case with Sport Band iOS SmartWatch",
-          "label": "relevant"
-        },
-        {
           "key": "noon-sa:N70223264V",
           "store": "noon-sa",
           "price": 899,
@@ -697,6 +690,13 @@
           "store": "jarir",
           "price": 999,
           "title": "Apple Watch SE 3 40 Smartwatch, GPS, Midnight Aluminum Case, Midnight Sport Band, Medium/Large",
+          "label": "relevant"
+        },
+        {
+          "key": "jarir:689617",
+          "store": "jarir",
+          "price": 999,
+          "title": "Apple Watch SE 3 40 Smartwatch, GPS, Starlight Aluminum Case, Sand Sport Band, Medium/Large",
           "label": "relevant"
         }
       ]
@@ -798,13 +798,6 @@
           "label": "relevant"
         },
         {
-          "key": "trendyol-sa:1215925516",
-          "store": "trendyol-sa",
-          "price": 31.15,
-          "title": "KA35 Power Bank with 20,000mAh Capacity and Ultra-Fast Charging",
-          "label": "relevant"
-        },
-        {
           "key": "aliexpress:1005012205832690",
           "store": "aliexpress",
           "price": 31.59,
@@ -837,6 +830,13 @@
           "store": "aliexpress",
           "price": 33.29,
           "title": "20000mAh Power Bank with Makeup Mirror Portable Charger Digital Display Power Bank External Battery for iPhone 17 Samsung Xiaomi",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005009750601822",
+          "store": "aliexpress",
+          "price": 34.99,
+          "title": "20000mAh Power Bank Built-in Cable USB Portable Charger External Battery Fast Charging Powerbank for iPhone 16 Xiaomi Poverbank",
           "label": "relevant"
         }
       ]
@@ -894,18 +894,18 @@
         }
       ],
       "recordedItems": 494,
-      "results": 141,
+      "results": 146,
       "missingCalls": [],
       "labelled": true,
       "metrics": {
         "top": 10,
-        "precisionAt10": 0.7,
+        "precisionAt10": 0.9,
         "accessoryAt10": 0,
-        "wrongModelAt10": 0.2,
+        "wrongModelAt10": 0.1,
         "unlabeledAt10": 0,
-        "recall": 0.8924050632911392,
+        "recall": 0.9050632911392406,
         "relevantRecorded": 158,
-        "relevantKept": 141,
+        "relevantKept": 143,
         "cheapestRelevantFirst": true
       },
       "top": [
@@ -917,25 +917,11 @@
           "label": "relevant"
         },
         {
-          "key": "aliexpress:1005011891367794",
-          "store": "aliexpress",
-          "price": 27.29,
-          "title": "Mechanical Gaming Keyboard Anti-ghosting for Gaming Typing Floating Compact",
-          "label": "relevant"
-        },
-        {
           "key": "amazon-sa:B08CF2W4Z1",
           "store": "amazon-sa",
           "price": 29.9,
           "title": "SKY-TOUCH G2 Computer Gaming Keyboard and Mouse Combo :Keyboard with Flexible Polychromatic LED Lights Mechanical Feel - Black and white",
           "label": "wrong-model"
-        },
-        {
-          "key": "aliexpress:1005013305181258",
-          "store": "aliexpress",
-          "price": 32.19,
-          "title": " Portable 60% Mechanical Gaming Keyboard for Desk Typing and Laptop Use Daily",
-          "label": "relevant"
         },
         {
           "key": "aliexpress:1005013037927286",
@@ -945,20 +931,6 @@
           "label": "relevant"
         },
         {
-          "key": "aliexpress:1005011871310018",
-          "store": "aliexpress",
-          "price": 36.59,
-          "title": "60% Gaming Keyboard RGB Backlit 68 Key Ultra-Compact Keyboard TS91 Ergonomic Waterproof Mechanical Feeling Office",
-          "label": "relevant"
-        },
-        {
-          "key": "aliexpress:1005009018840089",
-          "store": "aliexpress",
-          "price": 36.99,
-          "title": "USB Single Hand Keyboard Luminous Ultra-slim One Handedly Keyboard 3 Color Backlight Mini Gaming Mechanical Keyboard Desktop PC",
-          "label": "off-topic"
-        },
-        {
           "key": "aliexpress:1005007573605623",
           "store": "aliexpress",
           "price": 37.39,
@@ -966,17 +938,45 @@
           "label": "relevant"
         },
         {
-          "key": "aliexpress:1005006421437822",
-          "store": "aliexpress",
-          "price": 49.49,
-          "title": "K98 Wireless Gaming Mechanical Feel Keyboard 2.4G+Bluetooth Dual-mode Backlight Desktop PC/Notebook Available Keyboard",
-          "label": "wrong-model"
-        },
-        {
           "key": "noon-sa:ZCC27E5074D87386784DCZ",
           "store": "noon-sa",
           "price": 53.01,
           "title": "Hirospace Cable-type RGB gaming keyboard, 61-key compact mechanical keyboard",
+          "label": "relevant"
+        },
+        {
+          "key": "amazon-sa:B0DQD3R97M",
+          "store": "amazon-sa",
+          "price": 55.86,
+          "title": "61-Key Mechanical Keyboard, with English and Arabic bilingual input keycap, Red Axis Switch, 17 kinds Adjustment Light, for Windows/MacOS/Android PC Gamers Office - Red Axis/White",
+          "label": "relevant"
+        },
+        {
+          "key": "noon-sa:ZC231290EECBB47BC4317Z",
+          "store": "noon-sa",
+          "price": 59.9,
+          "title": "T-WOLF 61-Key RGB Mechanical Gaming Keyboard with Red Switches and 60% Compact Layout, Detachable Cable, 21-Key Anti-Ghosting, Ergonomic Design for PC and Mac Gamers",
+          "label": "relevant"
+        },
+        {
+          "key": "noon-sa:Z3E9585FD6610DFF29F0BZ",
+          "store": "noon-sa",
+          "price": 61.1,
+          "title": "DNPO Mechanical Gaming Keyboard SA Layout Rainbow Backlit",
+          "label": "relevant"
+        },
+        {
+          "key": "noon-sa:Z912CBE6EE9EB90D176FDZ",
+          "store": "noon-sa",
+          "price": 63.7,
+          "title": "Nacodex NK61 Red Switches, Mechanical Gaming Keyboard, Hot-Swappable, 60% Mini Version, Detachable USB Cable, 525 grams, Full Anti-Ghosting, Silent RGB Lighting, Suitable for PC/PS4/Xbox Players, Mac White",
+          "label": "relevant"
+        },
+        {
+          "key": "noon-sa:Z3DF43CFB444FE04C0B22Z",
+          "store": "noon-sa",
+          "price": 65,
+          "title": "DUNELIFE 61-Key Mechanical Gaming Keyboard – Supports Hot-Swapping, 16.8 Million Color RGB Backlighting, Arabic/English Layout, Waterproof and Anti-Ghosting Design (Red Switches), Perfectly Ergonomic",
           "label": "relevant"
         }
       ]
@@ -1034,7 +1034,7 @@
         }
       ],
       "recordedItems": 501,
-      "results": 382,
+      "results": 398,
       "missingCalls": [],
       "labelled": true,
       "metrics": {
@@ -1043,9 +1043,9 @@
         "accessoryAt10": 0,
         "wrongModelAt10": 0,
         "unlabeledAt10": 0,
-        "recall": 0.9694117647058823,
+        "recall": 0.9741176470588235,
         "relevantRecorded": 425,
-        "relevantKept": 412,
+        "relevantKept": 414,
         "cheapestRelevantFirst": true
       },
       "top": [
@@ -1075,13 +1075,6 @@
           "store": "aliexpress",
           "price": 4.24,
           "title": "2.4GHz Wireless Optical Game Mouse for PC Laptop Computer USB Receiver Mini Portable Mouse Mice",
-          "label": "relevant"
-        },
-        {
-          "key": "aliexpress:1005009599066007",
-          "store": "aliexpress",
-          "price": 4.24,
-          "title": "Gaming Mouse Wired M3 Colorful Glowing Electric Office Game USB Mice Laptop Accessories",
           "label": "relevant"
         },
         {
@@ -1117,6 +1110,13 @@
           "store": "aliexpress",
           "price": 9.57,
           "title": "MINGCVIL Rechargeable Wireless Mouse Gaming Computer Bluetooth Mouse USB Mechanical E-Sports Backlight PC Mouse For Computer",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005006904646242",
+          "store": "aliexpress",
+          "price": 9.91,
+          "title": "Ergonomic Wireless Gaming Mouse RGB Backlight USB Compatible Rechargeable Silent Backlit Mouse for Laptop PC - Silent Gaming Mic",
           "label": "relevant"
         }
       ]
@@ -1526,17 +1526,17 @@
           "label": "relevant"
         },
         {
-          "key": "aliexpress:1005012332030303",
-          "store": "aliexpress",
-          "price": 495.19,
-          "title": "24/27/32/34 Inch Curved Monitor | 1K/2K/4K | Height-Adjustable + Backlit | Up To 280Hz HDR400",
-          "label": "relevant"
-        },
-        {
           "key": "amazon-sa:B0FQBQWWDP",
           "store": "amazon-sa",
           "price": 499.96,
           "title": "Gawfolk 27 inch Gaming Monitor 4K 60Hz IPS Computer Monitors",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005010059310871",
+          "store": "aliexpress",
+          "price": 519.9,
+          "title": "Chinese factory New280Hz/360Hz/540Hz 600Hz 1K 4K Gaming Screen Desktop 24 27 32 Inch LedPc computer Monitor",
           "label": "relevant"
         }
       ]
@@ -1594,7 +1594,7 @@
         }
       ],
       "recordedItems": 449,
-      "results": 230,
+      "results": 233,
       "missingCalls": [],
       "labelled": true,
       "metrics": {
@@ -1734,7 +1734,7 @@
         }
       ],
       "recordedItems": 473,
-      "results": 301,
+      "results": 304,
       "missingCalls": [],
       "labelled": true,
       "metrics": {
@@ -1743,9 +1743,9 @@
         "accessoryAt10": 0,
         "wrongModelAt10": 0,
         "unlabeledAt10": 0,
-        "recall": 0.9415204678362573,
+        "recall": 0.9502923976608187,
         "relevantRecorded": 342,
-        "relevantKept": 322,
+        "relevantKept": 325,
         "cheapestRelevantFirst": true
       },
       "top": [
@@ -1918,13 +1918,6 @@
           "label": "relevant"
         },
         {
-          "key": "aliexpress:1005005900302218",
-          "store": "aliexpress",
-          "price": 11.52,
-          "title": "Watch Smart Wristwatch Support SIM Card Bracelet Calendar Equipment",
-          "label": "relevant"
-        },
-        {
           "key": "aliexpress:1005011965958554",
           "store": "aliexpress",
           "price": 11.74,
@@ -1957,6 +1950,13 @@
           "store": "aliexpress",
           "price": 15.17,
           "title": "New Smart Watch 1.88'' HD Screen Bluetooth Calls Sleep Blood Oxygen Pressure Health Monitoring Smart Watches For Women Men Ht30",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005013213405743",
+          "store": "aliexpress",
+          "price": 18.59,
+          "title": "2026 New Military-grade Smart Watch Men GPS Flashlight 3ATM Waterproof Watch Bluetooth Call 100+Sport Outdoor Smartwatch Pk Ht22",
           "label": "relevant"
         }
       ]
@@ -2014,7 +2014,7 @@
         }
       ],
       "recordedItems": 471,
-      "results": 346,
+      "results": 351,
       "missingCalls": [],
       "labelled": true,
       "metrics": {
@@ -2023,19 +2023,12 @@
         "accessoryAt10": 0,
         "wrongModelAt10": 0,
         "unlabeledAt10": 0,
-        "recall": 0.95,
+        "recall": 0.9578947368421052,
         "relevantRecorded": 380,
-        "relevantKept": 361,
-        "cheapestRelevantFirst": true
+        "relevantKept": 364,
+        "cheapestRelevantFirst": false
       },
       "top": [
-        {
-          "key": "trendyol-sa:1193565502",
-          "store": "trendyol-sa",
-          "price": 16.45,
-          "title": "Hair Dryer Brush Model OK 723",
-          "label": "relevant"
-        },
         {
           "key": "trendyol-sa:1194781843",
           "store": "trendyol-sa",
@@ -2065,13 +2058,6 @@
           "label": "relevant"
         },
         {
-          "key": "trendyol-sa:994920220",
-          "store": "trendyol-sa",
-          "price": 21.6,
-          "title": "Mini Hair dryer - Travel",
-          "label": "relevant"
-        },
-        {
           "key": "trendyol-sa:1194709064",
           "store": "trendyol-sa",
           "price": 22.28,
@@ -2097,6 +2083,20 @@
           "store": "trendyol-sa",
           "price": 26.33,
           "title": "Low Noise Quick Dry Hair Dryer",
+          "label": "relevant"
+        },
+        {
+          "key": "trendyol-sa:1237201696",
+          "store": "trendyol-sa",
+          "price": 26.33,
+          "title": "DX1348 Hair Dryer with Hot & Cold Air, Quick Drying, Low Noise and 1.6m Power Cord",
+          "label": "relevant"
+        },
+        {
+          "key": "trendyol-sa:1216604583",
+          "store": "trendyol-sa",
+          "price": 26.56,
+          "title": "Hair Dryer 4000W, 2 Speeds, 3 Heat Settings, Cool Shot, DC Motor Blow Dryer for Home & Salon, Black",
           "label": "relevant"
         }
       ]
@@ -2177,13 +2177,6 @@
           "label": "relevant"
         },
         {
-          "key": "aliexpress:1005006075318651",
-          "store": "aliexpress",
-          "price": 4.24,
-          "title": "Creative Hifi Stereo Metal Wireless Subwoofer Wireless Bluetooth Speaker Music Player Mini Speakers",
-          "label": "relevant"
-        },
-        {
           "key": "aliexpress:1005004094288848",
           "store": "aliexpress",
           "price": 6.66,
@@ -2212,13 +2205,6 @@
           "label": "relevant"
         },
         {
-          "key": "aliexpress:1005010631934394",
-          "store": "aliexpress",
-          "price": 7.68,
-          "title": "Mini Mushroom Bluetooth Speaker Creative Mini Suction Cup Portable Smart Speaker for Phones ﻿",
-          "label": "relevant"
-        },
-        {
           "key": "aliexpress:1005006211973421",
           "store": "aliexpress",
           "price": 7.91,
@@ -2226,17 +2212,31 @@
           "label": "relevant"
         },
         {
-          "key": "aliexpress:1005006212045351",
-          "store": "aliexpress",
-          "price": 7.91,
-          "title": "Mini Portable Wireless Caixa De Som Bluetooth Speaker Sound Music Box Blutooth For Subwoofer Blootooth Hifi Acoustics Hand Free",
-          "label": "relevant"
-        },
-        {
           "key": "aliexpress:1005007382863041",
           "store": "aliexpress",
           "price": 7.91,
           "title": "Portable Wireless Caixa De Som Bluetooth Speaker Mini Music Sound Box Blutooth For Subwoofer Bocina Handfree Baffe Blootooth USB",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005005901279613",
+          "store": "aliexpress",
+          "price": 8.1,
+          "title": "Portable Bluetooth Speaker Outdoor Waterproof Wireless TWS Radio Column Box Speaker Support TF card Stereo 3D Hi-Fi Music Player",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005006727539792",
+          "store": "aliexpress",
+          "price": 8.91,
+          "title": "Mini A10 Wireless Bluetooth Speaker Metal Subwoofer Small Steel Cannon Sound Box Support TF Card for Laptop PC Indoor Outdoor",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005007457507314",
+          "store": "aliexpress",
+          "price": 8.91,
+          "title": "Wireless Caixa De Som Bluetooth Speaker Portable Music Sound Box Mini Blutooth For Subwoofer Baffle Hand Free Audio Bocina Baffe",
           "label": "relevant"
         }
       ]
@@ -2434,7 +2434,7 @@
         }
       ],
       "recordedItems": 478,
-      "results": 286,
+      "results": 287,
       "missingCalls": [],
       "labelled": true,
       "metrics": {
@@ -2443,9 +2443,9 @@
         "accessoryAt10": 0,
         "wrongModelAt10": 0,
         "unlabeledAt10": 0,
-        "recall": 0.8806818181818182,
+        "recall": 0.8835227272727273,
         "relevantRecorded": 352,
-        "relevantKept": 310,
+        "relevantKept": 311,
         "cheapestRelevantFirst": true
       },
       "top": [
@@ -2499,13 +2499,6 @@
           "label": "relevant"
         },
         {
-          "key": "aliexpress:1005007171249171",
-          "store": "aliexpress",
-          "price": 8.91,
-          "title": "Six-Speed Automatic Electric Toothbrush Adult & Children's Universal Soft Bristle Charging Smart Toothbrush for All Ages",
-          "label": "relevant"
-        },
-        {
           "key": "aliexpress:1005010361724538",
           "store": "aliexpress",
           "price": 8.91,
@@ -2517,6 +2510,13 @@
           "store": "aliexpress",
           "price": 9.29,
           "title": "1 Set Portable X-3 Sonic Electric Toothbrush Set IPX7 Waterproof USB Charging Adjustable Modes Travel Friendly Oral Hygiene",
+          "label": "relevant"
+        },
+        {
+          "key": "trendyol-sa:1250355467",
+          "store": "trendyol-sa",
+          "price": 11.53,
+          "title": "White USB Rechargeable Toothbrush, Electric Dental Cleaning Brush with 3 Spare Heads",
           "label": "relevant"
         }
       ]
@@ -2574,7 +2574,7 @@
         }
       ],
       "recordedItems": 524,
-      "results": 144,
+      "results": 146,
       "missingCalls": [],
       "labelled": true,
       "metrics": {
@@ -2714,54 +2714,26 @@
         }
       ],
       "recordedItems": 492,
-      "results": 246,
+      "results": 250,
       "missingCalls": [],
       "labelled": true,
       "metrics": {
         "top": 10,
-        "precisionAt10": 0.7,
-        "accessoryAt10": 0.2,
+        "precisionAt10": 1,
+        "accessoryAt10": 0,
         "wrongModelAt10": 0,
         "unlabeledAt10": 0,
-        "recall": 0.6103286384976526,
+        "recall": 0.6126760563380281,
         "relevantRecorded": 426,
-        "relevantKept": 260,
-        "cheapestRelevantFirst": false
+        "relevantKept": 261,
+        "cheapestRelevantFirst": true
       },
       "top": [
-        {
-          "key": "trendyol-sa:353074944",
-          "store": "trendyol-sa",
-          "price": 12.27,
-          "title": "Coffee Machine Colored Socks",
-          "label": "off-topic"
-        },
-        {
-          "key": "trendyol-sa:892761997",
-          "store": "trendyol-sa",
-          "price": 14.73,
-          "title": "D1 Coffee Brush Coffee Brush Set Espresso Brush Kit Include Wooden Coffee Grinder Machine Cleaning B",
-          "label": "accessory"
-        },
-        {
-          "key": "trendyol-sa:1159943144",
-          "store": "trendyol-sa",
-          "price": 15.06,
-          "title": "58.5mm Single Layer Secondary Water Distribution Network Stainless Steel Coffee Machine Handle Filte",
-          "label": "accessory"
-        },
         {
           "key": "amazon-sa:B0DXVXPS9L",
           "store": "amazon-sa",
           "price": 29.92,
           "title": "Imperial Electric Turkish Coffee Maker, 600W Fast Heating System, 0.3L Compact Capacity, Elegant Design Coffee Machine for Authentic Turkish Coffee Preparation, Easy-to-Use Home and Office Coffee",
-          "label": "relevant"
-        },
-        {
-          "key": "jarir:JPP-8904468304347",
-          "store": "jarir",
-          "price": 39,
-          "title": "Impex Turkish Coffee Machine,Multicolor",
           "label": "relevant"
         },
         {
@@ -2779,13 +2751,6 @@
           "label": "relevant"
         },
         {
-          "key": "jarir:JPP-6291071040420",
-          "store": "jarir",
-          "price": 49,
-          "title": "Nikai Drip Coffee Machine,1.3 L,Black",
-          "label": "relevant"
-        },
-        {
           "key": "aliexpress:1005013323876130",
           "store": "aliexpress",
           "price": 49.39,
@@ -2797,6 +2762,41 @@
           "store": "aliexpress",
           "price": 50.25,
           "title": "Portable Capsule Coffee Machine Heating fully Semi-automatic Espresso Mini Coffee Maker For Car Outdoor Home Using 5Cups 80ml",
+          "label": "relevant"
+        },
+        {
+          "key": "amazon-sa:B0D4JZBDBQ",
+          "store": "amazon-sa",
+          "price": 50.59,
+          "title": "JANO 600W Electric Coffee Machine, Stainless Steel, 400 Ml, Easy-To-Control Plastic Handle, Silver/Black JN03402, 2 Years Warranty",
+          "label": "relevant"
+        },
+        {
+          "key": "noon-sa:Z3EE8F23B85948ACE2818Z",
+          "store": "noon-sa",
+          "price": 51.52,
+          "title": "LAC LAICHY LAC Electric Coffee Kettle，500ML Turkish Coffee Machine，650W，360° Rotatable Base Coffee Maker,Stainless Steel Material ，Suitable for Home",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005012591172104",
+          "store": "aliexpress",
+          "price": 54.65,
+          "title": "Coffee Machine Automatic Drip Coffee Machine American Milk Tea Machine Coffee Pot",
+          "label": "relevant"
+        },
+        {
+          "key": "amazon-sa:B0DDQ9LWFH",
+          "store": "amazon-sa",
+          "price": 55,
+          "title": "Impex Drip Coffee Maker 1.25L Coffee Machine With 12 Cup Glass Carafe, Removable Funnel And Filter, Keep-Warm And Anti Drip Function, Indicator Light,2 Years Warranty-CM1912",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005010153959346",
+          "store": "aliexpress",
+          "price": 55.81,
+          "title": "JFBONIN Electric Portable Coffee Machine Capsule Ground Coffee Brewer for Coffee Powder And Coffee Capsule - Coffee Maker",
           "label": "relevant"
         }
       ]
@@ -2905,20 +2905,6 @@
           "label": "relevant"
         },
         {
-          "key": "aliexpress:1005010485268524",
-          "store": "aliexpress",
-          "price": 2896.88,
-          "title": "IPad Air 4 A14 Bionic chip 10.9Inch 64G/256G Touch ID WiFi 4G 6-core CPU 4-core GPU 16-core Neural Engine.",
-          "label": "relevant"
-        },
-        {
-          "key": "amazon-sa:B0GQVFZ7W7",
-          "store": "amazon-sa",
-          "price": 2899,
-          "title": "Apple iPad Air 11-inch (M4): Liquid Retina Display, 128GB, 12MP Front/Back Camera, Wi-Fi 7 with Apple N1, Touch ID, All-Day Battery Life — Blue",
-          "label": "relevant"
-        },
-        {
           "key": "noon-sa:N52866668A",
           "store": "noon-sa",
           "price": 2906,
@@ -2937,6 +2923,20 @@
           "store": "noon-sa",
           "price": 3079,
           "title": "Apple iPad Air  2026 (8th Gen) M4 11-Inch Wi-Fi 128GB Blue - Middle East Version",
+          "label": "relevant"
+        },
+        {
+          "key": "jarir:678790",
+          "store": "jarir",
+          "price": 3099,
+          "title": "Apple iPad Air 11 M4 Tablet - Wi-Fi 2026, Apple Intelligence, 11\", 128 GB, Space Grey, 8-core CPU",
+          "label": "relevant"
+        },
+        {
+          "key": "jarir:678784",
+          "store": "jarir",
+          "price": 3099,
+          "title": "Apple iPad Air 11 M4 Tablet - Wi-Fi 2026, Apple Intelligence, 11\", 128 GB, Purple, 8-core CPU",
           "label": "relevant"
         }
       ]
@@ -3134,7 +3134,7 @@
         }
       ],
       "recordedItems": 471,
-      "results": 350,
+      "results": 352,
       "missingCalls": [],
       "labelled": true,
       "metrics": {
@@ -3220,14 +3220,1638 @@
           "label": "relevant"
         }
       ]
+    },
+    {
+      "query": "air purifier",
+      "slug": "air-purifier",
+      "stores": [
+        {
+          "store": "aliexpress",
+          "complete": true,
+          "calls": 2
+        },
+        {
+          "store": "amazon-sa",
+          "complete": true,
+          "calls": 2
+        },
+        {
+          "store": "jarir",
+          "complete": true,
+          "calls": 2
+        },
+        {
+          "store": "noon-sa",
+          "complete": true,
+          "calls": 2
+        },
+        {
+          "store": "trendyol-sa",
+          "complete": true,
+          "calls": 2
+        }
+      ],
+      "statuses": [
+        {
+          "site": "aliexpress",
+          "status": "ok"
+        },
+        {
+          "site": "amazon-sa",
+          "status": "ok"
+        },
+        {
+          "site": "jarir",
+          "status": "ok"
+        },
+        {
+          "site": "noon-sa",
+          "status": "ok"
+        },
+        {
+          "site": "trendyol-sa",
+          "status": "ok"
+        }
+      ],
+      "recordedItems": 470,
+      "results": 299,
+      "missingCalls": [],
+      "labelled": true,
+      "metrics": {
+        "top": 10,
+        "precisionAt10": 1,
+        "accessoryAt10": 0,
+        "wrongModelAt10": 0,
+        "unlabeledAt10": 0,
+        "recall": 0.8888888888888888,
+        "relevantRecorded": 333,
+        "relevantKept": 296,
+        "cheapestRelevantFirst": false
+      },
+      "top": [
+        {
+          "key": "aliexpress:1005012961152157",
+          "store": "aliexpress",
+          "price": 15.22,
+          "title": "Negative Ion Air Purifier Plug in Mini Anion Generator Odor Eliminator for Pet Smoke Kitchen Bathroom Air Cleaner 1W",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005009888669499",
+          "store": "aliexpress",
+          "price": 15.29,
+          "title": "Plug-In Negative Ion Air Purifier Generator Home Portable Air Freshener Ionizer Pet/Kitchen Odor Anion Smell Cleaner Purifier",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005013637598871",
+          "store": "aliexpress",
+          "price": 18.73,
+          "title": "Plug In Air Purifier Negative Ion Ionizer Mini Quiet Air Cleaner for Pet Odor Smoke Dust Kitchen Bathroom Home Freshener",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005007128747603",
+          "store": "aliexpress",
+          "price": 20.72,
+          "title": "Air Purifiers for Bedroom Kitchen Quiet Air Cleaner with H11 HEPA Filter Portable with 2 Speeds for Allergies Pollen Pet Dust",
+          "label": "relevant"
+        },
+        {
+          "key": "trendyol-sa:1104469988",
+          "store": "trendyol-sa",
+          "price": 22.41,
+          "title": "European standard White Mini Anion Purifier, Plug-in Air Purifier with Negative Ion Generator Odor R",
+          "label": "relevant"
+        },
+        {
+          "key": "trendyol-sa:1104469055",
+          "store": "trendyol-sa",
+          "price": 22.59,
+          "title": "US White Mini Anion Purifier, Plug-in Air Purifier with Negative Ion Generator Odor Remove for Home,",
+          "label": "relevant"
+        },
+        {
+          "key": "trendyol-sa:1164078181",
+          "store": "trendyol-sa",
+          "price": 22.68,
+          "title": "US White Air Purifier Plug In Negative Ion Ionizer Air Purifier for Household Quiet Operation Ionize",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005007478697503",
+          "store": "aliexpress",
+          "price": 24.25,
+          "title": "Mini Desktop Air Purifier HEPA Filtered Air Purified Air with Fragrance Negative Ion Purifier",
+          "label": "relevant"
+        },
+        {
+          "key": "trendyol-sa:1077365819",
+          "store": "trendyol-sa",
+          "price": 24.67,
+          "title": "Negative Ion Air Purifier,Portable Negative Ion Generator,for Use in Home,Bedroom,Toilets",
+          "label": "relevant"
+        },
+        {
+          "key": "trendyol-sa:1164079274",
+          "store": "trendyol-sa",
+          "price": 25.12,
+          "title": "EU WHITE Mini Air Purifier Plug In Negative Ion Ionizer Air Purifier for Office Bedroom Quiet Ionize",
+          "label": "relevant"
+        }
+      ]
+    },
+    {
+      "query": "gaming chair",
+      "slug": "gaming-chair",
+      "stores": [
+        {
+          "store": "aliexpress",
+          "complete": true,
+          "calls": 2
+        },
+        {
+          "store": "amazon-sa",
+          "complete": true,
+          "calls": 2
+        },
+        {
+          "store": "jarir",
+          "complete": true,
+          "calls": 2
+        },
+        {
+          "store": "noon-sa",
+          "complete": true,
+          "calls": 2
+        },
+        {
+          "store": "trendyol-sa",
+          "complete": true,
+          "calls": 2
+        }
+      ],
+      "statuses": [
+        {
+          "site": "aliexpress",
+          "status": "ok"
+        },
+        {
+          "site": "amazon-sa",
+          "status": "ok"
+        },
+        {
+          "site": "jarir",
+          "status": "ok"
+        },
+        {
+          "site": "noon-sa",
+          "status": "ok"
+        },
+        {
+          "site": "trendyol-sa",
+          "status": "ok"
+        }
+      ],
+      "recordedItems": 490,
+      "results": 287,
+      "missingCalls": [],
+      "labelled": true,
+      "metrics": {
+        "top": 10,
+        "precisionAt10": 1,
+        "accessoryAt10": 0,
+        "wrongModelAt10": 0,
+        "unlabeledAt10": 0,
+        "recall": 0.9865591397849462,
+        "relevantRecorded": 372,
+        "relevantKept": 367,
+        "cheapestRelevantFirst": true
+      },
+      "top": [
+        {
+          "key": "amazon-sa:B0GQTJBWMQ",
+          "store": "amazon-sa",
+          "price": 19,
+          "title": "BESTONE Gaming Chair with Footrest - Premium Ergonomic High Back Design, 360° Rotation Reclining Height Adjustable Computer Chair for Saudi Gamers (Black-2)",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005009901325723",
+          "store": "aliexpress",
+          "price": 60.99,
+          "title": "1841 2025 Chairman Gaming Office Task Chair for Conference Study Student - Factory Direct Sales High Quality Furniture",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005012751838923",
+          "store": "aliexpress",
+          "price": 72.92,
+          "title": "Black Mesh Gaming Office Chair Mid Back Lumbar Support Adjustable Height Swivel For Home Computer Desk Task",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005013159000423",
+          "store": "aliexpress",
+          "price": 77.49,
+          "title": "Ergonomic Reclining High Back Mesh Living Room Rocking Gaming Chair Computer Desk Swivel Rolling Lumbar Support Pillow",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005013255695462",
+          "store": "aliexpress",
+          "price": 103.29,
+          "title": "Ergonomic Gaming Chair Adjustable Back Support Computer Seat for Live Streaming Host Office Work College Student Dormitory",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005012038950850",
+          "store": "aliexpress",
+          "price": 108.69,
+          "title": "Home Computer Chair, Comfortable for Long Sitting, Office Chair, Reclining Sofa, Gaming Chair with Footrest, Boss Chair",
+          "label": "relevant"
+        },
+        {
+          "key": "noon-sa:Z7791C3AE6CE7EC8F5225Z",
+          "store": "noon-sa",
+          "price": 109.85,
+          "title": "DUNISO Floor Chair, Folding Lazy Sofa with Adjustable Backrest, Padded Floor Gaming Chair with Removable Back Pillow, Back Support Floor Seat, Lightweight Lounger Chair for Meditation, Reading, Watching, Video-Gaming, Adult & Kid",
+          "label": "relevant"
+        },
+        {
+          "key": "noon-sa:Z21A9AD5D618095E98159Z",
+          "store": "noon-sa",
+          "price": 123.5,
+          "title": "DUNISO Folding floor Gaming Reading Chair with 6 Adjustable Position, Ergonomic Lazy Sofa Padded Sleeper with back support for Reading Games Meditating Padded Gaming Chair",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005012665789662",
+          "store": "aliexpress",
+          "price": 128.39,
+          "title": "Gaming Chair PU Leather Ergonomic Computer Chair Wide Seat Wear Resistant Swivel Office Chair for Women Bedroom",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005012510067871",
+          "store": "aliexpress",
+          "price": 132.15,
+          "title": "Ergonomic Chair Office Chair Gaming Chair",
+          "label": "relevant"
+        }
+      ]
+    },
+    {
+      "query": "electric kettle",
+      "slug": "electric-kettle",
+      "stores": [
+        {
+          "store": "aliexpress",
+          "complete": true,
+          "calls": 2
+        },
+        {
+          "store": "amazon-sa",
+          "complete": true,
+          "calls": 2
+        },
+        {
+          "store": "jarir",
+          "complete": true,
+          "calls": 2
+        },
+        {
+          "store": "noon-sa",
+          "complete": true,
+          "calls": 2
+        },
+        {
+          "store": "trendyol-sa",
+          "complete": true,
+          "calls": 2
+        }
+      ],
+      "statuses": [
+        {
+          "site": "aliexpress",
+          "status": "ok"
+        },
+        {
+          "site": "amazon-sa",
+          "status": "ok"
+        },
+        {
+          "site": "jarir",
+          "status": "ok"
+        },
+        {
+          "site": "noon-sa",
+          "status": "ok"
+        },
+        {
+          "site": "trendyol-sa",
+          "status": "ok"
+        }
+      ],
+      "recordedItems": 486,
+      "results": 350,
+      "missingCalls": [],
+      "labelled": true,
+      "metrics": {
+        "top": 10,
+        "precisionAt10": 1,
+        "accessoryAt10": 0,
+        "wrongModelAt10": 0,
+        "unlabeledAt10": 0,
+        "recall": 0.8603603603603603,
+        "relevantRecorded": 444,
+        "relevantKept": 382,
+        "cheapestRelevantFirst": true
+      },
+      "top": [
+        {
+          "key": "aliexpress:1005013324864824",
+          "store": "aliexpress",
+          "price": 17.27,
+          "title": "Fast Boiling 2L Stainless Steel Electric Water Kettle, Food-grade Hot Water Heater Multi-purpose Teapot for Coffee and Beverages",
+          "label": "relevant"
+        },
+        {
+          "key": "trendyol-sa:1209829082",
+          "store": "trendyol-sa",
+          "price": 18.57,
+          "title": "RA65 Compact Electric Kettle with Rapid-Boil Technology – White",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005012525508588",
+          "store": "aliexpress",
+          "price": 19.39,
+          "title": "Foldable Electric Kettle Tea Kettle Lightweight Easy Storage Instant Heating Pot Silicone Hot Water Boiling for Hotels Dorm",
+          "label": "relevant"
+        },
+        {
+          "key": "trendyol-sa:1147119674",
+          "store": "trendyol-sa",
+          "price": 19.74,
+          "title": "TC-2466 Portable Electric Travel Kettle, 0.5L Stainless Steel Mini Water Boiler with 2 Cups, Compact Design with UK 3-Pin Plug.",
+          "label": "relevant"
+        },
+        {
+          "key": "trendyol-sa:1143938736",
+          "store": "trendyol-sa",
+          "price": 19.75,
+          "title": "TC-2466 Portable Electric Travel Kettle (0.5L Stainless Steel, 2 Cups, UK 3-Pin Plug)",
+          "label": "relevant"
+        },
+        {
+          "key": "amazon-sa:B0H1CPPC3C",
+          "store": "amazon-sa",
+          "price": 21.21,
+          "title": "Electric Kettle 1000W, Stainless Steel, 0.5 Liter, Fast Vacuum Design, Auto Shut-Off, Heat Insulated Handle, Boil-Dry Protection, TC2466",
+          "label": "relevant"
+        },
+        {
+          "key": "trendyol-sa:1228620551",
+          "store": "trendyol-sa",
+          "price": 21.45,
+          "title": "Portable Electric Kettle 0.8L 600W Stainless Steel Water Boiler with Automatic Shut-Off, Cool-Touch Handle, Indicator Light, Filter & 2 Cups",
+          "label": "relevant"
+        },
+        {
+          "key": "trendyol-sa:1196249065",
+          "store": "trendyol-sa",
+          "price": 21.59,
+          "title": "RA65 Compact Electric Kettle Fast Boil Technology - 304 Stainless Steel Interior WHITE",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005013345722022",
+          "store": "aliexpress",
+          "price": 21.72,
+          "title": "2L Food-Grade Stainless Steel Electric Kettle, Hot Water Teapot Boiler, Electric Water Heater for Coffee & Beverage Making",
+          "label": "relevant"
+        },
+        {
+          "key": "trendyol-sa:1233711454",
+          "store": "trendyol-sa",
+          "price": 22.31,
+          "title": "600ml Foldable Silicone Portable Electric Kettle, 600W Foldable Hot Water Kettle, Small 110/220V Kettle with On/Off Button for Travel, Office, Home, Camping, and Easy Storage (White)",
+          "label": "relevant"
+        }
+      ]
+    },
+    {
+      "query": "nintendo switch 2",
+      "slug": "nintendo-switch-2",
+      "stores": [
+        {
+          "store": "aliexpress",
+          "complete": true,
+          "calls": 2
+        },
+        {
+          "store": "amazon-sa",
+          "complete": true,
+          "calls": 2
+        },
+        {
+          "store": "jarir",
+          "complete": true,
+          "calls": 2
+        },
+        {
+          "store": "noon-sa",
+          "complete": true,
+          "calls": 2
+        },
+        {
+          "store": "trendyol-sa",
+          "complete": true,
+          "calls": 2
+        }
+      ],
+      "statuses": [
+        {
+          "site": "aliexpress",
+          "status": "ok"
+        },
+        {
+          "site": "amazon-sa",
+          "status": "ok"
+        },
+        {
+          "site": "jarir",
+          "status": "ok"
+        },
+        {
+          "site": "noon-sa",
+          "status": "ok"
+        },
+        {
+          "site": "trendyol-sa",
+          "status": "ok"
+        }
+      ],
+      "recordedItems": 448,
+      "results": 23,
+      "missingCalls": [],
+      "labelled": true,
+      "metrics": {
+        "top": 10,
+        "precisionAt10": 0.9,
+        "accessoryAt10": 0.1,
+        "wrongModelAt10": 0,
+        "unlabeledAt10": 0,
+        "recall": 0.9354838709677419,
+        "relevantRecorded": 31,
+        "relevantKept": 29,
+        "cheapestRelevantFirst": true
+      },
+      "top": [
+        {
+          "key": "amazon-sa:B0F2J4SYJ2",
+          "store": "amazon-sa",
+          "price": 2049,
+          "title": "Nintendo Switch 2 Console",
+          "label": "relevant"
+        },
+        {
+          "key": "noon-sa:N70183206V",
+          "store": "noon-sa",
+          "price": 2049,
+          "title": "Nintendo Switch 2 Standalone (International Version)",
+          "label": "relevant"
+        },
+        {
+          "key": "noon-sa:N70183277V",
+          "store": "noon-sa",
+          "price": 2217,
+          "title": "Nintendo Switch 2 Console - International Version [ New 2025 Model ]",
+          "label": "relevant"
+        },
+        {
+          "key": "amazon-sa:B0F4DJNL7N",
+          "store": "amazon-sa",
+          "price": 2299,
+          "title": "Nintendo Switch 2 Console, 2 Year Manufacturer Warranty (KSA Version)",
+          "label": "relevant"
+        },
+        {
+          "key": "jarir:655801",
+          "store": "jarir",
+          "price": 2299,
+          "title": "Nintendo Switch 2 Joy-Con 2 Controller, 256 GB, Black",
+          "label": "accessory"
+        },
+        {
+          "key": "aliexpress:1005009583728700",
+          "store": "aliexpress",
+          "price": 2345.44,
+          "title": "Nintendo Switch 2 Game Console NS2 7.9-inch LCD 1080P 120Hz Display Joy‑Con2 Handle Console Stable TV Mode Video Gaming Console",
+          "label": "relevant"
+        },
+        {
+          "key": "noon-sa:N70183207V",
+          "store": "noon-sa",
+          "price": 2397,
+          "title": "Nintendo Switch 2 + Mario Kart World Bundle",
+          "label": "relevant"
+        },
+        {
+          "key": "amazon-sa:B0GZH8NWND",
+          "store": "amazon-sa",
+          "price": 2399,
+          "title": "Nintendo Switch 2 Console + Switch 2 Carrying Case and Screen Protector (KSA Version)",
+          "label": "relevant"
+        },
+        {
+          "key": "amazon-sa:B0F4DL6SYJ",
+          "store": "amazon-sa",
+          "price": 2414,
+          "title": "Nintendo Switch 2 Console + Mario Kart World Bundle, 2 Year Manufacturer Warranty (KSA Version)",
+          "label": "relevant"
+        },
+        {
+          "key": "noon-sa:N70168806V",
+          "store": "noon-sa",
+          "price": 2414,
+          "title": "Nintendo Switch 2 With Mario Kart World Bundle (KSA Version)",
+          "label": "relevant"
+        }
+      ]
+    },
+    {
+      "query": "baby stroller",
+      "slug": "baby-stroller",
+      "stores": [
+        {
+          "store": "aliexpress",
+          "complete": true,
+          "calls": 2
+        },
+        {
+          "store": "amazon-sa",
+          "complete": true,
+          "calls": 2
+        },
+        {
+          "store": "jarir",
+          "complete": true,
+          "calls": 2
+        },
+        {
+          "store": "noon-sa",
+          "complete": true,
+          "calls": 2
+        },
+        {
+          "store": "trendyol-sa",
+          "complete": true,
+          "calls": 2
+        }
+      ],
+      "statuses": [
+        {
+          "site": "aliexpress",
+          "status": "ok"
+        },
+        {
+          "site": "amazon-sa",
+          "status": "ok"
+        },
+        {
+          "site": "jarir",
+          "status": "ok"
+        },
+        {
+          "site": "noon-sa",
+          "status": "ok"
+        },
+        {
+          "site": "trendyol-sa",
+          "status": "ok"
+        }
+      ],
+      "recordedItems": 487,
+      "results": 258,
+      "missingCalls": [],
+      "labelled": true,
+      "metrics": {
+        "top": 10,
+        "precisionAt10": 1,
+        "accessoryAt10": 0,
+        "wrongModelAt10": 0,
+        "unlabeledAt10": 0,
+        "recall": 0.7172774869109948,
+        "relevantRecorded": 382,
+        "relevantKept": 274,
+        "cheapestRelevantFirst": false
+      },
+      "top": [
+        {
+          "key": "aliexpress:1005011809273083",
+          "store": "aliexpress",
+          "price": 61.02,
+          "title": "Stroller Lightweight Folding Simple Umbrella Cart Can Sit and Lie Down Baby Children Summer Travel Young Children Stroller",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005009389039009",
+          "store": "aliexpress",
+          "price": 66.45,
+          "title": "Baby Stroller Light Folding Simple Umbrella Cart Can Sit and Lie Down Baby and Child Summer Travel Young Children's Stroller",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005009388717211",
+          "store": "aliexpress",
+          "price": 71.25,
+          "title": "Baby Stroller Can Sit and Lie Down Baby Light Folding Simple and Super Small Children's Stroller Portable Umbrella Cart Handcart",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005009558421293",
+          "store": "aliexpress",
+          "price": 75.15,
+          "title": "Stroller Ultra Light Pocket Cart Baby Walking Artifact Foldable Foldable One Click Baby Travel Easy",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005009400552148",
+          "store": "aliexpress",
+          "price": 77.25,
+          "title": "Baby Stroller Can Only Be Sat on Lightweight Folding Baby Stroller Goes Out Multi-functional Children's Simple Baby Walking",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005012781555774",
+          "store": "aliexpress",
+          "price": 79.05,
+          "title": "Children's Stroller Baby Walking Artifact Lightweight Folding Pocket Car Travel Easy To Carry Baby Lightweight Compact Trolley",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005011598295401",
+          "store": "aliexpress",
+          "price": 79.95,
+          "title": "The Children's Stroller Can Be Sitting and Sliding Multi-functional Baby Stroller Baby Shade Tricycle Foldable",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005009612738341",
+          "store": "aliexpress",
+          "price": 85.65,
+          "title": "Baby Stroller Light Folding Easy To Sit and Lie Down Ultra-compact Summer Portable Baby Stroller",
+          "label": "relevant"
+        },
+        {
+          "key": "trendyol-sa:964372860",
+          "store": "trendyol-sa",
+          "price": 85.81,
+          "title": "Four-wheeled foldable baby stroller, lightweight and easy to fold",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005011814695230",
+          "store": "aliexpress",
+          "price": 87.75,
+          "title": "Baby Stroller Can Be Customized Folding Portable Can Sit Light and Simple Baby Umbrella Cart",
+          "label": "relevant"
+        }
+      ]
+    },
+    {
+      "query": "macbook air m3",
+      "slug": "macbook-air-m3",
+      "stores": [
+        {
+          "store": "aliexpress",
+          "complete": true,
+          "calls": 2
+        },
+        {
+          "store": "amazon-sa",
+          "complete": true,
+          "calls": 2
+        },
+        {
+          "store": "jarir",
+          "complete": true,
+          "calls": 2
+        },
+        {
+          "store": "noon-sa",
+          "complete": true,
+          "calls": 2
+        },
+        {
+          "store": "trendyol-sa",
+          "complete": true,
+          "calls": 2
+        }
+      ],
+      "statuses": [
+        {
+          "site": "aliexpress",
+          "status": "ok"
+        },
+        {
+          "site": "amazon-sa",
+          "status": "ok"
+        },
+        {
+          "site": "jarir",
+          "status": "ok"
+        },
+        {
+          "site": "noon-sa",
+          "status": "ok"
+        },
+        {
+          "site": "trendyol-sa",
+          "status": "ok"
+        }
+      ],
+      "recordedItems": 414,
+      "results": 2,
+      "missingCalls": [],
+      "labelled": true,
+      "metrics": {
+        "top": 2,
+        "precisionAt10": 1,
+        "accessoryAt10": 0,
+        "wrongModelAt10": 0,
+        "unlabeledAt10": 0,
+        "recall": 1,
+        "relevantRecorded": 2,
+        "relevantKept": 2,
+        "cheapestRelevantFirst": true
+      },
+      "top": [
+        {
+          "key": "aliexpress:1005013446906517",
+          "store": "aliexpress",
+          "price": 5338.57,
+          "title": "2024 MacBook air M3 15 inch 8-core CPU 10-core GPU 256G/512G/1T/2T/4TSSD 16G/32G/64G RAM Notebooks Laptop.",
+          "label": "relevant"
+        },
+        {
+          "key": "noon-sa:N70051929V",
+          "store": "noon-sa",
+          "price": 5362,
+          "title": "Apple MacBook Air MXCT3 | 13 Inch Display | Apple M3 Chip | 8-Core CPU and 10-Core GPU | 16GB RAM | 512GB SSD | macOS | English Keyboard | International Version | Silver",
+          "label": "relevant"
+        }
+      ]
+    },
+    {
+      "query": "standing desk",
+      "slug": "standing-desk",
+      "stores": [
+        {
+          "store": "aliexpress",
+          "complete": true,
+          "calls": 2
+        },
+        {
+          "store": "amazon-sa",
+          "complete": true,
+          "calls": 2
+        },
+        {
+          "store": "jarir",
+          "complete": true,
+          "calls": 2
+        },
+        {
+          "store": "noon-sa",
+          "complete": true,
+          "calls": 2
+        },
+        {
+          "store": "trendyol-sa",
+          "complete": true,
+          "calls": 2
+        }
+      ],
+      "statuses": [
+        {
+          "site": "aliexpress",
+          "status": "ok"
+        },
+        {
+          "site": "amazon-sa",
+          "status": "ok"
+        },
+        {
+          "site": "jarir",
+          "status": "ok"
+        },
+        {
+          "site": "noon-sa",
+          "status": "ok"
+        },
+        {
+          "site": "trendyol-sa",
+          "status": "ok"
+        }
+      ],
+      "recordedItems": 514,
+      "results": 262,
+      "missingCalls": [],
+      "labelled": true,
+      "metrics": {
+        "top": 10,
+        "precisionAt10": 0.5,
+        "accessoryAt10": 0.1,
+        "wrongModelAt10": 0,
+        "unlabeledAt10": 0,
+        "recall": 0.8871595330739299,
+        "relevantRecorded": 257,
+        "relevantKept": 228,
+        "cheapestRelevantFirst": true
+      },
+      "top": [
+        {
+          "key": "aliexpress:1005003450636701",
+          "store": "aliexpress",
+          "price": 52.39,
+          "title": "Foldable Computer Table Portable Standing Desk Bed Side Table Height Adjustable Laptop table Furniture with pen holder",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005007873132512",
+          "store": "aliexpress",
+          "price": 56.86,
+          "title": "Stand Desk Monitor Organizer Monitor Riser Stand - Ergonomic Laptop Stand Desk Organizer Keyboard Storage",
+          "label": "accessory"
+        },
+        {
+          "key": "aliexpress:1005012077389926",
+          "store": "aliexpress",
+          "price": 72.65,
+          "title": "Height-adjustable Standing Desk Ergonomic Corner Computer Desk Study Desk Learning Game Office Furniture",
+          "label": "relevant"
+        },
+        {
+          "key": "amazon-sa:B09FDNP853",
+          "store": "amazon-sa",
+          "price": 75,
+          "title": "SogesHome Adjustable Mobile Bed Desk 23.6 inches Portable Laptop Computer Stand Desks, Cart Tray, White Maple",
+          "label": "off-topic"
+        },
+        {
+          "key": "noon-sa:Z6F65E2B1B147FBADB59EZ",
+          "store": "noon-sa",
+          "price": 88.35,
+          "title": "Foldable Stand Up Desk Standing Desk Computer Desk Workstation Sit-Stand Desktop Dining Tables (60 * 40cm)",
+          "label": "relevant"
+        },
+        {
+          "key": "amazon-sa:B0CWKDJMXJ",
+          "store": "amazon-sa",
+          "price": 109.23,
+          "title": "HOOKOR Mobile Laptop Desk, 80 * 40CM Height Adjustable Laptop Table, Small Computer Desk with Rolling Wheel,Portable Bedrooms Work Desk Standing Table,Bedside Sofa Table (White)",
+          "label": "off-topic"
+        },
+        {
+          "key": "amazon-sa:B0FW46ZYRL",
+          "store": "amazon-sa",
+          "price": 109.98,
+          "title": "AUTOYSUR Movable Computer Desk with Wheels, Height Adjustable Overbed Bedside Desk, Mobile Standing Laptop Table with Tilting Top for Hospital Home Sofa Bed Side Table (White4)",
+          "label": "off-topic"
+        },
+        {
+          "key": "amazon-sa:B07XL8QH49",
+          "store": "amazon-sa",
+          "price": 113.2,
+          "title": "DlandHome Rolling Desk Adjustable Standing Desk, Mobile Side Table 31.4 Inches w/ Wheels Adjustable C Table Movable Portable Laptop Computer Stand for Bed Sofa, Black",
+          "label": "relevant"
+        },
+        {
+          "key": "amazon-sa:B0H4VDB451",
+          "store": "amazon-sa",
+          "price": 122.55,
+          "title": "Beauenty Adjustable Height Mobile Laptop Desk with Tilting Desktop, Rolling Overbed Table, Bedroom Bedside Table, Portable Computer Stand for Bed, Sofa, Reading, Working, Study (Wood Color)",
+          "label": "off-topic"
+        },
+        {
+          "key": "noon-sa:Z55FA875BC193E0FBC1ABZ",
+          "store": "noon-sa",
+          "price": 125,
+          "title": "UNUNS Height Adjustable Standing Desk Converter,Stand Up Desk Converter For Home Office,Gas Spring Computer Workstation For Monitor Or Laptop",
+          "label": "relevant"
+        }
+      ]
+    },
+    {
+      "query": "noise cancelling headphones",
+      "slug": "noise-cancelling-headphones",
+      "stores": [
+        {
+          "store": "aliexpress",
+          "complete": true,
+          "calls": 4
+        },
+        {
+          "store": "amazon-sa",
+          "complete": true,
+          "calls": 4
+        },
+        {
+          "store": "jarir",
+          "complete": true,
+          "calls": 4
+        },
+        {
+          "store": "noon-sa",
+          "complete": true,
+          "calls": 2
+        },
+        {
+          "store": "trendyol-sa",
+          "complete": true,
+          "calls": 4
+        }
+      ],
+      "statuses": [
+        {
+          "site": "aliexpress",
+          "status": "ok"
+        },
+        {
+          "site": "amazon-sa",
+          "status": "ok"
+        },
+        {
+          "site": "jarir",
+          "status": "ok"
+        },
+        {
+          "site": "noon-sa",
+          "status": "ok"
+        },
+        {
+          "site": "trendyol-sa",
+          "status": "ok"
+        }
+      ],
+      "recordedItems": 660,
+      "results": 310,
+      "missingCalls": [],
+      "labelled": true,
+      "metrics": {
+        "top": 10,
+        "precisionAt10": 0.7,
+        "accessoryAt10": 0,
+        "wrongModelAt10": 0.3,
+        "unlabeledAt10": 0,
+        "recall": 0.9017341040462428,
+        "relevantRecorded": 346,
+        "relevantKept": 312,
+        "cheapestRelevantFirst": false
+      },
+      "top": [
+        {
+          "key": "aliexpress:1005007871124515",
+          "store": "aliexpress",
+          "price": 6.62,
+          "title": "kebidu 3.5mm Noise Cancelling Wired Headphones Microphone Universal USB Headset With Microphone For PC Laptop Computer",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005013670559020",
+          "store": "aliexpress",
+          "price": 6.75,
+          "title": "For SONY 3.5mm Wired Gaming Headphones Game Headset Noise Cancelling with Microphone Volume Control for PS4 Play Station 4 PC",
+          "label": "relevant"
+        },
+        {
+          "key": "amazon-sa:B0968YB23Q",
+          "store": "amazon-sa",
+          "price": 9,
+          "title": "Datazone Headphone, Lightweight, Cool Design, Portable Speaker, Noise Canceling, Clear & Crisp Sound, Ep-13 Gold / Black, Wired",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005012821019831",
+          "store": "aliexpress",
+          "price": 11.46,
+          "title": "3.5mm Wired Computer Headphone No Microphone Gaming Headset Noise Canceling Sports MP3 Earphone Wired Stereo Headset Universal",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005013695041214",
+          "store": "aliexpress",
+          "price": 13.19,
+          "title": "Over Ear 3.5mm Wired Headphones Gaming Headset Retro Earphones Music Noise Canceling Sports Earphone Stereo Headset For Phones",
+          "label": "relevant"
+        },
+        {
+          "key": "trendyol-sa:1104475283",
+          "store": "trendyol-sa",
+          "price": 14.33,
+          "title": "Blue 3.5mm Wired Headphones Noise Canceling In-Ear Sports Earphone Dual Driver Bass Stereo Gaming He",
+          "label": "wrong-model"
+        },
+        {
+          "key": "trendyol-sa:836845393",
+          "store": "trendyol-sa",
+          "price": 15.08,
+          "title": "blue Wired In-ear Earphone In Ear Noise Cancellation Ergonomic Design Stereo Sports Music Headphones",
+          "label": "wrong-model"
+        },
+        {
+          "key": "aliexpress:1005008857578156",
+          "store": "aliexpress",
+          "price": 15.25,
+          "title": "3.5mm Wired Stereo Headphones Bass Hi-Fi Gaming Headset Noise Canceling Sports MP3 Earphone Wired Stereo Headsets Universal",
+          "label": "relevant"
+        },
+        {
+          "key": "trendyol-sa:1136887585",
+          "store": "trendyol-sa",
+          "price": 15.42,
+          "title": "Black 3.5mm Jack Wired Earphones In Ear Stereo Talking Headphone Noise Cancelling Earphone Mic Sport",
+          "label": "wrong-model"
+        },
+        {
+          "key": "aliexpress:1005012562343820",
+          "store": "aliexpress",
+          "price": 15.91,
+          "title": "3.5mm/Type-C Wired Headphones Noise Cancelling Business Over Ear Headset Flexible Adjustable Stereo Earphones for PC MP3 Mobile",
+          "label": "relevant"
+        }
+      ]
+    },
+    {
+      "query": "car vacuum cleaner",
+      "slug": "car-vacuum-cleaner",
+      "stores": [
+        {
+          "store": "aliexpress",
+          "complete": true,
+          "calls": 2
+        },
+        {
+          "store": "amazon-sa",
+          "complete": true,
+          "calls": 2
+        },
+        {
+          "store": "jarir",
+          "complete": true,
+          "calls": 2
+        },
+        {
+          "store": "noon-sa",
+          "complete": true,
+          "calls": 2
+        },
+        {
+          "store": "trendyol-sa",
+          "complete": true,
+          "calls": 2
+        }
+      ],
+      "statuses": [
+        {
+          "site": "aliexpress",
+          "status": "ok"
+        },
+        {
+          "site": "amazon-sa",
+          "status": "ok"
+        },
+        {
+          "site": "jarir",
+          "status": "ok"
+        },
+        {
+          "site": "noon-sa",
+          "status": "ok"
+        },
+        {
+          "site": "trendyol-sa",
+          "status": "ok"
+        }
+      ],
+      "recordedItems": 488,
+      "results": 286,
+      "missingCalls": [],
+      "labelled": true,
+      "metrics": {
+        "top": 10,
+        "precisionAt10": 1,
+        "accessoryAt10": 0,
+        "wrongModelAt10": 0,
+        "unlabeledAt10": 0,
+        "recall": 0.9322033898305084,
+        "relevantRecorded": 354,
+        "relevantKept": 330,
+        "cheapestRelevantFirst": true
+      },
+      "top": [
+        {
+          "key": "aliexpress:1005007545285887",
+          "store": "aliexpress",
+          "price": 4.46,
+          "title": "12000Pa Car Wireless Vacuum Cleaner 120W Blowable Cordless Home Appliance Vacuum Home & Car Dual Use Mini Vacuum Cleaner",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005007175249019",
+          "store": "aliexpress",
+          "price": 4.99,
+          "title": "120W Portable Car Vacuum Cleaner USB Charging Handheld Cordless Vacuum Cleaner Powerful Suction for Auto/Home/Office/Pet Hair",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005013367315583",
+          "store": "aliexpress",
+          "price": 9.86,
+          "title": "Cordless Vacuum Cleaner High-power Dual-purpose For Suction And Blowing Suitable For Car And Household Dust Removal",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005013596799451",
+          "store": "aliexpress",
+          "price": 9.99,
+          "title": "Portable Car Vacuum Cleaner High Power Handheld Wet Dry Dual Use 1 Set for New Car Interior Cleaning Gift",
+          "label": "relevant"
+        },
+        {
+          "key": "noon-sa:N13064707A",
+          "store": "noon-sa",
+          "price": 16.97,
+          "title": "Portable Car Mini Vacuum Cleaner",
+          "label": "relevant"
+        },
+        {
+          "key": "trendyol-sa:1097972836",
+          "store": "trendyol-sa",
+          "price": 17.55,
+          "title": "Car Vacuum Cleaner",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005013523715718",
+          "store": "aliexpress",
+          "price": 18.79,
+          "title": "Cordless Car Vacuum Cleaner, 32000Pa Powerful Handheld Auto Vacuum, Rechargeable Mini Vacuum for Car Interior Home And Office",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005007345671063",
+          "store": "aliexpress",
+          "price": 18.91,
+          "title": "9000Pa Wireless Car Vacuum Cleaner USB Charging 1200mAh Portable Cleaning Appliance Mini Wet and Dry Vacuum Cleaner Household",
+          "label": "relevant"
+        },
+        {
+          "key": "trendyol-sa:1145812096",
+          "store": "trendyol-sa",
+          "price": 21.06,
+          "title": "Portable Wireless Car Vacuum Cleaner Wireless Vacuum Cleaner Dual Use for Home and Car 120W High Pow",
+          "label": "relevant"
+        },
+        {
+          "key": "trendyol-sa:1053913897",
+          "store": "trendyol-sa",
+          "price": 21.25,
+          "title": "Cordless Handheld Wet/Dry Car Vacuum Cleaner 97891 - White/Blue",
+          "label": "relevant"
+        }
+      ]
+    },
+    {
+      "query": "blender",
+      "slug": "blender",
+      "stores": [
+        {
+          "store": "aliexpress",
+          "complete": true,
+          "calls": 2
+        },
+        {
+          "store": "amazon-sa",
+          "complete": true,
+          "calls": 2
+        },
+        {
+          "store": "jarir",
+          "complete": true,
+          "calls": 2
+        },
+        {
+          "store": "noon-sa",
+          "complete": true,
+          "calls": 2
+        },
+        {
+          "store": "trendyol-sa",
+          "complete": true,
+          "calls": 2
+        }
+      ],
+      "statuses": [
+        {
+          "site": "aliexpress",
+          "status": "ok"
+        },
+        {
+          "site": "amazon-sa",
+          "status": "ok"
+        },
+        {
+          "site": "jarir",
+          "status": "ok"
+        },
+        {
+          "site": "noon-sa",
+          "status": "ok"
+        },
+        {
+          "site": "trendyol-sa",
+          "status": "ok"
+        }
+      ],
+      "recordedItems": 472,
+      "results": 389,
+      "missingCalls": [],
+      "labelled": true,
+      "metrics": {
+        "top": 10,
+        "precisionAt10": 0.4,
+        "accessoryAt10": 0,
+        "wrongModelAt10": 0,
+        "unlabeledAt10": 0,
+        "recall": 0.9533527696793003,
+        "relevantRecorded": 343,
+        "relevantKept": 327,
+        "cheapestRelevantFirst": false
+      },
+      "top": [
+        {
+          "key": "aliexpress:1005006119594934",
+          "store": "aliexpress",
+          "price": 4.24,
+          "title": "Mini Electric Milk Foamer Blender Wireless Coffee Whisk Mixer Skimer Handheld Egg Beater Cappuccino Frother Mixer for Kitchen",
+          "label": "off-topic"
+        },
+        {
+          "key": "aliexpress:1005009562931914",
+          "store": "aliexpress",
+          "price": 8.59,
+          "title": "Electric Handheld Milk Frother 3-Speed Adjustable USB Rechargeable Portable Blender Mini Food Mixer for Coffee Lattes Milk",
+          "label": "off-topic"
+        },
+        {
+          "key": "trendyol-sa:1130804892",
+          "store": "trendyol-sa",
+          "price": 10.37,
+          "title": "Jelly Blender for Blending and Applying Lipstick",
+          "label": "off-topic"
+        },
+        {
+          "key": "trendyol-sa:1214354598",
+          "store": "trendyol-sa",
+          "price": 11.74,
+          "title": "Handheld Coffee And Milk Blender Multicolour",
+          "label": "off-topic"
+        },
+        {
+          "key": "aliexpress:1005013605572065",
+          "store": "aliexpress",
+          "price": 12.3,
+          "title": "Portable Fruit Juicer Blenders Outdoor Personal Electric Mini Bottle Home USB Charge 6 Blades Double Cup Juicer Machine",
+          "label": "relevant"
+        },
+        {
+          "key": "trendyol-sa:1144317143",
+          "store": "trendyol-sa",
+          "price": 12.33,
+          "title": "Hand Blender DC2859 | Heavy-Duty Manual Blender, Stainless Steel Head | Red and Black",
+          "label": "relevant"
+        },
+        {
+          "key": "trendyol-sa:905139302",
+          "store": "trendyol-sa",
+          "price": 12.76,
+          "title": "Hand Blender, Stainless Steel Blade, RF9877",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005008761611860",
+          "store": "aliexpress",
+          "price": 15.45,
+          "title": "Automatic Stainless Steel Handheld Whisk Mini Portable Blender with 3 Speed Adjustable USB Rechargeable Milk Frother for Kitchen",
+          "label": "off-topic"
+        },
+        {
+          "key": "aliexpress:1005009517553871",
+          "store": "aliexpress",
+          "price": 18.13,
+          "title": "260ML Electric Charging Mini Garlic Masher Portable Onion Chopper Meat Grinder Kitchen Vegetable Blender for Household Use",
+          "label": "off-topic"
+        },
+        {
+          "key": "aliexpress:1005013567800702",
+          "store": "aliexpress",
+          "price": 18.98,
+          "title": "[USB-Rechargeable Blender] Portable USB-Rechargeable 10.14oz to 16.91oz Blender & Juicer | Easy Clean, Perfect for Fruit",
+          "label": "relevant"
+        }
+      ]
+    },
+    {
+      "query": "instant camera",
+      "slug": "instant-camera",
+      "stores": [
+        {
+          "store": "aliexpress",
+          "complete": true,
+          "calls": 2
+        },
+        {
+          "store": "amazon-sa",
+          "complete": true,
+          "calls": 2
+        },
+        {
+          "store": "jarir",
+          "complete": true,
+          "calls": 2
+        },
+        {
+          "store": "noon-sa",
+          "complete": true,
+          "calls": 2
+        },
+        {
+          "store": "trendyol-sa",
+          "complete": true,
+          "calls": 2
+        }
+      ],
+      "statuses": [
+        {
+          "site": "aliexpress",
+          "status": "ok"
+        },
+        {
+          "site": "amazon-sa",
+          "status": "ok"
+        },
+        {
+          "site": "jarir",
+          "status": "ok"
+        },
+        {
+          "site": "noon-sa",
+          "status": "ok"
+        },
+        {
+          "site": "trendyol-sa",
+          "status": "ok"
+        }
+      ],
+      "recordedItems": 509,
+      "results": 250,
+      "missingCalls": [],
+      "labelled": true,
+      "metrics": {
+        "top": 10,
+        "precisionAt10": 1,
+        "accessoryAt10": 0,
+        "wrongModelAt10": 0,
+        "unlabeledAt10": 0,
+        "recall": 0.8713450292397661,
+        "relevantRecorded": 342,
+        "relevantKept": 298,
+        "cheapestRelevantFirst": true
+      },
+      "top": [
+        {
+          "key": "aliexpress:1005012939102174",
+          "store": "aliexpress",
+          "price": 11.91,
+          "title": "Kids Digital Camera With Instant Print Mini Printer 2.8inch Portable Thermal Photo Print Camera For Children With Video Function",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005013239834334",
+          "store": "aliexpress",
+          "price": 17.26,
+          "title": "Kids Digital Camera with 32G Memory Card Instant Print Thermal Printed Video Toy Birthday Gift for Children",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005009325018619",
+          "store": "aliexpress",
+          "price": 19.35,
+          "title": "Instant Print Digital Camera - Mini Portable Photo Printer with Cute Cartoon Design, Instant Black & White Printing",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005009181336674",
+          "store": "aliexpress",
+          "price": 19.54,
+          "title": "Kids Digital Camera With Instant Print Mini Printer 2.8inch Video Portable Thermal Instant Photo Print Kids Camera With Printer",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005012766417920",
+          "store": "aliexpress",
+          "price": 22.25,
+          "title": "Children 1080P HD Digital Camera  Mini Thermal Printer Photography Instant Print Photo HD Digital Video Cameras Portable Toy",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005013692888084",
+          "store": "aliexpress",
+          "price": 64.74,
+          "title": "Children's Retro Color Photo Camera HD Recording Gift for Boys And Girls Instant Camera for Kids",
+          "label": "relevant"
+        },
+        {
+          "key": "trendyol-sa:904752680",
+          "store": "trendyol-sa",
+          "price": 72.44,
+          "title": "Cute Pink Digital Children Camera Photography Instant Print Photo 1080P HD Video Recorder Mini Therm",
+          "label": "relevant"
+        },
+        {
+          "key": "trendyol-sa:904788439",
+          "store": "trendyol-sa",
+          "price": 77.63,
+          "title": "Young Purple Digital Children Camera Photography Instant Print Photo 1080P HD Video Recorder Mini Th",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005013562575400",
+          "store": "aliexpress",
+          "price": 83,
+          "title": "Kids Instant Print Camera 1080P HD Dual Camera Bluetooth Zero Ink Thermal Printing Digital Toy Gift for Boys Girls Age 3-12 Pink",
+          "label": "relevant"
+        },
+        {
+          "key": "amazon-sa:B0F48FJVZB",
+          "store": "amazon-sa",
+          "price": 85.41,
+          "title": "DMG Kids Camera Instant Print, 1080P 2-Inch Screen Kids Digital Camera with 3 Rolls No-Ink Print Paper, 32GB SD Card, Instant Printing Selfie Camera, Photo Video Birthday Gift for Girls Boys (Purple)",
+          "label": "relevant"
+        }
+      ]
+    },
+    {
+      "query": "galaxy tab s9",
+      "slug": "galaxy-tab-s9",
+      "stores": [
+        {
+          "store": "aliexpress",
+          "complete": true,
+          "calls": 2
+        },
+        {
+          "store": "amazon-sa",
+          "complete": true,
+          "calls": 2
+        },
+        {
+          "store": "jarir",
+          "complete": true,
+          "calls": 2
+        },
+        {
+          "store": "noon-sa",
+          "complete": true,
+          "calls": 2
+        },
+        {
+          "store": "trendyol-sa",
+          "complete": true,
+          "calls": 2
+        }
+      ],
+      "statuses": [
+        {
+          "site": "aliexpress",
+          "status": "ok"
+        },
+        {
+          "site": "amazon-sa",
+          "status": "ok"
+        },
+        {
+          "site": "jarir",
+          "status": "ok"
+        },
+        {
+          "site": "noon-sa",
+          "status": "ok"
+        },
+        {
+          "site": "trendyol-sa",
+          "status": "ok"
+        }
+      ],
+      "recordedItems": 434,
+      "results": 11,
+      "missingCalls": [],
+      "labelled": true,
+      "metrics": {
+        "top": 10,
+        "precisionAt10": 0.9,
+        "accessoryAt10": 0.1,
+        "wrongModelAt10": 0,
+        "unlabeledAt10": 0,
+        "recall": 0.8461538461538461,
+        "relevantRecorded": 13,
+        "relevantKept": 11,
+        "cheapestRelevantFirst": true
+      },
+      "top": [
+        {
+          "key": "amazon-sa:B0CC9YVZPJ",
+          "store": "amazon-sa",
+          "price": 1995,
+          "title": "Samsung Galaxy Tab S9 5G, 8GB RAM, 128GB Storage, Graphite, (KSA Version)",
+          "label": "relevant"
+        },
+        {
+          "key": "noon-sa:N53421345A",
+          "store": "noon-sa",
+          "price": 2199,
+          "title": "Samsung Galaxy Tab S9 Graphite 8GB RAM 128GB Wifi - Middle East Version",
+          "label": "relevant"
+        },
+        {
+          "key": "noon-sa:N53421344A",
+          "store": "noon-sa",
+          "price": 2407,
+          "title": "Samsung Galaxy Tab S9 Graphite 8GB RAM 128GB 5G - Middle East Version",
+          "label": "relevant"
+        },
+        {
+          "key": "noon-sa:N53421359A",
+          "store": "noon-sa",
+          "price": 2999,
+          "title": "Samsung Galaxy Tab S9 Graphite 8GB RAM 128GB 5G With Cover Keyboard Slim - Middle East Version",
+          "label": "relevant"
+        },
+        {
+          "key": "noon-sa:N52549543A",
+          "store": "noon-sa",
+          "price": 3299,
+          "title": "Samsung Galaxy Tab S9 Beige 8GB RAM 128GB Wifi With Smart Book Cover - Middle East Version",
+          "label": "relevant"
+        },
+        {
+          "key": "noon-sa:N52549527A",
+          "store": "noon-sa",
+          "price": 3499,
+          "title": "Samsung Galaxy Tab S9 Graphite 8GB RAM 128GB 5G With Smart Book Cover - Middle East Version",
+          "label": "relevant"
+        },
+        {
+          "key": "noon-sa:N52261390A",
+          "store": "noon-sa",
+          "price": 3999,
+          "title": "Samsung Galaxy Tab S9 Graphite 12GB RAM 256GB 5G With Smart Book Cover - Middle East Version",
+          "label": "relevant"
+        },
+        {
+          "key": "noon-sa:N52261500A",
+          "store": "noon-sa",
+          "price": 4299,
+          "title": "Samsung Galaxy Tab S9 Ultra Graphite 12GB RAM 256GB Wifi With Smart Book Cover - Middle East Version",
+          "label": "relevant"
+        },
+        {
+          "key": "noon-sa:N70048915V",
+          "store": "noon-sa",
+          "price": 5499,
+          "title": "Samsung Galaxy Tab S9 Ultra Beige 16GB RAM 1TB WiFi Middle East Version",
+          "label": "relevant"
+        },
+        {
+          "key": "noon-sa:N53422395A",
+          "store": "noon-sa",
+          "price": 81,
+          "title": "Samsung Galaxy Tab S9 Ultra Privacy Screen Black",
+          "label": "accessory"
+        }
+      ]
     }
   ],
   "overall": {
-    "queries": 23,
-    "precisionAt10": 0.9695652173913044,
-    "accessoryAt10": 0.013043478260869568,
-    "wrongModelAt10": 0.008695652173913044,
-    "recall": 0.9017098491148425,
-    "cheapestRelevantFirst": 0.9565217391304348
+    "queries": 35,
+    "precisionAt10": 0.9485714285714284,
+    "accessoryAt10": 0.011428571428571429,
+    "wrongModelAt10": 0.011428571428571429,
+    "recall": 0.9016875443536256,
+    "cheapestRelevantFirst": 0.8571428571428571
   }
 }

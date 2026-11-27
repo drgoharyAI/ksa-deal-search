@@ -13,6 +13,8 @@ export type Product = {
   ratingUnavailable?: true;
   /** Title-structure evidence says this may be another item that names the product; ranked after the rest. */
   weakMatch?: true;
+  /** Match confidence 0..1 from the result set (src/lib/match/confidence.ts); below MATCH_THRESHOLD ranks as "less likely". */
+  matchScore?: number;
   soldCount: number;
   image: string;
   url: string;

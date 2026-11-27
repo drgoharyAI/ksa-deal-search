@@ -3,6 +3,7 @@
 import { useState } from "react";
 import type { Product } from "@/src/lib/types";
 import { storeLabel } from "@/src/lib/stores";
+import { isLikelyMatch } from "@/src/lib/rank";
 
 const NBSP = " ";
 
@@ -41,7 +42,10 @@ export default function ResultCard({ product: p }: { product: Product }) {
         {discount > 0 && <span className="card__badge">{`−${discount}%`}</span>}
       </div>
       <div className="card__body">
-        <span className="card__store">{storeLabel(p.site)}</span>
+        <span className="card__store">
+          {storeLabel(p.site)}
+          {!isLikelyMatch(p) && <span className="card__flag"> · Less likely match</span>}
+        </span>
         <h3 className="card__title">
           <a className="card__link" href={p.url} target="_blank" rel="noopener noreferrer">
             {p.title}

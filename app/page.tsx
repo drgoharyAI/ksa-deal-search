@@ -6,7 +6,7 @@ import type { Product, SiteStatus } from "@/src/lib/types";
 import { STORES } from "@/src/lib/stores";
 import SearchForm, { type ErrorField, type FormValues } from "./components/SearchForm";
 import StatusBar from "./components/StatusBar";
-import ResultCard from "./components/ResultCard";
+import ResultTiers from "./components/ResultTiers";
 
 type Results = { products: Product[]; statuses: SiteStatus[]; reason?: string };
 type Phase = "idle" | "loading" | "done" | "error";
@@ -169,13 +169,7 @@ export default function Home() {
               ))}
             </ul>
           ) : results && products.length ? (
-            <ul className="grid">
-              {products.map((p) => (
-                <li key={`${p.site}+${p.id}`}>
-                  <ResultCard product={p} />
-                </li>
-              ))}
-            </ul>
+            <ResultTiers products={products} />
           ) : results ? (
             <div className="empty">
               <p className="empty__title">{results.reason ?? "No products matched your search and filters"}</p>

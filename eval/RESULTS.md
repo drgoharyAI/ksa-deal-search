@@ -428,3 +428,41 @@ removals) gave no p@10 gain; the work stopped after them with the targets otherw
 |---|---|---|---|---|
 | 62% | 10% | 5% | 90% | 50% |
 Failures: blender (p@10 0%: "beauty blender" makeup sponges are the cheapest), standing desk (20%: monitor stands, lap desks), noise cancelling headphones (wrong@10 30%: ANC earbuds). Rule tuning plateaus on new categories at 60–75%. Owner decision (2026-11-27): rank by match confidence first, then price.
+
+# Task 12f: confidence-tiered ranking (dev set = all 35 queries: 15 tuning + 8 holdout + 6 holdout2 + 6 holdout3)
+
+Mechanism: the pipeline sets `Product.matchScore` (0..1, `src/lib/match/confidence.ts`); `rank()`
+puts the confident tier (`matchScore >= MATCH_THRESHOLD`, not weak) first under every sort, then
+the less likely matches, then weak matches, each tier sorted by the chosen key. Nothing is dropped,
+so recall is unchanged. Metrics are unchanged too: cheapest-first still compares #1 with the
+cheapest eligible relevant item of all, so it now fails whenever that item is in the doubtful tier.
+Targets per set: p@10 >= 90%, acc@10 <= 3%, wrong@10 <= 5%, recall >= 80%, cheapest-first >= 85%.
+"tier" = median share of a query's results in the confident tier.
+
+Baseline (12e final, holdout3 added):
+| set | p@10 | acc@10 | wrong@10 | recall | cheapest-first |
+|---|---|---|---|---|---|
+| tuning (15) | 98.7% | 0% | 1.3% | 92.4% | 93.3% |
+| holdout (8) | 98.8% | 1.3% | 0% | 86.5% | 100% |
+| holdout2 (6) | 95.0% | 1.7% | 0% | 89.8% | 83.3% |
+| holdout3 (6) | 61.7% | 10.0% | 5.0% | 89.9% | 50.0% |
+| all (35) | 91.7% | 2.3% | 1.4% | 90.2% | 85.7% |
+
+## 12f round 1: resemblance to the listings at the usual price (kept)
+`matchScore` = the title's TF-IDF cosine (descriptive words: not query words, no digits, in 2+
+titles) to the centroid of the listings priced >= 0.5 x the median price of the matches, divided by
+the median cosine of those reference listings, capped at 1 (queries with under 10 results are not
+judged). It joins typicality and the price cluster in one number: junk that names the
+product is cheap AND worded like nothing at the product's usual price (beauty-blender sponges r
+0-0.3, a Galaxy Tab privacy screen 0.2). Threshold swept 0.3-0.75: 0.4 keeps every set's
+cheapest-first but holdout2's; above 0.5 cheapest-first falls fast (tuning 80% at 0.5, 73% at 0.6).
+Reference variants tried: all items (holdout3 p@10 62-65%), >= 0.25 x median (75%), >= 1 x median
+(77% but tuning cheapest-first 80%). Tier: 92% of results. Holdout2 cheapest-first 83%->67%: air
+purifier's cheapest relevant item ("Astronaut Negative Ion Air Purifier", r 0.29) is now doubtful.
+| set | p@10 | acc@10 | wrong@10 | recall | cheapest-first |
+|---|---|---|---|---|---|
+| tuning (15) | 99.3% | 0% | 0.7% | 92.4% | 93.3% |
+| holdout (8) | 98.8% | 1.3% | 0% | 86.5% | 100% |
+| holdout2 (6) | 98.3% | 1.7% | 0% | 89.8% | 66.7% |
+| holdout3 (6) | 75.0% | 3.3% | 5.0% | 89.9% | 66.7% |
+| all (35) | 94.9% | 1.1% | 1.1% | 90.2% | 85.7% |

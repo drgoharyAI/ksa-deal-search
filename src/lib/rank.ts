@@ -4,6 +4,16 @@ export type SortKey = "price" | "discount" | "deal";
 
 const priceOf = (p: Product) => p.finalPrice ?? p.listPrice;
 
+/** Products whose matchScore (src/lib/match/confidence.ts) reaches this form the confident tier. */
+export const MATCH_THRESHOLD = 0.4;
+
+/**
+ * Confident match: not a weak match, and a matchScore (when the pipeline set one) at or above
+ * MATCH_THRESHOLD. Products without a score count as confident unless weak.
+ */
+export const isLikelyMatch = (p: Product): boolean =>
+  !p.weakMatch && (p.matchScore === undefined || p.matchScore >= MATCH_THRESHOLD);
+
 export function dealScore(p: Product, minPrice: number, maxPrice: number): number {
   const range = maxPrice - minPrice || 1;
   const price = 1 - (priceOf(p) - minPrice) / range;
@@ -13,11 +23,16 @@ export function dealScore(p: Product, minPrice: number, maxPrice: number): numbe
   return 0.4 * price + 0.3 * discount + 0.2 * rating + 0.1 * sold;
 }
 
-/** Stable (Array.prototype.sort is stable); never mutates the input. Weak matches go after the rest, each part sorted. */
+/**
+ * Tiered and stable (Array.prototype.sort is stable); never mutates the input. Confident matches
+ * come first, then the less likely ones (low matchScore), then weak matches; each tier is sorted
+ * by the chosen key. Pure and client-safe: the UI re-ranks with it when the sort changes.
+ */
 export function rank(products: Product[], sort: SortKey): Product[] {
-  const strong = products.filter((p) => !p.weakMatch);
-  if (strong.length === products.length || !strong.length) return sortBy(products, sort);
-  return [...sortBy(strong, sort), ...sortBy(products.filter((p) => p.weakMatch), sort)];
+  const confident = products.filter(isLikelyMatch);
+  const doubtful = products.filter((p) => !isLikelyMatch(p) && !p.weakMatch);
+  const weak = products.filter((p) => p.weakMatch);
+  return [confident, doubtful, weak].flatMap((tier) => (tier.length ? sortBy(tier, sort) : []));
 }
 
 function sortBy(products: Product[], sort: SortKey): Product[] {

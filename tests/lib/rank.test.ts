@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { rank, dealScore } from "@/src/lib/rank";
+import { rank, dealScore, isLikelyMatch, MATCH_THRESHOLD } from "@/src/lib/rank";
 import type { Product } from "@/src/lib/types";
 
 const P = (o: Partial<Product>): Product => ({
@@ -74,5 +74,29 @@ describe("weak matches (12e)", () => {
   it("an all-weak list is just sorted", () => {
     const ps = [P({ id: "a", listPrice: 3, weakMatch: true }), P({ id: "b", listPrice: 2, weakMatch: true })];
     expect(rank(ps, "price").map((p) => p.id)).toEqual(["b", "a"]);
+  });
+});
+
+describe("confidence tiers (12f)", () => {
+  const ps = [
+    P({ id: "doubt", listPrice: 1, matchScore: MATCH_THRESHOLD - 0.01, discountPct: 90 }),
+    P({ id: "weak", listPrice: 2, matchScore: 0.1, weakMatch: true, discountPct: 80 }),
+    P({ id: "sure", listPrice: 30, matchScore: 0.9, discountPct: 5 }),
+    P({ id: "edge", listPrice: 20, matchScore: MATCH_THRESHOLD, discountPct: 10 }),
+    P({ id: "unscored", listPrice: 25 }),
+  ];
+  it("price: confident tier by price, then less likely, then weak", () => {
+    expect(rank(ps, "price").map((p) => p.id)).toEqual(["edge", "unscored", "sure", "doubt", "weak"]);
+  });
+  it("discount and deal apply the same tiers", () => {
+    expect(rank(ps, "discount").map((p) => p.id)).toEqual(["edge", "sure", "unscored", "doubt", "weak"]);
+    expect(rank(ps, "deal").map((p) => p.id).slice(-2)).toEqual(["doubt", "weak"]);
+  });
+  it("isLikelyMatch: unscored counts as confident unless weak", () => {
+    expect(ps.map(isLikelyMatch)).toEqual([false, false, true, true, true]);
+  });
+  it("an all-doubtful list is just sorted", () => {
+    const low = [P({ id: "a", listPrice: 3, matchScore: 0.1 }), P({ id: "b", listPrice: 2, matchScore: 0.2 })];
+    expect(rank(low, "price").map((p) => p.id)).toEqual(["b", "a"]);
   });
 });

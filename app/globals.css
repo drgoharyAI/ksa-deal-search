@@ -81,6 +81,8 @@
 .results__head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: var(--space-2xs) var(--space-md); }
 .results__head h2 { font-size: var(--text-xl); }
 .results__note { font-size: var(--text-sm); color: var(--color-muted); }
+.results__divider { display: grid; gap: var(--space-2xs); padding-top: var(--space-md); border-top: var(--rule-hair) solid var(--color-rule); }
+.results__divider h3 { font-size: var(--text-lg); }
 
 .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-sm); margin: 0; padding: 0; list-style: none; }
 .grid > li { display: flex; min-width: 0; }
@@ -92,6 +94,7 @@
 .card__badge { position: absolute; top: var(--space-xs); left: var(--space-xs); padding: var(--space-3xs) var(--space-xs); border: 1px solid var(--color-ink); border-radius: var(--radius-input); background: var(--color-cotton); color: var(--color-ink); font-size: var(--text-sm); font-weight: 600; font-variant-numeric: tabular-nums; }
 .card__body { display: flex; flex: 1; flex-direction: column; gap: var(--space-2xs); min-width: 0; padding: var(--space-sm); }
 .card__store { font-size: var(--text-sm); color: var(--color-muted); }
+.card__flag { color: var(--color-ink-2); }
 .card__title { display: -webkit-box; max-width: none; overflow: hidden; font-family: var(--font-body); font-size: var(--text-md); font-weight: 500; letter-spacing: normal; line-height: 1.35; text-wrap: pretty; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2; }
 .card__link { color: inherit; text-decoration: none; }
 .card__link::after { content: ""; position: absolute; inset: 0; border-radius: var(--radius-card); }
