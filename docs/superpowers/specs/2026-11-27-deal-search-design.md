@@ -315,18 +315,17 @@ This supersedes "Runs locally only".
   - a Caddy reverse proxy with automatic HTTPS
   - a persistent volume for the DB, Chrome profiles, API Anything home, and logs.
   The app port is not published; only Caddy is exposed.
-- **Auth (required):**
-  - Single-owner login: a password hash in env (`APP_PASSWORD_HASH`, argon2id or scrypt).
-  - Sessions in an HTTP-only, Secure, SameSite=Strict signed cookie (`SESSION_SECRET`).
-  - Login rate limit plus lockout.
-  - Every page and API route needs a session except the login route and a health check.
-  - Logout.
+- **No authentication (owner decision, 2026-11-27, after being warned of the risks).** The app is fully public. Abuse limits are kept anyway; they block no one, and they protect the owner's stores' IP and Telegram:
+  - Per-IP rate limits: search 10/min, suggest 60/min, write APIs 20/min. Requests over the limit get 429 with Retry-After.
+  - A global cap of 200 active watches.
+  - Telegram sends capped at 30/hour, with the test button at 3/hour.
+  - All limits are configurable through env.
 - **Request guard:**
   - Allowed hosts come from `APP_HOSTS` (the domain) instead of loopback-only.
   - The Origin/Sec-Fetch-Site rules stay.
   - It binds to 0.0.0.0 inside the container only.
   - Local dev keeps the loopback behaviour.
-- **Secrets:** Telegram token and chat id, `SESSION_SECRET` and the password hash come from env only, documented in `.env.example`, never in the image or git.
+- **Secrets:** Telegram token and chat id,  come from env only, documented in `.env.example`, never in the image or git.
 - **Ops:**
   - `/api/health` (unauthenticated, no data) for monitoring.
   - Structured logs.
