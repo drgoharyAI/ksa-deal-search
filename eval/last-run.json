@@ -1,5 +1,5 @@
 {
-  "at": "2026-11-27T02:03:40.217Z",
+  "at": "2026-11-27T02:04:56.002Z",
   "queries": [
     {
       "query": "anc earbuds under 300",
@@ -474,13 +474,13 @@
         }
       ],
       "recordedItems": 465,
-      "results": 329,
+      "results": 328,
       "missingCalls": [],
       "labelled": true,
       "metrics": {
         "top": 10,
-        "precisionAt10": 0.9,
-        "accessoryAt10": 0.1,
+        "precisionAt10": 1,
+        "accessoryAt10": 0,
         "wrongModelAt10": 0,
         "unlabeledAt10": 0,
         "recall": 0.9030470914127424,
@@ -489,13 +489,6 @@
         "cheapestRelevantFirst": false
       },
       "top": [
-        {
-          "key": "trendyol-sa:1235628803",
-          "store": "trendyol-sa",
-          "price": 17.32,
-          "title": "4PCS 4/ 8/ 16 Pcs Air Fryer Silicone Rubber Legs For 2QT For SL400 Air Fryer Toaster Oven Air Fryer",
-          "label": "accessory"
-        },
         {
           "key": "aliexpress:1005011992429150",
           "store": "aliexpress",
@@ -557,6 +550,13 @@
           "store": "aliexpress",
           "price": 70.95,
           "title": "15L Air Fryer Oven Combo 220V Multifunctional Oil-Free Electric Fryer EU UK Plug Household Toaster Oven",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005013414964598",
+          "store": "aliexpress",
+          "price": 74.25,
+          "title": "4L Mini Air Fryer Oil-Free Electric Air Fryer Multifunctional Healthy Cooking Household Compact Fryer for Home Kitchen",
           "label": "relevant"
         }
       ]
@@ -754,7 +754,7 @@
         }
       ],
       "recordedItems": 554,
-      "results": 288,
+      "results": 304,
       "missingCalls": [],
       "labelled": true,
       "metrics": {
@@ -763,12 +763,19 @@
         "accessoryAt10": 0,
         "wrongModelAt10": 0,
         "unlabeledAt10": 0,
-        "recall": 0.8226600985221675,
+        "recall": 0.8645320197044335,
         "relevantRecorded": 406,
-        "relevantKept": 334,
-        "cheapestRelevantFirst": false
+        "relevantKept": 351,
+        "cheapestRelevantFirst": true
       },
       "top": [
+        {
+          "key": "aliexpress:1005010529278076",
+          "store": "aliexpress",
+          "price": 16.49,
+          "title": "20000mAh portable power bank built-in 4 charging cables LED light Type-C/USB port Applicable to iPhone/Android, etc Electronics",
+          "label": "relevant"
+        },
         {
           "key": "aliexpress:1005013641902818",
           "store": "aliexpress",
@@ -830,13 +837,6 @@
           "store": "aliexpress",
           "price": 33.29,
           "title": "20000mAh Power Bank with Makeup Mirror Portable Charger Digital Display Power Bank External Battery for iPhone 17 Samsung Xiaomi",
-          "label": "relevant"
-        },
-        {
-          "key": "noon-sa:Z85ECCB5145CAB296831EZ",
-          "store": "noon-sa",
-          "price": 43.2,
-          "title": "20000mAh 20W Power Bank with Built-in Flashlight ,  Tablets, and More | Charge Multiple Devices Simultaneously | Compact, Convenient, and Travel-Friendly",
           "label": "relevant"
         }
       ]
@@ -1034,7 +1034,7 @@
         }
       ],
       "recordedItems": 501,
-      "results": 382,
+      "results": 381,
       "missingCalls": [],
       "labelled": true,
       "metrics": {
@@ -1454,7 +1454,7 @@
         }
       ],
       "recordedItems": 408,
-      "results": 129,
+      "results": 128,
       "missingCalls": [],
       "labelled": true,
       "metrics": {
@@ -1463,9 +1463,9 @@
         "accessoryAt10": 0,
         "wrongModelAt10": 0,
         "unlabeledAt10": 0,
-        "recall": 0.8118279569892473,
+        "recall": 0.8064516129032258,
         "relevantRecorded": 186,
-        "relevantKept": 151,
+        "relevantKept": 150,
         "cheapestRelevantFirst": true
       },
       "top": [
@@ -2104,10 +2104,10 @@
   ],
   "overall": {
     "queries": 15,
-    "precisionAt10": 0.9066666666666666,
-    "accessoryAt10": 0.02666666666666667,
+    "precisionAt10": 0.9133333333333334,
+    "accessoryAt10": 0.020000000000000004,
     "wrongModelAt10": 0.04666666666666666,
-    "recall": 0.8954906140582227,
-    "cheapestRelevantFirst": 0.6666666666666666
+    "recall": 0.8979236525313057,
+    "cheapestRelevantFirst": 0.7333333333333333
   }
 }

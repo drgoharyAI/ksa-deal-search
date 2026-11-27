@@ -104,3 +104,11 @@ The accessory check reads the title before "with / includes / + / &"; a "+" glue
 | p@10 | acc@10 | wrong@10 | recall | cheapest-first |
 |---|---|---|---|---|
 | 91% | 3% | 4.7% | 90% | 67% |
+
+## Round 8: title-core fixes, legs/feet parts (kept)
+"built-in" now starts the add-on part of a title ("Power Bank built-in 4 cables"), the title core
+falls back to the whole title when it names no query word ("Ps5 Cooling & Dual Controller Charging
+Station"), and legs/feet join the part words ("Air Fryer Silicone Rubber Legs").
+| p@10 | acc@10 | wrong@10 | recall | cheapest-first |
+|---|---|---|---|---|
+| 91% (90.7→91.3) | 2% | 4.7% | 90% | 73% |

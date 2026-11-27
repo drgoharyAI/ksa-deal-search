@@ -301,3 +301,12 @@ describe("isOtherProduct (12c)", () => {
     expect(isOtherProduct("Wireless Gaming Mouse 6 Keys", ["gaming", "mouse"])).toBe(false);
   });
 });
+
+describe("title core needs a query word (12c)", () => {
+  it("uses the whole title when the part before '&' names no query word", () => {
+    expect(isAccessory("Ps5 Cooling & Dual Controller Charging Station", ["controller"])).toBe(true);
+  });
+  it("'built-in' starts the add-on part", () => {
+    expect(isAccessory("20000mAh Power Bank built-in 4 charging cables", ["power", "bank", "20000mah"])).toBe(false);
+  });
+});

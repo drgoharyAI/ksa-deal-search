@@ -8,7 +8,7 @@ import { tokenizeKeepDigits, hasDigit } from "./tokenize";
 const ACCESSORY = new Set<string>(words);
 /** Part nouns that, right after the product noun, name a part of it ("Mouse Pad", "Watch Band"). */
 const PART = new Set<string>(partWords);
-const CONNECTOR = /\b(?:with|includes?|including)\b|\s[+&]\s/i; // "S24+" is a model, " + " joins items
+const CONNECTOR = /\b(?:with|includes?|including|built[-\s]?in)\b|\s[+&]\s/i; // "S24+" is a model, " + " joins items
 
 /** A candidate accessory is priced below this fraction of the median non-candidate price. */
 const PRICE_RATIO = 0.4;
@@ -19,15 +19,20 @@ export const GAP_RATIO = 4;
 const isAccessoryWord = (t: string) =>
   ACCESSORY.has(t) || (t.endsWith("s") && ACCESSORY.has(t.slice(0, -1)));
 
-/** Title tokens before any "with / + / & / includes / including". */
-function coreTokens(title: string): string[] {
-  return tokenize(title.split(CONNECTOR)[0]);
+/**
+ * Title tokens before any "with / + / & / includes / including / built-in". When that part names
+ * no query word ("Ps5 Cooling & Dual Controller Charging Station"), the whole title is used.
+ */
+function coreTokens(title: string, queryTokens: string[] = []): string[] {
+  const core = tokenize(title.split(CONNECTOR)[0]);
+  if (!queryTokens.length || core.some((t) => queryTokens.some((q) => formsMatch(q, t)))) return core;
+  return tokenize(title);
 }
 
 /** Accessory words in the title core that the query does not ask for. */
 function foreignAccessoryIdx(title: string, queryTokens: string[]): { tt: string[]; idx: number[] } {
   const q = queryTokens.map((t) => t.toLowerCase());
-  const tt = coreTokens(title);
+  const tt = coreTokens(title, q);
   const idx: number[] = [];
   tt.forEach((t, i) => {
     if (isAccessoryWord(t) && !q.some((x) => formsMatch(x, t))) idx.push(i);
