@@ -82,13 +82,11 @@ export function readInsights(products: Product[], now = Date.now()): Product[] {
 }
 
 /**
- * Deal badges and trends (readInsights); then this search's prices and the products seen are
- * recorded. Once per search, with its final products. A database failure is logged and never
- * fails the search.
+ * Records this search's prices and the products seen. Once per search: with its final products,
+ * or, for a stream the client left, with the stores answered by then. A database failure is
+ * logged and never fails the search.
  */
-export function withInsights(products: Product[]): Product[] {
-  const now = Date.now();
-  const out = readInsights(products, now);
+export function recordProducts(products: Product[], now = Date.now()): void {
   try {
     recordObservations(getDb(), products, now);
   } catch (e) {
@@ -99,5 +97,15 @@ export function withInsights(products: Product[]): Product[] {
   } catch (e) {
     console.warn("[discover] could not record the products seen", e instanceof Error ? e.message : String(e));
   }
+}
+
+/**
+ * Deal badges and trends (readInsights, from the observations stored before this search); then
+ * this search's prices and the products seen are recorded (recordProducts).
+ */
+export function withInsights(products: Product[]): Product[] {
+  const now = Date.now();
+  const out = readInsights(products, now);
+  recordProducts(products, now);
   return out;
 }

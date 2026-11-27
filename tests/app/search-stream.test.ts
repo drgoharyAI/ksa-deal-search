@@ -70,6 +70,7 @@ async function readEvents(reader: ReadableStreamDefaultReader<Uint8Array>, out: 
   return out;
 }
 const tick = () => new Promise((r) => setTimeout(r, 0));
+const observations = () => (state.db.prepare("SELECT count(*) n FROM observations").get() as { n: number }).n;
 const historyRows = () => (state.db.prepare("SELECT count(*) n FROM searches").get() as { n: number }).n;
 const strip = (e: StreamEvent): Record<string, unknown> => {
   const rest: Record<string, unknown> = { ...e };
@@ -145,19 +146,66 @@ describe("POST /api/search/stream", () => {
     expect((plain.products as unknown[]).length).toBeGreaterThan(0);
   });
 
-  it("client abort: no more events, nothing recorded, and the waiting store call sees the abort", async () => {
+  it("client abort: no more events, no history, the answered stores' prices recorded once; the waiting call sees the abort", async () => {
     const slow = deferredStore("slow");
     const res = await stream.POST(req("/api/search/stream"));
     const reader = res.body!.getReader();
     await readEvents(reader, [], (e) => e.some((x) => x.type === "results"));
     expect(slow.signals[0]?.aborted).toBe(false);
+    expect(observations()).toBe(0);
     await reader.cancel();
     expect(slow.signals[0]?.aborted).toBe(true);
+    // Recorded at the abort, for AliExpress only (the store answered by then).
+    expect(recordSeen).toHaveBeenCalledTimes(1);
+    const seen = vi.mocked(recordSeen).mock.calls[0][1];
+    expect(seen.length).toBeGreaterThan(0);
+    expect(new Set(seen.map((p) => p.site))).toEqual(new Set(["aliexpress"]));
+    expect(observations()).toBe(seen.length);
+    slow.release(ok(fixture.data));
+    await tick();
+    await tick();
+    expect(historyRows()).toBe(0);
+    expect(recordSeen).toHaveBeenCalledTimes(1);
+    expect(observations()).toBe(seen.length);
+  });
+
+  it("an abort before any store answered records nothing", async () => {
+    const slow = deferredStore("slow");
+    const res = await stream.POST(req("/api/search/stream", body({ sites: ["slow"] })));
+    const reader = res.body!.getReader();
+    await readEvents(reader, [], (e) => e.length > 0);
+    await reader.cancel();
+    slow.release(ok(fixture.data));
+    await tick();
+    expect(recordSeen).not.toHaveBeenCalled();
+    expect(observations()).toBe(0);
+    expect(historyRows()).toBe(0);
+  });
+
+  it("after a failure in the assemble step: one plain error event, and nothing recorded later", async () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const slow = deferredStore("slow");
+    // A listing whose title is not text passes normalization but breaks matching.
+    sites.broken = {
+      id: "broken",
+      label: "Broken",
+      searchCalls: () => [{ op: "search", args: {} }],
+      runCall: async () => ok([{}]),
+      normalizeSearchItem: () => ({ ...(sites.aliexpress.normalizeSearchItem(fixture.data[0]) as object), site: "broken", title: { length: 1 } }) as never,
+    };
+    aa.mockImplementation(() => new Promise(() => {})); // AliExpress never answers
+    const res = await stream.POST(req("/api/search/stream", body({ sites: ["aliexpress", "broken", "slow"] })));
+    const reader = res.body!.getReader();
+    const events = await readEvents(reader, [], (e) => e.some((x) => x.type === "error"));
+    expect(events.at(-1)).toEqual({ type: "error", error: "The search failed; try again" });
+    expect(JSON.stringify(events)).not.toMatch(/toLowerCase|TypeError/);
     slow.release(ok(fixture.data));
     await tick();
     await tick();
     expect(historyRows()).toBe(0);
     expect(recordSeen).not.toHaveBeenCalled();
+    expect(observations()).toBe(0);
+    expect(warn).toHaveBeenCalledWith("[search/stream] search failed", expect.any(String));
   });
 
   it("maps store failures to unavailable (with the retry time) and failed, without internal text", async () => {
@@ -192,7 +240,7 @@ describe("POST /api/search/stream", () => {
       walled: { type: "store", store: "walled", state: "unavailable", retryAt: until },
       broken: { type: "store", store: "broken", state: "failed" },
     });
-    expect(text).not.toMatch(/secret|ECONNRESET|429/);
+    expect(text).not.toMatch(/secret|ECONNRESET|HTTP 429/); // not a bare 429: retryAt is a number
     expect(events.at(-1)).toEqual({ type: "done" });
     expect(historyRows()).toBe(0); // no store answered: not a successful search
   });

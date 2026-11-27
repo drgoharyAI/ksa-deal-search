@@ -108,6 +108,8 @@ export type StreamState = {
   /** "done" arrived (or the stream ended and the rest was settled as failed). */
   done: boolean;
   error?: string;
+  /** The user stopped the search (or left it): stores still "searching" never answered. */
+  stopped?: true;
 };
 
 export function initStream(sites: string[]): StreamState {
@@ -143,6 +145,14 @@ export function settle(s: StreamState): StreamState {
   return { ...s, stores, done: true };
 }
 
+/**
+ * Ends a search the user stopped (Stop, or "go home" while it ran): what arrived stays, and the
+ * stores that had not answered keep their state, shown as "Stopped".
+ */
+export function stopStream(s: StreamState): StreamState {
+  return s.done ? s : { ...s, done: true, stopped: true };
+}
+
 /** The settled status row for a plain (non-streamed) /api/search answer. */
 export function streamFromPayload(sites: string[], payload: SearchPayload): StreamState {
   const counts = countsOf(payload);
@@ -176,8 +186,9 @@ export function liveSummary(s: StreamState, resultCount: number): string {
     return "Showing the first results; more stores are still searching";
   }
   const answered = entries.filter((e) => e.state === "ok" || e.state === "empty").length;
-  const down = entries.length - answered;
   const head = `${n(resultCount, "result", "results")} from ${answered} of ${n(entries.length, "store", "stores")}`;
+  if (s.stopped) return `Search stopped; ${head}`;
+  const down = entries.length - answered;
   return down ? `${head}; ${down} unavailable or failed` : head;
 }
 

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { Product } from "@/src/lib/types";
 import {
-  countsOf, initStream, liveSummary, parseEvent, readEvents, reduceStream, settle, storeEntries, storeEntryOf, streamFromPayload, takeLines,
+  countsOf, initStream, liveSummary, parseEvent, readEvents, reduceStream, settle, stopStream, storeEntries, storeEntryOf, streamFromPayload, takeLines,
   type StreamEvent,
 } from "@/src/lib/search-stream";
 import { HOME_ENTRY, historyMove } from "@/src/lib/rerun";
@@ -145,5 +145,26 @@ describe("historyMove: Back and Forward on the search page", () => {
     expect(historyMove("?store=jarir", null, { stashed: false, showingHome: true })).toBe("sync");
     expect(historyMove("?store=jarir", null, { stashed: true, showingHome: false })).toBe("sync");
     expect(historyMove("", null, { stashed: true, showingHome: true })).toBe("sync");
+  });
+});
+
+describe("stopStream: Stop, or go home while a search runs (fix round 1)", () => {
+  it("ends the stream; stores that had not answered stay unanswered and are marked stopped", () => {
+    const running = run([
+      { type: "store", store: "jarir", state: "ok", count: 1 },
+      { type: "results", products: [p("jarir", "1")], statuses: [{ site: "jarir", status: "ok" }] },
+    ]);
+    const stopped = stopStream(running);
+    expect(stopped.done).toBe(true);
+    expect(stopped.stopped).toBe(true);
+    expect(storeEntries(stopped).map((e) => e.state)).toEqual(["ok", "searching", "searching"]);
+    expect(stopped.results).toBe(running.results);
+    // A finished search is left as it is.
+    const done = reduceStream(running, { type: "done" });
+    expect(stopStream(done)).toBe(done);
+  });
+  it("the live region says the search was stopped, not that stores are still searching", () => {
+    const s = stopStream(run([{ type: "store", store: "jarir", state: "ok", count: 1 }, { type: "results", products: [p("jarir", "1")], statuses: [] }]));
+    expect(liveSummary(s, 1)).toBe("Search stopped; 1 result from 1 of 3 stores");
   });
 });

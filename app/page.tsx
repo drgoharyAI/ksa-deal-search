@@ -29,7 +29,7 @@ import { allMembers, buildUnits, viewItems } from "@/src/lib/view";
 import type { GroupRef } from "@/src/lib/match/group";
 import { GroupOpenContext, type GroupOpen } from "./components/GroupCard";
 import {
-  initStream, liveSummary, readEvents, reduceStream, settle, storeEntries, streamFromPayload, type SearchPayload, type StreamEvent, type StreamState,
+  initStream, liveSummary, readEvents, reduceStream, settle, stopStream, storeEntries, streamFromPayload, type SearchPayload, type StreamEvent, type StreamState,
 } from "@/src/lib/search-stream";
 
 type Filters = { minPrice?: number; maxPrice?: number; minRating?: number };
@@ -77,7 +77,6 @@ export default function Home() {
   const [values, setValues] = useState<FormValues>(INITIAL);
   const [phase, setPhase] = useState<Phase>("idle");
   const [run, setRun] = useState<Run | null>(null);
-  const [stopped, setStopped] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [errorField, setErrorField] = useState<ErrorField>(null);
   const abortRef = useRef<AbortController | null>(null);
@@ -139,11 +138,11 @@ export default function Home() {
   const resetHome = (stash: boolean) => {
     abortRef.current?.abort();
     abortRef.current = null;
-    stashRef.current = stash && run?.stream.results ? { run, values, chips } : null;
+    // A search still running is stopped first: Back must not bring back stores "Searching" forever.
+    stashRef.current = stash && run?.stream.results ? { run: { ...run, stream: stopStream(run.stream) }, values, chips } : null;
     setValues(INITIAL);
     setPhase("idle");
     setRun(null);
-    setStopped(false);
     setError(null);
     setErrorField(null);
     setWatchOpen(false);
@@ -184,7 +183,6 @@ export default function Home() {
           setValues(s.values);
           setRun(s.run);
           setPhase("done");
-          setStopped(false);
         }
         setChips(filtersFromSearch(qs));
       },
@@ -273,7 +271,6 @@ export default function Home() {
     setError(null);
     setErrorField(null);
     setPhase("loading");
-    setStopped(false);
     stashRef.current = null;
     // A new query drops the store, brand and price chips of the old results (not on a History re-run).
     const carried = chipsForNewQuery(chips, results?.query, v.query);
@@ -361,6 +358,11 @@ export default function Home() {
         fail(streamError);
         return;
       }
+      if (!gotResults) {
+        // Store lines but never a view (the stream broke early): ask the plain endpoint.
+        await plain();
+        return;
+      }
       setRun((r) => (r && !r.stream.done ? { ...r, stream: settle(r.stream) } : r));
       setPhase("done");
     } finally {
@@ -371,9 +373,8 @@ export default function Home() {
   function stop() {
     abortRef.current?.abort();
     abortRef.current = null;
-    setStopped(true);
     // The results so far stay; with none yet, back to the home.
-    setRun((r) => (r?.stream.results ? r : null));
+    setRun((r) => (r?.stream.results ? { ...r, stream: stopStream(r.stream) } : null));
     setPhase(run?.stream.results ? "done" : "idle");
   }
 
@@ -422,7 +423,7 @@ export default function Home() {
 
         {formError && <ErrorState message={formError} />}
 
-        <StatusBar stores={stores} stopped={stopped} />
+        <StatusBar stores={stores} stopped={!!run?.stream.stopped} />
 
         {home && (
           <>

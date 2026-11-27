@@ -188,6 +188,15 @@ describe("StatusBar (U2 live store row)", async () => {
     expect(out).toContain(">Stopped<");
     expect(out).not.toContain("storestatus__pulse");
   });
+  it("a search stashed by go-home and restored by Back shows Stopped, never Searching (fix round 1)", async () => {
+    const { initStream, reduceStream, stopStream, storeEntries } = await import("@/src/lib/search-stream");
+    const running = reduceStream(initStream(["jarir", "noon-sa"]), { type: "store", store: "jarir", state: "empty" });
+    const restored = stopStream(running);
+    const out = html(h(StatusBar, { stores: storeEntries(restored), stopped: !!restored.stopped }));
+    expect(out).toContain(">Stopped<");
+    expect(out).not.toContain(">Searching<");
+    expect(out).not.toContain("storestatus__pulse");
+  });
   it("renders nothing without stores; an ok without a count never invents one", () => {
     expect(html(h(StatusBar, { stores: [] }))).toBe("");
     expect(storeStateText({ store: "a", state: "ok" }).text).toBe("Answered");
