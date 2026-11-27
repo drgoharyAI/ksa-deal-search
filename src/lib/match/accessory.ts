@@ -1,32 +1,55 @@
 import words from "@/data/accessory-words.json";
+import type { Product } from "@/src/lib/types";
 import { tokenize } from "./tokenize";
 import { formsMatch } from "./relevance";
 
 const ACCESSORY = new Set<string>(words);
+const CONNECTOR = /\b(?:with|includes?|including)\b|[+&]/i;
+
+/** A candidate accessory is priced below this fraction of the median non-candidate price. */
+const PRICE_RATIO = 0.4;
 
 const isAccessoryWord = (t: string) =>
   ACCESSORY.has(t) || (t.endsWith("s") && ACCESSORY.has(t.slice(0, -1)));
 
-const CONNECTOR = /\b(?:with|includes?|including)\b|[+&]/i;
+/** Title tokens before any "with / + / & / includes / including". */
+function coreTokens(title: string): string[] {
+  return tokenize(title.split(CONNECTOR)[0]);
+}
 
-/**
- * Accessory when, before any "with/+/&/includes", an accessory word is followed by
- * "for"/"compatible", or comes before the first title token matching the query
- * (unless the title still ends in the query's last token, e.g. "Smart Band 9 Fitness Tracker").
- * Never when the query itself names an accessory word.
- */
-export function isAccessory(title: string, queryTokens: string[]): boolean {
+/** Accessory words in the title core that the query does not ask for. */
+function foreignAccessoryIdx(title: string, queryTokens: string[]): { tt: string[]; idx: number[] } {
   const q = queryTokens.map((t) => t.toLowerCase());
-  if (q.some(isAccessoryWord)) return false;
-  const tt = tokenize(title.split(CONNECTOR)[0]);
-  const firstMatch = tt.findIndex((t) => q.some((x) => formsMatch(x, t)));
-  const limit = firstMatch === -1 ? Infinity : firstMatch;
-  const forIdx = tt.findIndex((t) => t === "for" || t === "compatible");
-  const core = forIdx === -1 ? tt : tt.slice(0, forIdx);
-  const endsWithQuery = q.length > 0 && core.length > 0 && formsMatch(q[q.length - 1], core[core.length - 1]);
-  return tt.some((t, i) => {
-    if (!isAccessoryWord(t)) return false;
-    if (tt[i + 1] === "for" || tt[i + 1] === "compatible") return true;
-    return i < limit && !endsWithQuery;
+  const tt = coreTokens(title);
+  const idx: number[] = [];
+  tt.forEach((t, i) => {
+    if (isAccessoryWord(t) && !q.some((x) => formsMatch(x, t))) idx.push(i);
   });
+  return { tt, idx };
+}
+
+/** Candidate: the title core holds an accessory word the query does not name. Price decides the rest. */
+export function isAccessory(title: string, queryTokens: string[]): boolean {
+  return foreignAccessoryIdx(title, queryTokens).idx.length > 0;
+}
+
+/** Strong: such a word directly followed by "for"/"compatible", or "replacement" (not in the query). */
+export function isStrongAccessory(title: string, queryTokens: string[]): boolean {
+  const { tt, idx } = foreignAccessoryIdx(title, queryTokens);
+  return idx.some((i) => tt[i] === "replacement" || tt[i + 1] === "for" || tt[i + 1] === "compatible");
+}
+
+function median(xs: number[]): number {
+  const s = [...xs].sort((a, b) => a - b);
+  const m = s.length >> 1;
+  return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2;
+}
+
+/** Drop strong accessories; drop candidates priced far below the non-candidates' median. */
+export function dropAccessories(products: Product[], queryTokens: string[]): Product[] {
+  const live = products.filter((p) => !isStrongAccessory(p.title, queryTokens));
+  const mains = live.filter((p) => !isAccessory(p.title, queryTokens));
+  if (!mains.length) return live;
+  const cutoff = PRICE_RATIO * median(mains.map((p) => p.listPrice));
+  return live.filter((p) => !isAccessory(p.title, queryTokens) || p.listPrice >= cutoff);
 }

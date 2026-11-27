@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { tokenize } from "@/src/lib/match/tokenize";
 import { scoreRelevance, filterRelevant } from "@/src/lib/match/relevance";
-import { isAccessory } from "@/src/lib/match/accessory";
+import { isAccessory, isStrongAccessory, dropAccessories } from "@/src/lib/match/accessory";
 import { dedupe } from "@/src/lib/match/dedupe";
 import type { Product } from "@/src/lib/types";
 
@@ -126,18 +126,55 @@ describe("review fixes", () => {
     expect(scoreRelevance([["usb-c", "cable"]], "UGREEN USB C Cable")).toBeGreaterThanOrEqual(0.6);
     expect(scoreRelevance([["noise", "cancelling", "earbuds"]], "Noise-Cancelling Earbuds")).toBeGreaterThanOrEqual(0.6);
   });
-  it("4: main products with accessory words are not flagged", () => {
-    const cases: [string, string[]][] = [
-      ["Soundcore P20i Earbuds with Charging Case", ["anc", "earbuds"]],
-      ["Xiaomi Smart Band 9 Fitness Tracker", ["fitness", "tracker"]],
-      ["Laptop Backpack Bag 15.6 inch", ["laptop", "backpack"]],
-      ["Baseus Power Bank Wireless Charger 10000mAh", ["power", "bank"]],
-      ["Anker Power Bank with Built-in Cable", ["power", "bank"]],
-      ["TP-Link USB WiFi Adapter", ["wifi", "dongle"]],
+  it("4: isAccessory is the candidate test; strong needs for/compatible/replacement", () => {
+    expect(isAccessory("Soundcore P20i Earbuds with Charging Case", ["anc", "earbuds"])).toBe(false);
+    expect(isAccessory("Anker Power Bank with Built-in Cable", ["power", "bank"])).toBe(false);
+    expect(isAccessory("iPhone 16 Case", ["iphone", "16"])).toBe(true);
+    expect(isAccessory("Anker USB-C Cable", ["usb-c", "cable"])).toBe(false);
+    expect(isStrongAccessory("Silicone Case for AirPods Pro 2", ["anc", "earbuds"])).toBe(true);
+    expect(isStrongAccessory("Ear Tips Replacement for Galaxy Buds", ["anc", "earbuds"])).toBe(true);
+    expect(isStrongAccessory("iPhone 16 Case", ["iphone", "16"])).toBe(false);
+  });
+  const titles = (ps: Product[]) => ps.map((p) => p.title);
+  const set = (rows: [string, number][]) => rows.map(([t, pr], i) => prod(t, pr, String(i)));
+  it("C1: dropAccessories iphone", () => {
+    const ps = set([
+      ["Apple iPhone 16 128GB", 3299], ["Apple iPhone 16 256GB", 3799], ["iPhone 16 Case", 29],
+      ["Clear Case iPhone 16", 19], ["ESR iPhone 16 Screen Protector 3 Pack", 35], ["Silicone Case for iPhone 16", 25],
+    ]);
+    expect(titles(dropAccessories(ps, ["iphone", "16"]))).toEqual(["Apple iPhone 16 128GB", "Apple iPhone 16 256GB"]);
+  });
+  it("C1: dropAccessories earbuds", () => {
+    const ps = set([
+      ["Soundcore P20i Earbuds with Charging Case", 99], ["JBL Wave Earbuds", 149],
+      ["Earbuds Case Silicone", 15], ["Cable Earbuds Wired", 89],
+    ]);
+    expect(titles(dropAccessories(ps, ["earbuds"]))).toEqual(["Soundcore P20i Earbuds with Charging Case", "JBL Wave Earbuds", "Cable Earbuds Wired"]);
+  });
+  it("C1: main products survive when priced like peers", () => {
+    const fit = set([["Xiaomi Smart Band 9 Fitness Tracker", 149], ["Huawei Band 9 Fitness Tracker", 179], ["Fitbit Inspire 3 Fitness Tracker", 299]]);
+    expect(dropAccessories(fit, ["fitness", "tracker"])).toHaveLength(3);
+    const pb = set([["Baseus Power Bank Wireless Charger 10000mAh", 129], ["Anker Power Bank with Built-in Cable", 99], ["Anker 20000mAh Power Bank", 149]]);
+    expect(dropAccessories(pb, ["power", "bank"])).toHaveLength(3);
+  });
+  it("C1: dropAccessories laptop and strong", () => {
+    const ps = set([["Lenovo IdeaPad Laptop", 1999], ["HP Laptop 15", 2299], ["Laptop Charger 65W", 79], ["Laptop Stand Aluminium", 59]]);
+    expect(titles(dropAccessories(ps, ["laptop"]))).toEqual(["Lenovo IdeaPad Laptop", "HP Laptop 15"]);
+    const st = set([["Baseus ANC Earbuds", 100], ["Silicone Case for AirPods Pro 2", 150], ["Ear Tips Replacement for Galaxy Buds", 200]]);
+    expect(titles(dropAccessories(st, ["anc", "earbuds"]))).toEqual(["Baseus ANC Earbuds"]);
+  });
+  it("C1: no non-candidates keeps non-strong candidates", () => {
+    const ps = set([["iPhone 16 Case", 29], ["Silicone Case for iPhone 16", 25]]);
+    expect(titles(dropAccessories(ps, ["iphone", "16"]))).toEqual(["iPhone 16 Case"]);
+  });
+  it("I1: variant words block merging", () => {
+    const pairs = [
+      ["Samsung Galaxy S24 Plus", "Samsung Galaxy S24 Ultra"],
+      ["Apple iPhone 16 Pro", "Apple iPhone 16 Plus"],
+      ["Apple Watch Ultra 2", "Apple Watch Series 2"],
+      ["Apple Watch Series 9 GPS", "Apple Watch Series 9 Cellular"],
     ];
-    for (const [t, q] of cases) expect(isAccessory(t, q), t).toBe(false);
-    expect(isAccessory("Silicone Case for AirPods Pro 2", ["anc", "earbuds"])).toBe(true);
-    expect(isAccessory("Ear Tips Replacement for Galaxy Buds", ["anc", "earbuds"])).toBe(true);
+    for (const [x, y] of pairs) expect(dedupe([prod(x, 1, "a"), prod(y, 2, "b")]), x).toHaveLength(2);
   });
   it("5: dedupe keeps distinct models, merges color variants", () => {
     const t = (m: string) => `Sony ${m} Wireless Noise Cancelling Bluetooth Over Ear Headphones With Mic Black`;
