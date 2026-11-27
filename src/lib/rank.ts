@@ -5,7 +5,7 @@ export type SortKey = "price" | "discount" | "deal";
 const priceOf = (p: Product) => p.finalPrice ?? p.listPrice;
 
 /** Products whose matchScore (src/lib/match/confidence.ts) reaches this form the confident tier. */
-export const MATCH_THRESHOLD = 0.4;
+export const MATCH_THRESHOLD = 0.6;
 
 /**
  * Confident match: not a weak match, and a matchScore (when the pipeline set one) at or above

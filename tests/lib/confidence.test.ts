@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { resemblance, scoreMatches, MIN_TITLES } from "@/src/lib/match/confidence";
+import { resemblance, scoreMatches, namesAsPhrase, phraseCredit, MIN_TITLES, PHRASE_USUAL } from "@/src/lib/match/confidence";
 import { rank, isLikelyMatch, MATCH_THRESHOLD } from "@/src/lib/rank";
 import type { Product } from "@/src/lib/types";
 
@@ -29,6 +29,24 @@ describe("resemblance (12f)", () => {
   });
   it("needs enough titles", () => {
     expect(resemblance(real.slice(0, MIN_TITLES - 1), v)).toBeNull();
+  });
+});
+
+describe("phrase (12f)", () => {
+  const desk = [["standing", "desk"]];
+  it("namesAsPhrase: the query words together and in order, compounds and aliases allowed", () => {
+    expect(namesAsPhrase("Portable Standing Desk Height Adjustable", desk)).toBe(true);
+    expect(namesAsPhrase("Desk Organizer, Monitor Stand, Black", desk)).toBe(false);
+    expect(namesAsPhrase("Philips Airfryer XL", [["air", "fryer"]])).toBe(true);
+    expect(namesAsPhrase("TWS Earbuds Noise Cancelling Earbuds", [["anc", "earbuds"]])).toBe(true);
+    expect(namesAsPhrase("Hand Blender 500W", v)).toBe(true); // one-word query
+  });
+  it("phraseCredit: not naming the phrase costs more the more usual the phrase is", () => {
+    const usual = [...Array.from({ length: 9 }, () => prod("Electric Standing Desk")), prod("Desk Organizer Monitor Stand")];
+    expect(phraseCredit(usual, desk).at(-1)).toBeCloseTo(1 - (0.9 - PHRASE_USUAL) / (1 - PHRASE_USUAL), 5);
+    expect(phraseCredit(usual, desk)[0]).toBe(1);
+    const spread = [prod("Electric Standing Desk"), ...Array.from({ length: 3 }, () => prod("Desk Adjustable Standing"))];
+    expect(phraseCredit(spread, desk).every((c) => c === 1)).toBe(true);
   });
 });
 

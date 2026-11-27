@@ -466,3 +466,23 @@ purifier's cheapest relevant item ("Astronaut Negative Ion Air Purifier", r 0.29
 | holdout2 (6) | 98.3% | 1.7% | 0% | 89.8% | 66.7% |
 | holdout3 (6) | 75.0% | 3.3% | 5.0% | 89.9% | 66.7% |
 | all (35) | 94.9% | 1.1% | 1.1% | 90.2% | 85.7% |
+
+## 12f round 2: the query named as a phrase, when that is usual (kept)
+Second signal: the query's digit-free words appear together and in order ("Portable Standing
+Desk"; aliases and open/closed compounds count). Its absence only counts where it is unusual: the
+penalty is 0 until half of the search's titles name the phrase and grows linearly to the full
+weight when all do (standing desk 69%: a desk organizer or "Mobile Bed Desk ... Computer Stand" is
+unusual; noise cancelling headphones 31%: sellers spread the words, no penalty).
+`matchScore = 0.7 x resemblance + 0.3 x phrase credit`, threshold 0.6 (resemblance alone must
+reach 0.43 with the phrase, 0.86 without it where the phrase is universal). Swept weights
+0.2-0.5, "usual" share 0/0.3/0.4/0.5/0.6, threshold 0.4-0.75. A fixed phrase penalty (no "usual"
+share) reached the same p@10 only with tuning cheapest-first 73-80%. Standing desk p@10
+50%->80%. Cost: bluetooth speaker's cheapest relevant item is now doubtful (holdout
+cheapest-first 100%->87.5%, still >= 85%). Tier: 88% of results.
+| set | p@10 | acc@10 | wrong@10 | recall | cheapest-first |
+|---|---|---|---|---|---|
+| tuning (15) | 99.3% | 0.7% | 0% | 92.4% | 93.3% |
+| holdout (8) | 98.8% | 1.3% | 0% | 86.5% | 87.5% |
+| holdout2 (6) | 100% | 0% | 0% | 89.8% | 66.7% |
+| holdout3 (6) | 81.7% | 3.3% | 5.0% | 89.9% | 66.7% |
+| all (35) | 96.3% | 1.1% | 0.9% | 90.2% | 82.9% |

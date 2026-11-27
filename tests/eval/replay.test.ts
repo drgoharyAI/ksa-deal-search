@@ -5,6 +5,7 @@ vi.mock("@/src/lib/aa", () => ({ aaCall: vi.fn() }));
 
 import { aaCall } from "@/src/lib/aa";
 import { runSearch } from "@/src/lib/pipeline";
+import { isLikelyMatch } from "@/src/lib/rank";
 import { sites } from "@/src/sites/registry";
 import { callKey, createReplayExec, plannedCalls, querySlug, recordedProducts, type Recording } from "@/src/eval/replay";
 
@@ -37,8 +38,14 @@ describe("replay transport", () => {
     expect(r.statuses).toEqual([{ site: "amazon-sa", status: "ok" }]);
     expect(r.products.length).toBeGreaterThan(0);
     expect(kept.length).toBeGreaterThanOrEqual(r.products.length);
-    const prices = r.products.map((p) => p.listPrice);
-    expect(prices).toEqual([...prices].sort((a, b) => a - b));
+    // Confident tier first, sorted by price (12f); the rest are all less likely matches.
+    const split = r.products.findIndex((p) => !isLikelyMatch(p));
+    const tiers = split < 0 ? [r.products] : [r.products.slice(0, split), r.products.slice(split)];
+    expect(tiers[1]?.every((p) => !isLikelyMatch(p)) ?? true).toBe(true);
+    for (const t of tiers.slice(0, 1)) {
+      const prices = t.map((p) => p.listPrice);
+      expect(prices).toEqual([...prices].sort((a, b) => a - b));
+    }
   });
 
   it("replay matches a live run fed the same answers", async () => {
