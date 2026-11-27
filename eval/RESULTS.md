@@ -527,3 +527,21 @@ results, 9 relevant: capped).
 |---|---|---|---|---|
 | 90% | 0% | 6% | 90% | 60% |
 Match-first ranking generalizes: unseen-category p@10 went from 62% (holdout 3, before 12f) to 90%. The only weak query is steam iron (wrong@10 30%: handheld garment steamers, a debatable label). Tuning stops here.
+
+## Final-review fixes (C1 brand price demotion, I1 filler words; rules otherwise unchanged)
+- C1: for a brand query without a model number, items below 0.25 x the median or in the lower
+  group of a 4x price split are now demoted ("Less likely matches") instead of dropped. With a
+  model number (iphone 16, switch 2, s24) they are still dropped.
+- I1: filler words (the, best, cheap, new, for, with, ...) are no longer required title words.
+  No recorded query contains one, so the replay cannot measure it; unit tests cover it.
+
+| set | p@10 | acc@10 | wrong@10 | recall | cheapest-first |
+|---|---|---|---|---|---|
+| tuning (15) | 99% (=) | 1% (=) | 0% (=) | 92% (=) | 93% (=) |
+| holdout (8) | 99% (=) | 1% (=) | 0% (=) | 87% (=) | 88% (=) |
+| holdout2 (6) | 100% (=) | 0% (=) | 0% (=) | 90% (=) | 67% (=) |
+| holdout3 (6) | 82% (=) | 3% (=) | 5% (=) | 90% (=) | 67% (=) |
+| holdout4 (5) | 90% (=) | 0% (=) | 6% (=) | 90% (=) | 60% (=) |
+Per-query metrics are identical. Only result counts changed: apple watch 97 -> 105 and ipad air
+76 -> 87 (the cheap tier now listed under "Less likely matches", after the top 10). The new
+failure shapes (brand + category, filler words) still need an untuned recorded holdout.
