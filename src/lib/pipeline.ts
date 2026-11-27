@@ -66,6 +66,12 @@ const MSG_FAILED = "Store request failed";
 const MSG_UNREADABLE = "Store results could not be read";
 /** "input": the store answered "no results" (e.g. Trendyol's 404 past the last page): an empty answer. */
 const EMPTY_CLASSES = new Set(["input"]);
+/**
+ * Store titles are cut to this length before matching. The longest of 22,078 recorded titles is
+ * 472 characters; the cap bounds the matcher's regexes (a few are quadratic in the worst case,
+ * see docs/QA.md) against a garbage or hostile listing with a huge title.
+ */
+export const MAX_TITLE = 1000;
 
 const isNum = (n: number | undefined): n is number => typeof n === "number" && Number.isFinite(n);
 
@@ -111,6 +117,7 @@ async function runSite(
     for (const raw of raws) {
       try {
         const p = adapter.normalizeSearchItem(raw);
+        if (p && p.title.length > MAX_TITLE) p.title = p.title.slice(0, MAX_TITLE);
         const at = answeredAt.get(raw);
         if (p && at !== undefined) p.fetchedAt = at;
         if (p) products.push(p);
@@ -198,12 +205,12 @@ export async function runSearch(input: SearchInput, opts: SearchOptions = {}): P
   const groups = orderGroups(groupProducts(perStore), input.sort).filter((g) => g.members.length > 1);
   const groupOf = new Map(groups.flatMap((g) => g.members.map((p) => [p, g.key] as const)));
   const listed = new Set(products);
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- p is a member of groups, and groupOf maps every group member
   const groupExtras = groups.flatMap((g) => g.members.filter((p) => !listed.has(p))).map((p) => ({ ...p, groupKey: groupOf.get(p)! }));
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- guarded by groupOf.has(p) in the same expression
   products = products.map((p) => (groupOf.has(p) ? { ...p, groupKey: groupOf.get(p)! } : p));
 
   const result: SearchResult = { products, statuses, queryTokens, groups: groupRefs(groups), groupExtras };
   if (!products.length) result.reason = NO_MATCH_REASON;
   return result;
 }
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- p is a member of groups, and groupOf maps every group member
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- guarded by groupOf.has(p) in the same expression

@@ -4,7 +4,7 @@ import fixture from "../fixtures/aliexpress-search.json";
 vi.mock("@/src/lib/aa", () => ({ aaCall: vi.fn() }));
 
 import { aaCall } from "@/src/lib/aa";
-import { runSearch } from "@/src/lib/pipeline";
+import { MAX_TITLE, runSearch } from "@/src/lib/pipeline";
 import { POST } from "@/app/api/search/route";
 import { sites } from "@/src/sites/registry";
 
@@ -31,6 +31,23 @@ describe("runSearch", () => {
     // duplicates across calls collapsed
     const keys = r.products.map((p) => p.site + p.id);
     expect(new Set(keys).size).toBe(keys.length);
+  });
+
+  it("a huge store title is cut to MAX_TITLE before matching (task 18)", async () => {
+    sites.huge = {
+      id: "huge",
+      label: "Huge",
+      searchCalls: () => [{ op: "search", args: {} }],
+      runCall: async () => ({ ok: true, tier: 1, data: [{ id: "1", title: "ANC Earbuds Wireless " + "pro ".repeat(5000), price: 50 }] }),
+      normalizeSearchItem: sites.aliexpress.normalizeSearchItem,
+    };
+    try {
+      const r = await runSearch({ ...base, sites: ["huge"], query: "anc earbuds" });
+      expect(r.products).toHaveLength(1);
+      expect(r.products[0].title).toHaveLength(MAX_TITLE);
+    } finally {
+      delete sites.huge;
+    }
   });
 
   it("an inherited key as a site id is ignored, not called (task 18, deferred Task 7 minor)", async () => {
