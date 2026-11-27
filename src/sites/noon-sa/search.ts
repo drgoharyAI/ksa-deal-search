@@ -12,6 +12,21 @@ import { withNoonPage } from "./browser";
 
 const BASE = "https://www.noon.com/saudi-en";
 const LOAD_TIMEOUT_MS = 25_000;
+/**
+ * How long a loaded search page may show neither cards nor a block before it counts as empty or
+ * drift. Shorter than a load: the page is already there, so a "no results" search answers fast.
+ */
+const CARDS_TIMEOUT_MS = 12_000;
+/**
+ * Page 1 with at least this many listings is a full page, so page 2 is worth a load. Recorded page
+ * 1s (eval/recorded/noon-sa) hold 50 to 79 listings, and a short last page fewer.
+ */
+export const FULL_PAGE = 40;
+/**
+ * noon's "no results" page. No such page is recorded (eval/recorded/noon-sa has none), so the
+ * check is conservative: no product card, and one of these phrases in the (saudi-en) page text.
+ */
+const NO_RESULTS_RE = "no results found|couldn.t find (any|anything|what you|a match)|we could not find|0 results for";
 const MIN_GAP_MS = 2_000;
 const CACHE_TTL_MS = 600_000;
 const BLOCK_BACKOFF_MS = 10 * 60_000;
@@ -28,6 +43,7 @@ export function sanitizeQ(terms: string): string {
 /**
  * Main term only (noon search is broad; variants would double the page loads).
  * Pages 1 and 2: a price-ascending URL param was not verified in the spike, so sort is "".
+ * Page 2 loads only when page 1 was full (runCall checks; a short page 1 answers it empty).
  */
 // eslint-disable-next-line @typescript-eslint/no-unused-vars -- variants intentionally ignored (see above)
 export function searchCalls(pq: ParsedQuery, _variants: string[]) {
@@ -165,6 +181,8 @@ class Drift extends Error {}
 class BlockedRecently extends Error {}
 /** The caller went away while this load waited for the browser. */
 class Aborted extends Error {}
+/** A page after the first whose previous page did not load: not loaded either. */
+class PreviousPageMissing extends Error {}
 
 const CARD_SEL = '[data-qa="plp-product-box"]';
 const CHALLENGE_SEL = 'iframe[src*="captcha"], #sec-if-cpt-container, [id*="captcha"]';
@@ -190,20 +208,28 @@ async function loadSearch(page: NoonPage, url: string): Promise<RawNoonItem[]> {
   let outcome: unknown = "timeout";
   try {
     const h = await page.waitForFunction(
-      (sel: string) =>
-        document.querySelector(sel) ? "ok" : /access denied/i.test(document.title) ? "denied" : false,
-      CARD_SEL,
-      { timeout: LOAD_TIMEOUT_MS },
+      ([sel, noResults]: [string, string]) =>
+        document.querySelector(sel)
+          ? "ok"
+          : /access denied/i.test(document.title)
+            ? "denied"
+            : // eslint-disable-next-line security/detect-non-literal-regexp -- NO_RESULTS_RE, a constant passed into the page
+              new RegExp(noResults, "i").test(document.body?.innerText ?? "")
+              ? "empty"
+              : false,
+      [CARD_SEL, NO_RESULTS_RE] as [string, string],
+      { timeout: CARDS_TIMEOUT_MS },
     );
     outcome = await h.jsonValue();
   } catch {
-    // no cards and no denial within the timeout
+    // no cards, no denial and no "no results" text within the timeout
   }
   if (outcome === "denied") throw new Blocked("search: Access Denied");
+  if (outcome === "empty") return []; // noon says it found nothing: ok, 0 results
   if (outcome !== "ok") {
     if (await page.$(CHALLENGE_SEL)) throw new Blocked("challenge shown");
-    // No verified "no results" marker exists (spike), so missing cards means the page or the
-    // selectors changed (or an interstitial never resolved): report breakage, not an empty list.
+    // Neither cards nor noon's "no results" text: the page or the selectors changed (or an
+    // interstitial never resolved). Report breakage, not an empty list.
     throw new Drift("no product cards");
   }
   // Playwright $$eval: runs the extractor inside the page on the matched cards (no string eval).
@@ -274,6 +300,12 @@ export function createRunCall(deps: {
         // whose search was cancelled while it waited does not load at all.
         if (opts.signal?.aborted) throw new Aborted();
         if (recentlyBlocked()) throw new BlockedRecently();
+        // A later page loads only after a full previous page (the calls queue in page order).
+        if (pageNo !== "1") {
+          const prev = cache.get(`${q}|${Number(pageNo) - 1}`);
+          if (!prev?.ok) throw new PreviousPageMissing();
+          if (!Array.isArray(prev.data) || prev.data.length < FULL_PAGE) return null;
+        }
         if (!warmed.has(page)) {
           await gap();
           await warmUp(page);
@@ -282,11 +314,13 @@ export function createRunCall(deps: {
         await gap();
         return loadSearch(page, url);
       });
+      if (items === null) return { ok: true, tier: 3, data: [] }; // the previous page was the last
       const ok: AaResult = { ok: true, tier: 3, data: items };
       cache.set(key, ok);
       return ok;
     } catch (e) {
       if (e instanceof BlockedRecently) return BLOCKED_RECENTLY;
+      if (e instanceof PreviousPageMissing) return { ok: false, class: "error", reason: "previous page not loaded; this page skipped" };
       if (e instanceof Aborted) return { ok: false, class: ABORTED, reason: "the search was cancelled" };
       const reason = e instanceof Error ? e.message : String(e);
       if (e instanceof Blocked) {

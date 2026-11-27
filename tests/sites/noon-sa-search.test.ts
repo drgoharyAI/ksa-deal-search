@@ -7,6 +7,7 @@ import {
   normalizeSearchItem,
   searchCalls,
   createRunCall,
+  FULL_PAGE,
   toRawItems,
   type NoonPage,
 } from "@/src/sites/noon-sa/search";
@@ -131,7 +132,7 @@ describe("searchCalls", () => {
 
 type FakeOpts = {
   status?: number;
-  outcome?: "ok" | "denied" | "timeout";
+  outcome?: "ok" | "denied" | "timeout" | "empty";
   gotos?: { n: number };
   captcha?: boolean;
   gotoThrows?: Error;
@@ -172,23 +173,42 @@ function runCallWith(page: NoonPage) {
 }
 
 const call = { op: "search", args: { q: "usb c cable", page: "1", sort: "" } };
+const fullPage = Array.from({ length: FULL_PAGE }, (_, i) => ({ href: `/saudi-en/a/N${i}/p/`, title: `A${i}`, price: "10", origPrice: null, rating: null, reviews: null, image: null }));
 
 describe("runCall", () => {
   it("returns tier 3 items on success; warms up the home page once", async () => {
-    const page = fakePage({
-      cards: [
-        { href: "/saudi-en/a/N1/p/", title: "A", price: "10", origPrice: null, rating: null, reviews: null, image: null },
-      ],
-    });
+    const page = fakePage({ cards: fullPage });
     const run = runCallWith(page);
     const r = await run(call);
-    expect(r).toEqual({ ok: true, tier: 3, data: [expect.objectContaining({ id: "N1", price: 10 })] });
+    expect(r).toMatchObject({ ok: true, tier: 3, data: expect.arrayContaining([expect.objectContaining({ id: "N0", price: 10 })]) });
     await run({ ...call, args: { ...call.args, page: "2" } });
     expect(page.visited).toEqual([
       "https://www.noon.com/saudi-en/",
       "https://www.noon.com/saudi-en/search/?q=usb%20c%20cable&page=1",
       "https://www.noon.com/saudi-en/search/?q=usb%20c%20cable&page=2",
     ]);
+  });
+
+  it("page 2 loads only when page 1 was full", async () => {
+    const page = fakePage({ cards: [{ href: "/saudi-en/a/N1/p/", title: "A", price: "10", origPrice: null, rating: null, reviews: null, image: null }] });
+    const run = runCallWith(page);
+    await run(call);
+    expect(await run({ ...call, args: { ...call.args, page: "2" } })).toEqual({ ok: true, tier: 3, data: [] });
+    expect(page.visited.filter((u) => u.includes("page=2"))).toEqual([]);
+  });
+
+  it("page 2 is skipped (not loaded) when page 1 failed", async () => {
+    const page = fakePage({ gotoThrows: new Error("net::ERR_TIMED_OUT") });
+    const run = runCallWith(page);
+    await run(call);
+    const n = page.visited.length;
+    expect(await run({ ...call, args: { ...call.args, page: "2" } })).toMatchObject({ ok: false, class: "error" });
+    expect(page.visited).toHaveLength(n);
+  });
+
+  it("noon's no-results page answers an empty list at once, not drift", async () => {
+    const r = await runCallWith(fakePage({ outcome: "empty" }))(call);
+    expect(r).toEqual({ ok: true, tier: 3, data: [] });
   });
 
   it("a call whose search was cancelled while it waited loads nothing and is not cached (U2)", async () => {
@@ -309,7 +329,7 @@ describe("runCall blocked short-circuit", () => {
     expect(gotos.n).toBe(1);
 
     await vi.advanceTimersByTimeAsync(60_000 + 10);
-    await run(p2);
+    await run(call);
     expect(gotos.n).toBeGreaterThan(1);
   });
 });
