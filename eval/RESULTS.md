@@ -422,3 +422,9 @@ Every target is met on every set except holdout2 cheapest-first (83.3% vs 85%). 
 baby stroller, whose cheapest item labelled relevant is a 10-pack of reflective patches (its
 white twin is labelled accessory), so no correct ranking can pass it. Rounds 5 and 6 (list
 removals) gave no p@10 gain; the work stopped after them with the targets otherwise met.
+
+## Holdout 3 (6 unseen queries, after 12e, rules unchanged)
+| p@10 | acc@10 | wrong@10 | recall | cheapest-first |
+|---|---|---|---|---|
+| 62% | 10% | 5% | 90% | 50% |
+Failures: blender (p@10 0%: "beauty blender" makeup sponges are the cheapest), standing desk (20%: monitor stands, lap desks), noise cancelling headphones (wrong@10 30%: ANC earbuds). Rule tuning plateaus on new categories at 60–75%. Owner decision (2026-11-27): rank by match confidence first, then price.
