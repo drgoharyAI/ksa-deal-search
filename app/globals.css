@@ -167,13 +167,15 @@
  * size from "Searching" to the final state, so nothing below moves as stores answer. */
 .storestatus { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); margin: 0; padding: 0; list-style: none; border: var(--border); border-radius: var(--radius-md); background: var(--color-surface); overflow: hidden; }
 .storestatus__item { position: relative; display: flex; flex-direction: column; justify-content: flex-start; gap: var(--space-3xs); min-width: 0; padding: var(--space-xs) var(--space-sm); box-shadow: -1px -1px 0 var(--color-rule); font-variant-numeric: tabular-nums; }
-/* Three lines are kept for the state from the start ("Temporarily unavailable" wraps in a narrow
- * cell, then its "try after" line), so a state or detail arriving mid-stream never moves the page. */
-.storestatus__state { min-width: 0; min-height: calc(3 * 1.25rem); line-height: 1.25rem; overflow-wrap: anywhere; font-size: var(--text-sm); color: var(--color-ink-2); }
-/* "some pages failed", "try after 12:29 AM": its own line under the state, never cut off */
-.storestatus__detail { display: block; font-weight: 400; color: var(--color-muted); }
+/* Two lines are kept for the state from the start: a short label ("Unavailable"), then its detail
+ * ("try after 12:29 AM", "some pages failed"), so a state or detail arriving mid-stream never moves
+ * the page. A line too long for a narrow cell is cut with an ellipsis; the cell's tooltip and its
+ * screen-reader text keep the whole wording. */
+.storestatus__state { display: flex; flex-direction: column; min-width: 0; height: calc(2 * 1.125rem); line-height: 1.125rem; font-size: var(--text-sm); color: var(--color-ink-2); }
+.storestatus__label, .storestatus__detail { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.storestatus__detail { font-weight: 400; color: var(--color-muted); }
 .storestatus__item--ok .storestatus__state { font-weight: 500; color: var(--color-ink); }
-.storestatus__item--empty .storestatus__state, .storestatus__item--stopped .storestatus__state, .storestatus__item--searching .storestatus__state { color: var(--color-muted); }
+.storestatus__item--empty .storestatus__state, .storestatus__item--stopped .storestatus__state, .storestatus__item--searching .storestatus__state, .storestatus__item--other .storestatus__state { color: var(--color-muted); }
 .storestatus__item--unavailable .storestatus__state { font-weight: 500; color: var(--color-warn-ink); }
 .storestatus__item--failed .storestatus__state { font-weight: 500; color: var(--color-error); }
 /* Searching: a short hairline drifting along the cell's foot. Not progress: it never fills. */
@@ -466,7 +468,10 @@
 .cmp__toggle input { width: 1.25rem; height: 1.25rem; margin: 0; accent-color: var(--color-ink); cursor: pointer; }
 .cmp__toggle input:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
 .cmp__toggle:has(input:checked) { border-color: var(--color-ink); background: var(--color-paper-3); box-shadow: inset 0 0 0 1px var(--color-ink); }
-.cmp__note { flex: 1 1 16rem; font-size: var(--text-sm); color: var(--color-muted); }
+/* Notes are direct children of the column-flex dialog: they keep their own height (flex: none).
+ * Only the one beside the toggle in the bar grows along the row. */
+.cmp__note { flex: none; font-size: var(--text-sm); color: var(--color-muted); }
+.cmp__bar .cmp__note { flex: 1 1 16rem; }
 .cmp__note:empty { display: none; }
 .cmp__note--gone { color: var(--color-warn-ink); }
 .cmp__swipe { font-size: var(--text-sm); color: var(--color-ink-2); }

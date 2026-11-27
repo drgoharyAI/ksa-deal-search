@@ -175,10 +175,11 @@ describe("StatusBar (U2 live store row)", async () => {
     expect(out.match(/storestatus__pulse/g)).toHaveLength(1);
     expect(out).toContain(">Searching<");
     expect(out).toContain(">12 results<");
-    expect(out).toContain('1 result<span class="storestatus__detail">some pages failed</span>');
+    expect(out).toContain('1 result</span><span class="storestatus__detail">some pages failed</span>');
     expect(out).toContain(">No results<");
-    expect(out).toContain('Temporarily unavailable<span class="storestatus__detail">try after 14:30</span>');
-    expect(out).toContain('class="storestatus__item storestatus__item--unavailable"><span class="storemark storemark--full">');
+    expect(out).toContain('<span class="storestatus__label">Unavailable</span><span class="storestatus__detail">try after 14:30</span>');
+    expect(out).toContain('<span class="visually-hidden">Temporarily unavailable, try after 14:30</span>');
+    expect(out).toContain('class="storestatus__item storestatus__item--unavailable" title="SHEIN KSA: Temporarily unavailable, try after 14:30"><span class="storemark storemark--full">');
     expect(out).toContain(">Failed<");
     expect(out).not.toMatch(/%|progress/);
     // Each store keeps its mark.
