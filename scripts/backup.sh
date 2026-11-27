@@ -6,13 +6,16 @@
 # of /data (API Anything home, noon/SHEIN Chrome profiles with their cookies) is tarred without
 # Chrome's caches. Keeps the newest $KEEP archives (default 7). Restore: docs/DEPLOY.md.
 set -euo pipefail
+# Archives hold the DB (history, watches) and Chrome profiles (cookies): owner-only.
+umask 077
 
 cd "$(dirname "$0")/.."
 BACKUP_DIR="${BACKUP_DIR:-$HOME/deal-search-backups}"
 KEEP="${KEEP:-7}"
 stamp="$(date +%Y%m%d-%H%M%S)"
 out="$BACKUP_DIR/deal-search-$stamp.tar.gz"
-mkdir -p "$BACKUP_DIR"
+install -d -m 700 "$BACKUP_DIR"
+chmod 700 "$BACKUP_DIR"
 
 dc() { docker compose exec -T app "$@"; }
 
@@ -40,6 +43,7 @@ if [ "${status[0]}" -gt 1 ] || [ "${status[1]}" -ne 0 ]; then
   echo "backup: tar failed (tar=${status[0]} gzip=${status[1]})" >&2
   exit 1
 fi
+chmod 600 "$out.part"
 mv "$out.part" "$out"
 dc rm -rf /data/.backup
 

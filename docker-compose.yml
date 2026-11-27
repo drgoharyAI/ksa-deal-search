@@ -19,6 +19,11 @@ services:
       SHEIN_PROFILE_DIR: /data/shein-profile
     volumes:
       - deal-data:/data
+    # Chrome's sandbox needs user/PID/network namespaces, which Docker's default seccomp profile
+    # blocks without CAP_SYS_ADMIN. This profile is Docker's default plus clone/unshare/setns, so
+    # Chrome runs sandboxed as non-root (no --no-sandbox, no extra capabilities).
+    security_opt:
+      - seccomp=./docker/seccomp-chrome.json
     # Chrome uses /dev/shm heavily; Docker's 64 MB default crashes tabs.
     shm_size: 1gb
     # SIGTERM: Chrome gets Browser.close (20 s cap), then the DB closes.

@@ -19,7 +19,9 @@ RUN npm run build
 FROM ${NODE_IMAGE} AS prod-deps
 WORKDIR /app
 COPY package.json package-lock.json ./
-RUN npm ci --omit=dev --ignore-scripts --no-audit --no-fund
+RUN npm ci --omit=dev --ignore-scripts --no-audit --no-fund \
+ # next, its SWC binaries and sharp already come traced in .next/standalone; drop the copies (~330 MB).
+ && rm -rf node_modules/next node_modules/@next node_modules/@img node_modules/sharp node_modules/caniuse-lite
 
 # ---------- runtime ----------
 FROM ${NODE_IMAGE} AS runtime
@@ -62,9 +64,10 @@ COPY --chown=node:node api-specs ./api-specs
 COPY --chown=node:node scripts/install-specs.mjs ./scripts/install-specs.mjs
 COPY --chmod=0755 docker/entrypoint.sh /usr/local/bin/deal-search-entrypoint
 
-# Non-root. /data is the persistent volume (a new named volume copies this ownership).
-RUN install -d -o node -g node /data /tmp/.X11-unix -m 1777 \
- && chown node:node /data
+# Non-root (Chrome keeps its sandbox: see docker/seccomp-chrome.json). /data is the persistent
+# volume (a new named volume copies this ownership).
+RUN install -d -o node -g node -m 0755 /data \
+ && install -d -o root -g root -m 1777 /tmp/.X11-unix
 USER node
 VOLUME ["/data"]
 EXPOSE 3000

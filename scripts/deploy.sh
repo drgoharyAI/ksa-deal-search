@@ -23,7 +23,7 @@ if [ "${WORKTREE:-0}" = "1" ]; then
   git ls-files -z --cached --others --exclude-standard | xargs -0 tar -cf "$tmp/release.tar" --ignore-failed-read --
   echo "deploy: packed the working tree"
 else
-  git archive --format=tar -o "$tmp/release.tar" HEAD
+  git -c core.autocrlf=false archive --format=tar -o "$tmp/release.tar" HEAD
   echo "deploy: packed $(git rev-parse --short HEAD)"
 fi
 

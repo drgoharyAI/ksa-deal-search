@@ -1,0 +1,5 @@
+# Files run inside the Linux container or on the VM: always LF.
+*.sh text eol=lf
+Dockerfile text eol=lf
+docker/* text eol=lf
+docker-compose.yml text eol=lf
