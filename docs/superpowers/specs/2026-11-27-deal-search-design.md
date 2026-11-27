@@ -315,11 +315,7 @@ This supersedes "Runs locally only".
   - a Caddy reverse proxy with automatic HTTPS
   - a persistent volume for the DB, Chrome profiles, API Anything home, and logs.
   The app port is not published; only Caddy is exposed.
-- **No authentication (owner decision, 2026-11-27, after being warned of the risks).** The app is fully public. Abuse limits are kept anyway; they block no one, and they protect the owner's stores' IP and Telegram:
-  - Per-IP rate limits: search 10/min, suggest 60/min, write APIs 20/min. Requests over the limit get 429 with Retry-After.
-  - A global cap of 200 active watches.
-  - Telegram sends capped at 30/hour, with the test button at 3/hour.
-  - All limits are configurable through env.
+- **No authentication and no usage limits (owner decision, 2026-11-27).** The app runs on the LAN only.
 - **Request guard:**
   - Allowed hosts come from `APP_HOSTS` (the domain) instead of loopback-only.
   - The Origin/Sec-Fetch-Site rules stay.
@@ -338,6 +334,6 @@ This supersedes "Runs locally only".
 ### Update (owner, 2026-11-27): hosted on a local Proxmox server on the LAN, not a cloud VPS
 - **Host:** a Debian 12 VM on Proxmox (recommended 2 vCPU, 4 GB RAM, 20 GB disk), running Docker plus docker compose. A VM is preferred over LXC so Chrome and Xvfb run without extra privileges.
 - **Network:** LAN only, through the home Saudi residential IP, so the stores serve KSA storefronts. The app container publishes port 3000 on the VM's LAN address. `APP_HOSTS` lists the VM IP and an optional LAN hostname (for example `deals.lan`). Caddy is optional and LAN-only: HTTP by default, or Caddy with its internal CA for LAN HTTPS. There is no public exposure and no login.
-- **Rate limits and caps** stay as above.
+- **No rate limits or caps** (owner). The existing per-store caching and blocked-store back-offs are kept: they protect against store blocking and are not user limits.
 - **The image stays the same:** Node 24, Chrome stable and Xvfb. It has a persistent volume, `/api/health`, restart `unless-stopped`, graceful Chrome shutdown, and a backup script. Proxmox VM backups also cover the volume.
 - **Docs:** create the VM, install Docker, clone, configure `.env`, run `docker compose up -d`, then cover updates, backups, logs, and troubleshooting (a store blocked, or Chrome not starting).
