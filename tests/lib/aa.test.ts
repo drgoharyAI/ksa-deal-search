@@ -224,3 +224,62 @@ describe("aaCall queued call after a block", () => {
     await b;
   });
 });
+
+describe("aaCall concurrent ordering within one search", () => {
+  // Calls of one search run concurrently; answers arrive in any order.
+  function held() {
+    const resolvers = new Map<string, (v: unknown) => void>();
+    const sent: string[] = [];
+    callMock.mockImplementation((site: string, _op: string, args: { q: string }) => {
+      sent.push(`${site}:${args.q}`);
+      return new Promise((r) => resolvers.set(args.q, r));
+    });
+    const answer = async (q: string, v: unknown) => {
+      await vi.waitFor(() => expect(resolvers.has(q)).toBe(true));
+      resolvers.get(q)!(v);
+    };
+    return { sent, answer };
+  }
+  const OK = { ok: true, class: "ok", tier: 1, data: 1 };
+  const DRIFT = { ok: false, class: "drift", reason: "anti-bot", retry: "no" };
+  const BLOCKED = { ok: false, class: "blocked", reason: "captcha", retry: "no" };
+
+  it("drift answers first, then an ok: the ok lifts the drift back-off", async () => {
+    const { answer } = held();
+    const x = aaCall("co1", "search", { q: "X" }, opts);
+    const y = aaCall("co1", "search", { q: "Y" }, opts);
+    await answer("X", DRIFT);
+    await x;
+    await answer("Y", OK);
+    await y;
+    callMock.mockResolvedValue(OK);
+    expect(await aaCall("co1", "search", uniq(), opts)).toMatchObject({ ok: true });
+  });
+
+  it("blocked answers first, then an ok: still backed off", async () => {
+    const { answer, sent } = held();
+    const x = aaCall("co2", "search", { q: "X" }, opts);
+    const y = aaCall("co2", "search", { q: "Y" }, opts);
+    await answer("X", BLOCKED);
+    await x;
+    await answer("Y", OK);
+    await y;
+    expect(await aaCall("co2", "search", { q: "Z" }, opts)).toMatchObject({ ok: false, class: "blocked" });
+    expect(sent).toEqual(["co2:X", "co2:Y"]);
+  });
+
+  it("drift, then blocked, then ok: still backed off", async () => {
+    const { answer, sent } = held();
+    const x = aaCall("co3", "search", { q: "X" }, opts);
+    const y = aaCall("co3", "search", { q: "Y" }, opts);
+    const z = aaCall("co3", "search", { q: "Z" }, opts);
+    await answer("X", DRIFT);
+    await x;
+    await answer("Y", BLOCKED);
+    await y;
+    await answer("Z", OK);
+    await z;
+    expect(await aaCall("co3", "search", { q: "W" }, opts)).toMatchObject({ ok: false, class: "blocked" });
+    expect(sent).toEqual(["co3:X", "co3:Y", "co3:Z"]);
+  });
+});

@@ -35,15 +35,32 @@ const BACKOFF_CLASSES = new Set(["blocked", "rate"]);
 const g = globalThis as typeof globalThis & {
   __aaBackoffUntil?: Map<string, number>;
   __aaLastOkAt?: Map<string, number>;
+  __aaDriftBackoff?: Set<string>;
 };
 const backoffUntil = (g.__aaBackoffUntil ??= new Map<string, number>());
 const lastOkAt = (g.__aaLastOkAt ??= new Map<string, number>());
+/** Stores whose current back-off came from a drift only: a later ok answer (same search) lifts it. */
+const driftBackoff = (g.__aaDriftBackoff ??= new Set<string>());
 
-function shouldBackOff(site: string, cls: string): boolean {
-  if (BACKOFF_CLASSES.has(cls)) return true;
-  if (cls !== "drift") return false;
+function recordOk(site: string): void {
+  lastOkAt.set(site, Date.now());
+  if (driftBackoff.delete(site)) backoffUntil.delete(site);
+}
+
+function recordFailure(site: string, cls: string): void {
+  if (BACKOFF_CLASSES.has(cls)) {
+    // blocked/rate: never lifted by an ok, even if a drift set the back-off first.
+    driftBackoff.delete(site);
+    backoffUntil.set(site, Date.now() + BACKOFF_MS);
+    return;
+  }
+  if (cls !== "drift") return;
   const ok = lastOkAt.get(site);
-  return ok === undefined || Date.now() - ok >= DRIFT_OK_GRACE_MS;
+  if (ok !== undefined && Date.now() - ok < DRIFT_OK_GRACE_MS) return;
+  // Do not turn an active blocked/rate back-off into a liftable one.
+  if (backingOff(site) && !driftBackoff.has(site)) return;
+  driftBackoff.add(site);
+  backoffUntil.set(site, Date.now() + BACKOFF_MS);
 }
 
 function backingOff(site: string): AaResult | null {
@@ -60,6 +77,7 @@ function backingOff(site: string): AaResult | null {
 export function resetBackoff(): void {
   backoffUntil.clear();
   lastOkAt.clear();
+  driftBackoff.clear();
 }
 
 const limits = { search: pLimit(3), detail: pLimit(2) };
@@ -102,6 +120,7 @@ export async function aaCall(
   const cache = cacheFor(opts.ttlMs);
   const key = `${site}/${op}/${JSON.stringify(args)}`;
   const hit = cache.get(key);
+  // Cached hits intentionally do not refresh lastOkAt: they say nothing about the store right now.
   if (hit) return hit;
 
   const pending = inflight.get(key);
@@ -120,8 +139,8 @@ export async function aaCall(
     }
     if (out.result.ok) {
       cache.set(key, out.result);
-      lastOkAt.set(site, Date.now());
-    } else if (shouldBackOff(site, out.result.class)) backoffUntil.set(site, Date.now() + BACKOFF_MS);
+      recordOk(site);
+    } else recordFailure(site, out.result.class);
     return out.result;
   });
   inflight.set(key, p);
