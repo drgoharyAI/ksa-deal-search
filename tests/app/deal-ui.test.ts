@@ -26,7 +26,8 @@ describe("card", () => {
   it("explains other badges to screen readers once, without a tooltip", () => {
     const out = html({ ...P, deal: { badge: "lowest-30d", label: "Lowest in 30 days" } });
     expect(out).toContain('<span class="visually-hidden">. Lowest price we&#x27;ve seen in 30 days</span>');
-    expect(out).not.toContain("title=");
+    // No tooltip on the badge (the card's title attribute carries the product title only).
+    expect(out).not.toMatch(/class="deal[^>]*title=/);
     expect(out).not.toContain("deal__why");
   });
   it("shows nothing extra without enough data", () => {
@@ -40,7 +41,7 @@ describe("card", () => {
     expect(out).toContain('class="deal deal--fake-deal"');
     // The reason is visible text, said once: no title tooltip, no hidden copy.
     expect(out).toContain('<p class="deal__why">The &#x27;was&#x27; price was never charged</p>');
-    expect(out).not.toContain("title=");
+    expect(out).not.toMatch(/class="deal[^>]*title=/);
     expect(out.match(/never charged/g)).toHaveLength(1);
     expect(out).toContain('aria-label="Lowest price per day for Kettle, over 10 days"');
     // x by day: the gap from day 21 to day 29 is wider than the one from 20 to 21.

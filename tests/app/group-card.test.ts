@@ -31,7 +31,7 @@ describe("httpsUrl (17b2)", () => {
 
 describe("GroupCard (17b2)", () => {
   it("leads with the best price and store, and a row per store in a list", () => {
-    const out = html(groupOf(3, (i) => (i === 1 ? { discountPct: 12, deal: { badge: "lowest-30d", label: "Lowest in 30 days" } } : {})));
+    const out = html(groupOf(3, (i) => (i === 1 ? { discountPct: 12, origPrice: 2400, deal: { badge: "lowest-30d", label: "Lowest in 30 days" } } : {})));
     expect(out).toMatch(/Best price <span class="card__amount">SAR\s2,000<\/span> at/);
     expect(out).toContain("Prices from 3 stores");
     // role="list": list-style none drops list semantics in Safari/VoiceOver (task 18, 17b minor).

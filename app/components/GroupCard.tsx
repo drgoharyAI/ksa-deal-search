@@ -7,7 +7,7 @@ import { isLikelyMatch } from "@/src/lib/rank";
 import { productKey } from "@/src/lib/specs";
 import { httpsUrl, type GroupItem } from "@/src/lib/view";
 import StoreLogo from "./StoreLogo";
-import { CardCompare, CardWatch, dealExplanation, type CompareControl } from "./ResultCard";
+import { CardCompare, CardMedia, CardWatch, dealExplanation, verifiedDiscount, type CompareControl } from "./ResultCard";
 import { formatMoney } from "@/src/lib/money";
 import Button from "./ui/Button";
 
@@ -29,7 +29,7 @@ function Row({ p, best, color }: { p: Product; best: boolean; color?: string }) 
   const price = formatMoney(priceOf(p), p.currency);
   const store = storeLabel(p.site);
   const href = httpsUrl(p.url);
-  const discount = p.discountPct ? Math.round(p.discountPct) : 0;
+  const discount = verifiedDiscount(p) ?? 0;
   return (
     <li className={best ? "gcard__row gcard__row--best" : "gcard__row"}>
       <span className="gcard__store">
@@ -66,12 +66,11 @@ function Row({ p, best, color }: { p: Product; best: boolean; color?: string }) 
 }
 
 /**
- * The same product at several stores: the best member's picture and title, its price and store,
- * then a row per listing (cheapest confident first, highlighted). "Watch" and "Compare" act on the
- * best member.
+ * The same product at several stores: one picture and title, then a price ladder with a row per
+ * listing, each linking to its store. "Best price" (accent) marks the lowest price in its currency,
+ * and only when another row shares that currency. "Watch" and "Compare" act on the lead member.
  */
 function GroupCard({ group: g, query, compareChecked = false, onCompare }: { group: GroupItem; query?: string } & CompareControl) {
-  const [failed, setFailed] = useState<string | null>(null);
   const shared = useContext(GroupOpenContext);
   const [localOpen, setLocalOpen] = useState(false);
   const rowKeys = g.rows.map(productKey);
@@ -79,26 +78,22 @@ function GroupCard({ group: g, query, compareChecked = false, onCompare }: { gro
   const setOpen = (v: boolean) => (shared ? shared.setOpen(rowKeys, v) : setLocalOpen(v));
   const listId = useId();
   const b = g.best;
-  const image = [b, ...g.rows].map((p) => p.image).find((src) => !!src && src !== failed);
+  // One picture for the whole card: the lead's, else the next member's (Carrefour gives none).
+  const images = [b, ...g.rows].map((p) => p.image);
   const extra = g.rows.length - VISIBLE_ROWS;
   const rows = open || extra <= 0 ? g.rows : g.rows.slice(0, VISIBLE_ROWS);
   const stores = `${g.storeCount} ${g.storeCount === 1 ? "store" : "stores"}`;
 
   return (
-    <article className="card gcard">
+    <article className={["card gcard", !isLikelyMatch(b) && "card--muted", compareChecked && "card--selected"].filter(Boolean).join(" ")}>
       <div className="gcard__head">
-        <div className="gcard__media">
-          {image ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={image} alt="" width={160} height={160} loading="lazy" decoding="async" referrerPolicy="no-referrer" onError={() => setFailed(image)} />
-          ) : (
-            <span className="card__noimg">No image</span>
-          )}
-        </div>
+        <CardMedia src={images} site={b.site} className="gcard__media" size={160} />
         <div className="gcard__lead">
-          <h3 className="card__title">{b.title}</h3>
+          <h3 className="card__title" title={b.title}>
+            {b.title}
+          </h3>
           <p className="gcard__best">
-            Best price <span className="card__amount">{formatMoney(priceOf(b), b.currency)}</span> at{" "}
+            {g.bestPrice ? "Best price" : "Listed at"} <span className="card__amount">{formatMoney(priceOf(b), b.currency)}</span> at{" "}
             <span className="gcard__beststore">
               <StoreLogo id={b.site} size={18} />
               {storeLabel(b.site)}
@@ -110,7 +105,7 @@ function GroupCard({ group: g, query, compareChecked = false, onCompare }: { gro
       </div>
       <ul className="gcard__rows" role="list" id={listId} aria-label={`Prices for ${b.title}`}>
         {rows.map((p) => (
-          <Row key={productKey(p)} p={p} best={p === b} color={g.colors[`${p.site}:${p.id}`]} />
+          <Row key={productKey(p)} p={p} best={p === g.bestPrice} color={g.colors[`${p.site}:${p.id}`]} />
         ))}
       </ul>
       <div className="gcard__foot">
@@ -120,7 +115,6 @@ function GroupCard({ group: g, query, compareChecked = false, onCompare }: { gro
             <span className="visually-hidden">{open ? "" : ` ${extra === 1 ? "price" : "prices"}`}</span>
           </Button>
         )}
-        <p className="card__ship">Shipping not included</p>
         {onCompare && <CardCompare product={b} checked={compareChecked} onCompare={onCompare} />}
         {query && <CardWatch key={productKey(b)} product={b} query={query} />}
       </div>

@@ -98,7 +98,8 @@ describe("Price", () => {
 describe("Skeleton, EmptyState, ErrorState, SectionHeader, footer", () => {
   it("Skeletons are hidden from screen readers", () => {
     expect(html(h(Skeleton, { variant: "price" }))).toBe('<span class="skeleton skeleton--price" aria-hidden="true"></span>');
-    expect(html(h(SkeletonCard))).toContain('class="card card--skeleton" aria-hidden="true"');
+    expect(html(h(SkeletonCard))).toContain('class="card card--grid card--skeleton" aria-hidden="true"');
+    expect(html(h(SkeletonCard, { variant: "list" }))).toContain('class="card card--list card--skeleton" aria-hidden="true"');
   });
   it("EmptyState renders title, body and action", () => {
     const out = html(h(EmptyState, { title: "No searches yet", body: "Run one.", action: h(Button, { href: "/", children: "Search" }) }));

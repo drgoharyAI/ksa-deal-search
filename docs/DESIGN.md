@@ -129,8 +129,30 @@ Media queries use rem widths (`48rem`, `64rem`, `90rem`), because CSS variables 
 | `SectionHeader` | `h1`/`h2`, optional note and actions | |
 
 **Cards.** `--color-surface` on paper, `--radius-md`, and `--shadow-1`. On hover (hover devices only)
-the card lifts 1px to `--shadow-2`. There is never a card inside a card. U3 redesigns the result
-cards on these tokens.
+the card lifts 1px to `--shadow-2`. There is never a card inside a card.
+
+## Results page (U3)
+
+- **Head.** The search form turns compact: the query stays editable in place, and stores, price and
+  rating fold behind one line. Then come the StatusBar, the result count, store coverage ("Results from 5 of 7
+  stores"), and "Prices exclude shipping", which is said once per page and never per card.
+- **Toolbar.** It holds Filters (below 64rem, with a count badge), Sort (the existing sorts) and a Grid or List
+  switch, which is kept in localStorage. Below 64rem it sticks under the top bar; `--topbar-h` is
+  measured at runtime.
+- **Active filters.** Each one is a removable chip, followed by "Clear all".
+- **Filter panel.** It is one component, `FilterChips`, placed in one of three ways. From 64rem it is a sticky
+  sidebar 16.5rem wide that holds its place while the first store streams. From 48rem it is a panel that the
+  Filters button folds open. On phones it is a bottom-sheet `<dialog>` with a focus trap, closed by Esc or a
+  scrim tap, and focus goes back to the button. A group of options shows only when the data has it: no
+  rating group without ratings, and no "Verified deals" without a lowest-in-30-days or below-usual badge.
+- **Result card.** The variants are `card--grid` and `card--list`. `card--muted` marks a less likely match: drawn on
+  paper, with no lift. `card--selected` (ticked for compare) gets an ink ring. Every card has a 1:1 picture box
+  (contain, lazy, fixed size). When there is no picture, a placeholder shows the store's grey mark. The title is clamped
+  (3 lines in the grid, 2 in a list), with the full title in `title`. Next come the `Price` primitive, rating and sold
+  count only when given, quiet deal labels and the sparkline. "View on <store>" (new tab, noopener
+  noreferrer) is the main action, and Compare and Watch sit under it.
+- **Group card.** It shows one picture and title, then a price ladder. "Best price" (the accent row) goes only to the lowest
+  price in its own currency, and only when another row shares that currency.
 
 ## Store status (U2)
 

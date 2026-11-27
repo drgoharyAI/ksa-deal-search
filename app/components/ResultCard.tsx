@@ -4,13 +4,14 @@ import { memo, useState } from "react";
 import type { DealInsight, PriceTrend, Product } from "@/src/lib/types";
 import { storeLabel } from "@/src/lib/stores";
 import { isLikelyMatch } from "@/src/lib/rank";
+import { httpsUrl } from "@/src/lib/view";
 import StoreLogo from "./StoreLogo";
 import WatchForm, { postWatch } from "./WatchForm";
 import { defaultTarget } from "@/src/lib/alerts/shared";
 import Sparkline from "./Sparkline";
-import { formatMoney } from "@/src/lib/money";
 import Button from "./ui/Button";
-
+import Price from "./ui/Price";
+import StoreMark from "./ui/StoreMark";
 
 const DEAL_EXPLAIN: Record<DealInsight["badge"], string> = {
   "fake-deal": "The discount does not hold up against the prices we've seen",
@@ -116,7 +117,7 @@ export function CardWatch({ product: p, query }: { product: Product; query: stri
           }}
         />
       ) : watch === "saved" ? null : (
-        <Button size="sm" onClick={() => setWatch("open")}>
+        <Button size="sm" variant="ghost" className="card__watchbtn" onClick={() => setWatch("open")}>
           Watch
           <span className="visually-hidden"> {p.title}</span>
         </Button>
@@ -133,72 +134,99 @@ export function CardWatch({ product: p, query }: { product: Product; query: stri
   );
 }
 
+/** The view a card is drawn in: a grid card, or a compact list row. */
+export type CardVariant = "grid" | "list";
+
+/** The struck "was" price: only a store's own earlier price above the current one, same item, same currency. */
+export function wasPrice(p: Product): number | null {
+  const price = p.finalPrice ?? p.listPrice;
+  return p.origPrice !== null && Number.isFinite(p.origPrice) && p.origPrice > price ? p.origPrice : null;
+}
+
+/**
+ * The percent off we may show: the store's "was" price backs it, and our own history has not
+ * called the deal fake. The store's own percent wins; otherwise it is worked out from the "was".
+ */
+export function verifiedDiscount(p: Product): number | null {
+  const was = wasPrice(p);
+  if (was === null || p.deal?.badge === "fake-deal") return null;
+  const pct = p.discountPct ?? Math.round((1 - (p.finalPrice ?? p.listPrice) / was) * 100);
+  return pct >= 1 && pct < 100 ? pct : null;
+}
+
+/**
+ * The picture box: the store's image at a fixed ratio, or a quiet placeholder with the store's
+ * mark. `src` may list several pictures (a group's members): a broken one gives way to the next.
+ */
+export function CardMedia({ src, site, className = "card__media", size = 400 }: { src: string | string[]; site: string; className?: string; size?: number }) {
+  const [failed, setFailed] = useState<ReadonlySet<string>>(() => new Set());
+  const show = (Array.isArray(src) ? src : [src]).find((s) => !!s && !failed.has(s));
+  return (
+    <div className={className}>
+      {show ? (
+        // Remote store images: plain <img> keeps Next's image optimizer off the stores' CDNs.
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={show} alt="" width={size} height={size} loading="lazy" decoding="async" referrerPolicy="no-referrer" onError={() => setFailed((f) => new Set(f).add(show))} />
+      ) : (
+        <span className="noimg">
+          <StoreLogo id={site} size={24} />
+          <span className="noimg__text">No image</span>
+        </span>
+      )}
+    </div>
+  );
+}
+
 /**
  * `query`: the search this card came from; with it the card offers a price alert ("Watch").
  * `onCompare`: with it the card offers a "Compare" checkbox (`compareChecked`: ticked).
+ * `variant`: a grid card or a compact list row. A less likely match is drawn muted either way.
  */
-function ResultCard({ product: p, query, compareChecked = false, onCompare }: { product: Product; query?: string } & CompareControl) {
-  const [imgFailed, setImgFailed] = useState(false);
+function ResultCard({ product: p, query, compareChecked = false, onCompare, variant = "grid" }: { product: Product; query?: string; variant?: CardVariant } & CompareControl) {
   const price = p.finalPrice ?? p.listPrice;
-  const showImage = !!p.image && !imgFailed;
-  const discount = p.discountPct ? Math.round(p.discountPct) : 0;
-  const hasOrig = p.origPrice !== null && p.origPrice > price;
+  const store = storeLabel(p.site);
+  const likely = isLikelyMatch(p);
+  const href = httpsUrl(p.url);
+  const discount = verifiedDiscount(p);
+  const cls = ["card", `card--${variant}`, !likely && "card--muted", compareChecked && "card--selected"].filter(Boolean).join(" ");
 
   return (
-    <article className="card">
-      <div className="card__media">
-        {showImage ? (
-          // Remote store images: plain <img> keeps Next's image optimizer off the five stores' CDNs.
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={p.image}
-            alt=""
-            width={400}
-            height={400}
-            loading="lazy"
-            decoding="async"
-            referrerPolicy="no-referrer"
-            onError={() => setImgFailed(true)}
-          />
-        ) : (
-          <span className="card__noimg">No image</span>
-        )}
-        {discount > 0 && <span className="card__badge">{`−${discount}%`}</span>}
-      </div>
+    <article className={cls}>
+      <CardMedia src={p.image} site={p.site} />
       <div className="card__body">
-        <span className="card__store">
-          <StoreLogo id={p.site} size={18} />
-          <span className="card__storename">{storeLabel(p.site)}</span>
-          {!isLikelyMatch(p) && <span className="card__flag"> · Less likely match</span>}
-        </span>
-        <h3 className="card__title">
-          <a className="card__link" href={p.url} target="_blank" rel="noopener noreferrer">
-            {p.title}
-            <span className="visually-hidden"> (opens in a new tab)</span>
-          </a>
+        <div className="card__store">
+          <StoreMark id={p.site} size={18} />
+          {!likely && <span className="card__flag">Less likely match</span>}
+        </div>
+        <h3 className="card__title" title={p.title}>
+          {p.title}
         </h3>
-        <p className="card__price">
-          {p.site === "aliexpress" && <span className="card__from">from</span>}
-          <span className="card__amount">{formatMoney(price, p.currency)}</span>
-          {hasOrig && (
-            <s className="card__orig">
-              <span className="visually-hidden">was </span>
-              {formatMoney(p.origPrice as number, p.currency)}
-            </s>
-          )}
-        </p>
-        {p.deal && <DealBadge deal={p.deal} />}
-        {p.trend && p.trend.points.length >= 2 && <Trend trend={p.trend} title={p.title} />}
-        <p className="card__ship">Shipping not included</p>
-        {(p.rating !== null || p.soldCount > 0) && (
+        <Price amount={price} currency={p.currency} original={wasPrice(p)} discountPct={discount} verified={discount !== null} from={p.site === "aliexpress"} size="md" />
+        {(p.rating !== null || p.soldCount > 0 || p.ratingUnavailable) && (
           <p className="card__meta">
             {p.rating !== null && <span>Rated {p.rating.toFixed(1)} of 5</span>}
             {p.soldCount > 0 && <span>{p.soldCount.toLocaleString("en-US")} sold</span>}
+            {p.ratingUnavailable && <span>No rating from this store</span>}
           </p>
         )}
-        {p.ratingUnavailable && <p className="card__meta">No rating</p>}
-        {onCompare && <CardCompare product={p} checked={compareChecked} onCompare={onCompare} />}
-        {query && <CardWatch product={p} query={query} />}
+        {p.deal && <DealBadge deal={p.deal} />}
+        {p.trend && p.trend.points.length >= 2 && <Trend trend={p.trend} title={p.title} />}
+        <div className="card__actions">
+          {href ? (
+            <Button size="sm" className="card__go" href={href} external>
+              View on {store}
+              <span className="visually-hidden">{`: ${p.title} (opens in a new tab)`}</span>
+            </Button>
+          ) : (
+            <span className="card__nolink">No store link</span>
+          )}
+          {(onCompare || query) && (
+            <div className="card__more">
+              {onCompare && <CardCompare product={p} checked={compareChecked} onCompare={onCompare} />}
+              {query && <CardWatch product={p} query={query} />}
+            </div>
+          )}
+        </div>
       </div>
     </article>
   );
