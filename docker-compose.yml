@@ -10,8 +10,10 @@ services:
     hostname: deal-search
     restart: unless-stopped
     init: true
+    # IPv4 only. A bare "3000:3000" also listens on [::], and the VM has a global IPv6 address,
+    # so the app would be reachable from the internet. ufw does not filter Docker-published ports.
     ports:
-      - "3000:3000"
+      - "${APP_BIND:-0.0.0.0}:3000:3000"
     env_file: .env
     environment:
       NODE_ENV: production
@@ -48,8 +50,8 @@ services:
     depends_on:
       - app
     ports:
-      - "80:80"
-      - "443:443"
+      - "${APP_BIND:-0.0.0.0}:80:80"
+      - "${APP_BIND:-0.0.0.0}:443:443"
     environment:
       CADDY_HOST: ${CADDY_HOST:-deals.lan}
     volumes:

@@ -223,5 +223,10 @@ headless Chrome.
 **Health is 503 / `"db":"error"`.** The volume is not writable or full: `docker compose exec app
 ls -la /data`, `df -h` on the VM.
 
+**Exposure.** Ports are published on IPv4 only (`${APP_BIND:-0.0.0.0}`). The VM has a global IPv6
+address, and a bare `"3000:3000"` would also listen on `[::]` and be reachable from the internet.
+ufw does not filter Docker-published ports. Set `APP_BIND=192.168.1.48` in `.env` to bind one address.
+Check: `ss -tlnp | grep 3000` must show no `[::]` line.
+
 **Port 3000 is taken.** Change the left side of `ports:` in `docker-compose.yml` (for example
 `"8080:3000"`) and put `192.168.1.48:8080` in `APP_HOSTS`.
