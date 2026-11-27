@@ -261,3 +261,8 @@ non-goals for these three.
   the adapter reports `error` instead of throwing. While Chrome runs, any local
   process can drive it through the debug port. That's acceptable for a personal PC,
   and the port is never exposed beyond localhost.
+- **Trendyol KSA added (owner, 2026-11-27).** Site id `trendyol-sa`. It must be
+  Trendyol's Saudi storefront: English, SAR prices, delivery to Saudi Arabia (Trendyol's
+  Gulf/international site with country SA). It is spiked like the others: API
+  Anything first, Playwright as a fallback. `finalPrice = listPrice`, and cards say
+  "shipping not included".

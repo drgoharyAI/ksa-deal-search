@@ -294,7 +294,7 @@ Behavior:
 
 ## Scope extension: amazon.sa, noon KSA, jarir.com
 
-Spec section "Scope extension". Site ids are `amazon-sa`, `noon-sa` and `jarir`. On these sites `finalPrice = listPrice`, `detailStatus:"ok"`, `shipping:null`, and cards say "shipping not included". These tasks run after Task 9. Their spikes (Tasks 10a–c) run early and in parallel. They're research only: each uses its own API Anything home `.aa-home-spike-<id>/` (gitignored) and writes only its own files. The controller commits them.
+Spec section "Scope extension". Site ids are `amazon-sa`, `noon-sa`, `jarir` and `trendyol-sa` (added 2026-11-27, spike Task 10d). On these sites `finalPrice = listPrice`, `detailStatus:"ok"`, `shipping:null`, and cards say "shipping not included". These tasks run after Task 9. Their spikes (Tasks 10a–c) run early and in parallel. They're research only: each uses its own API Anything home `.aa-home-spike-<id>/` (gitignored) and writes only its own files. The controller commits them.
 
 ### Task 10a/10b/10c: Spike — `<id>.search` op (one per site, STOP-GATE per site)
 
