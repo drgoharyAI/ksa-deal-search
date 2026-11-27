@@ -10,7 +10,7 @@ import StoreLogo from "./StoreLogo";
 import { CardCompare, CardWatch, dealExplanation, formatMoney, type CompareControl } from "./ResultCard";
 
 /** Rows shown before "Show N more". */
-export const VISIBLE_ROWS = 4;
+const VISIBLE_ROWS = 4;
 
 const priceOf = (p: Product) => p.finalPrice ?? p.listPrice;
 

@@ -7,7 +7,7 @@ import { brandLabel } from "@/src/lib/specs";
 import StoreLogo from "./StoreLogo";
 
 /** Brands shown before "More brands". */
-export const TOP_BRANDS = 12;
+const TOP_BRANDS = 12;
 
 type Props = {
   filters: ChipFilters;

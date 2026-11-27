@@ -5,9 +5,9 @@ import { labelKey } from "./metrics";
  * eval/groups-gold.json: per query, reviewed cross-store pairs ("site:id" keys) that are the same
  * product or tricky different products (same brand, another model, capacity or generation).
  */
-export type GroupGoldQuery = { query: string; split: "tune" | "heldout"; sameKeys: [string, string][]; differentKeys: [string, string][] };
+type GroupGoldQuery = { query: string; split: "tune" | "heldout"; sameKeys: [string, string][]; differentKeys: [string, string][] };
 
-export type GroupPairCounts = {
+type GroupPairCounts = {
   /** Gold pairs with both items in the results (pairs with an item filtered out are skipped). */
   samePairs: number;
   differentPairs: number;

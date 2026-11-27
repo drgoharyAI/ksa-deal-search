@@ -40,7 +40,7 @@ export type SearchResult = {
   reason?: string;
 };
 
-export const NO_MATCH_REASON = "No products matched your search and filters";
+const NO_MATCH_REASON = "No products matched your search and filters";
 
 export type Call = { op: string; args: Record<string, string> };
 

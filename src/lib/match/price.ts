@@ -4,7 +4,7 @@ import type { Product } from "@/src/lib/types";
 const BRANDS = new Set<string>(brands);
 
 /** In a brand query, an item below this fraction of the median price is a clone or a part. */
-export const BRAND_PRICE_RATIO = 0.25;
+const BRAND_PRICE_RATIO = 0.25;
 
 const median = (xs: number[]): number => {
   const s = [...xs].sort((a, b) => a - b);
@@ -13,7 +13,7 @@ const median = (xs: number[]): number => {
 };
 
 /** True when the query names a known brand ("apple watch", "samsung galaxy s24"). */
-export const namesBrand = (queryTokens: string[]) => queryTokens.some((t) => BRANDS.has(t.toLowerCase()));
+const namesBrand = (queryTokens: string[]) => queryTokens.some((t) => BRANDS.has(t.toLowerCase()));
 
 /**
  * Brand queries only: price evidence against items priced far below the matching items.
@@ -38,7 +38,7 @@ export function applyBrandPriceRules(products: Product[], queryTokens: string[],
 }
 
 /** Two price tiers this far apart (ratio of their geometric means) are different kinds of item. */
-export const TIER_RATIO = 4;
+const TIER_RATIO = 4;
 
 /**
  * Price structure of a brand query's matches: the best two-group split of log prices. When the

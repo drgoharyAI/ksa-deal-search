@@ -14,14 +14,14 @@ function withinOneEdit(a: string, b: string): boolean {
 }
 
 /** Light English stem: drops one common inflection suffix (gaming/gamer/games -> gam). */
-export function stem(t: string): string {
+function stem(t: string): string {
   const m = t.match(/^(.{3,}?)(?:ation|ing|ers|er|es|ed|s|e)$/);
   const s = m ? m[1] : t;
   return s.replace(/([a-z])$/, "$1"); // cancell -> cancel
 }
 
 /** Exact; else (no digits in either token) same stem, prefix (query >= 4 chars) or edit distance <= 1 after the first letter (query >= 5 chars). */
-export function tokenMatches(q: string, t: string): boolean {
+function tokenMatches(q: string, t: string): boolean {
   if (q === t) return true;
   if (hasDigit(q) || hasDigit(t)) return false;
   if (q.length >= 4 && t.startsWith(q)) return true;

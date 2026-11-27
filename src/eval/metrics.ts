@@ -3,9 +3,6 @@ import { hasValidPrice, isExcluded, passesPriceRating, ratinglessSites, type Pri
 
 export type Label = "relevant" | "accessory" | "wrong-model" | "off-topic";
 
-/** eval/labels/<slug>.json. Key = "<site>:<product id>" of the normalized Product. */
-export type LabelsFile = { query: string; labels: Record<string, Label> };
-
 export const labelKey = (p: Pick<Product, "site" | "id">): string => `${p.site}:${p.id}`;
 
 /** The query's own filters (from parseQuery), used to decide which relevant items are eligible. */

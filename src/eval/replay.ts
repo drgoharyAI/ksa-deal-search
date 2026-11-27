@@ -5,7 +5,7 @@ import { parseQuery } from "@/src/lib/query/parse";
 import { expandTerms } from "@/src/lib/query/synonyms";
 
 /** One raw store call as sent through the app's real transport, with its answer. */
-export type RecordedCall = { op: string; args: Record<string, string>; result: AaResult };
+type RecordedCall = { op: string; args: Record<string, string>; result: AaResult };
 
 /** eval/recorded/<store>/<slug>.json */
 export type Recording = {

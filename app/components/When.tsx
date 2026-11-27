@@ -5,7 +5,7 @@ const UNITS: [Intl.RelativeTimeFormatUnit, number][] = [
 ];
 
 /** "3 hours ago" style text for a past time (ms). */
-export function ago(at: number, now = Date.now()): string {
+function ago(at: number, now = Date.now()): string {
   const diff = at - now;
   const rtf = new Intl.RelativeTimeFormat("en", { numeric: "auto" });
   for (const [unit, ms] of UNITS) if (Math.abs(diff) >= ms) return rtf.format(Math.round(diff / ms), unit);

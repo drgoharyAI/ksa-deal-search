@@ -29,7 +29,7 @@ const MAX_RETRIES = 2;
  * drift is one odd page (e.g. a niche synonym query), not a block.
  */
 export const BACKOFF_MS = 10 * 60_000;
-export const DRIFT_OK_GRACE_MS = 60_000;
+const DRIFT_OK_GRACE_MS = 60_000;
 const BACKOFF_CLASSES = new Set(["blocked", "rate"]);
 // On globalThis so the back-off survives Next.js dev HMR module reloads.
 const g = globalThis as typeof globalThis & {

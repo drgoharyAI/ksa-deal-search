@@ -182,7 +182,7 @@ async function warmUp(page: NoonPage) {
 }
 
 /** Load one search URL on `page` and extract its cards. Throws on block/navigation errors. */
-export async function loadSearch(page: NoonPage, url: string): Promise<RawNoonItem[]> {
+async function loadSearch(page: NoonPage, url: string): Promise<RawNoonItem[]> {
   const resp = await page.goto(url, { waitUntil: "domcontentloaded", timeout: LOAD_TIMEOUT_MS });
   checkStatus(resp?.status() ?? 0, "search");
   let outcome: unknown = "timeout";

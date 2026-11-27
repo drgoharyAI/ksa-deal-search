@@ -57,8 +57,6 @@ export type SiteStatus = {
   message?: string;
 };
 
-export type RawDetail = unknown;
-
 export type SiteAdapter = {
   id: string;
   label: string;

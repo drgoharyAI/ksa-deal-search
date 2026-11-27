@@ -7,10 +7,10 @@ import { TtlCache } from "./cache";
  * merge is the order of SOURCES (Amazon first, then Jarir).
  */
 
-export const MIN_Q = 2;
-export const MAX_Q = 80;
-export const MAX_SUGGESTIONS = 8;
-export const SOURCE_TIMEOUT_MS = 1500;
+const MIN_Q = 2;
+const MAX_Q = 80;
+const MAX_SUGGESTIONS = 8;
+const SOURCE_TIMEOUT_MS = 1500;
 export const CACHE_TTL_MS = 5 * 60_000;
 export const BACKOFF_MS = 10 * 60_000;
 
@@ -27,7 +27,7 @@ const values = (list: unknown, field = "value"): string[] =>
         .filter((v): v is string => typeof v === "string")
     : [];
 
-export const SOURCES: Source[] = [
+const SOURCES: Source[] = [
   {
     id: "amazon-sa",
     url: (q) =>
@@ -59,7 +59,7 @@ export const SOURCES: Source[] = [
 ];
 
 /** Trimmed, single-spaced, lower case: the cache key and what the sources are sent. */
-export const normalizeQuery = (q: string): string => q.trim().replace(/\s+/g, " ").toLowerCase();
+const normalizeQuery = (q: string): string => q.trim().replace(/\s+/g, " ").toLowerCase();
 
 // Latin letters, digits, punctuation, symbols and spaces only: drops Arabic and other scripts.
 const LATIN_ONLY = /^[\p{Script=Latin}\p{N}\p{P}\p{S}\s]+$/u;

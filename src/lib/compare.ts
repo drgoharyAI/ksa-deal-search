@@ -14,7 +14,7 @@ const NBSP = " ";
 const priceOf = (p: Product) => p.finalPrice ?? p.listPrice;
 
 /** "SAR 2,999" (no-break space), two decimals only when the amount has cents. */
-export function money(n: number, currency = "SAR"): string {
+function money(n: number, currency = "SAR"): string {
   const digits = Number.isInteger(n) ? 0 : 2;
   return `${currency || "SAR"}${NBSP}${n.toLocaleString("en-US", { minimumFractionDigits: digits, maximumFractionDigits: 2 })}`;
 }

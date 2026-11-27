@@ -50,7 +50,7 @@ export function queryOnlyInLaterSegment(title: string, variants: string[][]): bo
   });
 }
 
-export function isWeakMatch(title: string, variants: string[][]): boolean {
+function isWeakMatch(title: string, variants: string[][]): boolean {
   return productOnlyAfterWith(title, variants) || queryOnlyInLaterSegment(title, variants);
 }
 

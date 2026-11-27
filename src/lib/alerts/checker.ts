@@ -44,7 +44,6 @@ export type CycleReport = { checked: number; groups: number; fired: number; retr
 
 type GroupOutcome = { ok: true; products: Product[] } | { ok: false; status: "blocked" | "error" };
 
-export { normQuery };
 
 function filterFor(w: Watch, products: Product[]): Product[] {
   const f = w.filters ?? {};

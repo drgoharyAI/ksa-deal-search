@@ -26,8 +26,6 @@ export const STORES = [
 /** Store ids checked when the page opens. */
 export const defaultSites = (): string[] => STORES.filter((s) => s.defaultSelected).map((s) => s.id);
 
-export type StoreId = (typeof STORES)[number]["id"];
-
 const LABELS: Record<string, string> = Object.fromEntries(STORES.map((s) => [s.id, s.label]));
 
 export const storeLabel = (id: string): string => LABELS[id] ?? id;

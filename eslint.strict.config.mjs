@@ -1,21 +1,22 @@
 // Stricter, type-aware lint pass, run by `npm run lint:strict` (and `npm run qa`).
 // The default `eslint.config.mjs` stays as the everyday Next.js pass; this one adds
-// typescript-eslint strict-type-checked and eslint-plugin-security over the app's own code.
+// typescript-eslint strict-type-checked, eslint-plugin-security and eslint-plugin-redos (registered
+// in the base config) over the app's own code.
 // Every rule option below is a deliberate, documented choice (see docs/QA.md).
 import { defineConfig, globalIgnores } from "eslint/config";
 import tseslint from "typescript-eslint";
 import security from "eslint-plugin-security";
-import redos from "eslint-plugin-redos";
 import base from "./eslint.config.mjs";
 
 export default defineConfig([
   ...base,
   // Plain-JS tooling (eval scripts, spike prototypes, config files) is not type-checked.
   globalIgnores(["scripts/**", "eval/**", "*.mjs", "*.config.ts"]),
+  // A suppression whose problem is gone fails the pass, so stale ones do not pile up.
+  { linterOptions: { reportUnusedDisableDirectives: "error" } },
   {
     files: ["app/**/*.{ts,tsx}", "src/**/*.ts", "tests/**/*.ts", "instrumentation.ts"],
     extends: [tseslint.configs.strictTypeChecked, security.configs.recommended],
-    plugins: { redos },
     languageOptions: {
       parserOptions: { projectService: true, tsconfigRootDir: import.meta.dirname },
     },

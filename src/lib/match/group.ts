@@ -26,7 +26,7 @@ import { normalizeTitle } from "./spec";
  * Minimum token similarity without a shared code: Jaccard weighted by each token's rarity in the
  * result set (IDF), averaged over the group's members. Chosen on the tuning half of the eval.
  */
-export const GROUP_THRESHOLD = 0.6;
+const GROUP_THRESHOLD = 0.6;
 
 const priceOf = (p: Product) => p.finalPrice ?? p.listPrice;
 const keyOf = (p: Pick<Product, "site" | "id">) => `${p.site}:${p.id}`;
@@ -834,7 +834,7 @@ const setsEqual = (a: Set<string>, b: Set<string>) => {
 };
 
 /** Token weight: rarer tokens in the result set weigh more (a differing "Access" or "Fortnite" counts). */
-export type Weight = (token: string) => number;
+type Weight = (token: string) => number;
 
 /** Weighted Jaccard; plain Jaccard without weights. */
 function jaccard(a: Set<string>, b: Set<string>, w: Weight = () => 1): number {
@@ -994,7 +994,7 @@ const isStaticGeneric = (w: string) => STATIC_GENERIC.has(w);
 const FEATURE_WORDS = new Set("footrest footstool clock anc noise cancellation cancelling canceling heated heater".split(" "));
 
 /** Share of the result set's titles from which a word counts as generic (tuned on the eval's tune half). */
-export const GENERIC_SHARE = 0.02;
+const GENERIC_SHARE = 0.02;
 
 function signature(words: Set<string>, generic: (w: string) => boolean): string {
   return [...words].filter((w) => !generic(w)).sort().join(" ");

@@ -21,14 +21,14 @@ export type ChipFilters = {
 export const NO_FILTERS: ChipFilters = { stores: [], brands: [], discounted: false };
 
 /** The minimum-rating chips after "Any". */
-export const RATING_STEPS = [3, 4, 4.5] as const;
+const RATING_STEPS = [3, 4, 4.5] as const;
 
 type Dim = "stores" | "brands" | "price" | "rating" | "discounted";
 
 /** Per result set: each product's brand, and the stores that rate none of their products. */
 export type ChipContext = { brands: Map<string, string | undefined>; ratingless: Set<string> };
 
-export const priceOf = (p: Product): number => p.finalPrice ?? p.listPrice;
+const priceOf = (p: Product): number => p.finalPrice ?? p.listPrice;
 
 /** Shows a discount: a discount percent, or an original price above the price. */
 export const isDiscounted = (p: Product): boolean =>
@@ -67,7 +67,7 @@ export function passes(p: Product, f: ChipFilters, ctx: ChipContext, skip?: Dim)
 export const applyFilters = (products: Product[], f: ChipFilters, ctx: ChipContext): Product[] =>
   products.filter((p) => passes(p, f, ctx));
 
-export type Option = { id: string; count: number };
+type Option = { id: string; count: number };
 export type Facets = {
   /** Stores with results (or selected), in the store list's order. */
   stores: Option[];

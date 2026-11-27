@@ -8,7 +8,7 @@ const PAD = 3;
  * SVG path for the points, oldest left; a flat line when every price is the same. Points are
  * evenly spaced, or, with `xSpan`, placed by `at` on a 0..xSpan-1 axis so gaps show.
  */
-export function sparkPath(points: PricePoint[], w = W, h = H, xSpan?: number): string {
+function sparkPath(points: PricePoint[], w = W, h = H, xSpan?: number): string {
   if (!points.length) return "";
   const prices = points.map((p) => p.price);
   const min = Math.min(...prices);

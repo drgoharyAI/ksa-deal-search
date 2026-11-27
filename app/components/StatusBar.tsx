@@ -11,7 +11,7 @@ type Props = {
 };
 
 /** "Store blocked the request; …" from the server becomes "AliExpress blocked the request; …". */
-export function storeMessage(site: string, message: string): string {
+function storeMessage(site: string, message: string): string {
   const label = storeLabel(site);
   return message.startsWith("Store ") ? `${label} ${message.slice(6)}` : `${label}: ${message}`;
 }

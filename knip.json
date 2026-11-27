@@ -1,0 +1,6 @@
+{
+  "$schema": "https://unpkg.com/knip@6/schema.json",
+  "entry": ["scripts/*.mjs", "src/eval/node-entry.ts", "tests/stubs-server-only.ts"],
+  "project": ["app/**/*.{ts,tsx}", "src/**/*.ts", "scripts/**/*.mjs", "tests/**/*.ts", "*.ts"],
+  "eslint": { "config": ["eslint.config.mjs", "eslint.strict.config.mjs"] }
+}

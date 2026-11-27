@@ -14,7 +14,7 @@ const CONNECTOR = /\b(?:with|includes?|including|built[-\s]?in)\b|\s[+&]\s/i; //
 const PRICE_RATIO = 0.3;
 
 /** With no non-candidates, a jump of at least this ratio between consecutive candidate prices splits accessories from products. */
-export const GAP_RATIO = 4;
+const GAP_RATIO = 4;
 
 const isAccessoryWord = (t: string) =>
   ACCESSORY.has(t) || (t.endsWith("s") && ACCESSORY.has(t.slice(0, -1)));
@@ -140,7 +140,7 @@ function gapCutoff(prices: number[]): number | null {
  * accessory vocabulary then describes the item ("Charger Stand", "Charging Pad", "Cable with
  * Adapter"), so only the "made for" structure ("Case for Wireless Charger") marks an add-on.
  */
-export const isAccessoryQuery = (variants: string[][]): boolean =>
+const isAccessoryQuery = (variants: string[][]): boolean =>
   variants.some((v) => {
     const h = headNoun(v);
     return !!h && isAccessoryWord(h);

@@ -128,6 +128,7 @@ export function chromeCandidates(
 }
 
 export function findChrome(): string | null {
+  // eslint-disable-next-line security/detect-non-literal-fs-filename -- Chrome install paths from a fixed list and the operator's CHROME_PATH
   for (const p of chromeCandidates()) if (fs.existsSync(p)) return p;
   return null;
 }
@@ -150,7 +151,6 @@ export type ChromeDeps = {
    * process adopt an orphan Chrome instead of spawning a second one (which hands off and exits).
    */
   readOwnPortFile?(profileDir: string): OwnPortFile | null;
-  // eslint-disable-next-line security/detect-non-literal-fs-filename -- Chrome install paths from a fixed list and the operator's CHROME_PATH
   writeOwnPortFile?(profileDir: string, f: OwnPortFile): void;
   removeOwnPortFile?(profileDir: string): void;
   /** True if a process with this pid exists. */
@@ -182,6 +182,7 @@ const realDeps: Omit<Deps, "profileDir"> = {
   readActivePort(profileDir) {
     try {
       // First line of DevToolsActivePort is the port; parseInt stops at the line break.
+      // eslint-disable-next-line security/detect-non-literal-fs-filename -- a file inside the app's own Chrome profile dir
       const port = parseInt(fs.readFileSync(portFile(profileDir), "utf8"), 10);
       return validPort(port) ? port : null;
     } catch {
@@ -193,6 +194,7 @@ const realDeps: Omit<Deps, "profileDir"> = {
   },
   readOwnPortFile(profileDir) {
     try {
+      // eslint-disable-next-line security/detect-non-literal-fs-filename -- a file inside the app's own Chrome profile dir
       const f = JSON.parse(fs.readFileSync(ownPortFile(profileDir), "utf8")) as Partial<OwnPortFile>;
       const pid = f.pid;
       return validPort(f.port) && typeof pid === "number" && Number.isInteger(pid) && pid > 0
@@ -216,7 +218,6 @@ const realDeps: Omit<Deps, "profileDir"> = {
     } catch {
       // best effort
     }
-      // eslint-disable-next-line security/detect-non-literal-fs-filename -- a file inside the app's own Chrome profile dir
   },
   pidAlive(pid) {
     try {
@@ -228,7 +229,6 @@ const realDeps: Omit<Deps, "profileDir"> = {
     }
   },
   freePort() {
-      // eslint-disable-next-line security/detect-non-literal-fs-filename -- a file inside the app's own Chrome profile dir
     return new Promise((resolve, reject) => {
       const srv = net.createServer();
       srv.unref();
@@ -306,7 +306,7 @@ function normDir(p: string): string {
   return process.platform === "win32" ? s.toLowerCase() : s;
 }
 
-export const sameDir = (a: string, b: string): boolean => normDir(a) === normDir(b);
+const sameDir = (a: string, b: string): boolean => normDir(a) === normDir(b);
 
 /**
  * Candidates for a Chrome already running on this profile: our own port file first (the pid is

@@ -34,7 +34,7 @@ export function trendChange(pct: number): { arrow: string; spoken: string; text:
  * The badge. A fake deal shows its reason as visible text under the badge (no hover needed, read
  * once); the other badges explain themselves to screen readers only.
  */
-export function DealBadge({ deal }: { deal: DealInsight }) {
+function DealBadge({ deal }: { deal: DealInsight }) {
   const explain = dealExplanation(deal);
   const visible = deal.badge === "fake-deal";
   return (

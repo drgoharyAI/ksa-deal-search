@@ -5,9 +5,9 @@
 
 export const RECENTS_KEY = "deal-search:recent-searches";
 export const MAX_RECENTS = 20;
-export const EMPTY_RECENTS_SHOWN = 5;
-export const TYPED_RECENTS_SHOWN = 3;
-export const MAX_OPTIONS = 8;
+const EMPTY_RECENTS_SHOWN = 5;
+const TYPED_RECENTS_SHOWN = 3;
+const MAX_OPTIONS = 8;
 export const MIN_SUGGEST_CHARS = 2;
 export const DEBOUNCE_MS = 150;
 

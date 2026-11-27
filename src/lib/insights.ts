@@ -11,33 +11,33 @@ import type { DealBadge, DealInsight, PriceTrend, Product } from "./types";
 export const HOUR = 3_600_000;
 export const DAY = 24 * HOUR;
 export const PRUNE_AFTER = 180 * DAY;
-export const WINDOW = 30 * DAY;
+const WINDOW = 30 * DAY;
 /** Days are counted in Saudi time (UTC+3, no daylight saving). */
 const KSA_OFFSET = 3 * HOUR;
 
-export const MIN_OBSERVATIONS = 3;
-export const MIN_DAYS = 2;
+const MIN_OBSERVATIONS = 3;
+const MIN_DAYS = 2;
 /** The observations must also span at least this long, so 23:00 and 01:00 do not count as two days. */
-export const MIN_SPAN = 20 * HOUR;
+const MIN_SPAN = 20 * HOUR;
 /** "Below usual price": more than 10% under the 30-day median. */
-export const BELOW_USUAL = 0.9;
+const BELOW_USUAL = 0.9;
 /** Fake deal (a): a discount is claimed, but the price is not below its usual price. */
-export const USUAL_PRICE = 0.98;
+const USUAL_PRICE = 0.98;
 /** Fake deal (a): the "was" price is above every observed price and this far over the median. */
-export const INFLATED_WAS = 1.15;
+const INFLATED_WAS = 1.15;
 /** Fake deal (b), no history: claimed discount, "was" multiple, and the result-set sanity floor. */
-export const UNREALISTIC_DISCOUNT = 70;
-export const UNREALISTIC_MULTIPLE = 3;
+const UNREALISTIC_DISCOUNT = 70;
+const UNREALISTIC_MULTIPLE = 3;
 /** The price must be at least this share of the result set's median to count as "normal range". */
-export const NORMAL_RANGE_FLOOR = 0.5;
+const NORMAL_RANGE_FLOOR = 0.5;
 /** Fewer comparable listings than this and (b) never fires. */
-export const MIN_PEERS = 4;
+const MIN_PEERS = 4;
 /** A shown discount: discountPct at or above this, or a "was" price above the price. */
 const SHOWN_DISCOUNT = 10;
 
 export type Observation = { site: string; productId: string; price: number; origPrice: number | null; at: number };
 
-export const LABELS: Record<DealBadge, string> = {
+const LABELS: Record<DealBadge, string> = {
   "fake-deal": "Fake deal",
   "lowest-30d": "Lowest in 30 days",
   "below-usual": "Below usual price",
@@ -55,7 +55,7 @@ const valid = (n: unknown): n is number => typeof n === "number" && Number.isFin
 /** The Saudi calendar day (days since the epoch, UTC+3) of a timestamp. */
 export const ksaDay = (at: number) => Math.floor((at + KSA_OFFSET) / DAY);
 
-export function median(xs: number[]): number {
+function median(xs: number[]): number {
   const s = [...xs].sort((a, b) => a - b);
   const m = s.length >> 1;
   return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2;
@@ -82,7 +82,7 @@ export function withCurrent(history: Observation[], current: { price: number; or
   ].sort((a, b) => a.at - b.at);
 }
 
-export function showsDiscount(price: number, origPrice: number | null, discountPct: number | null): boolean {
+function showsDiscount(price: number, origPrice: number | null, discountPct: number | null): boolean {
   return (discountPct ?? 0) >= SHOWN_DISCOUNT || (origPrice !== null && origPrice > price);
 }
 

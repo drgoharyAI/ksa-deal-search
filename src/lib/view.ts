@@ -13,7 +13,7 @@ import type { GroupRef } from "@/src/lib/match/group";
 /** One card's worth of listings: a cross-store group (grouped) or a single product. */
 export type Unit = { key: string; members: Product[]; grouped: boolean; colors: Record<string, string> };
 
-export type SingleItem = { kind: "product"; key: string; product: Product };
+type SingleItem = { kind: "product"; key: string; product: Product };
 export type GroupItem = {
   kind: "group";
   key: string;

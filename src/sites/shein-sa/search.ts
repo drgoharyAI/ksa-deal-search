@@ -213,7 +213,7 @@ async function warmUpIfNeeded(page: SheinPage, gap: () => Promise<void>) {
 type BffInfo = { products?: unknown; num?: unknown };
 
 /** Load page 1 of a search on `page` and read its products. Throws on block/navigation errors. */
-export async function loadSearch(page: SheinPage, url: string): Promise<RawSheinItem[]> {
+async function loadSearch(page: SheinPage, url: string): Promise<RawSheinItem[]> {
   // Listen before navigating: the page's own JS makes the signed XHR right after load.
   const xhr = page
     .waitForResponse((r) => r.url().includes(XHR_PATH) && r.url().includes("page=1&"), { timeout: XHR_TIMEOUT_MS })
@@ -248,7 +248,7 @@ export async function loadSearch(page: SheinPage, url: string): Promise<RawShein
 export type SheinState = { blockedUntil: number; strikes: number; lastLoad: number };
 
 /** The persisted part of the back-off. */
-export type Backoff = { blockedUntil: number; strikes: number };
+type Backoff = { blockedUntil: number; strikes: number };
 export type BackoffStore = { load(): Backoff | null; save(v: Backoff): void };
 
 /** Path of the persisted back-off (resolved on use, never at import). */

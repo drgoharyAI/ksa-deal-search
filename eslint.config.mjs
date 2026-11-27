@@ -1,6 +1,8 @@
 import { defineConfig, globalIgnores } from "eslint/config";
 import nextVitals from "eslint-config-next/core-web-vitals";
 import nextTs from "eslint-config-next/typescript";
+import security from "eslint-plugin-security";
+import redos from "eslint-plugin-redos";
 
 const eslintConfig = defineConfig([
   ...nextVitals,
@@ -20,6 +22,13 @@ const eslintConfig = defineConfig([
     ".claude/**",
     "eval/dump/**",
   ]),
+  {
+    // The stricter pass (eslint.strict.config.mjs) enables these plugins' rules; they are only
+    // registered here so inline `eslint-disable` comments naming them resolve. Unused-directive
+    // checks run in the strict pass, where every suppressed rule is on.
+    plugins: { security, redos },
+    linterOptions: { reportUnusedDisableDirectives: "off" },
+  },
 ]);
 
 export default eslintConfig;

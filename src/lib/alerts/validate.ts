@@ -10,7 +10,7 @@ const MAX_TARGET = 10_000_000;
 
 const str = (v: unknown, max: number): string | null => (typeof v === "string" && v.trim() && v.length <= max ? v.trim() : null);
 
-export const validTarget = (v: unknown): v is number => typeof v === "number" && Number.isFinite(v) && v > 0 && v <= MAX_TARGET;
+const validTarget = (v: unknown): v is number => typeof v === "number" && Number.isFinite(v) && v > 0 && v <= MAX_TARGET;
 
 const httpUrl = (v: unknown): string | null => {
   if (typeof v !== "string" || v.length > 2000) return null;
@@ -81,7 +81,7 @@ export function parseId(v: unknown): number | null {
 }
 
 /** { minPrice?, maxPrice?, minRating? } as finite non-negative numbers (rating 0 to 5); null when invalid. */
-export function parseFilters(v: unknown): WatchFilters | null {
+function parseFilters(v: unknown): WatchFilters | null {
   if (v === undefined || v === null) return {};
   if (typeof v !== "object" || Array.isArray(v)) return null;
   const o = v as Record<string, unknown>;

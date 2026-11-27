@@ -16,7 +16,7 @@ export function resolveProfileDir(env: Env = process.env, home: string = os.home
 }
 
 /** The old in-repo profile location. */
-export const legacyProfileDir = (): string => path.join(/* turbopackIgnore: true */ process.cwd(), ".noon-profile");
+const legacyProfileDir = (): string => path.join(/* turbopackIgnore: true */ process.cwd(), ".noon-profile");
 
 export type ProfileFs = {
   exists(p: string): boolean;

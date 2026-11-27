@@ -17,16 +17,16 @@ import { formsMatch } from "./relevance";
  */
 
 /** Listings priced at least this fraction of the median price of the matches define the product's usual wording. */
-export const REFERENCE_PRICE_RATIO = 0.5;
+const REFERENCE_PRICE_RATIO = 0.5;
 /** Resemblance needs enough titles to say what the product's listings look like. */
 export const MIN_TITLES = 10;
 /** Weights of the two signals in matchScore. */
-export const RESEMBLANCE_WEIGHT = 0.7;
-export const PHRASE_WEIGHT = 0.3;
+const RESEMBLANCE_WEIGHT = 0.7;
+const PHRASE_WEIGHT = 0.3;
 /** Not naming the query as a phrase costs nothing until this share of the titles do. */
 export const PHRASE_USUAL = 0.5;
 /** A weak match (12e title structure) never scores above this (below MATCH_THRESHOLD in rank.ts). */
-export const WEAK_CAP = 0.3;
+const WEAK_CAP = 0.3;
 
 const median = (xs: number[]): number => {
   if (!xs.length) return 0;

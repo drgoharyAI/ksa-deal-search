@@ -81,8 +81,10 @@ for (const x of adv) {
   const ga = gs.find((g) => g.members.some((m) => m.id === "adv-a"));
   const merged = ga.members.some((m) => m.id === "adv-b");
   // knownMiss: a merge the rules do not make yet (a recall gap), counted apart from failures.
-  if (x.knownMiss) merged ? advFixed.push(`${x.a} | ${x.b}`) : advMiss++;
-  else if (merged !== (x.expect === "merge")) advBad.push(`${x.expect.toUpperCase()} expected: ${x.a} | ${x.b}`);
+  if (x.knownMiss) {
+    if (merged) advFixed.push(`${x.a} | ${x.b}`);
+    else advMiss++;
+  } else if (merged !== (x.expect === "merge")) advBad.push(`${x.expect.toUpperCase()} expected: ${x.a} | ${x.b}`);
 }
 console.warn = warn;
 const advN = adv.filter((x) => !x.knownMiss).length;
