@@ -89,6 +89,7 @@ describe("browser.ts side effects", () => {
       profileDir: dir,
       readActivePort: read,
       probe: async () => true,
+      userDataDir: async () => dir, // adoption proves the profile (src/sites/chrome/cdp.ts)
       spawnChrome: (_p, a) => (spawned.push(a), { exitCode: null, kill: () => true }),
       connect: async () =>
         ({ contexts: () => [{ pages: () => [page], newPage: async () => page }], newContext: async () => ({}), on: () => {}, newBrowserCDPSession: async () => ({ send: async () => {} }), close: async () => {}, isConnected: () => true }) as never,

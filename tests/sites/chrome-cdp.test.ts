@@ -1,14 +1,16 @@
 import { describe, it, expect } from "vitest";
 import { createCdpLauncher, type ChromeDeps, type OwnPortFile } from "@/src/sites/chrome/cdp";
 
-function fakeBrowser() {
+function fakeBrowser(closed?: { n: number }) {
   const page = { isClosed: () => false };
   return {
     contexts: () => [{ pages: () => [page], newPage: async () => page }],
     newContext: async () => ({ pages: () => [page], newPage: async () => page }),
     on: () => {},
     newBrowserCDPSession: async () => ({ send: async () => {} }),
-    close: async () => {},
+    close: async () => {
+      if (closed) closed.n++;
+    },
   };
 }
 
@@ -20,6 +22,8 @@ type Opts = {
   spawnExit?: number | null;
   onSpawn?: () => void;
   spawnDelay?: () => Promise<void>;
+  /** user-data-dir the connected Chrome reports (default: this profile) */
+  udd?: (port: number) => string | null;
 };
 
 function deps(o: Opts) {
@@ -29,7 +33,11 @@ function deps(o: Opts) {
     written: [] as OwnPortFile[],
     ownRemoved: 0,
     events: [] as string[],
+    killed: [] as number[],
+    sleeps: [] as number[],
+    disconnects: { n: 0 },
   };
+  let lastPort = 0;
   let own = o.own ?? null;
   const d: ChromeDeps = {
     profileDir: "C:/fake/profile",
@@ -56,11 +64,14 @@ function deps(o: Opts) {
     },
     connect: async (port) => {
       log.connected.push(port);
+      lastPort = port;
       if (o.spawnDelay) await o.spawnDelay();
       log.events.push("connected");
-      return fakeBrowser() as never;
+      return fakeBrowser(log.disconnects) as never;
     },
-    sleep: async () => {},
+    userDataDir: async () => (o.udd ? o.udd(lastPort) : "C:/fake/profile"),
+    killPid: (pid) => void log.killed.push(pid),
+    sleep: async (ms) => void log.sleeps.push(ms),
   };
   return { d, log, setOwn: (f: OwnPortFile | null) => (own = f) };
 }
@@ -118,6 +129,108 @@ describe("createCdpLauncher: own port file", () => {
     const before = b.log.ownRemoved;
     s2.kill?.();
     expect(b.log.ownRemoved).toBe(before + 1);
+  });
+});
+
+describe("createCdpLauncher: adoption proves the Chrome is ours", () => {
+  it("wrong user-data-dir -> not adopted (disconnected, record deleted), spawns, kills nothing", async () => {
+    const { d, log } = deps({
+      own: { port: 40001, pid: 77, startedAt: 1 },
+      answers: () => true,
+      udd: (port) => (port === 40001 ? "C:/someone/else" : "C:/fake/profile"),
+    });
+    const s = await launcher(d)();
+    expect(log.connected).toEqual([40001, 51234]);
+    expect(log.disconnects.n).toBe(1);
+    expect(log.ownRemoved).toBeGreaterThanOrEqual(1);
+    expect(log.spawned).toHaveLength(1);
+    expect(log.killed).toEqual([]);
+    s.kill?.();
+    expect(log.killed).toEqual([]); // our own child is stopped through its handle, not by pid
+  });
+
+  it("unreadable user-data-dir -> not adopted", async () => {
+    const { d, log } = deps({
+      own: { port: 40001, pid: 77, startedAt: 1 },
+      answers: () => true,
+      udd: (p) => (p === 40001 ? null : "C:/fake/profile"),
+    });
+    await launcher(d)();
+    expect(log.spawned).toHaveLength(1);
+    expect(log.killed).toEqual([]);
+  });
+
+  it("matching user-data-dir (case and slashes differ) -> adopted; kill() stops that pid via the dep", async () => {
+    const { d, log } = deps({
+      own: { port: 40001, pid: 77, startedAt: 1 },
+      answers: (p) => p === 40001,
+      udd: () => (process.platform === "win32" ? "c:\\FAKE\\profile\\" : "C:/fake/profile/"),
+    });
+    const s = await launcher(d)();
+    expect(log.spawned).toEqual([]);
+    expect(log.connected).toEqual([40001]);
+    s.kill?.();
+    expect(log.killed).toEqual([77]);
+  });
+
+  it("DevToolsActivePort adoption (no pid) never kills by pid", async () => {
+    const { d, log } = deps({ answers: (p) => p === 40005 });
+    d.readActivePort = () => 40005;
+    const s = await launcher(d)();
+    expect(log.connected).toEqual([40005]);
+    s.kill?.();
+    expect(log.killed).toEqual([]);
+  });
+});
+
+describe("createCdpLauncher: re-probing", () => {
+  it("pid alive but probe failed -> waits 2 s and probes once more before deleting the record", async () => {
+    let probes = 0;
+    const { d, log } = deps({ own: { port: 40001, pid: 77, startedAt: 1 }, answers: () => false });
+    d.probe = async (port) => port === 40001 && ++probes >= 2;
+    await launcher(d)();
+    expect(log.sleeps).toContain(2_000);
+    expect(log.spawned).toEqual([]);
+    expect(log.ownRemoved).toBe(0);
+    expect(log.connected).toEqual([40001]);
+  });
+
+  it("early exit 0 -> re-probes the remembered port (record already deleted) and adopts it", async () => {
+    let up = false;
+    const h = deps({
+      own: { port: 40001, pid: 77, startedAt: 1 },
+      answers: (p) => up && p === 40001,
+      spawnExit: 0,
+      onSpawn: () => (up = true),
+    });
+    await launcher(h.d)();
+    expect(h.log.ownRemoved).toBeGreaterThanOrEqual(1);
+    expect(h.log.spawned).toHaveLength(1);
+    expect(h.log.connected).toEqual([40001]);
+  });
+
+  it("early exit 0, remembered port answers but is another profile -> throws, kills nothing", async () => {
+    let up = false;
+    const h = deps({
+      own: { port: 40001, pid: 77, startedAt: 1 },
+      answers: (p) => up && p === 40001,
+      spawnExit: 0,
+      onSpawn: () => (up = true),
+      udd: () => "C:/other",
+    });
+    await expect(launcher(h.d)()).rejects.toThrow(/exited early \(code 0\)/);
+    expect(h.log.killed).toEqual([]);
+  });
+});
+
+describe("createCdpLauncher: launch lock", () => {
+  it("is shared on globalThis and released after a throwing launch", async () => {
+    expect((globalThis as { __dealSearchLaunchLock?: unknown }).__dealSearchLaunchLock).toBeDefined();
+    const bad = deps({ answers: () => false });
+    bad.d.findChrome = () => null;
+    await expect(launcher(bad.d)()).rejects.toThrow("Chrome not found");
+    const good = deps({ answers: (p) => p === 51234 });
+    await expect(launcher(good.d)()).resolves.toBeTruthy();
   });
 });
 

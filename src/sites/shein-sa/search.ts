@@ -29,6 +29,8 @@ const MIN_GAP_MS = 5_000;
 const CACHE_TTL_MS = 60 * 60_000;
 const BACKOFF_START_MS = 2 * 3_600_000;
 const BACKOFF_CAP_MS = 12 * 3_600_000;
+/** Upper bound for persisted strikes (the cap is reached at strike 4; 8 keeps headroom). */
+const MAX_STRIKES = 8;
 const PRODUCT_PATH_RE = /^\/([^/]+)-p-(\d+)\.html$/;
 const CHALLENGE_RE = /\/risk\/challenge|captcha_type=/i;
 const XHR_PATH = "/bff-api/product/get_products_by_keywords";
@@ -309,9 +311,13 @@ export function createRunCall(deps: {
     if (loadedStates.has(state)) return;
     loadedStates.add(state);
     const v = store.load();
-    if (v && v.blockedUntil > state.blockedUntil) {
-      state.blockedUntil = v.blockedUntil;
-      state.strikes = Math.max(state.strikes, v.strikes);
+    // Never trust the file blindly: a bad or hand-edited value must not block SHEIN for days.
+    if (!v || !Number.isFinite(v.blockedUntil) || !Number.isFinite(v.strikes)) return;
+    const blockedUntil = Math.min(v.blockedUntil, Date.now() + BACKOFF_CAP_MS);
+    const strikes = Math.min(Math.max(0, Math.floor(v.strikes)), MAX_STRIKES);
+    if (blockedUntil > state.blockedUntil) {
+      state.blockedUntil = blockedUntil;
+      state.strikes = Math.max(state.strikes, strikes);
     }
   }
   const warmed = new WeakSet<object>();

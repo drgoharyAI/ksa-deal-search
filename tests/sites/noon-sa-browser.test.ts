@@ -156,6 +156,8 @@ function launcherDeps(o: { portFile: number | null; answers: (port: number) => b
       return fb.browser as never;
     },
     sleep: async () => {},
+    // Adoption proves the Chrome runs on this profile (see src/sites/chrome/cdp.ts).
+    userDataDir: async () => "C:/fake/.noon-profile",
   };
   return { deps, calls };
 }

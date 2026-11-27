@@ -363,6 +363,30 @@ describe("runCall back-off", () => {
     expect(state.strikes).toBe(1);
   });
 
+  it("a persisted back-off is clamped on load (<= now + 12 h, strikes <= 8); non-finite ignored", async () => {
+    const H = 3_600_000;
+    const page = fakePage({ xhr: okBody });
+    const state = freshState();
+    const persist = { load: () => ({ blockedUntil: Date.now() + 1000 * H, strikes: 50 }), save: () => {} };
+    const r = await createRunCall({ withPage: (fn) => fn(page), minGapMs: 0, state, persist })(call);
+    expect(r).toMatchObject({ class: "blocked" });
+    expect(state.blockedUntil).toBeLessThanOrEqual(Date.now() + 12 * H);
+    expect(state.strikes).toBe(8);
+
+    for (const bad of [Infinity, NaN]) {
+      const st = freshState();
+      const p2 = fakePage({ xhr: okBody });
+      const r2 = await createRunCall({
+        withPage: (fn) => fn(p2),
+        minGapMs: 0,
+        state: st,
+        persist: { load: () => ({ blockedUntil: bad, strikes: 3 }), save: () => {} },
+      })(call);
+      expect(r2).toMatchObject({ ok: true });
+      expect(st.blockedUntil).toBe(0);
+    }
+  });
+
   it("the default persistence file lives in the SHEIN profile dir", async () => {
     const { backoffFile } = await import("@/src/sites/shein-sa/search");
     vi.stubEnv("SHEIN_PROFILE_DIR", "C:/x/shein");
