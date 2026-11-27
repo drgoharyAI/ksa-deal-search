@@ -308,7 +308,7 @@ describe("isOtherProduct (12c)", () => {
 
 describe("title core needs a query word (12c)", () => {
   it("uses the whole title when the part before '&' names no query word", () => {
-    expect(isAccessory("Ps5 Cooling & Dual Controller Charging Station", ["controller"])).toBe(true);
+    expect(isAccessory("Ps5 Cooling & Dual Controller Charging Dock", ["controller"])).toBe(true);
   });
   it("'built-in' starts the add-on part", () => {
     expect(isAccessory("20000mAh Power Bank built-in 4 charging cables", ["power", "bank", "20000mah"])).toBe(false);
@@ -336,7 +336,7 @@ describe("round 10 part nouns (12c)", () => {
     expect(isStrongAccessory("Wireless Controller for PS5 and Switch", ["ps5", "controller"], [["ps5", "controller"]])).toBe(false);
   });
   it("core falls back to the whole title when only a model token is before '&'", () => {
-    expect(isAccessory("Ps5 Cooling & Dual Controller Charging Station", ["ps5", "controller"])).toBe(true);
+    expect(isAccessory("Ps5 Cooling & Dual Controller Charging Dock", ["ps5", "controller"])).toBe(true);
   });
 });
 
