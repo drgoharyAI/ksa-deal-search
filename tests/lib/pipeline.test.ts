@@ -33,6 +33,12 @@ describe("runSearch", () => {
     expect(new Set(keys).size).toBe(keys.length);
   });
 
+  it("an inherited key as a site id is ignored, not called (task 18, deferred Task 7 minor)", async () => {
+    mock.mockImplementation(okFixture);
+    const r = await runSearch({ ...base, sites: ["constructor", "__proto__", "toString", "aliexpress"], query: "anc earbuds" });
+    expect(r.statuses).toEqual([{ site: "aliexpress", status: "ok" }]);
+  });
+
   it("filler words are not required title words (final review I1)", async () => {
     mock.mockImplementation(okFixture);
     const plain = await runSearch({ ...base, query: "anc earbuds" });

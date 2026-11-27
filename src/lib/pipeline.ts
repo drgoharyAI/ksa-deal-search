@@ -156,7 +156,11 @@ export async function runSearch(input: SearchInput, opts: SearchOptions = {}): P
   // Filler ("best", "cheap", "for") is not a required title word; stores still get the raw words.
   const queryTokens = [pq.terms, ...variants].map((t) => tokenizeKeepDigits(matchTerms(t)));
 
-  const adapters = input.sites.map((id) => registry[id]).filter((a): a is SiteAdapter => !!a);
+  // Own keys only: "constructor" or "__proto__" must not resolve to an Object.prototype member
+  // (the search route filters ids too, but the alert checker calls this with stored ids).
+  const adapters = input.sites
+    .map((id) => (Object.hasOwn(registry, id) ? registry[id] : undefined))
+    .filter((a): a is SiteAdapter => a !== undefined);
   const outs = await Promise.all(adapters.map((a) => runSite(a, pq, variants, opts.exec)));
   const statuses = outs.map((o) => o.status);
 
