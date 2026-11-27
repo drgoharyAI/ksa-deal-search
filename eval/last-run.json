@@ -1,5 +1,5 @@
 {
-  "at": "2026-11-27T02:07:12.167Z",
+  "at": "2026-11-27T02:07:39.580Z",
   "queries": [
     {
       "query": "anc earbuds under 300",
@@ -1454,7 +1454,7 @@
         }
       ],
       "recordedItems": 408,
-      "results": 128,
+      "results": 140,
       "missingCalls": [],
       "labelled": true,
       "metrics": {
@@ -1463,9 +1463,9 @@
         "accessoryAt10": 0,
         "wrongModelAt10": 0,
         "unlabeledAt10": 0,
-        "recall": 0.8064516129032258,
+        "recall": 0.8709677419354839,
         "relevantRecorded": 186,
-        "relevantKept": 150,
+        "relevantKept": 162,
         "cheapestRelevantFirst": true
       },
       "top": [
@@ -1481,6 +1481,20 @@
           "store": "aliexpress",
           "price": 164.82,
           "title": "Monitor 24 inch curved e-sports 2K180HZ desktop computer notebook external screen 27 inch IPS high definition 4K",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005012743967903",
+          "store": "aliexpress",
+          "price": 219.19,
+          "title": "FY 4K Curved Monitor 240Hz Ultra Wide Gaming Screen for Gamers High Refresh Rate Desktop Display 24 27 32 34 Inch",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005012887746098",
+          "store": "aliexpress",
+          "price": 302.39,
+          "title": "Suitable for E-sports Players, High Update Rate Game Monitor 144Hz 165Hz LCD Screen 2K 4K Resolution 19/21/24/27/28/32 Inches",
           "label": "relevant"
         },
         {
@@ -1512,31 +1526,17 @@
           "label": "relevant"
         },
         {
+          "key": "aliexpress:1005012332030303",
+          "store": "aliexpress",
+          "price": 495.19,
+          "title": "24/27/32/34 Inch Curved Monitor | 1K/2K/4K | Height-Adjustable + Backlit | Up To 280Hz HDR400",
+          "label": "relevant"
+        },
+        {
           "key": "amazon-sa:B0FQBQWWDP",
           "store": "amazon-sa",
           "price": 499.96,
           "title": "Gawfolk 27 inch Gaming Monitor 4K 60Hz IPS Computer Monitors",
-          "label": "relevant"
-        },
-        {
-          "key": "aliexpress:1005010131912434",
-          "store": "aliexpress",
-          "price": 519.9,
-          "title": "600Hz 540HZ 500HZ 360hzHigh Refresh Rate Gaming Pc Monitor 24 27 Inch 5K/4K/2K FramelessLow Blue Light LED LCD DP Desktop",
-          "label": "relevant"
-        },
-        {
-          "key": "aliexpress:1005012821540950",
-          "store": "aliexpress",
-          "price": 525.39,
-          "title": "27 Inch 4K IPS Monitor, UHD 2K Computer Display Screen, 144Hz 165Hz Gaming Monitor, Desktop Monitor for Office Design",
-          "label": "relevant"
-        },
-        {
-          "key": "aliexpress:1005013483687144",
-          "store": "aliexpress",
-          "price": 583.39,
-          "title": "BK025422 Gaming Display Monitor  27 INCH 2K 4K 120HZ 165HZ 200HZ 240HZ LCD Monitors Gaming PC Computer Monitor",
           "label": "relevant"
         }
       ]
@@ -2107,7 +2107,7 @@
     "precisionAt10": 0.9733333333333334,
     "accessoryAt10": 0,
     "wrongModelAt10": 0.020000000000000004,
-    "recall": 0.8977667897862076,
+    "recall": 0.9020678650550249,
     "cheapestRelevantFirst": 0.8
   }
 }

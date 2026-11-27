@@ -38,7 +38,8 @@ export function specMatches(q: string, prev: string | undefined, title: string):
   const t = normalizeTitle(title);
   if (/^\d+(?:\.\d+)?$/.test(q)) {
     const n = esc(q);
-    const sized = re(`(?<![\\d.])${n}${INCH}`).test(t);
+    // A size list counts too: "24/27/32 Inch", "24 27 32 34 Inch".
+    const sized = re(`(?<![\\d.])${n}(?:\\s*[/,]?\\s*\\d{2}(?:\\.\\d)?)*${INCH}`).test(t);
     if (!prev || /\d/.test(prev)) return sized || re(`(?<![\\w.])${n}(?![\\w.])`).test(t);
     return sized || re(`(?<![a-z0-9])${esc(prev)}\\s*-?\\s*${n}${NOT_SUFFIXED}`).test(t);
   }

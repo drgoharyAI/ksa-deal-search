@@ -139,3 +139,10 @@ product itself ("3PCS 100W USB-C Cable") are unaffected because cable is not a p
 | p@10 | acc@10 | wrong@10 | recall | cheapest-first |
 |---|---|---|---|---|
 | 97% (96.7→97.3) | 0% | 2.0% | 90% | 80% |
+
+## Round 12: screen-size lists (kept)
+A bare size number also matches inside a size list ending in a unit ("24/27/32 Inch",
+"24 27 32 34 Inch"), a common marketplace listing for one product in several sizes.
+| p@10 | acc@10 | wrong@10 | recall | cheapest-first |
+|---|---|---|---|---|
+| 97% | 0% | 2.0% | 90% (89.8→90.2) | 80% |

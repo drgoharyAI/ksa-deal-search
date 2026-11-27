@@ -235,6 +235,8 @@ describe("specMatches (12c)", () => {
     expect(specMatches("27", "monitor", "Z-Edge 27-inch Gaming Monitor 4K")).toBe(true);
     expect(specMatches("27", "monitor", 'AOC 27" 4K Monitor')).toBe(true);
     expect(specMatches("27", "monitor", "4K Monitor 32 inch, 2 x 27W speakers")).toBe(false);
+    expect(specMatches("27", "monitor", "24/27/32 Inch Curved Monitor 4K")).toBe(true);
+    expect(specMatches("27", "monitor", "Gaming Display 24 27 32 34 Inch")).toBe(true);
   });
   it("number + unit, spaced or with thousands separator", () => {
     expect(specMatches("20000mah", "bank", "KA35 Power Bank with 20,000mAh Capacity")).toBe(true);
