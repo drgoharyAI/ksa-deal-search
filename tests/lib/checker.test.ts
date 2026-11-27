@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { openDb, type Db } from "@/src/lib/db";
 import { createWatch, getWatch, listEvents, listPricePoints, updateWatch } from "@/src/lib/alerts/repo";
 import { createChecker, runCycle, type CheckerDeps } from "@/src/lib/alerts/checker";
-import type { SearchInput, SearchResult } from "@/src/lib/pipeline";
+import type { SearchInput, SearchOptions, SearchResult } from "@/src/lib/pipeline";
 import type { Product, SiteStatus } from "@/src/lib/types";
 
 const prod = (site: string, id: string, price: number, extra: Partial<Product> = {}): Product => ({
@@ -23,7 +23,7 @@ const prod = (site: string, id: string, price: number, extra: Partial<Product> =
   ...extra,
 });
 
-type Answer = { products: Product[]; status?: SiteStatus["status"] };
+type Answer = { products: Product[]; status?: SiteStatus["status"]; message?: string; listings?: Product[] };
 
 let db: Db;
 let answers: Record<string, Answer>;
@@ -32,11 +32,13 @@ let notify: ReturnType<typeof vi.fn>;
 let sleep: ReturnType<typeof vi.fn>;
 let clock: number;
 
-const search = async (input: SearchInput): Promise<SearchResult> => {
+const search = async (input: SearchInput, opts?: Pick<SearchOptions, "onFiltered">): Promise<SearchResult> => {
   calls.push(input);
   const site = input.sites[0];
   const a = answers[site] ?? { products: [] };
-  return { products: a.products, statuses: [{ site, status: a.status ?? "ok" }], queryTokens: [] };
+  if (a.listings) opts?.onFiltered?.(a.listings);
+  const status: SiteStatus = { site, status: a.status ?? "ok", ...(a.message ? { message: a.message } : {}) };
+  return { products: a.products, statuses: [status], queryTokens: [] };
 };
 
 const deps = (over: Partial<CheckerDeps> = {}): CheckerDeps => ({
@@ -164,12 +166,13 @@ describe("runCycle: search watch", () => {
     expect(notify.mock.calls[0][0]).toMatchObject({ title: "jarir J", store: "Jarir", newPrice: 449, oldPrice: 470 });
   });
 
-  it("uses the stores that answered when another is blocked", async () => {
+  it("a partial answer (another store blocked) records its status, no price point", async () => {
     const id = createWatch(db, { kind: "search", site: null, productId: null, query: "airpods", sites: ["amazon-sa", "jarir"], target: 450 }, 0);
     answers["amazon-sa"] = { products: [], status: "blocked" };
     answers["jarir"] = { products: [prod("jarir", "J", 470)] };
     await runCycle(deps());
-    expect(listPricePoints(db, id).map((p) => p.price)).toEqual([470]);
+    expect(listPricePoints(db, id)).toEqual([]);
+    expect(getWatch(db, id)?.lastCheckStatus).toBe("partial");
   });
 });
 
@@ -319,5 +322,149 @@ describe("runCycle: search watch filters", () => {
     };
     await runCycle(deps());
     expect(listPricePoints(db, id).map((p) => p.price)).toEqual([480]);
+  });
+});
+
+describe("code review round: alert checker", () => {
+  const searchWatch = (target: number, sites = ["noon-sa", "amazon-sa"]) =>
+    createWatch(db, { kind: "search", site: null, productId: null, query: "airpods", sites, target }, 0);
+  const tick = () => {
+    clock += 1_000;
+    return runCycle(deps());
+  };
+
+  it("a partial answer never re-arms: the same drop does not alert twice", async () => {
+    const id = searchWatch(100);
+    answers["noon-sa"] = { products: [prod("noon-sa", "N", 95)] };
+    answers["amazon-sa"] = { products: [prod("amazon-sa", "A", 130)] };
+    expect((await tick()).fired).toBe(1);
+    // noon blocked, amazon 120: the cheap store is missing, so not a rise above the target
+    answers["noon-sa"] = { products: [], status: "blocked" };
+    answers["amazon-sa"] = { products: [prod("amazon-sa", "A", 120)] };
+    expect((await tick()).fired).toBe(0);
+    expect(getWatch(db, id)).toMatchObject({ lastFiredPrice: 95, lastCheckStatus: "partial" });
+    answers["noon-sa"] = { products: [prod("noon-sa", "N", 95)] };
+    expect((await tick()).fired).toBe(0);
+    expect(notify).toHaveBeenCalledTimes(1);
+    expect(listPricePoints(db, id).map((p) => p.price)).toEqual([95, 95]);
+  });
+
+  it("a store answer with failed requests is partial too", async () => {
+    const id = productWatch(450);
+    answers["amazon-sa"] = { products: [prod("amazon-sa", "B0X", 440)] };
+    await tick();
+    answers["amazon-sa"] = { products: [prod("amazon-sa", "B0X", 500)], message: "1 of 3 requests failed" };
+    await tick();
+    expect(getWatch(db, id)).toMatchObject({ lastFiredPrice: 440, lastCheckStatus: "partial", lastPrice: 440 });
+    answers["amazon-sa"] = { products: [prod("amazon-sa", "B0X", 500)] };
+    await tick();
+    expect(getWatch(db, id)?.lastFiredPrice).toBeNull();
+  });
+
+  it("re-reads each watch: a deleted one is skipped, a paused one too, a new target is used", async () => {
+    const a = productWatch(450, "amazon-sa", "A1");
+    const b = productWatch(450, "amazon-sa", "B1");
+    const c = productWatch(450, "amazon-sa", "C1");
+    answers["amazon-sa"] = { products: [prod("amazon-sa", "A1", 400), prod("amazon-sa", "B1", 400), prod("amazon-sa", "C1", 400)] };
+    const slow = async (input: SearchInput, opts?: Pick<SearchOptions, "onFiltered">) => {
+      const r = await search(input, opts);
+      db.prepare("DELETE FROM watches WHERE id = ?").run(a);
+      updateWatch(db, b, { status: "paused" });
+      updateWatch(db, c, { target: 300 });
+      return r;
+    };
+    const r = await runCycle(deps({ search: slow }));
+    expect(r).toMatchObject({ checked: 1, fired: 0 });
+    expect(notify).not.toHaveBeenCalled();
+    expect(getWatch(db, b)?.lastCheckedAt).toBeNull();
+    expect(getWatch(db, c)).toMatchObject({ lastPrice: 400, lastFiredPrice: null });
+  });
+
+  it("one watch failing does not abort the cycle", async () => {
+    const a = productWatch(450, "amazon-sa", "A1");
+    const b = productWatch(450, "amazon-sa", "B1");
+    answers["amazon-sa"] = { products: [prod("amazon-sa", "A1", 400), prod("amazon-sa", "B1", 400)] };
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    notify.mockImplementationOnce(async () => {
+      db.prepare("DELETE FROM watches WHERE id = ?").run(a); // the event insert then fails its foreign key
+      return { ok: true };
+    });
+    try {
+      await runCycle(deps());
+    } finally {
+      warn.mockRestore();
+    }
+    expect(getWatch(db, b)).toMatchObject({ lastFiredPrice: 400 });
+  });
+
+  it("a product watch finds its product even when the dedupe kept a cheaper look-alike", async () => {
+    const id = productWatch(450, "amazon-sa", "B0X");
+    const cheap = prod("amazon-sa", "TWIN", 300, { title: "amazon-sa B0X" });
+    answers["amazon-sa"] = { products: [cheap], listings: [cheap, prod("amazon-sa", "B0X", 440)] };
+    expect((await tick()).fired).toBe(1);
+    expect(listPricePoints(db, id).map((p) => p.price)).toEqual([440]);
+  });
+
+  it("a manual re-arm after a sent alert is a new event, never a retry", async () => {
+    const id = productWatch(450);
+    answers["amazon-sa"] = { products: [prod("amazon-sa", "B0X", 440)] };
+    notify.mockResolvedValueOnce({ ok: false, error: "Telegram is not set up", notConfigured: true });
+    await tick(); // unsent, not to be retried
+    updateWatch(db, id, { target: 445, lastFiredPrice: null }); // the owner changes the target
+    const r = await tick();
+    expect(r).toMatchObject({ fired: 1, retried: 0 });
+    expect(listEvents(db)).toHaveLength(2);
+  });
+
+  it("re-arming ends a pending retry", async () => {
+    const id = productWatch(450);
+    answers["amazon-sa"] = { products: [prod("amazon-sa", "B0X", 440)] };
+    notify.mockResolvedValueOnce({ ok: false, error: "Telegram answered 502" });
+    await tick();
+    updateWatch(db, id, { target: 445, lastFiredPrice: null });
+    expect((await tick())).toMatchObject({ fired: 1, retried: 0 });
+    expect(listEvents(db).map((e) => e.sent)).toEqual([true, false]);
+  });
+
+  it("checks at most 100 watches and sends at most 20 alerts per cycle", async () => {
+    const ids = Array.from({ length: 105 }, (_, i) => productWatch(450, "amazon-sa", `P${i}`));
+    answers["amazon-sa"] = { products: ids.map((_, i) => prod("amazon-sa", `P${i}`, 400)) };
+    const r = await tick();
+    expect(r).toMatchObject({ checked: 100, deferred: 5, fired: 20 });
+    expect(notify).toHaveBeenCalledTimes(20);
+    // the armed rest fire on later cycles
+    const r2 = await tick();
+    expect(r2.fired).toBe(20);
+  });
+
+  it("prunes price points older than 180 days and events past the newest 1000", async () => {
+    const id = productWatch(450);
+    clock = 200 * 86_400_000;
+    db.prepare("INSERT INTO price_points (watchId, at, price) VALUES (?, ?, ?)").run(id, 1, 500);
+    const ins = db.prepare("INSERT INTO alert_events (watchId, at, title, site, newPrice, target) VALUES (?, ?, 't', 'amazon-sa', 1, 1)");
+    for (let i = 0; i < 1005; i++) ins.run(id, i);
+    answers["amazon-sa"] = { products: [prod("amazon-sa", "B0X", 500)] };
+    await runCycle(deps());
+    expect(listPricePoints(db, id).map((p) => p.price)).toEqual([500]);
+    expect((db.prepare("SELECT count(*) n FROM alert_events").get() as { n: number }).n).toBe(1000);
+  });
+
+  it("chains timers longer than setTimeout's limit", async () => {
+    vi.useFakeTimers();
+    const spy = vi.spyOn(globalThis, "setTimeout");
+    try {
+      productWatch(450);
+      const c = createChecker(() => deps({ now: () => Date.now() }), { intervalMs: 30 * 86_400_000, firstDelayMs: 2 ** 31 + 5_000 });
+      c.start();
+      await vi.advanceTimersByTimeAsync(10_000);
+      expect(calls).toHaveLength(0);
+      await vi.advanceTimersByTimeAsync(2 ** 31);
+      expect(calls).toHaveLength(1);
+      expect(spy.mock.calls.every((call) => (call[1] ?? 0) <= 2 ** 31 - 1)).toBe(true);
+      c.stop();
+    } finally {
+      spy.mockRestore();
+      vi.useRealTimers();
+    }
   });
 });

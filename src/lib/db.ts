@@ -165,6 +165,11 @@ const MIGRATIONS: (string | ((db: Db) => void))[] = [
     addColumn(db, "seen_products", "pickupOnly", "INTEGER NOT NULL DEFAULT 0");
     addColumn(db, "favourites", "pickupOnly", "INTEGER NOT NULL DEFAULT 0");
   },
+  // 7: an alert event whose Telegram send failed and is to be retried says so (retry = 1), so a
+  // manual re-arm (a new target) is never mistaken for a retry. Idempotent.
+  (db) => {
+    addColumn(db, "alert_events", "retry", "INTEGER NOT NULL DEFAULT 0");
+  },
 ];
 
 export const SCHEMA_VERSION = MIGRATIONS.length;

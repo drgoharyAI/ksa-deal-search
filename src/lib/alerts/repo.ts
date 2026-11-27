@@ -77,12 +77,22 @@ export type WatchPatch = Partial<{
 
 const PATCHABLE = new Set(["target", "status", "lastFiredPrice", "lastCheckedAt", "lastPrice", "lastCheckStatus", "title", "url", "filters"]);
 
+/**
+ * Re-arming (lastFiredPrice set to null: a new target, a resumed watch, a price above the target)
+ * also ends any pending Telegram retry, so the next drop is a new alert, never a retry.
+ */
 export function updateWatch(db: Db, id: number, patch: WatchPatch): boolean {
   const keys = Object.keys(patch).filter((k) => PATCHABLE.has(k));
   if (!keys.length) return false;
   const sql = `UPDATE watches SET ${keys.map((k) => `${k} = ?`).join(", ")} WHERE id = ?`;
   const vals = keys.map((k) => (k === "filters" ? JSON.stringify(patch.filters ?? {}) : (patch as Record<string, string | number | null>)[k]));
-  return Number(db.prepare(sql).run(...vals, id).changes) > 0;
+  const changed = Number(db.prepare(sql).run(...vals, id).changes) > 0;
+  if (changed && "lastFiredPrice" in patch && patch.lastFiredPrice === null) clearRetry(db, id);
+  return changed;
+}
+
+export function countWatches(db: Db): number {
+  return (db.prepare("SELECT count(*) n FROM watches").get() as { n: number }).n;
 }
 
 export function deleteWatch(db: Db, id: number): boolean {
@@ -108,18 +118,21 @@ export function listWatchViews(db: Db): WatchView[] {
   return listWatches(db).map((w) => ({ ...w, lowest: lows.get(w.id) ?? null, points: listPricePoints(db, w.id) }));
 }
 
-type EventRow = Omit<AlertEvent, "sent" | "seen"> & { sent: number; seen: number };
+type EventRow = Omit<AlertEvent, "sent" | "seen"> & { sent: number; seen: number; retry?: number };
 
-export function addEvent(db: Db, e: Omit<AlertEvent, "id" | "seen">): number {
+const toEvent = ({ retry: _retry, ...r }: EventRow): AlertEvent => ({ ...r, sent: !!r.sent, seen: !!r.seen });
+
+/** `retry`: the Telegram send failed and the next cycle retries it (pendingEvent finds it). */
+export function addEvent(db: Db, e: Omit<AlertEvent, "id" | "seen">, opts: { retry?: boolean } = {}): number {
   const r = db
-    .prepare("INSERT INTO alert_events (watchId, at, title, site, oldPrice, newPrice, target, currency, url, sent) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
-    .run(e.watchId, e.at, e.title, e.site, e.oldPrice, e.newPrice, e.target, e.currency, e.url, e.sent ? 1 : 0);
+    .prepare("INSERT INTO alert_events (watchId, at, title, site, oldPrice, newPrice, target, currency, url, sent, retry) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
+    .run(e.watchId, e.at, e.title, e.site, e.oldPrice, e.newPrice, e.target, e.currency, e.url, e.sent ? 1 : 0, !e.sent && opts.retry ? 1 : 0);
   return Number(r.lastInsertRowid);
 }
 
 export function listEvents(db: Db, limit = 100): AlertEvent[] {
   const rows = db.prepare("SELECT * FROM alert_events ORDER BY at DESC, id DESC LIMIT ?").all(limit) as unknown as EventRow[];
-  return rows.map((r) => ({ ...r, sent: !!r.sent, seen: !!r.seen }));
+  return rows.map(toEvent);
 }
 
 export function unreadCount(db: Db): number {
@@ -133,17 +146,32 @@ export function markEventsSeen(db: Db, upTo?: number): void {
 }
 
 /**
- * The watch's latest event when its Telegram send failed and is still to be retried: unsent, and
- * no price above `target` was recorded since (a rise re-arms the watch, so a later drop is a new
- * alert).
+ * The watch's event whose Telegram send failed and is still to be retried: its explicit retry flag
+ * (set only on a failed send that should be retried). Re-arming clears the flag (clearRetry), so a
+ * manual re-arm or a rise above the target makes the next drop a new alert.
  */
-export function pendingEvent(db: Db, watchId: number, target: number): AlertEvent | null {
-  const r = db.prepare("SELECT * FROM alert_events WHERE watchId = ? ORDER BY at DESC, id DESC LIMIT 1").get(watchId) as unknown as EventRow | undefined;
-  if (!r || r.sent) return null;
-  const rose = db.prepare("SELECT 1 FROM price_points WHERE watchId = ? AND at > ? AND price > ? LIMIT 1").get(watchId, r.at, target);
-  return rose ? null : { ...r, sent: false, seen: !!r.seen };
+export function pendingEvent(db: Db, watchId: number): AlertEvent | null {
+  const r = db.prepare("SELECT * FROM alert_events WHERE watchId = ? AND retry = 1 AND sent = 0 ORDER BY at DESC, id DESC LIMIT 1").get(watchId) as unknown as EventRow | undefined;
+  return r ? toEvent(r) : null;
 }
 
-export function updateEvent(db: Db, id: number, patch: { newPrice: number; sent: boolean }): void {
-  db.prepare("UPDATE alert_events SET newPrice = ?, sent = ? WHERE id = ?").run(patch.newPrice, patch.sent ? 1 : 0, id);
+/** Ends the watch's pending retries (re-armed). */
+export function clearRetry(db: Db, watchId: number): void {
+  db.prepare("UPDATE alert_events SET retry = 0 WHERE watchId = ? AND retry = 1").run(watchId);
+}
+
+/** A retried send: the new price, whether it went out, and whether to retry again. */
+export function updateEvent(db: Db, id: number, patch: { newPrice: number; sent: boolean; retry?: boolean }): void {
+  db.prepare("UPDATE alert_events SET newPrice = ?, sent = ?, retry = ? WHERE id = ?").run(patch.newPrice, patch.sent ? 1 : 0, !patch.sent && patch.retry ? 1 : 0, id);
+}
+
+/** Price points are kept this long (owner ruling: safety caps). */
+export const PRICE_POINT_DAYS = 180;
+/** Alert events kept: the newest this many. */
+export const MAX_EVENTS = 1000;
+
+/** Drops price points older than PRICE_POINT_DAYS and alert events beyond the newest MAX_EVENTS. */
+export function pruneAlertHistory(db: Db, now: number): void {
+  db.prepare("DELETE FROM price_points WHERE at < ?").run(now - PRICE_POINT_DAYS * 86_400_000);
+  db.prepare("DELETE FROM alert_events WHERE id NOT IN (SELECT id FROM alert_events ORDER BY at DESC, id DESC LIMIT ?)").run(MAX_EVENTS);
 }
