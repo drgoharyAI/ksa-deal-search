@@ -179,3 +179,10 @@ Task 12c report for the suspected label errors.
 
 ## Label corrections (controller, 2026-11-27)
 The tuning agent flagged 9 labels as wrong; all were confirmed under the rubric. Liners, a mould, skins, grips and a stand were relabelled accessory, and a recipe book off-topic. Overall after the correction: p@10 98%, acc@10 0%, wrong@10 1%, recall 91%, cheapest-first 100%. Every stop-rule target is met on the tuning set. The one remaining weak query is mechanical keyboard (p@10 70%: membrane keyboard + mouse combos).
+
+## Holdout check (8 unseen queries, rules unchanged)
+| set | p@10 | acc@10 | wrong@10 | recall | cheapest-first |
+|---|---|---|---|---|---|
+| tuning (15) | 98% | 0% | 1% | 91% | 100% |
+| holdout (8) | 76% | 13% | 10% | 76% | 50% |
+The rules overfit the tuning set. Worst holdout queries: ipad air (wrong@10 80%), coffee machine (acc@10 40%, recall 61%), wireless charger 15w (recall 39%), running shoes (recall 71%).
