@@ -1,0 +1,172 @@
+{
+  "name": "extra-sa",
+  "baseUrl": "https://search.unbxd.io",
+  "operations": [
+    {
+      "name": "search",
+      "request": {
+        "method": "GET",
+        "url": "https://search.unbxd.io/21705619e273429e5767eea44ccb1ad5/ss-unbxd-auk-extra-saudi-en-prod11541714990488/search?q=laptop&rows=40&page=1&sort=score%20desc&fields=productCode,title,price,wasPrice,discount,currency,imageUrl,productUrl,brandEn,rating,numberOfReviews,inStockFlag,vipPrimePrice,basicPrimePrice,productStatusEn",
+        "headers": {
+          "accept": "application/json, text/plain, */*",
+          "accept-language": "en-US,en;q=0.9",
+          "origin": "https://www.extra.com",
+          "referer": "https://www.extra.com/"
+        }
+      },
+      "slots": [
+        {
+          "param": "q",
+          "at": [
+            "query:q"
+          ]
+        },
+        {
+          "param": "page",
+          "at": [
+            "query:page"
+          ]
+        },
+        {
+          "param": "sort",
+          "at": [
+            "query:sort"
+          ]
+        }
+      ],
+      "volatile": [],
+      "trigger": {
+        "url": "https://search.unbxd.io/21705619e273429e5767eea44ccb1ad5/ss-unbxd-auk-extra-saudi-en-prod11541714990488/search?q={q}&rows=40&page=1&sort=score%20desc&fields=productCode,title,price,wasPrice,discount,currency,imageUrl,productUrl,brandEn,rating,numberOfReviews,inStockFlag,vipPrimePrice,basicPrimePrice,productStatusEn"
+      },
+      "match": {
+        "method": "GET",
+        "host": "search.unbxd.io",
+        "path": "/*/*/search"
+      },
+      "response": {
+        "format": "json",
+        "contentType": "application/json; charset=UTF-8",
+        "extract": "response.products",
+        "pick": [
+          "id=productCode",
+          "title",
+          "brand=brandEn",
+          "price",
+          "origPrice=wasPrice",
+          "discount",
+          "currency",
+          "rating",
+          "reviews=numberOfReviews",
+          "image=imageUrl[0]",
+          "url=productUrl",
+          "inStock=inStockFlag",
+          "memberPrice=vipPrimePrice",
+          "status=productStatusEn"
+        ],
+        "shape": {
+          "searchMetaData": "object",
+          "searchMetaData.status": "number",
+          "searchMetaData.queryTime": "number",
+          "searchMetaData.queryParams": "object",
+          "searchMetaData.queryParams.apiKey": "string",
+          "searchMetaData.queryParams.dd.tag": "string",
+          "searchMetaData.queryParams.enablePf": "string",
+          "searchMetaData.queryParams.enableTaxonomy": "string",
+          "searchMetaData.queryParams.fields": "string",
+          "searchMetaData.queryParams.log.response": "string",
+          "searchMetaData.queryParams.module.exclude": "string",
+          "searchMetaData.queryParams.page": "string",
+          "searchMetaData.queryParams.promotion.version": "string",
+          "searchMetaData.queryParams.q": "string",
+          "searchMetaData.queryParams.q.op": "string",
+          "searchMetaData.queryParams.req.rm.asterix": "string",
+          "searchMetaData.queryParams.req.rm.promotionEngine": "string",
+          "searchMetaData.queryParams.rows": "string",
+          "searchMetaData.queryParams.sort": "string",
+          "searchMetaData.queryParams.start": "string",
+          "searchMetaData.queryParams.uid": "string",
+          "searchMetaData.queryParams.user.behaviour": "string",
+          "searchMetaData.queryParams.variants": "string",
+          "response": "object",
+          "response.numberOfProducts": "number",
+          "response.start": "number",
+          "response.products": "array",
+          "response.products[]": "object",
+          "response.products[].basicPrimePrice": "number",
+          "response.products[].brandEn": "string",
+          "response.products[].currency": "string",
+          "response.products[].discount": "number",
+          "response.products[].imageUrl": "array",
+          "response.products[].imageUrl[]": "string",
+          "response.products[].inStockFlag": "string",
+          "response.products[].numberOfReviews": "number",
+          "response.products[].price": "number",
+          "response.products[].productCode": "string",
+          "response.products[].productStatusEn": "null",
+          "response.products[].productStatusEn[]": "null",
+          "response.products[].productUrl": "string",
+          "response.products[].rating": "number",
+          "response.products[].title": "string",
+          "response.products[].uniqueId": "string",
+          "response.products[].vipPrimePrice": "number",
+          "response.products[].wasPrice": "number",
+          "facets": "object",
+          "facets.text": "object",
+          "facets.text.list": "array",
+          "facets.text.list[]": "object",
+          "facets.text.list[].facetName": "string",
+          "facets.text.list[].filterField": "string",
+          "facets.text.list[].values": "array",
+          "facets.text.list[].values[]": "string",
+          "facets.text.list[].displayName": "string",
+          "facets.text.list[].position": "number",
+          "facets.range": "object",
+          "facets.range.list": "array",
+          "facets.range.list[]": "object",
+          "facets.range.list[].facetName": "string",
+          "facets.range.list[].values": "object",
+          "facets.range.list[].values.counts": "array",
+          "facets.range.list[].values.end": "number",
+          "facets.range.list[].values.gap": "number",
+          "facets.range.list[].values.start": "number",
+          "facets.range.list[].displayName": "string",
+          "facets.range.list[].position": "number",
+          "banner": "object",
+          "banner.banners": "array",
+          "banner.banners[]": "object",
+          "banner.banners[].imageUrl": "string",
+          "banner.banners[].landingUrl": "string"
+        }
+      },
+      "params": [
+        {
+          "name": "q",
+          "type": "string",
+          "required": true,
+          "example": "laptop"
+        },
+        {
+          "name": "page",
+          "type": "string",
+          "required": false,
+          "example": "1"
+        },
+        {
+          "name": "sort",
+          "type": "string",
+          "required": false,
+          "example": "score desc",
+          "enum": [
+            "score desc",
+            "price asc",
+            "price desc"
+          ]
+        }
+      ],
+      "readOnly": true,
+      "minTier": 1,
+      "learnedLoggedIn": false,
+      "learnedAt": "2026-11-27T09:48:24.343Z"
+    }
+  ]
+}
