@@ -230,6 +230,12 @@ On the VM: `.env` has `COMPOSE_PROFILES=tunnel` and `deals.example.com` in `APP_
 in `.env.tunnel` (`TUNNEL_TOKEN=<token>`, mode 600), read only by `cloudflared`, never by the app.
 The app has no login and no limits (owner decision), so anyone with the URL can use it: put Cloudflare Access (or another login) in front of a public hostname.
 
+**GPU.** VM 300 has the host's GeForce GTX 1050 Ti passed through (Proxmox resource mapping
+`gtx1050ti`, `hostpci0: mapping=gtx1050ti,pcie=1,rombar=0,x-vga=0`, IOMMU group 2). The guest runs the
+headless NVIDIA 580 server driver (`nvidia-headless-580-server`, `nvidia-utils-580-server`; 580 is the last
+branch that supports Pascal). Check: `nvidia-smi`. The app does not use the GPU (Chrome renders in software
+under Xvfb); it is there for future work. VMs 9011 and 202 map the same card: only one of them can run at a time.
+
 **Exposure.** Ports are published on IPv4 only (`${APP_BIND:-0.0.0.0}`). The VM has a global IPv6
 address, and a bare `"3000:3000"` would also listen on `[::]` and be reachable from the internet.
 ufw does not filter Docker-published ports. Set `APP_BIND=192.168.1.48` in `.env` to bind one address.
