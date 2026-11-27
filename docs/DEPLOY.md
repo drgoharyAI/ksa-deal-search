@@ -189,7 +189,9 @@ search once. Check the VM's public IP is the home connection (no VPN on the VM).
   and read the error. "Failed to move to new namespace" or "Zygote process exited": the seccomp
   profile is not applied. Check `docker inspect deal-search --format '{{.HostConfig.SecurityOpt}}'`
   and that `docker/seccomp-chrome.json` exists next to `docker-compose.yml`.
-- A stale lock after a crash: `docker compose exec app sh -c 'rm -f /data/*-profile/Singleton*'`.
+- "Chrome exited early (code 21)": Chrome believes the profile is used by another machine (a
+  stale `SingletonLock`). The entrypoint deletes these locks at every start, and the compose file
+  pins `hostname: deal-search`, so `docker compose restart app` clears it.
 - Crashing tabs: `shm_size: 1gb` must be in effect (`docker compose exec app df -h /dev/shm`).
 
 **DISPLAY / Xvfb.** The entrypoint logs "Xvfb ready on :99". If it says "Xvfb did not start", the

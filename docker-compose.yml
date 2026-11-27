@@ -6,6 +6,8 @@ services:
     build: .
     image: deal-search:latest
     container_name: deal-search
+    # Fixed: Chrome's profile lock records the hostname; a new one per recreate looks like another machine.
+    hostname: deal-search
     restart: unless-stopped
     init: true
     ports:

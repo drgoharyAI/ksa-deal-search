@@ -23,6 +23,12 @@ while [ ! -S "/tmp/.X11-unix/X${DISPLAY_NUM}" ]; do
 done
 echo "entrypoint: Xvfb ready on $DISPLAY"
 
+# No Chrome runs yet: a SingletonLock left in a profile belongs to an earlier container (its
+# hostname differs after a recreate) and would make Chrome exit with code 21 "profile in use".
+for d in "${NOON_PROFILE_DIR:-/data/noon-profile}" "${SHEIN_PROFILE_DIR:-/data/shein-profile}"; do
+  rm -f "$d/SingletonLock" "$d/SingletonCookie" "$d/SingletonSocket" "$d/deal-search-port.json"
+done
+
 mkdir -p "$(dirname "${DEAL_SEARCH_DB:-/data/data.db}")" "${API_ANYTHING_HOME:-/data/aa-home}"
 node scripts/install-specs.mjs || echo "entrypoint: WARNING install-specs failed; continuing" >&2
 
