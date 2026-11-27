@@ -145,9 +145,10 @@ function launcherDeps(o: { portFile: number | null; answers: (port: number) => b
       portFile = null;
     },
     probe: async (port) => o.answers(port),
+    freePort: async () => 51234,
     spawnChrome: (_path, args) => {
       calls.spawned.push(args);
-      portFile = 51234; // Chrome writes DevToolsActivePort after starting with port 0
+      portFile = 51234; // Chrome writes DevToolsActivePort after starting
       return { exitCode: null, kill: () => true };
     },
     connect: async (port) => {
@@ -168,14 +169,21 @@ describe("createChromeLauncher", () => {
     expect(s.isAlive()).toBe(true);
   });
 
-  it("stale DevToolsActivePort (no answer) -> spawns with port 0 and reads the new port", async () => {
+  it("stale DevToolsActivePort (no answer) -> spawns on a chosen free port and connects to it", async () => {
     const { deps, calls } = launcherDeps({ portFile: 40001, answers: (p) => p === 51234 });
     await createChromeLauncher(deps)();
     expect(calls.removed).toBe(1);
     expect(calls.spawned).toHaveLength(1);
-    expect(calls.spawned[0]).toContain("--remote-debugging-port=0");
+    expect(calls.spawned[0]).toContain("--remote-debugging-port=51234");
     expect(calls.spawned[0]).toContain("--remote-debugging-address=127.0.0.1");
     expect(calls.connected).toEqual([51234]);
+  });
+
+  it("never spawns with --remote-debugging-port=0 (Chrome 158 then sets navigator.webdriver=true)", async () => {
+    const { deps, calls } = launcherDeps({ portFile: null, answers: (p) => p === 51234 });
+    await createChromeLauncher(deps)();
+    expect(calls.spawned[0]).not.toContain("--remote-debugging-port=0");
+    expect(calls.spawned[0].some((a) => /^--remote-debugging-port=[1-9]\d*$/.test(a))).toBe(true);
   });
 
   it("no Chrome installed -> 'Chrome not found'", async () => {

@@ -60,16 +60,17 @@ describe("normalizeSearchItem", () => {
 });
 
 describe("searchCalls", () => {
-  it("emits pages 1 and 2 per term, no sort", () => {
-    const calls = searchCalls({ terms: "usb-c cable 100w", exclude: [] }, ["a/b & c"]);
+  it("budget: main p1 + p2, first variant p1 only (max 3, no sort)", () => {
+    const calls = searchCalls({ terms: "usb-c cable 100w", exclude: [] }, ["a/b & c", "zzz"]);
     expect(calls).toEqual([
       { op: "search", args: { q: "usb-c cable 100w", page: "1" } },
       { op: "search", args: { q: "usb-c cable 100w", page: "2" } },
       { op: "search", args: { q: "a b c", page: "1" } },
-      { op: "search", args: { q: "a b c", page: "2" } },
     ]);
   });
   it("skips empty terms", () => {
-    expect(searchCalls({ terms: "¿¿", exclude: [] }, ["usb"])).toHaveLength(2);
+    expect(searchCalls({ terms: "¿¿", exclude: [] }, ["usb"])).toEqual([
+      { op: "search", args: { q: "usb", page: "1" } },
+    ]);
   });
 });

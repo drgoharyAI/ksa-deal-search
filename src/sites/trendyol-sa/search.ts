@@ -42,14 +42,15 @@ export function normalizeSearchItem(raw: unknown): Product | null {
   };
 }
 
+/** Call budget: main p1, main price-asc p1, first usable variant p1 (<= 3 calls). */
 export function searchCalls(pq: ParsedQuery, variants: string[]) {
   const calls: { op: "search"; args: Record<string, string> }[] = [];
-  for (const term of [pq.terms, ...variants]) {
-    const q = sanitizeQ(term);
-    if (!q) continue;
+  const q = sanitizeQ(pq.terms);
+  if (q) {
     calls.push({ op: "search", args: { q, page: "1", sort: "SCORE" } });
-    calls.push({ op: "search", args: { q, page: "2", sort: "SCORE" } });
     calls.push({ op: "search", args: { q, page: "1", sort: "PRICE_BY_ASC" } });
   }
+  const v = variants.map(sanitizeQ).find((s) => s && s !== q);
+  if (v) calls.push({ op: "search", args: { q: v, page: "1", sort: "SCORE" } });
   return calls;
 }

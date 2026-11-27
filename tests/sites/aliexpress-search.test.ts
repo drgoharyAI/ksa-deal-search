@@ -78,19 +78,25 @@ describe("normalizeSearchItem", () => {
 });
 
 describe("searchCalls", () => {
-  it("emits 3 calls per term", () => {
+  it("budget: main p1, main price_asc p1, first variant p1 (max 3)", () => {
     const calls = searchCalls({ terms: "anc earbuds", exclude: [] }, [
       "noise cancelling earbuds",
+      "wireless earbuds",
     ]);
-    expect(calls).toHaveLength(6);
-    expect(calls[0]).toEqual({
-      op: "search",
-      args: { q: "anc-earbuds", page: "1", sort: "default" },
-    });
-    expect(calls.filter((c) => c.args.sort === "price_asc")).toHaveLength(2);
-    expect(calls.filter((c) => c.args.page === "2")).toHaveLength(2);
+    expect(calls).toEqual([
+      { op: "search", args: { q: "anc-earbuds", page: "1", sort: "default" } },
+      { op: "search", args: { q: "anc-earbuds", page: "1", sort: "price_asc" } },
+      { op: "search", args: { q: "noise-cancelling-earbuds", page: "1", sort: "default" } },
+    ]);
   });
-  it("skips terms with empty slug", () => {
-    expect(searchCalls({ terms: "¿¿", exclude: [] }, ["usb-c"])).toHaveLength(3);
+  it("no variants -> 2 calls; never page 2", () => {
+    const calls = searchCalls({ terms: "anc earbuds", exclude: [] }, []);
+    expect(calls).toHaveLength(2);
+    expect(calls.every((c) => c.args.page === "1")).toBe(true);
+  });
+  it("skips terms with empty slug; uses the first usable variant", () => {
+    expect(searchCalls({ terms: "¿¿", exclude: [] }, ["¿", "usb-c"])).toEqual([
+      { op: "search", args: { q: "usb-c", page: "1", sort: "default" } },
+    ]);
   });
 });

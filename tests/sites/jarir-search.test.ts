@@ -56,20 +56,23 @@ describe("normalizeSearchItem", () => {
 });
 
 describe("searchCalls", () => {
-  it("emits 3 calls per term", () => {
-    const calls = searchCalls({ terms: "usb-c cable 100w", exclude: [] }, ["a/b & c"]);
-    expect(calls).toHaveLength(6);
-    expect(calls[0]).toEqual({
-      op: "search",
-      args: { q: "usb-c cable 100w", page: "1", sort_by: "relevance", sort_order: "descending" },
-    });
-    expect(calls[2]).toEqual({
-      op: "search",
-      args: { q: "usb-c cable 100w", page: "1", sort_by: "final_price", sort_order: "ascending" },
-    });
-    expect(calls[3].args.q).toBe("a b c");
+  it("budget: main p1, main price-asc p1, first variant p1 (max 3)", () => {
+    const calls = searchCalls({ terms: "usb-c cable 100w", exclude: [] }, ["a/b & c", "zzz"]);
+    expect(calls).toEqual([
+      {
+        op: "search",
+        args: { q: "usb-c cable 100w", page: "1", sort_by: "relevance", sort_order: "descending" },
+      },
+      {
+        op: "search",
+        args: { q: "usb-c cable 100w", page: "1", sort_by: "final_price", sort_order: "ascending" },
+      },
+      { op: "search", args: { q: "a b c", page: "1", sort_by: "relevance", sort_order: "descending" } },
+    ]);
   });
   it("skips empty terms", () => {
-    expect(searchCalls({ terms: "¿¿", exclude: [] }, ["usb"])).toHaveLength(3);
+    const calls = searchCalls({ terms: "¿¿", exclude: [] }, ["usb"]);
+    expect(calls).toHaveLength(1);
+    expect(calls[0].args.q).toBe("usb");
   });
 });

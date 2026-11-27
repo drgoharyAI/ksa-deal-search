@@ -55,14 +55,15 @@ export function normalizeSearchItem(raw: unknown): Product | null {
   };
 }
 
+/** Call budget: main p1, main price-asc p1, first usable variant p1 (<= 3 calls). */
 export function searchCalls(pq: ParsedQuery, variants: string[]) {
   const calls: { op: "search"; args: { q: string; page: string; sort: string } }[] = [];
-  for (const term of [pq.terms, ...variants]) {
-    const q = slugify(term);
-    if (!q) continue;
+  const q = slugify(pq.terms);
+  if (q) {
     calls.push({ op: "search", args: { q, page: "1", sort: "default" } });
-    calls.push({ op: "search", args: { q, page: "2", sort: "default" } });
     calls.push({ op: "search", args: { q, page: "1", sort: "price_asc" } });
   }
+  const v = variants.map(slugify).find((s) => s && s !== q);
+  if (v) calls.push({ op: "search", args: { q: v, page: "1", sort: "default" } });
   return calls;
 }

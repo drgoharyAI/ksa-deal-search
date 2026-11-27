@@ -65,6 +65,7 @@ export default function ResultCard({ product: p }: { product: Product }) {
             {p.soldCount > 0 && <span>{p.soldCount.toLocaleString("en-US")} sold</span>}
           </p>
         )}
+        {p.ratingUnavailable && <p className="card__meta">No rating</p>}
       </div>
     </article>
   );

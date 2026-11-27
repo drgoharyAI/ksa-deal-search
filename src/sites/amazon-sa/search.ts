@@ -56,13 +56,15 @@ export function normalizeSearchItem(raw: unknown): Product | null {
   };
 }
 
+/** Call budget (no sort on Amazon): main p1 + p2, first usable variant p1 (<= 3 calls). */
 export function searchCalls(pq: ParsedQuery, variants: string[]) {
   const calls: { op: "search"; args: { q: string; page: string } }[] = [];
-  for (const term of [pq.terms, ...variants]) {
-    const q = sanitizeQ(term);
-    if (!q) continue;
+  const q = sanitizeQ(pq.terms);
+  if (q) {
     calls.push({ op: "search", args: { q, page: "1" } });
     calls.push({ op: "search", args: { q, page: "2" } });
   }
+  const v = variants.map(sanitizeQ).find((s) => s && s !== q);
+  if (v) calls.push({ op: "search", args: { q: v, page: "1" } });
   return calls;
 }

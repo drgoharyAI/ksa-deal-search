@@ -9,6 +9,8 @@ export type Product = {
   discountPct: number | null;
   currency: string;
   rating: number | null;
+  /** Set when a rating filter is on but this product's store gives no ratings at all (e.g. Jarir). */
+  ratingUnavailable?: true;
   soldCount: number;
   image: string;
   url: string;

@@ -1,5 +1,6 @@
 import "server-only";
 import { spawn } from "node:child_process";
+import net from "node:net";
 import fs from "node:fs";
 import path from "node:path";
 import type { Browser, Page } from "playwright-core";
@@ -115,6 +116,8 @@ export type ChromeDeps = {
   /** Port from `<profile>/DevToolsActivePort` (written by Chrome), or null. */
   readActivePort(profileDir: string): number | null;
   removeActivePort(profileDir: string): void;
+  /** A currently free TCP port on 127.0.0.1 for Chrome's debug endpoint. */
+  freePort(): Promise<number>;
   /** True if `http://127.0.0.1:<port>/json/version` answers. */
   probe(port: number): Promise<boolean>;
   spawnChrome(chromePath: string, args: string[]): ChromeProc;
@@ -138,6 +141,18 @@ const realDeps: ChromeDeps = {
   },
   removeActivePort(profileDir) {
     fs.rmSync(portFile(profileDir), { force: true });
+  },
+  freePort() {
+    return new Promise((resolve, reject) => {
+      const srv = net.createServer();
+      srv.unref();
+      srv.on("error", reject);
+      srv.listen(0, "127.0.0.1", () => {
+        const addr = srv.address();
+        const port = typeof addr === "object" && addr ? addr.port : 0;
+        srv.close(() => (port ? resolve(port) : reject(new Error("no free port"))));
+      });
+    });
   },
   async probe(port) {
     try {
@@ -164,12 +179,11 @@ async function existingPort(d: ChromeDeps): Promise<number | null> {
   return port !== null && (await d.probe(port)) ? port : null;
 }
 
-async function waitForNewPort(d: ChromeDeps, proc: ChromeProc, timeoutMs = 15_000): Promise<number> {
+async function waitForPort(d: ChromeDeps, proc: ChromeProc, port: number, timeoutMs = 15_000): Promise<void> {
   const deadline = Date.now() + timeoutMs;
   while (Date.now() < deadline) {
     if (proc.exitCode !== null) throw new Error(`Chrome exited early (code ${proc.exitCode})`);
-    const port = await existingPort(d);
-    if (port !== null) return port;
+    if (await d.probe(port)) return;
     await d.sleep(250);
   }
   throw new Error("Chrome debug port did not open");
@@ -189,8 +203,12 @@ export function createChromeLauncher(overrides: Partial<ChromeDeps> = {}): Launc
       const chromePath = d.findChrome();
       if (!chromePath) throw new Error("Chrome not found");
       d.removeActivePort(d.profileDir); // stale file from a dead Chrome
+      // An explicit port, never 0: Chrome 158 started with --remote-debugging-port=0 reports
+      // navigator.webdriver === true (checked 2026-11-27), and noon's Akamai then answers 403
+      // "Access Denied". With a fixed port it is false, as with a normal launch.
+      port = await d.freePort();
       proc = d.spawnChrome(chromePath, [
-        "--remote-debugging-port=0",
+        `--remote-debugging-port=${port}`,
         "--remote-debugging-address=127.0.0.1",
         `--user-data-dir=${d.profileDir}`,
         "--window-position=-32000,-32000",
@@ -206,7 +224,7 @@ export function createChromeLauncher(overrides: Partial<ChromeDeps> = {}): Launc
 
     let browser: Browser | null = null;
     try {
-      if (p) port = await waitForNewPort(d, p);
+      if (p) await waitForPort(d, p, port!);
       browser = await d.connect(port!);
       const context = browser.contexts()[0] ?? (await browser.newContext());
       const page = context.pages()[0] ?? (await context.newPage());

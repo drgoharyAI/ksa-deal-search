@@ -11,7 +11,40 @@ export type AaResult =
 process.env.API_ANYTHING_LOCAL_ONLY ??= "1";
 process.env.API_ANYTHING_HOME ??= "./.aa-home";
 
+/**
+ * Runtime calls never heal, re-learn or escalate. All four api-anything stores were learned at
+ * tier 1 (plain HTTP), so:
+ * - maxTier 1: no browser at all, so no recapture and no cookie refresh;
+ * - callOnly: installed ops only; no rescan/recapture/heal, no registry or background traffic,
+ *   no stale marks written, and a drift is returned as-is (no second "same request once more").
+ *   api-anything's own cool-down after blocked/rate still applies.
+ */
+const CALL_OPTIONS = { view: { maxChars: 200000 }, maxTier: 1, callOnly: true } as const;
+
 const MAX_RETRIES = 2;
+
+/** After a store answers blocked, rate or drift (at runtime: an anti-bot page), send it nothing for this long. */
+export const BACKOFF_MS = 10 * 60_000;
+const BACKOFF_CLASSES = new Set(["blocked", "rate", "drift"]);
+// On globalThis so the back-off survives Next.js dev HMR module reloads.
+const g = globalThis as typeof globalThis & { __aaBackoffUntil?: Map<string, number> };
+const backoffUntil = (g.__aaBackoffUntil ??= new Map<string, number>());
+
+function backingOff(site: string): AaResult | null {
+  const until = backoffUntil.get(site);
+  if (until === undefined) return null;
+  if (Date.now() >= until) {
+    backoffUntil.delete(site);
+    return null;
+  }
+  return { ok: false, class: "blocked", reason: `backing off until ${new Date(until).toISOString()}` };
+}
+
+/** Test helper: clear every store's back-off. */
+export function resetBackoff(): void {
+  backoffUntil.clear();
+}
+
 const limits = { search: pLimit(3), detail: pLimit(2) };
 const caches = new Map<number, TtlCache<AaResult>>();
 const inflight = new Map<string, Promise<AaResult>>();
@@ -28,7 +61,7 @@ async function callOnce(
   args: Record<string, string>,
 ): Promise<{ result: AaResult; retrySafe: boolean }> {
   try {
-    const r = await call(site, op, args, { view: { maxChars: 200000 } });
+    const r = await call(site, op, args, CALL_OPTIONS);
     if (r.ok) return { result: { ok: true, tier: r.tier ?? 1, data: r.data }, retrySafe: false };
     return {
       result: { ok: false, class: r.class, reason: r.reason ?? "" },
@@ -57,12 +90,19 @@ export async function aaCall(
   const pending = inflight.get(key);
   if (pending) return pending;
 
+  const held = backingOff(site);
+  if (held) return held;
+
   const p = limits[opts.lane](async () => {
+    // Re-check in the queue: a call queued behind one that got blocked must not send.
+    const heldNow = backingOff(site);
+    if (heldNow) return heldNow;
     let out = await callOnce(site, op, args);
     for (let i = 0; i < MAX_RETRIES && !out.result.ok && out.retrySafe; i++) {
       out = await callOnce(site, op, args);
     }
     if (out.result.ok) cache.set(key, out.result);
+    else if (BACKOFF_CLASSES.has(out.result.class)) backoffUntil.set(site, Date.now() + BACKOFF_MS);
     return out.result;
   });
   inflight.set(key, p);

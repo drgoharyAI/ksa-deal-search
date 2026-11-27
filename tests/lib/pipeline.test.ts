@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import fixture from "../fixtures/aliexpress-search.json";
 
 vi.mock("@/src/lib/aa", () => ({ aaCall: vi.fn() }));
@@ -128,10 +128,34 @@ describe("runSearch", () => {
     }
   });
 
-  it("all calls drift -> error status with generic message", async () => {
-    mock.mockResolvedValue({ ok: false, class: "drift", reason: "no product cards" });
+  it("api-anything store: all calls drift (anti-bot page) -> blocked with generic message", async () => {
+    vi.spyOn(console, "warn").mockImplementation(() => {});
+    mock.mockResolvedValue({ ok: false, class: "drift", reason: "embedded data not found" });
     const r = await runSearch({ ...base, query: "anc earbuds" });
-    expect(r.statuses[0]).toEqual({ site: "aliexpress", status: "error", message: "Store request failed" });
+    expect(r.statuses[0]).toEqual({
+      site: "aliexpress",
+      status: "blocked",
+      message: "Store blocked the request; try again later",
+    });
+    expect(JSON.stringify(r)).not.toContain("embedded data");
+  });
+
+  it("custom runCall store (noon): drift stays error", async () => {
+    vi.spyOn(console, "warn").mockImplementation(() => {});
+    sites.driftish = {
+      id: "driftish",
+      label: "Driftish",
+      searchCalls: () => [{ op: "search", args: { q: "x", page: "1" } }],
+      runCall: async () => ({ ok: false, class: "drift", reason: "no product cards" }),
+      normalizeSearchItem: () => null,
+      fetchDetail: async (p) => p,
+    };
+    try {
+      const r = await runSearch({ ...base, sites: ["driftish"], query: "anc earbuds" });
+      expect(r.statuses[0]).toEqual({ site: "driftish", status: "error", message: "Store request failed" });
+    } finally {
+      delete sites.driftish;
+    }
   });
 
   it("all calls plain errors -> error status", async () => {
@@ -202,5 +226,65 @@ describe("POST /api/search", () => {
     const res = await post({ query: "anc earbuds", sites: ["aliexpress"], sort: "deal" });
     expect(res.status).toBe(200);
     expect((await res.json()).products.length).toBeGreaterThan(0);
+  });
+});
+
+describe("runSearch ratings (minRating)", () => {
+  const prod = (site: string, id: string, rating: number | null) => ({
+    site,
+    id,
+    title: `ANC earbuds model ${id}`,
+    listPrice: 100 + Number(id),
+    origPrice: null,
+    discountPct: null,
+    currency: "SAR",
+    rating,
+    soldCount: 0,
+    image: "",
+    url: `https://example.com/${site}/${id}`,
+    finalPrice: 100 + Number(id),
+    detailStatus: "ok" as const,
+  });
+  const fakeSite = (id: string, items: ReturnType<typeof prod>[]) => ({
+    id,
+    label: id,
+    searchCalls: () => [{ op: "search", args: { q: "anc earbuds", page: "1" } }],
+    runCall: async () => ({ ok: true as const, tier: 1, data: items }),
+    normalizeSearchItem: (raw: unknown) => raw as ReturnType<typeof prod>,
+    fetchDetail: async (p: never) => p,
+  });
+
+  beforeEach(() => {
+    sites.norating = fakeSite("norating", [prod("norating", "1", null), prod("norating", "2", null)]);
+    sites.rated = fakeSite("rated", [prod("rated", "3", 4.5), prod("rated", "4", 3), prod("rated", "5", null)]);
+  });
+  afterEach(() => {
+    delete sites.norating;
+    delete sites.rated;
+  });
+
+  it("keeps and flags products of a store that never provides ratings", async () => {
+    const r = await runSearch({ sites: ["norating", "rated"], sort: "price", query: "anc earbuds", minRating: 4 });
+    const ids = r.products.map((p) => `${p.site}/${p.id}`).sort();
+    expect(ids).toEqual(["norating/1", "norating/2", "rated/3"]);
+    for (const p of r.products.filter((x) => x.site === "norating")) expect(p.ratingUnavailable).toBe(true);
+    expect(r.products.find((p) => p.site === "rated")?.ratingUnavailable).toBeUndefined();
+  });
+
+  it("without minRating, nothing is flagged and nothing dropped for rating", async () => {
+    const r = await runSearch({ sites: ["norating", "rated"], sort: "price", query: "anc earbuds" });
+    expect(r.products).toHaveLength(5);
+    expect(r.products.some((p) => p.ratingUnavailable)).toBe(false);
+  });
+});
+
+describe("call budget", () => {
+  it("every store makes at most 3 calls per search, even with 2 variants", () => {
+    const pq = { terms: "usb c cable", exclude: [] };
+    for (const id of ["aliexpress", "amazon-sa", "jarir", "noon-sa", "trendyol-sa"]) {
+      const calls = sites[id].searchCalls(pq, ["usb-c cord", "type c cable"]);
+      expect(calls.length, id).toBeGreaterThan(0);
+      expect(calls.length, id).toBeLessThanOrEqual(3);
+    }
   });
 });
