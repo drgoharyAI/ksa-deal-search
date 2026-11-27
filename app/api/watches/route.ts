@@ -1,11 +1,12 @@
 import { rejectCrossSite } from "@/src/lib/request-guard";
 import { getDb } from "@/src/lib/db";
 import { sites } from "@/src/sites/registry";
-import { addPricePoint, createWatch, deleteWatch, findProductWatch, findSearchWatch, getWatch, listWatchViews, updateWatch } from "@/src/lib/alerts/repo";
+import { addPricePoint, countWatches, createWatch, deleteWatch, findProductWatch, findSearchWatch, getWatch, listWatchViews, updateWatch } from "@/src/lib/alerts/repo";
 import { parseId, parseNewWatch, parseWatchUpdate } from "@/src/lib/alerts/validate";
 import { ensureChecker } from "@/src/lib/alerts/service";
-import { bad, dbFailure, json, readJson } from "@/src/lib/api";
+import { TOO_LARGE, bad, dbFailure, json, readJsonCapped, tooLarge } from "@/src/lib/api";
 import { isPickupOnly } from "@/src/lib/saved";
+import { MAX_WATCHES, limiters } from "@/src/lib/limits";
 
 const SITE_IDS = new Set(Object.keys(sites));
 
@@ -29,7 +30,9 @@ export async function GET(req: Request) {
 export async function POST(req: Request) {
   const rejected = rejectCrossSite(req, { json: true });
   if (rejected) return rejected;
-  const parsed = parseNewWatch(await readJson(req), SITE_IDS);
+  const body = await readJsonCapped(req);
+  if (body === TOO_LARGE) return tooLarge();
+  const parsed = parseNewWatch(body, SITE_IDS);
   if (!parsed.ok) return bad(parsed.error);
   const w = parsed.value;
   ensureChecker();
@@ -50,6 +53,8 @@ export async function POST(req: Request) {
       });
       return json({ watch: getWatch(db, existing.id), updated: true });
     }
+    // Owner ruling: safety caps.
+    if (countWatches(db) >= MAX_WATCHES) return bad(`You can keep up to ${MAX_WATCHES} price alerts. Delete one to add another.`, 409);
     const id = createWatch(db, w, now);
     if (w.price !== undefined) {
       addPricePoint(db, id, { at: now, price: w.price, url: w.url, title: w.title });
@@ -65,12 +70,16 @@ export async function POST(req: Request) {
 export async function PATCH(req: Request) {
   const rejected = rejectCrossSite(req, { json: true });
   if (rejected) return rejected;
-  const parsed = parseWatchUpdate(await readJson(req));
+  const body = await readJsonCapped(req);
+  if (body === TOO_LARGE) return tooLarge();
+  const parsed = parseWatchUpdate(body);
   if (!parsed.ok) return bad(parsed.error);
   const { id, target, status } = parsed.value;
   try {
     const db = getDb();
     if (!getWatch(db, id)) return bad("No such watch", 404);
+    // Re-arming (a new target) once per watch a minute (owner ruling: safety caps).
+    if (target !== undefined && !limiters.rearm.take(String(id))) return bad("Wait a minute before changing this alert again", 429);
     updateWatch(db, id, {
       ...(target !== undefined ? { target, lastFiredPrice: null } : {}),
       ...(status !== undefined ? { status } : {}),

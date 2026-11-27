@@ -1,6 +1,7 @@
 import { ensureChecker } from "@/src/lib/alerts/service";
 import { readSearchInput } from "@/src/lib/search-request";
 import { runSearchStream } from "@/src/lib/search-stream-server";
+import { busyResponse, searchGate } from "@/src/lib/search-gate";
 import type { StreamEvent } from "@/src/lib/search-stream";
 
 /**
@@ -13,6 +14,10 @@ export async function POST(req: Request) {
   if ("response" in read) return read.response;
   const { input } = read;
   ensureChecker();
+  // At most 4 searches at once and 8 waiting (owner ruling: safety caps); past that, 503 before
+  // any stream starts. The lane is held until the stream's work ends.
+  const release = await searchGate().acquire("user", req.signal);
+  if (!release) return busyResponse();
 
   // Aborted when the client goes away: the request's own signal, or the stream cancelled.
   const ctrl = new AbortController();
@@ -32,6 +37,7 @@ export async function POST(req: Request) {
         }
       };
       void runSearchStream(input, { emit, signal: ctrl.signal }).finally(() => {
+        release();
         req.signal.removeEventListener("abort", onAbort);
         try {
           controller.close();

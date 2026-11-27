@@ -1,6 +1,7 @@
 import "server-only";
 import { getDb } from "@/src/lib/db";
 import { runSearch } from "@/src/lib/pipeline";
+import { searchGate } from "@/src/lib/search-gate";
 import { formatAlertMessage, sendTelegram } from "@/src/lib/telegram";
 import { createChecker, type Checker } from "./checker";
 
@@ -32,7 +33,15 @@ export function getChecker(): Checker {
     g.__dealSearchChecker = createChecker(
       () => ({
         db: getDb(),
-        search: (input) => runSearch(input),
+        // The same lanes as the HTTP searches; a checker search waits, never refused.
+        search: async (input, opts) => {
+          const release = await searchGate().acquire("checker");
+          try {
+            return await runSearch(input, opts);
+          } finally {
+            release?.();
+          }
+        },
         now: Date.now,
         sleep,
         staggerMs: STAGGER_MS,

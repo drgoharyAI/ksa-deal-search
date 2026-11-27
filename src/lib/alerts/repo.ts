@@ -120,7 +120,21 @@ export function listWatchViews(db: Db): WatchView[] {
 
 type EventRow = Omit<AlertEvent, "sent" | "seen"> & { sent: number; seen: number; retry?: number };
 
-const toEvent = ({ retry: _retry, ...r }: EventRow): AlertEvent => ({ ...r, sent: !!r.sent, seen: !!r.seen });
+/** The page's shape: the internal retry flag stays out. */
+const toEvent = (r: EventRow): AlertEvent => ({
+  id: r.id,
+  watchId: r.watchId,
+  at: r.at,
+  title: r.title,
+  site: r.site,
+  oldPrice: r.oldPrice,
+  newPrice: r.newPrice,
+  target: r.target,
+  currency: r.currency,
+  url: r.url,
+  sent: !!r.sent,
+  seen: !!r.seen,
+});
 
 /** `retry`: the Telegram send failed and the next cycle retries it (pendingEvent finds it). */
 export function addEvent(db: Db, e: Omit<AlertEvent, "id" | "seen">, opts: { retry?: boolean } = {}): number {

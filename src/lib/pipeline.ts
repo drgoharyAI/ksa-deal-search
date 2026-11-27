@@ -53,10 +53,13 @@ export type CallExec = (adapter: SiteAdapter, call: Call) => Promise<AaResult>;
  * Development hooks (eval harness). Production passes none, so behaviour is unchanged:
  * - exec replaces the transport for every store call (e.g. replaying recorded answers);
  * - onFiltered sees the products that passed every filter, before dedupe and ranking.
+ * `signal` (production too): a caller that went away (the HTTP request closed) skips the store
+ * calls still queued, as the streaming search does.
  */
 export type SearchOptions = {
   exec?: CallExec;
   onFiltered?: (products: Product[]) => void;
+  signal?: AbortSignal;
 };
 
 // api-anything classes meaning "the store is refusing us" (vs a plain error).
@@ -66,6 +69,7 @@ const AA_BLOCKED_CLASSES = new Set([...BLOCKED_CLASSES, "drift"]);
 const MSG_BLOCKED = "Store blocked the request; try again later";
 const MSG_FAILED = "Store request failed";
 const MSG_UNREADABLE = "Store results could not be read";
+export const MSG_UNSUPPORTED = "English search terms only";
 /** "input": the store answered "no results" (e.g. Trendyol's 404 past the last page): an empty answer. */
 const EMPTY_CLASSES = new Set(["input"]);
 /**
@@ -83,7 +87,7 @@ export type SiteOutcome = { products: Product[]; status: SiteStatus };
 /**
  * Asks one store and normalizes its answer. Never throws. `signal` lets a caller that went away
  * (a closed search stream) skip the store calls still queued; calls already sent finish and are
- * cached as usual. runSearch passes none.
+ * cached as usual. runSearch passes its caller's signal, if any.
  */
 export async function fetchSite(
   adapter: SiteAdapter,
@@ -95,6 +99,10 @@ export async function fetchSite(
   const signal = opts.signal;
   try {
     const calls = adapter.searchCalls(pq, variants);
+    if (!calls.length && pq.terms.trim()) {
+      // The adapter dropped every word (it sends English search terms only): say so, never "ok, 0".
+      return { products: [], status: { site: adapter.id, status: "unsupported", message: MSG_UNSUPPORTED } };
+    }
     const own = adapter.runCall?.bind(adapter);
     const aaOpts = signal ? { ttlMs: 600_000, lane: "search" as const, signal } : { ttlMs: 600_000, lane: "search" as const };
     const exec: (c: Call) => Promise<AaResult> = execOverride
@@ -193,7 +201,7 @@ export function prepareSearch(input: SearchInput): PreparedSearch {
 
 export async function runSearch(input: SearchInput, opts: SearchOptions = {}): Promise<SearchResult> {
   const prepared = prepareSearch(input);
-  const outs = await Promise.all(prepared.adapters.map((a) => fetchSite(a, prepared, { exec: opts.exec })));
+  const outs = await Promise.all(prepared.adapters.map((a) => fetchSite(a, prepared, { exec: opts.exec, signal: opts.signal })));
   return assembleResults(input, prepared, outs, opts);
 }
 

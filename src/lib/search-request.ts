@@ -10,6 +10,7 @@ import { getDb } from "@/src/lib/db";
 import { addSearch, historyEntryFor } from "@/src/lib/history";
 import { attachInsights, insightsFor, recordObservations } from "@/src/lib/insights";
 import { recordSeen } from "@/src/lib/discover";
+import { MAX_JSON_BODY, TOO_LARGE, readJsonCapped } from "@/src/lib/api";
 
 /**
  * Shared by POST /api/search and POST /api/search/stream: the same request guard and input rules,
@@ -25,12 +26,11 @@ const optNum = (v: unknown) => (typeof v === "number" && Number.isFinite(v) ? v 
 export async function readSearchInput(req: Request): Promise<{ input: SearchInput } | { response: Response }> {
   const rejected = rejectCrossSite(req, { json: true });
   if (rejected) return { response: rejected };
-  let body: Record<string, unknown>;
-  try {
-    body = (await req.json()) as Record<string, unknown>;
-  } catch {
-    return { response: NextResponse.json(EMPTY, { status: 400 }) };
-  }
+  // Read as a stream that stops at the cap: a huge or endless chunked body is never buffered.
+  const raw = await readJsonCapped(req, MAX_JSON_BODY);
+  if (raw === TOO_LARGE) return { response: NextResponse.json({ error: "The request is too large" }, { status: 413 }) };
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return { response: NextResponse.json(EMPTY, { status: 400 }) };
+  const body = raw as Record<string, unknown>;
   const query = typeof body?.query === "string" ? body.query : "";
   if (query.length > MAX_QUERY) {
     return { response: NextResponse.json({ error: "Search is too long" }, { status: 400 }) };

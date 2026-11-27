@@ -385,12 +385,14 @@ describe("code review round: alert checker", () => {
     const b = productWatch(450, "amazon-sa", "B1");
     answers["amazon-sa"] = { products: [prod("amazon-sa", "A1", 400), prod("amazon-sa", "B1", 400)] };
     const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
-    notify.mockImplementationOnce(async () => {
-      db.prepare("DELETE FROM watches WHERE id = ?").run(a); // the event insert then fails its foreign key
+    let first = true;
+    const deleting: CheckerDeps["notify"] = async () => {
+      if (first) db.prepare("DELETE FROM watches WHERE id = ?").run(a); // the event insert then fails its foreign key
+      first = false;
       return { ok: true };
-    });
+    };
     try {
-      await runCycle(deps());
+      await runCycle(deps({ notify: deleting }));
     } finally {
       warn.mockRestore();
     }

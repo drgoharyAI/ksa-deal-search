@@ -62,9 +62,13 @@ export type ParsedQuery = {
   exclude: string[];
 };
 
+/**
+ * "unsupported": the store was not asked because its adapter could not make a search from these
+ * words (an Arabic-only query; the adapters send English search terms only). Not "ok, 0 results".
+ */
 export type SiteStatus = {
   site: string;
-  status: "ok" | "blocked" | "error";
+  status: "ok" | "blocked" | "error" | "unsupported";
   message?: string;
 };
 
