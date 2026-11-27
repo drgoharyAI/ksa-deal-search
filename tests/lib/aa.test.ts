@@ -68,3 +68,18 @@ describe("aaCall", () => {
     expect(callMock).toHaveBeenCalledTimes(3);
   });
 });
+
+describe("aaCall in-flight sharing", () => {
+  it("concurrent identical calls make one upstream call", async () => {
+    callMock.mockImplementation(
+      () => new Promise((r) => setTimeout(() => r({ ok: true, class: "ok", tier: 1, data: 7 }), 20)),
+    );
+    const args = uniq();
+    const [a, b] = await Promise.all([
+      aaCall("s", "search", args, opts),
+      aaCall("s", "search", args, opts),
+    ]);
+    expect(a).toEqual(b);
+    expect(callMock).toHaveBeenCalledTimes(1);
+  });
+});

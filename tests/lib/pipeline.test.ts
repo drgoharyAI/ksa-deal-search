@@ -6,6 +6,7 @@ vi.mock("@/src/lib/aa", () => ({ aaCall: vi.fn() }));
 import { aaCall } from "@/src/lib/aa";
 import { runSearch } from "@/src/lib/pipeline";
 import { POST } from "@/app/api/search/route";
+import { sites } from "@/src/sites/registry";
 
 const mock = vi.mocked(aaCall);
 const okFixture = async () => ({ ok: true as const, tier: 1, data: fixture.data });
@@ -43,13 +44,94 @@ describe("runSearch", () => {
     mock.mockResolvedValue({ ok: false, class: "blocked", reason: "captcha" });
     const r = await runSearch({ ...base, query: "anc earbuds" });
     expect(r.products).toEqual([]);
-    expect(r.statuses[0]).toEqual({ site: "aliexpress", status: "blocked", message: "captcha" });
+    expect(r.statuses[0]).toEqual({ site: "aliexpress", status: "blocked", message: "Store blocked the request; try again later" });
+  });
+
+  it("all calls rate-limited -> blocked, generic client message, raw reason logged", async () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    mock.mockResolvedValue({ ok: false, class: "rate", reason: "429 secret-upstream-detail" });
+    const r = await runSearch({ ...base, query: "anc earbuds" });
+    expect(r.statuses[0]).toEqual({
+      site: "aliexpress",
+      status: "blocked",
+      message: "Store blocked the request; try again later",
+    });
+    expect(JSON.stringify(r)).not.toContain("secret-upstream-detail");
+    expect(warn).toHaveBeenCalled();
+    warn.mockRestore();
+  });
+
+  it("blocked status uses generic message, not the raw reason", async () => {
+    mock.mockResolvedValue({ ok: false, class: "blocked", reason: "captcha" });
+    const r = await runSearch({ ...base, query: "anc earbuds" });
+    expect(r.statuses[0].message).toBe("Store blocked the request; try again later");
+  });
+
+  it("a throwing adapter does not sink other sites", async () => {
+    mock.mockImplementation(okFixture);
+    const bad = {
+      id: "bad",
+      label: "Bad",
+      searchCalls: () => {
+        throw new Error("kaboom");
+      },
+      normalizeSearchItem: () => null,
+      fetchDetail: async (p: never) => p,
+    };
+    sites.bad = bad;
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    try {
+      const r = await runSearch({ ...base, sites: ["bad", "aliexpress"], query: "anc earbuds" });
+      expect(r.products.length).toBeGreaterThan(0);
+      expect(r.statuses.find((s) => s.site === "bad")).toEqual({
+        site: "bad",
+        status: "error",
+        message: "Store request failed",
+      });
+      expect(r.statuses.find((s) => s.site === "aliexpress")?.status).toBe("ok");
+    } finally {
+      delete sites.bad;
+      warn.mockRestore();
+    }
+  });
+
+  it("a sync-throwing runCall and normalize are contained", async () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    sites.bad2 = {
+      id: "bad2",
+      label: "Bad2",
+      searchCalls: () => [{ op: "search", args: {} }],
+      runCall: () => {
+        throw new Error("sync");
+      },
+      normalizeSearchItem: () => null,
+      fetchDetail: async (p) => p,
+    };
+    sites.bad3 = {
+      id: "bad3",
+      label: "Bad3",
+      searchCalls: () => [{ op: "search", args: {} }],
+      runCall: async () => ({ ok: true, tier: 1, data: [{}] }),
+      normalizeSearchItem: () => {
+        throw new Error("norm");
+      },
+      fetchDetail: async (p) => p,
+    };
+    try {
+      const r = await runSearch({ ...base, sites: ["bad2", "bad3"], query: "anc earbuds" });
+      expect(r.statuses.find((s) => s.site === "bad2")?.status).toBe("error");
+      expect(r.statuses.find((s) => s.site === "bad3")?.status).toBe("ok");
+    } finally {
+      delete sites.bad2;
+      delete sites.bad3;
+      warn.mockRestore();
+    }
   });
 
   it("all calls plain errors -> error status", async () => {
     mock.mockResolvedValue({ ok: false, class: "error", reason: "boom" });
     const r = await runSearch({ ...base, query: "anc earbuds" });
-    expect(r.statuses[0].status).toBe("error");
+    expect(r.statuses[0]).toEqual({ site: "aliexpress", status: "error", message: "Store request failed" });
   });
 
   it("partial failure -> ok with failed count", async () => {
@@ -98,6 +180,16 @@ describe("POST /api/search", () => {
     const res = await post({ query: "earbuds", sites: ["nope"], sort: "deal" });
     expect(res.status).toBe(400);
     expect(await res.json()).toEqual({ error: "Pick at least one store" });
+  });
+  it("dedupes site ids", async () => {
+    mock.mockImplementation(okFixture);
+    const res = await post({ query: "anc earbuds", sites: ["aliexpress", "aliexpress", "aliexpress"], sort: "deal" });
+    expect((await res.json()).statuses).toHaveLength(1);
+  });
+  it("400 when query too long", async () => {
+    const res = await post({ query: "a".repeat(201), sites: ["aliexpress"], sort: "deal" });
+    expect(res.status).toBe(400);
+    expect(await res.json()).toEqual({ error: "Search is too long" });
   });
   it("200 with results", async () => {
     mock.mockImplementation(okFixture);

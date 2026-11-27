@@ -14,6 +14,7 @@ process.env.API_ANYTHING_HOME ??= "./.aa-home";
 const MAX_RETRIES = 2;
 const limits = { search: pLimit(3), detail: pLimit(2) };
 const caches = new Map<number, TtlCache<AaResult>>();
+const inflight = new Map<string, Promise<AaResult>>();
 
 function cacheFor(ttlMs: number): TtlCache<AaResult> {
   let c = caches.get(ttlMs);
@@ -53,7 +54,10 @@ export async function aaCall(
   const hit = cache.get(key);
   if (hit) return hit;
 
-  return limits[opts.lane](async () => {
+  const pending = inflight.get(key);
+  if (pending) return pending;
+
+  const p = limits[opts.lane](async () => {
     let out = await callOnce(site, op, args);
     for (let i = 0; i < MAX_RETRIES && !out.result.ok && out.retrySafe; i++) {
       out = await callOnce(site, op, args);
@@ -61,4 +65,8 @@ export async function aaCall(
     if (out.result.ok) cache.set(key, out.result);
     return out.result;
   });
+  inflight.set(key, p);
+  const done = () => void (inflight.get(key) === p && inflight.delete(key));
+  p.then(done, done);
+  return p;
 }

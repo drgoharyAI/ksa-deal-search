@@ -6,6 +6,7 @@ import type { SortKey } from "@/src/lib/rank";
 
 const SORTS: SortKey[] = ["price", "discount", "deal"];
 const EMPTY = { error: "Enter something to search for" };
+const MAX_QUERY = 200;
 const optNum = (v: unknown) => (typeof v === "number" && Number.isFinite(v) ? v : undefined);
 
 export async function POST(req: Request) {
@@ -16,10 +17,16 @@ export async function POST(req: Request) {
     return NextResponse.json(EMPTY, { status: 400 });
   }
   const query = typeof body?.query === "string" ? body.query : "";
+  if (query.length > MAX_QUERY) {
+    return NextResponse.json({ error: "Search is too long" }, { status: 400 });
+  }
   if (!parseQuery(query).terms) return NextResponse.json(EMPTY, { status: 400 });
 
   const ids = Array.isArray(body.sites)
-    ? body.sites.filter((s): s is string => typeof s === "string" && Object.hasOwn(sites, s))
+    ? [...new Set(body.sites.filter((s): s is string => typeof s === "string" && Object.hasOwn(sites, s)))].slice(
+        0,
+        Object.keys(sites).length,
+      )
     : [];
   if (!ids.length) return NextResponse.json({ error: "Pick at least one store" }, { status: 400 });
 
