@@ -1,0 +1,36 @@
+# UX redesign (owner brief, 2026-11-27)
+
+Source: owner's detailed brief ("Principal Product Designer…"), condensed here. It is binding.
+- **Vision:** a premium, distinctive, search-first shopping intelligence platform across all integrated KSA stores. The goal is intelligence, trust, speed, transparency and simplicity, with an art-directed look.
+- **Never:**
+  - replace the search engine or integrations
+  - add mock data
+  - break existing API contracts
+  - remove working features
+  - show fake ratings, discounts, stock, delivery or stats
+  - leave dead buttons
+  - add a new UI framework or needless dependencies
+- **Avoid:** purple/blue gradients, glassmorphism, neon or glow, over-rounded cards, giant heroes, generic dashboards, decorative icons, chat bubbles, random illustrations.
+- **Design system:** one central set of tokens: warm off-white neutrals, charcoal text, ONE distinctive accent, an editorial type scale, spacing, radius, elevation, borders, buttons, inputs, card variants and breakpoints. The Hallmark Floor rules still apply (.claude/skills/hallmark).
+- **Homepage:** search-first. Brand, minimal nav, a prominent search with autocomplete (already exists), suggestions from real data (history and suggest API), store coverage and selection, and a small discovery strip from real data (recent observations or deals) only when it exists.
+- **Results:**
+  - Compact search header, query and result count, store coverage and live status, sort, filters (only for supported data), results, compare actions.
+  - Desktop: filter sidebar. Mobile: a bottom-sheet drawer.
+  - Progressive rendering per store, through a NEW streaming endpoint. The existing /api/search stays.
+- **Cards:**
+  - Price dominant; store identity instantly recognisable; consistent image box.
+  - Handles missing image, long title, currency, missing attributes, multiple sellers (group card) and duplicates.
+  - Brand/model, original price, verified discount, rating, shipping and availability show only when present.
+- **Compare:** excellent on mobile. Lowest comparable total highlighted. No cross-currency comparison. Missing values are shown differently from zero.
+- **Store status states:** searching / results (count shown only when the backend gives it) / no results / temporarily unavailable / failed. No fake progress.
+- **Discovery:** recently viewed, search history (exists), favourites, recent queries, best-price indicators, related products, product detail expansion, and shareable result URLs. Persist through the existing SQLite DB. Never simulate persistence.
+- **Responsive:** tested at 375/390/430/768/1024/1440/1920, with no horizontal overflow and thumb-friendly controls.
+- **States:** hover, focus, active, selected, disabled, loading, empty, error, success. Subtle motion, respecting reduced-motion.
+- **Performance:** minimal re-renders, lazy and responsive images, stable layout, existing caching kept.
+- **Phases:**
+  - U1: audit, design system, app shell and homepage
+  - U2: streaming search and store status
+  - U3: results layout, filters and cards
+  - U4: compare
+  - U5: discovery features
+  - U6: responsive, accessibility, QA and deploy
