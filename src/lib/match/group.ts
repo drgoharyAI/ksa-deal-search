@@ -340,18 +340,18 @@ type SpecRule = { dim: Dim | null; re: RegExp; val: (m: RegExpExecArray) => stri
 
 /** Counted features ("12 functions", "3 channel"): compared per feature, "qty:function". */
 const QTY =
-  /(?<![\d.])(\d+)\+?\s*-?\s*(mic|mode|speed|level|button|key|function|program|setting|preset|cup|layer|stage|sensor|channel|port|output|camera|head|attachment|drawer|basket|zone|blade|piece|burner|slice|egg|bar)s?\b/g;
+  /(?<![\d.])(\d+)\+?\s*(?:-\s*)?(mic|mode|speed|level|button|key|function|program|setting|preset|cup|layer|stage|sensor|channel|port|output|camera|head|attachment|drawer|basket|zone|blade|piece|burner|slice|egg|bar)s?\b/g;
 
 /** Order matters: each match is cut out of the title before the next rule and the model numbers. */
 const SPEC_RULES: SpecRule[] = [
-  { hint: ["in"], dim: "in1", re: /(?<![\d.])(\d+)\s*-?\s*in\s*-?\s*1\b/g, val: (m) => m[1] },
+  { hint: ["in"], dim: "in1", re: /(?<![\d.])(\d+)\s*(?:-\s*)?in\s*(?:-\s*)?1\b/g, val: (m) => m[1] },
   { hint: ["ram", "memory", "ddr"], dim: "ram", re: /(?<![\d.])(\d+)\s*gb\s*(?:of\s*)?(?:ram|memory|lpddr\d*x?|ddr\d*)\b/g, val: (m) => m[1] },
   { hint: ["ram"], dim: "ram", re: /\bram\s*:?\s*(\d+)\s*gb\b/g, val: (m) => m[1] },
   { hint: ["w-"], dim: "visc", re: /(?<![a-z\d.])(\d{1,2})w-(\d\d)(?!\w)/g, val: (m) => `${m[1]}w${m[2]}` },
   // An interface generation ("PCIe Gen4", "USB 3.2 Gen 2" against "Gen 2x2") is not the product's.
   { hint: ["gen"], dim: "ifgen", re: /\b(?:pcie?|pci[\s-]express|usb|nvme|thunderbolt)\s*(?:\d(?:\.\d)?\s*)?gen\s*(\d(?:x\d)?)\b/g, val: (m) => m[1] },
-  { hint: ["gen"], dim: "gen", re: /(?<![\d.])(\d+)(?:st|nd|rd|th)?\s*-?\s*gen(?:eration)?\b/g, val: (m) => m[1] },
-  { hint: ["gen"], dim: "gen", re: /\bgen(?:eration)?\s*-?\s*(\d+)\b/g, val: (m) => m[1] },
+  { hint: ["gen"], dim: "gen", re: /(?<![\d.])(\d+)(?:st|nd|rd|th)?\s*(?:-\s*)?gen(?:eration)?\b/g, val: (m) => m[1] },
+  { hint: ["gen"], dim: "gen", re: /\bgen(?:eration)?\s*(?:-\s*)?(\d+)\b/g, val: (m) => m[1] },
   { hint: ["hd"], dim: "res", re: /\b(fhd|qhd|uhd)\b/g, val: (m) => ({ fhd: "1080", qhd: "1440", uhd: "2160" })[m[1]]! },
   { hint: ["bluetooth", "bt"], dim: "bt", re: /\b(?:bluetooth|bt)\s*(?:version\s*|ver\.?\s*|v\.?\s*)?(\d(?:\.\d)?)\b/g, val: (m) => num(m[1]) },
   { hint: ["dpi"], dim: "dpi", re: /(?<![\d.])(\d+(?:\.\d+)?)\s*k\s*dpi\b/g, val: (m) => String(Math.round(Number(m[1]) * 1000)) },
@@ -376,7 +376,7 @@ const SPEC_RULES: SpecRule[] = [
 
 /** A number with its unit ("20000mAh", "27-inch", "2 m", "6ft"), read in one pass; see unitSpec. */
 const NUM_UNIT =
-  /(?<![\d.])(\d+(?:\.\d+)?)\s*-?\s*(mb\s*\/\s*s|gb\s*\/\s*s|mbps|gbps|mah|gb|tb|watts?|w|fl\.?\s*oz|oz|ounces?|lbs?|pounds?|mg|kgs?|grams?|volts?|tons?|btu|hp|cc|inch(?:es)?|in|"|''|”|mm|cm|meters?|metres?|m|ft|feet|foot|hz|ml|liters?|litres?|ltr|lt|l|k|p|g|pcs|pc|pieces?|pack|pk|count|ct|dpi|mp|pa|hours?|hrs?|h|years?|yrs?|months?|days?|minutes?|mins?|db|ms|d|rpm|kpa|v|a|°)(?![a-z0-9²³])/g;
+  /(?<![\d.])(\d+(?:\.\d+)?)\s*(?:-\s*)?(mb\s*\/\s*s|gb\s*\/\s*s|mbps|gbps|mah|gb|tb|watts?|w|fl\.?\s*oz|oz|ounces?|lbs?|pounds?|mg|kgs?|grams?|volts?|tons?|btu|hp|cc|inch(?:es)?|in|"|''|”|mm|cm|meters?|metres?|m|ft|feet|foot|hz|ml|liters?|litres?|ltr|lt|l|k|p|g|pcs|pc|pieces?|pack|pk|count|ct|dpi|mp|pa|hours?|hrs?|h|years?|yrs?|months?|days?|minutes?|mins?|db|ms|d|rpm|kpa|v|a|°)(?![a-z0-9²³])/g;
 
 /** Weight in grams to 3 significant digits (1.8 kg = 1800 g, 5 lb = 2270 g = 2.27 kg). */
 const grams = (g: number) => String(Number(g.toPrecision(3)));

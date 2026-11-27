@@ -145,13 +145,13 @@ export function parseSpecs(title: string): Specs {
       return " ";
     });
   };
-  const first = <K extends keyof Specs>(k: K, v: string) => {
+  const first = (k: keyof Specs, v: string) => {
     if (out[k] === undefined) out[k] = v;
   };
 
-  cut(/(?<![\d.])\d+\s*-?\s*in\s*-?\s*1\b/g, () => {});
+  cut(/(?<![\d.])\d+\s*(?:-\s*)?in\s*(?:-\s*)?1\b/g, () => {});
   // "8GB+256GB", "12/512GB": RAM then storage.
-  cut(/(?<![\d.])(\d{1,2})\s*(?:gb)?\s*[+/]\s*(\d{2,4})\s*(gb|tb)(?![a-z])/g, (m) => {
+  cut(/(?<![\d.])(\d{1,2})\s*(?:gb\s*)?[+/]\s*(\d{2,4})\s*(gb|tb)(?![a-z])/g, (m) => {
     first("ram", `${m[1]} GB`);
     first("storage", gb(Number(m[2]), m[3]));
   });
@@ -160,7 +160,7 @@ export function parseSpecs(title: string): Specs {
   cut(/(?<![\d.])(\d+(?:\.\d+)?)\s*(gb|tb)(?![a-z])/g, (m) => first("storage", gb(Number(m[1]), m[2])));
   cut(/(?<![\d.])(\d+(?:\.\d+)?)\s*mah\b/g, (m) => first("capacity", `${fmt(Number(m[1]))} mAh`));
   cut(/(?<![\d.])(\d+(?:\.\d+)?)\s*(?:w|watts?)(?![a-z])/g, (m) => first("wattage", `${fmt(Number(m[1]))} W`));
-  cut(/(?<![\d.])(\d+(?:\.\d+)?)\s*(?:"|''|”|-?\s*inch(?:es)?\b|in\b)/g, (m) => first("size", `${fmt(Number(m[1]))} in`));
+  cut(/(?<![\d.])(\d+(?:\.\d+)?)\s*(?:"|''|”|(?:-\s*)?inch(?:es)?\b|in\b)/g, (m) => first("size", `${fmt(Number(m[1]))} in`));
   for (const [re, label] of RESOLUTIONS)
     if (re.test(t)) {
       out.resolution = label;

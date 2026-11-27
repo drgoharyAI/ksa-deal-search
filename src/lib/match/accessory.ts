@@ -63,7 +63,7 @@ const CATEGORY_LABEL = new Set(["accessory", "accessories"]);
  * ("Gaming Mouse Pad", "Hair Dryer Folding Diffuser", "Apple Watch Band").
  */
 /** A piece count ("30PCS", "2 pcs", "50 Pieces", "pack of 10"): parts are sold in multiples. */
-const PIECES = /\b\d+\s*-?\s*(?:pcs|pc|pieces?)\b|\b(?:pack|set) of \d+/i;
+const PIECES = /\b\d+\s*(?:-\s*)?(?:pcs|pc|pieces?)\b|\b(?:pack|set) of \d+/i;
 
 export function isStrongAccessory(title: string, queryTokens: string[], variants: string[][] = []): boolean {
   const { tt, idx } = foreignAccessoryIdx(title, queryTokens);
