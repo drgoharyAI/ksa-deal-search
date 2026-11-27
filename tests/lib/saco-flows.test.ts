@@ -4,6 +4,10 @@ import { sites } from "@/src/sites/registry";
 import { readSearchInput } from "@/src/lib/search-request";
 import { parseNewWatch } from "@/src/lib/alerts/validate";
 import { rerunHref, valuesFromUrl } from "@/src/lib/rerun";
+import { createElement } from "react";
+import { renderToStaticMarkup } from "react-dom/server";
+import ResultCard from "@/app/components/ResultCard";
+import type { Product } from "@/src/lib/types";
 
 /** SACO (owner request): one registry entry reaches the search, chips/order, history and watch flows. */
 describe("SACO store wiring", () => {
@@ -36,6 +40,21 @@ describe("SACO store wiring", () => {
     expect(product).toMatchObject({ ok: true, value: { site: "saco-sa", sites: ["saco-sa"] } });
     const search = parseNewWatch({ kind: "search", query: "air fryer", sites: ["saco-sa"], target: 300 }, SITE_IDS);
     expect(search).toMatchObject({ ok: true, value: { sites: ["saco-sa"] } });
+  });
+
+  it("a branch-pickup-only listing cannot be watched (no Watch button, and the API refuses it)", () => {
+    const p: Product = {
+      site: "saco-sa", id: "103346", title: "Air fryer 4L", listPrice: 229, origPrice: null, discountPct: null, currency: "SAR", rating: null, soldCount: 0,
+      image: "", url: "https://www.saco.sa/en/product/x-p-000000000000103346", finalPrice: 229, detailStatus: "ok", pickupOnly: true,
+    };
+    const pickup = renderToStaticMarkup(createElement(ResultCard, { product: p, query: "air fryer" }));
+    expect(pickup).toContain("Branch pickup only");
+    expect(pickup).not.toContain("card__watchbtn");
+    const deliverable: Product = { ...p, pickupOnly: undefined };
+    expect(renderToStaticMarkup(createElement(ResultCard, { product: deliverable, query: "air fryer" }))).toContain("card__watchbtn");
+    const body = { kind: "product", site: "saco-sa", productId: "103346", query: "air fryer", target: 200, url: p.url };
+    expect(parseNewWatch({ ...body, pickupOnly: true }, SITE_IDS)).toMatchObject({ ok: false });
+    expect(parseNewWatch(body, SITE_IDS)).toMatchObject({ ok: true });
   });
 
   it("a history re-run keeps it", () => {

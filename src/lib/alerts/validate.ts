@@ -25,6 +25,8 @@ export function parseNewWatch(body: unknown, siteIds: ReadonlySet<string>): Ok<N
   const currency = typeof b.currency === "string" && /^[A-Z]{3}$/.test(b.currency) ? b.currency : "SAR";
 
   if (b.kind === "product") {
+    // Branch pickup only is not a deliverable price; the checker would never record one.
+    if (b.pickupOnly === true) return { ok: false, error: "A branch-pickup-only listing cannot be watched" };
     const site = typeof b.site === "string" && siteIds.has(b.site) ? b.site : null;
     if (!site) return { ok: false, error: "Unknown store" };
     const productId = str(b.productId, 200);

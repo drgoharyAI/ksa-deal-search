@@ -93,10 +93,14 @@ export function CardCompare({ product: p, checked, onCompare, label }: { product
   );
 }
 
-/** "Watch": a price alert on this product, opened in place. */
+/**
+ * "Watch": a price alert on this product, opened in place. Not offered on a branch-pickup-only
+ * listing: the checker never records a pickup-only price, so such a watch could never fire.
+ */
 export function CardWatch({ product: p, query }: { product: Product; query: string }) {
   const [watch, setWatch] = useState<"closed" | "open" | "saved">("closed");
   const price = p.finalPrice ?? p.listPrice;
+  if (p.pickupOnly) return null;
   return (
     <div className="card__watch">
       {watch === "open" ? (
