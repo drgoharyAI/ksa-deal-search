@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import type { AlertEvent, WatchView } from "@/src/lib/alerts/shared";
 import AppHeader, { ALERTS_SEEN_EVENT } from "../components/AppHeader";
 import AppFooter from "../components/AppFooter";
@@ -13,6 +13,22 @@ import Sparkline from "../components/Sparkline";
 import WatchForm from "../components/WatchForm";
 import When from "../components/When";
 import { formatMoney } from "@/src/lib/money";
+import { storeLink } from "@/src/lib/store-hosts";
+
+/**
+ * A watch's or alert's title, linked only to its own store's page. A link stored before the store
+ * host allowlist may point anywhere and is drawn under a store logo, so anything else gets no link.
+ */
+export function StoreTitleLink({ site, url, children }: { site: string | null; url: string | null; children: ReactNode }) {
+  const href = site ? storeLink(site, url) : null;
+  if (!href) return <>{children}</>;
+  return (
+    <a href={href} target="_blank" rel="noopener noreferrer">
+      {children}
+      <span className="visually-hidden"> (opens in a new tab)</span>
+    </a>
+  );
+}
 
 type Data = { watches: WatchView[]; events: AlertEvent[]; telegram: { configured: boolean } };
 type State = { phase: "loading" } | { phase: "error"; message: string } | ({ phase: "ready" } & Data);
@@ -161,14 +177,9 @@ export default function AlertsView() {
                       <li key={w.id} className={w.status === "paused" ? "row row--paused" : "row"}>
                         <div className="row__main">
                           <p className="row__title">
-                            {w.url ? (
-                              <a href={w.url} target="_blank" rel="noopener noreferrer">
-                                {name}
-                                <span className="visually-hidden"> (opens in a new tab)</span>
-                              </a>
-                            ) : (
-                              name
-                            )}
+                            <StoreTitleLink site={store} url={w.url}>
+                              {name}
+                            </StoreTitleLink>
                           </p>
                           <p className="row__meta">
                             {store ? (
@@ -254,14 +265,9 @@ export default function AlertsView() {
                     <li key={e.id} className="row">
                       <div className="row__main">
                         <p className="row__title">
-                          {e.url ? (
-                            <a href={e.url} target="_blank" rel="noopener noreferrer">
-                              {e.title}
-                              <span className="visually-hidden"> (opens in a new tab)</span>
-                            </a>
-                          ) : (
-                            e.title
-                          )}
+                          <StoreTitleLink site={e.site} url={e.url}>
+                            {e.title}
+                          </StoreTitleLink>
                         </p>
                         <p className="row__meta">
                           <StoreMark id={e.site} size={18} />
