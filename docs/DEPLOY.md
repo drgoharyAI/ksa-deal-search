@@ -226,7 +226,8 @@ ls -la /data`, `df -h` on the VM.
 **Public hostname (Cloudflare Tunnel).** `cloudflared` (compose profile `tunnel`) opens an outbound-only
 tunnel; no inbound port is needed. The tunnel `deal-search` is remotely managed in Cloudflare:
 ingress `deals.example.com -> http://app:3000`, DNS `search` CNAME `<tunnel-id>.cfargotunnel.com` (proxied).
-On the VM `.env`: `COMPOSE_PROFILES=tunnel`, `TUNNEL_TOKEN=<token>` and `deals.example.com` in `APP_HOSTS`.
+On the VM: `.env` has `COMPOSE_PROFILES=tunnel` and `deals.example.com` in `APP_HOSTS`; the token is
+in `.env.tunnel` (`TUNNEL_TOKEN=<token>`, mode 600), read only by `cloudflared`, never by the app.
 The app has no login and no limits (owner decision), so anyone with the URL can use it.
 
 **Exposure.** Ports are published on IPv4 only (`${APP_BIND:-0.0.0.0}`). The VM has a global IPv6

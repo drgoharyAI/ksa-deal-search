@@ -64,8 +64,9 @@ services:
         max-size: "10m"
         max-file: "3"
 
-  # Cloudflare Tunnel (outbound only; no inbound port). Enable with COMPOSE_PROFILES=tunnel and
-  # TUNNEL_TOKEN in .env. Routes and DNS live in Cloudflare (remotely managed). See docs/DEPLOY.md.
+  # Cloudflare Tunnel (outbound only; no inbound port). Enable with COMPOSE_PROFILES=tunnel in .env
+  # and TUNNEL_TOKEN in .env.tunnel (mode 600), which only this service reads: the app never sees
+  # the token. Routes and DNS live in Cloudflare (remotely managed). See docs/DEPLOY.md.
   cloudflared:
     image: cloudflare/cloudflared:2025.11.1
     profiles: ["tunnel"]
@@ -73,8 +74,9 @@ services:
     depends_on:
       - app
     command: tunnel --no-autoupdate run
-    environment:
-      TUNNEL_TOKEN: ${TUNNEL_TOKEN:-}
+    env_file:
+      - path: .env.tunnel
+        required: false
     security_opt:
       - no-new-privileges:true
     cap_drop:

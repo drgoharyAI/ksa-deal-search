@@ -5,7 +5,7 @@
 #   ENV_FILE=path/to/.env scripts/deploy.sh   # first deploy: upload this .env if the VM has none
 # Env: VM (deploy@192.168.1.48), SSH_KEY (~/.ssh/deal_search_proxmox), REMOTE_DIR
 # (/home/deploy/deal-search), HEALTH_URL (http://192.168.1.48:3000/api/health).
-# The remote folder is replaced with the new tree except .env; the data lives in the Docker
+# The remote folder is replaced with the new tree except .env and .env.tunnel; the data lives in the Docker
 # volume, not in that folder. Then: docker compose up -d --build, and a health check.
 set -euo pipefail
 
@@ -27,7 +27,7 @@ else
   echo "deploy: packed $(git rev-parse --short HEAD)"
 fi
 
-"${SSH[@]}" "mkdir -p '$REMOTE_DIR' && find '$REMOTE_DIR' -mindepth 1 -maxdepth 1 ! -name .env -exec rm -rf {} + && tar -xf - -C '$REMOTE_DIR'" < "$tmp/release.tar"
+"${SSH[@]}" "mkdir -p '$REMOTE_DIR' && find '$REMOTE_DIR' -mindepth 1 -maxdepth 1 ! -name .env ! -name .env.tunnel -exec rm -rf {} + && tar -xf - -C '$REMOTE_DIR'" < "$tmp/release.tar"
 
 if ! "${SSH[@]}" "test -f '$REMOTE_DIR/.env'"; then
   if [ -n "${ENV_FILE:-}" ]; then
