@@ -167,6 +167,19 @@ describe("review fixes", () => {
     const ps = set([["iPhone 16 Case", 29], ["Silicone Case for iPhone 16", 25]]);
     expect(titles(dropAccessories(ps, ["iphone", "16"]))).toEqual(["iPhone 16 Case"]);
   });
+  it("R3: all-candidate sets use max candidate price as reference", () => {
+    const w = set([
+      ["Apple Watch Series 9 GPS 45mm Midnight Aluminium Case with Sport Band", 1599],
+      ["Apple Watch SE GPS 40mm Starlight Aluminium Case with Sport Loop", 899],
+      ["Apple Watch Band 45mm Silicone", 29], ["Apple Watch Strap Nylon Sport Loop", 39], ["Apple Watch Charger Magnetic", 35],
+    ]);
+    expect(dropAccessories(w, ["apple", "watch"]).map((p) => p.id)).toEqual(["0", "1"]);
+    const f = set([["Xiaomi Smart Band 9 Fitness Tracker", 149], ["Huawei Band 9 Fitness Tracker", 179], ["Fitness Tracker Strap Nylon", 19]]);
+    expect(titles(dropAccessories(f, ["fitness", "tracker"]))).toEqual(["Xiaomi Smart Band 9 Fitness Tracker", "Huawei Band 9 Fitness Tracker"]);
+    // all cases: cutoff = 0.4 x 49 = 19.6, so only the cheapest (19) goes
+    const c = set([["iPhone 16 Case A", 19], ["iPhone 16 Case B", 25], ["iPhone 16 Case C", 29], ["iPhone 16 Case D", 39], ["iPhone 16 Case E", 49]]);
+    expect(dropAccessories(c, ["iphone", "16"]).map((p) => p.listPrice)).toEqual([25, 29, 39, 49]);
+  });
   it("I1: variant words block merging", () => {
     const pairs = [
       ["Samsung Galaxy S24 Plus", "Samsung Galaxy S24 Ultra"],

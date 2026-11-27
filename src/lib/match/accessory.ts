@@ -45,11 +45,14 @@ function median(xs: number[]): number {
   return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2;
 }
 
-/** Drop strong accessories; drop candidates priced far below the non-candidates' median. */
+/** Drop strong accessories; drop candidates priced far below the non-candidates' median (or the max candidate price if none). */
 export function dropAccessories(products: Product[], queryTokens: string[]): Product[] {
   const live = products.filter((p) => !isStrongAccessory(p.title, queryTokens));
   const mains = live.filter((p) => !isAccessory(p.title, queryTokens));
-  if (!mains.length) return live;
-  const cutoff = PRICE_RATIO * median(mains.map((p) => p.listPrice));
+  if (!live.length) return live;
+  // No clear main product (their own titles may hold "case"/"band"): use the priciest as reference.
+  const cutoff = mains.length
+    ? PRICE_RATIO * median(mains.map((p) => p.listPrice))
+    : PRICE_RATIO * Math.max(...live.map((p) => p.listPrice));
   return live.filter((p) => !isAccessory(p.title, queryTokens) || p.listPrice >= cutoff);
 }
