@@ -33,7 +33,8 @@ and Xvfb run without extra privileges. Set "Start at boot" in the VM's Options.
 
 `docker/entrypoint.sh`, under `tini`:
 
-1. starts `Xvfb :99` (1920x1080, unix socket only) and waits for it;
+1. starts `Xvfb :99` (1920x1080, unix socket only, access control on: a random cookie in
+   `XAUTHORITY=/tmp/.deal-search-Xauthority`, which Chrome inherits) and waits for it;
 2. runs `node scripts/install-specs.mjs` (copies `api-specs/` into `API_ANYTHING_HOME=/data/aa-home`
    and seeds the AliExpress KSA cookie);
 3. `exec node server.js` (Next.js standalone) on `0.0.0.0:3000`.
@@ -215,7 +216,9 @@ search once. Check the VM's public IP is the home connection (no VPN on the VM).
 
 **DISPLAY / Xvfb.** The entrypoint logs "Xvfb ready on :99". If it says "Xvfb did not start", the
 log lines after it say why. `docker compose exec app sh -c 'echo $DISPLAY; ls -l /tmp/.X11-unix'`
-must show `:99` and a socket `X99`. Never run Chrome headless to work around it: noon and SHEIN block
+must show `:99` and a socket `X99`. Xvfb runs with access control (no `-ac`): an X client run by
+hand inside the container needs `XAUTHORITY=/tmp/.deal-search-Xauthority` (the entrypoint exports it
+for the server and Chrome). Never run Chrome headless to work around it: noon and SHEIN block
 headless Chrome.
 
 **403 in the browser.** The address is not in `APP_HOSTS` (see `.env`).
@@ -243,3 +246,20 @@ Check: `ss -tlnp | grep 3000` must show no `[::]` line.
 
 **Port 3000 is taken.** Change the left side of `ports:` in `docker-compose.yml` (for example
 `"8080:3000"`) and put `192.168.1.48:8080` in `APP_HOSTS`.
+
+## Safety caps (owner ruling)
+
+The app is public with no login; these small in-memory caps protect the server, the Telegram bot
+and the stores. Normal personal use never reaches them; a restart clears them.
+
+| What | Cap | Answer past it |
+|---|---|---|
+| Telegram test message | 1 per 60 s | `429 {"error":"Wait a minute before sending another test"}` |
+| Price watches | 100 | `409 {"error":"You can keep up to 100 price alerts. Delete one to add another."}` |
+| Re-arm one watch (new target) | 1 per watch per 60 s | `429 {"error":"Wait a minute before changing this alert again"}` |
+| Searches | 4 running + 8 waiting | `503 {"error":"Busy, try again in a moment"}`, `Retry-After: 5` |
+| JSON request body | 8 KB, read as a stream | `413` |
+| Check cycle | 100 watches, 20 Telegram alerts | the rest wait for the next cycle |
+| Stored history | price points 180 days, newest 1000 alert events | pruned each cycle |
+
+The alert checker's searches share the 4 lanes but wait instead of getting 503.

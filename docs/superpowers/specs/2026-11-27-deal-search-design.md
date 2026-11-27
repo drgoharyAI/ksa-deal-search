@@ -368,3 +368,11 @@ This supersedes "Runs locally only".
 - **No rate limits or caps** (owner). The existing per-store caching and blocked-store back-offs are kept: they protect against store blocking and are not user limits.
 - **The image stays the same:** Node 24, Chrome stable and Xvfb. It has a persistent volume, `/api/health`, restart `unless-stopped`, graceful Chrome shutdown, and a backup script. Proxmox VM backups also cover the volume.
 - **Docs:** create the VM, install Docker, clone, configure `.env`, run `docker compose up -d`, then cover updates, backups, logs, and troubleshooting (a store blocked, or Chrome not starting).
+
+## Owner ruling: safety caps (owner, 2026-11-28)
+The app stays public with no login, but small caps protect the owner's server, Telegram bot and stores. Normal personal use never reaches them. They replace the "no caps" line above for these points only; the per-store caches and back-offs stay as they are. All counters are in memory (a restart clears them).
+- **Telegram test:** `POST /api/alerts/test-telegram` sends at most once per 60 s. Inside the window: `429 {"error":"Wait a minute before sending another test"}` and nothing is sent. A "not set up" answer does not use the window.
+- **Watches:** at most 100. `POST /api/watches` past that: `409 {"error":"You can keep up to 100 price alerts. Delete one to add another."}`. Re-arming a watch through `PATCH /api/watches` (a new target) at most once per watch per 60 s: `429 {"error":"Wait a minute before changing this alert again"}`. Pausing and resuming are not limited.
+- **Check cycle:** at most 100 due watches processed and 20 Telegram alerts sent per cycle; the rest wait for the next cycle (oldest checked first). Price points older than 180 days and alert events beyond the newest 1000 are pruned each cycle.
+- **Search queue:** at most 4 searches run at once, with up to 8 more waiting (first come, first served). Past that, `POST /api/search` and `POST /api/search/stream` answer `503 {"error":"Busy, try again in a moment"}` with `Retry-After: 5`. The alert checker's searches use the same lanes but always wait, never refused, so they are not starved.
+- **Request bodies:** JSON bodies are read as a stream that stops at 8 KB (searches, watches, alerts; saved and viewed products keep their 8 KB cap): `413` past that.

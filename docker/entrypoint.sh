@@ -8,9 +8,17 @@ export DISPLAY
 DISPLAY_NUM="${DISPLAY#:}"
 DISPLAY_NUM="${DISPLAY_NUM%%.*}"
 
-# Xvfb: noon and SHEIN need a headed Chrome; this is its screen. Unix socket only (-nolisten tcp).
+# Xvfb: noon and SHEIN need a headed Chrome; this is its screen. Unix socket only (-nolisten tcp)
+# and access control on (no -ac): a random MIT cookie in an Xauthority file only this user can
+# read, as xvfb-run does. Chrome is spawned by node, inherits DISPLAY and XAUTHORITY, and so
+# presents the cookie; any other local process without it is refused.
+XAUTHORITY="${XAUTHORITY:-/tmp/.deal-search-Xauthority}"
+export XAUTHORITY
+rm -f "$XAUTHORITY"
+(umask 077 && : >"$XAUTHORITY")
+xauth -q -f "$XAUTHORITY" add "$DISPLAY" . "$(od -An -N16 -tx1 /dev/urandom | tr -d ' \n')"
 rm -f "/tmp/.X${DISPLAY_NUM}-lock" "/tmp/.X11-unix/X${DISPLAY_NUM}"
-Xvfb "$DISPLAY" -screen 0 1920x1080x24 -nolisten tcp -ac >/tmp/xvfb.log 2>&1 &
+Xvfb "$DISPLAY" -screen 0 1920x1080x24 -nolisten tcp -auth "$XAUTHORITY" >/tmp/xvfb.log 2>&1 &
 i=0
 while [ ! -S "/tmp/.X11-unix/X${DISPLAY_NUM}" ]; do
   i=$((i + 1))
