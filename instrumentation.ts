@@ -4,6 +4,8 @@
  */
 export async function register() {
   if (process.env.NEXT_RUNTIME !== "nodejs" || process.env.NEXT_PHASE === "phase-production-build") return;
+  const { installShutdownHooks } = await import("./src/lib/shutdown-hooks");
+  installShutdownHooks(); // Docker only (NEXT_MANUAL_SIG_HANDLE): closes Chrome and the DB on SIGTERM
   const { ensureChecker } = await import("./src/lib/alerts/service");
   ensureChecker();
 }

@@ -97,12 +97,34 @@ export type BrowserQueue = ReturnType<typeof createBrowserQueue>;
 
 // ---------------- real Chrome launcher ----------------
 
-function chromeCandidates(): string[] {
-  const env = process.env;
+/**
+ * Where Chrome may be installed, in order: CHROME_PATH (operator override), then the platform's
+ * standard Google Chrome locations. Linux covers the official google-chrome-stable .deb used by the
+ * Docker image, with Chromium last.
+ */
+export function chromeCandidates(
+  env: Record<string, string | undefined> = process.env,
+  platform: NodeJS.Platform = process.platform,
+): string[] {
+  const own = env.CHROME_PATH?.trim() ? [env.CHROME_PATH.trim()] : [];
+  if (platform === "linux") {
+    return [
+      ...own,
+      "/usr/bin/google-chrome-stable",
+      "/usr/bin/google-chrome",
+      "/opt/google/chrome/chrome",
+      "/usr/bin/chromium",
+      "/usr/bin/chromium-browser",
+    ];
+  }
+  if (platform === "darwin") return [...own, "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"];
   const rel = path.join("Google", "Chrome", "Application", "chrome.exe");
-  return [env.ProgramFiles, env["ProgramFiles(x86)"], env.LocalAppData ?? env.LOCALAPPDATA]
-    .filter((d): d is string => !!d)
-    .map((d) => path.join(d, rel));
+  return [
+    ...own,
+    ...[env.ProgramFiles, env["ProgramFiles(x86)"], env.LocalAppData ?? env.LOCALAPPDATA]
+      .filter((d): d is string => !!d)
+      .map((d) => path.join(d, rel)),
+  ];
 }
 
 export function findChrome(): string | null {
