@@ -266,3 +266,4 @@ non-goals for these three.
   Gulf/international site with country SA). It is spiked like the others: API
   Anything first, Playwright as a fallback. `finalPrice = listPrice`, and cards say
   "shipping not included".
+- **More KSA stores (owner, 2026-11-27):** eXtra (`extra-sa`, extra.com), Carrefour KSA (`carrefour-sa`, carrefourksa.com), SHEIN KSA (`shein-sa`), Temu KSA (`temu-sa`). All must be Saudi storefronts with SAR prices and English titles. Each is spiked first with the usual method: API Anything at tier 1–2, then real Chrome over CDP only if blocked. Personal-volume traffic only, no CAPTCHA solving. A store that can't be read reliably is dropped and reported.
