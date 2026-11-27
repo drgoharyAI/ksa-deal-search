@@ -2,6 +2,7 @@
 
 import type { SortKey } from "@/src/lib/rank";
 import { STORES } from "@/src/lib/stores";
+import StoreLogo from "./StoreLogo";
 
 export type FormValues = {
   query: string;
@@ -100,7 +101,8 @@ export default function SearchForm({ values, onChange, onSubmit, onStop, loading
                 checked={values.sites.includes(s.id)}
                 onChange={(e) => toggleSite(s.id, e.target.checked)}
               />
-              <span>{s.label}</span>
+              <StoreLogo id={s.id} size={24} />
+              <span className="visually-hidden">{s.label}</span>
             </label>
           ))}
         </div>

@@ -1,3 +1,5 @@
+import { existsSync } from "node:fs";
+import { join } from "node:path";
 import { describe, it, expect } from "vitest";
 import { STORES, storeLabel } from "@/src/lib/stores";
 import { sites } from "@/src/sites/registry";
@@ -9,6 +11,13 @@ describe("STORES (client-safe store list)", () => {
 
   it("uses the registry's labels", () => {
     for (const s of STORES) expect(s.label).toBe(sites[s.id].label);
+  });
+
+  it("gives every store a logo file that exists under public/stores", () => {
+    for (const s of STORES) {
+      expect(s.logo).toMatch(/^\/stores\/[a-z-]+\.(svg|png|ico)$/);
+      expect(existsSync(join(process.cwd(), "public", s.logo)), s.id).toBe(true);
+    }
   });
 
   it("storeLabel falls back to the id for an unknown store", () => {

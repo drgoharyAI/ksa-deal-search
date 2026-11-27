@@ -4,6 +4,7 @@ import { useState } from "react";
 import type { Product } from "@/src/lib/types";
 import { storeLabel } from "@/src/lib/stores";
 import { isLikelyMatch } from "@/src/lib/rank";
+import StoreLogo from "./StoreLogo";
 
 const NBSP = " ";
 
@@ -43,7 +44,7 @@ export default function ResultCard({ product: p }: { product: Product }) {
       </div>
       <div className="card__body">
         <span className="card__store">
-          {storeLabel(p.site)}
+          <StoreLogo id={p.site} size={18} alt={storeLabel(p.site)} />
           {!isLikelyMatch(p) && <span className="card__flag"> · Less likely match</span>}
         </span>
         <h3 className="card__title">

@@ -50,6 +50,8 @@
 .chip:has(input:checked) { border-color: var(--color-ink); background: var(--color-cotton); color: var(--color-ink); }
 .stores[aria-invalid="true"] .chip { border-color: var(--color-error); }
 
+.store-logo { display: block; flex: none; object-fit: contain; border-radius: 4px; }
+
 .filters { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-md); }
 
 @media (hover: hover) {
@@ -68,7 +70,7 @@
 /* Per-store status: words, never dots */
 .status { display: flex; flex-wrap: wrap; gap: var(--space-xs); margin: 0; padding: 0; list-style: none; }
 .status__item { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 var(--space-xs); padding: var(--space-2xs) var(--space-sm); border: 1px solid var(--color-rule); border-radius: var(--radius-input); background: var(--color-paper); font-size: var(--text-sm); font-variant-numeric: tabular-nums; }
-.status__store { font-weight: 500; color: var(--color-ink); }
+.status__store { display: inline-flex; align-items: center; align-self: center; }
 .status__text { color: var(--color-muted); }
 .status__item--blocked { border-color: var(--color-warn-edge); background: var(--color-warn-well); }
 .status__item--blocked .status__text { font-weight: 500; color: var(--color-warn-ink); }
@@ -93,7 +95,7 @@
 .card__noimg { font-size: var(--text-sm); color: var(--color-muted); }
 .card__badge { position: absolute; top: var(--space-xs); left: var(--space-xs); padding: var(--space-3xs) var(--space-xs); border: 1px solid var(--color-ink); border-radius: var(--radius-input); background: var(--color-cotton); color: var(--color-ink); font-size: var(--text-sm); font-weight: 600; font-variant-numeric: tabular-nums; }
 .card__body { display: flex; flex: 1; flex-direction: column; gap: var(--space-2xs); min-width: 0; padding: var(--space-sm); }
-.card__store { font-size: var(--text-sm); color: var(--color-muted); }
+.card__store { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2xs) var(--space-xs); font-size: var(--text-sm); color: var(--color-muted); }
 .card__flag { color: var(--color-ink-2); }
 .card__title { display: -webkit-box; max-width: none; overflow: hidden; font-family: var(--font-body); font-size: var(--text-md); font-weight: 500; letter-spacing: normal; line-height: 1.35; text-wrap: pretty; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2; }
 .card__link { color: inherit; text-decoration: none; }
