@@ -107,3 +107,19 @@ describe("watches, price points and events", () => {
     expect(listWatches(db)).toHaveLength(2);
   });
 });
+
+describe("migration 7 (alert_events.retry)", () => {
+  it("adds the retry flag and is idempotent when the column is already there", () => {
+    const d = openDb(":memory:");
+    try {
+      const cols = () => (d.prepare("PRAGMA table_info(alert_events)").all() as { name: string }[]).map((c) => c.name);
+      expect(cols()).toContain("retry");
+      d.prepare("UPDATE schema_version SET version = 6").run();
+      migrate(d);
+      expect((d.prepare("SELECT version FROM schema_version").get() as { version: number }).version).toBe(SCHEMA_VERSION);
+      expect(cols().filter((c) => c === "retry")).toHaveLength(1);
+    } finally {
+      d.close();
+    }
+  });
+});
