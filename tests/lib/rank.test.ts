@@ -48,22 +48,23 @@ describe("rank", () => {
 
 describe("dealScore", () => {
   it("stays within 0..1", () => {
-    const best = P({ listPrice: 10, discountPct: 100, rating: 5, soldCount: 1e9 });
+    // The store discount comes from the "was" price (discount.ts): 99% is the most a real one reaches.
+    const best = P({ listPrice: 10, origPrice: 1000, discountPct: 99, rating: 5, soldCount: 1e9 });
     const worst = P({ listPrice: 50, discountPct: null, rating: null, soldCount: 0 });
     for (const p of [best, worst]) {
       const s = dealScore(p, 10, 50);
       expect(s).toBeGreaterThanOrEqual(0);
       expect(s).toBeLessThanOrEqual(1);
     }
-    expect(dealScore(best, 10, 50)).toBeCloseTo(1, 5);
+    expect(dealScore(best, 10, 50)).toBeCloseTo(0.997, 3);
     expect(dealScore(worst, 10, 50)).toBe(0);
   });
   it("handles min === max without NaN", () => {
     expect(Number.isFinite(dealScore(P({ listPrice: 10 }), 10, 10))).toBe(true);
   });
   it("cheaper higher-discount beats pricier at same rating/sales", () => {
-    const a = P({ listPrice: 10, discountPct: 60, rating: 4, soldCount: 100 });
-    const b = P({ listPrice: 40, discountPct: 10, rating: 4, soldCount: 100 });
+    const a = P({ listPrice: 10, origPrice: 25, discountPct: 60, rating: 4, soldCount: 100 });
+    const b = P({ listPrice: 40, origPrice: 44.44, discountPct: 10, rating: 4, soldCount: 100 });
     expect(dealScore(a, 10, 40)).toBeGreaterThan(dealScore(b, 10, 40));
   });
 });

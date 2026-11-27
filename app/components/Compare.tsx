@@ -155,6 +155,16 @@ function Cell({ r, i, p }: { r: CompareRow; i: number; p: Product }) {
   return <>{c}</>;
 }
 
+/**
+ * The column whose Remove was pressed, taken once: the ref is always cleared, even while the dialog
+ * is closed, so reopening it never sends focus to a stale Remove. Null when focus should stay put.
+ */
+export function takeRefocus(ref: { current: number | null }, open: boolean): number | null {
+  const i = ref.current;
+  ref.current = null;
+  return open ? i : null;
+}
+
 type DialogProps = {
   /** The ticked products in the current results, in the order they were ticked. */
   items: Product[];
@@ -181,9 +191,8 @@ export function CompareDialog({ items, missing = [], open, onClose, onRemove, br
   // column, or the last one), so it never drops to the page.
   const refocus = useRef<number | null>(null);
   useEffect(() => {
-    const i = refocus.current;
-    if (i === null || !open) return;
-    refocus.current = null;
+    const i = takeRefocus(refocus, open);
+    if (i === null) return;
     const removes = ref.current?.querySelectorAll<HTMLElement>(".cmp__remove");
     if (removes && removes.length) removes[Math.min(i, removes.length - 1)].focus();
   }, [items, open]);

@@ -18,7 +18,8 @@ export const isLikelyMatch = (p: Product): boolean =>
 export function dealScore(p: Product, minPrice: number, maxPrice: number): number {
   const range = maxPrice - minPrice || 1;
   const price = 1 - (priceOf(p) - minPrice) / range;
-  const discount = (p.discountPct ?? 0) / 100;
+  // The shared store-discount rule (discount.ts): a bare or contradicted store percent counts as 0.
+  const discount = (storeDiscount(p) ?? 0) / 100;
   const rating = (p.rating ?? 0) / 5;
   const sold = Math.min(1, Math.log10(p.soldCount + 1) / 5);
   return 0.4 * price + 0.3 * discount + 0.2 * rating + 0.1 * sold;
