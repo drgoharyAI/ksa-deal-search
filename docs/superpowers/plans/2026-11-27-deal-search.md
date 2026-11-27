@@ -325,6 +325,10 @@ Spec section "Scope extension". Site ids are `amazon-sa`, `noon-sa`, `jarir` and
 
 ---
 
+### Task 9b: Traffic & blocking hardening
+
+See `docs/superpowers/plans/briefs/task-9b-brief.md`. It was inserted after the Task 9 live check found AliExpress drift/heal traffic, noon blocks, a 9-calls-per-store fan-out and rating-less Jarir. It runs before Task 12.
+
 ### Task 12: Quality tuning loop (owner, 2026-11-27: "keep trying and optimizing based on results till reaching the best results")
 
 Runs after Tasks 7, 11, 8 and 9, once all stores work end to end.
