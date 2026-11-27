@@ -335,3 +335,37 @@ describe("review round 2: one model word apart, length, region, condition", () =
     expect(titleFeatures("Hard Carrying Case for AirPods Pro 2").accessory).toBe(true);
   });
 });
+
+describe("review round 3", () => {
+  const apart: [string, string][] = [
+    ["Bosch Professional GSR 120-LI Cordless Drill Driver 12V", "Bosch Professional GSB 120-LI Cordless Combi Drill 12V"],
+    ["Bosch Professional GSR 18V-55 Cordless Drill 18V", "Bosch Professional GSB 18V-55 Cordless Drill 18V"],
+    ["Nintendo Switch 2 With Mario Kart World Bundle", "Nintendo Switch 2 Console Bundle with Mario Kart World and Nintendo Switch 2 Camera"],
+    ["Samsung Galaxy A55 5G SM-A556E 256GB Navy", "Samsung Galaxy A35 5G SM-A556E 256GB Navy"],
+  ];
+  for (const [a, b] of apart) {
+    it(`apart: ${a} | ${b}`, () => {
+      expect(groupProducts([P("amazon-sa", "a", a, 100), P("noon-sa", "b", b, 100)]).every((g) => g.members.length === 1)).toBe(true);
+    });
+  }
+  const merge: [string, string][] = [
+    ["Philips Series 5000 Blender HR3030/01 1200W", "Philips 5000 Series Blender 1200W HR3030"],
+    ["Oral-B Vitality Pro Electric Toothbrush Blue", "Oral B Vitality Pro Rechargeable Electric Toothbrush, Lilac Mist"],
+    ["Ninja Air Fryer AF100ME 3.8L Black", "Ninja AF100ME Air Fryer, 3.8 Liter, Black/Grey"],
+    ["Samsung Galaxy S24 Ultra 5G 256GB 12GB RAM Titanium Gray", "Samsung Galaxy S24 Ultra, 12GB RAM, 256GB Storage, Titanium Gray, 5G"],
+    ["Apple Watch Series 10 GPS 46mm Rose Gold Aluminium Case with Light Blush Sport Band M/L", "Apple Watch Series 10 46mm GPS Rose Gold Aluminum Case Light Blush Sport Band - M/L"],
+    ["Logitech MX Master 3S Wireless Mouse Graphite", "Logitech MX Master 3S Performance Wireless Mouse - Pale Grey"],
+  ];
+  for (const [a, b] of merge) {
+    it(`merge: ${a} | ${b}`, () => {
+      expect(groupProducts([P("amazon-sa", "a", a, 100), P("noon-sa", "b", b, 100)]).some((g) => g.members.length === 2)).toBe(true);
+    });
+  }
+  it("spec-like codes (120-LI, 18V-55) are model numbers, not codes", () => {
+    expect(modelCodes("Bosch GSR 120-LI Drill 18V-55")).toEqual([]);
+  });
+  it("add-on nouns after with / and / + are compared", () => {
+    expect([...titleFeatures("Console Bundle with Mario Kart World and Nintendo Switch 2 Camera").addons]).toEqual(["camera"]);
+    expect([...titleFeatures("Apple AirPods Pro 2 with USB-C MagSafe Charging Case").addons]).toEqual([]);
+  });
+});

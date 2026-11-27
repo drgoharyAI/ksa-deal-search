@@ -43,7 +43,7 @@ const BRAND_CANON: Record<string, string> = {
   kindle: "amazon",
   galaxy: "samsung",
 };
-const KNOWN_BRANDS = new Set<string>([...brands, ...Object.keys(BRAND_CANON), "blackdecker"]);
+const KNOWN_BRANDS = new Set<string>([...brands, ...Object.keys(BRAND_CANON), "blackdecker", "oralb"]);
 
 /** Leading words that are not a brand ("Original Apple ...", "Wireless Earbuds ..."). */
 const GENERIC_LEAD = new Set(
@@ -67,7 +67,7 @@ const COLORS = new Set(
     "sky violet lilac khaki olive burgundy maroon turquoise cyan magenta champagne bronze copper platinum " +
     "onyx cobalt jade amber sage sand stone obsidian porcelain hazel pearl chroma cosmic galactic volcanic " +
     "camouflage camo sterling nova ice alpine indigo emerald ruby sapphire crimson scarlet arctic frost ocean " +
-    "forest lime peach plum wine mocha"
+    "forest lime peach plum wine mocha nickel pale matte glossy metallic mist misty blush shadow smoke haze"
   ).split(/\s+/),
 );
 const COLOR_PAIRS = ["space gray", "space grey", "space black", "rose gold", "jet black", "sky blue", "navy blue", "light blue", "dark blue", "light gray", "dark gray", "dark green", "light pink", "hot pink", "army green"];
@@ -135,6 +135,13 @@ const ACCESSORY_NOUNS = new Set(
   "case cases cover covers protector protectors replacement skin skins sticker stickers keycap keycaps pad pads earpads cushion cushions spare parts accessory accessories sleeve".split(" "),
 );
 const ACCESSORY_HINT = /case|cover|protector|replacement|skin|sticker|keycap|pad|cushion|spare|parts|accessor|sleeve/;
+/** A clause that adds items: after "with / + / & / and / includes / plus", up to the next separator. */
+const ADDON_CLAUSE = /(?:\bwith\b|\binclud(?:es?|ing)\b|\s\+\s|\s&\s|\band\b|\bbundle\b)([^,;|()[\]–]*)/g;
+const ADDON_HINT = /with|includ|\+|&|and|bundle/;
+/** Things sold along with the product. */
+const ADDON_NOUNS = new Set(
+  "camera cameras controller controllers charger chargers case cases bag bags game games card cards stand stands headset headsets mouse keyboard pen pens strap straps film films lens lenses battery batteries dock remote remotes mic microphone microphones cable cables tripod console consoles".split(" "),
+);
 const NOT_ACCESSORY = /\b(?:aluminium|aluminum|titanium|steel|ceramic|charging|magsafe|usb[-\s]?c|lightning|wireless)\s+(?:charging\s+)?case\b/g;
 
 const STOP = new Set(
@@ -158,6 +165,12 @@ export type TitleFeatures = {
   firstCode?: string;
   /** The word right after each code (when a space follows it), colours and stop words skipped. */
   codeNext: Map<string, string>;
+  /** The word right before each code, raw. */
+  codePrevRaw: Map<string, string>;
+  /** The word right before each code when it is a model word (not generic, not the brand). */
+  codePrev?: Map<string, string>;
+  /** Add-on nouns in "with / + / & / and / includes / bundle" clauses ("... and Camera"). */
+  addons: Set<string>;
   specs: Map<Dim, Set<string>>;
   /** Variant words plus "bundle", "band:<type>" and condition ("cond:refurbished", "cond:grade-b"). */
   variants: Set<string>;
@@ -191,9 +204,29 @@ function expandLists(t: string): string {
 
 /** Lowercase, thousands separators gone, "S24+" -> "S24 plus", lists expanded. */
 function prepare(title: string): string {
-  const t = normalizeTitle(title).replace(/\bblack\s*(?:\+|&|and)\s*decker\b/g, "blackdecker");
+  const t = normalizeTitle(title)
+    .replace(/\bblack\s*(?:\+|&|and)\s*decker\b/g, "blackdecker")
+    .replace(/\boral[\s-]b\b/g, "oralb")
+    // A code's colour / region suffix ("HR3030/01", "BHD274/03") names the same model.
+    .replace(/\b([a-z]{1,4}\d{3,}[a-z]*)\/\d{1,3}\b/g, "$1")
+    .replace(SPELLING, (w) => SPELLING_MAP[w]);
   return expandLists(t.replace(/(\b[a-z]+\d+)\+(?![a-z0-9])/g, "$1 plus "));
 }
+
+/** British / US spellings and spelled-out units read as one word. */
+const SPELLING_MAP: Record<string, string> = {
+  aluminum: "aluminium",
+  colour: "color",
+  grey: "gray",
+  litre: "liter",
+  litres: "liters",
+  metre: "meter",
+  metres: "meters",
+  cancelling: "canceling",
+  cancellation: "canceling",
+  noisecancelling: "noise canceling",
+};
+const SPELLING = new RegExp(`\\b(?:${Object.keys(SPELLING_MAP).join("|")})\\b`, "g");
 
 /** The title without compatibility lists and "upgrade from" phrases. */
 const ownText = (t: string) => t.replace(COMPAT, " ").replace(UPGRADE_FROM, " ");
@@ -276,26 +309,38 @@ const isCode = (t: string, n: string) =>
   !GLUED_VARIANT.test(n);
 
 /** Codes in title order, each with the word right after it (when only a space separates them). */
-function scanCodes(prepared: string): { codes: string[]; next: Map<string, string> } {
+/**
+ * A code made of a number and a spec unit ("120-LI", "18V-55"): a whole range shares it (Bosch GSR
+ * and GSB 120-LI), so it is no model evidence on its own. It is read as a model number instead.
+ */
+const SPEC_LIKE_CODE = /^(?:\d+(?:\.\d+)?(?:v|w|wh|ah|mah)?-(?:li|ion|\d+(?:\.\d+)?(?:v|w|wh|ah|mah)?)|\d+(?:\.\d+)?(?:v|w|wh|ah)-[a-z0-9]+)$/;
+
+function scanCodes(prepared: string): { codes: string[]; next: Map<string, string>; prev: Map<string, string> } {
   const parts = prepared.split(/([^a-z0-9.\-]+)/);
   const codes: string[] = [];
   const next = new Map<string, string>();
+  const prev = new Map<string, string>();
   for (let i = 0; i < parts.length; i += 2) {
     const t = parts[i].replace(/^[.\-]+|[.\-]+$/g, "");
     const n = t.replace(/[-.]/g, "");
-    if (!isCode(t, n)) continue;
+    if (!isCode(t, n) || SPEC_LIKE_CODE.test(t)) continue;
     const c = n.toUpperCase();
     if (!codes.includes(c)) codes.push(c);
     if (next.has(c)) continue;
+    // The previous word ("GSR" in "GSR 120-LI", "Galaxy" in "Galaxy A55"), only across a plain space.
+    if (i >= 2 && /^\s+$/.test(parts[i - 1])) {
+      const w = parts[i - 2].replace(/^[.\-]+|[.\-]+$/g, "");
+      if (w && !COLORS.has(w) && !STOP.has(w)) prev.set(c, w);
+    }
     // The next word, colours and stop words skipped, only across plain spaces.
     for (let j = i + 2; j < parts.length && /^\s+$/.test(parts[j - 1]); j += 2) {
       const w = parts[j].replace(/^[.\-]+|[.\-]+$/g, "");
-      if (!w || COLORS.has(w) || STOP.has(w)) continue;
+      if (!w || COLORS.has(w) || STOP.has(w) || SPEC_TOKEN.test(w)) continue;
       next.set(c, w);
       break;
     }
   }
-  return { codes, next };
+  return { codes, next, prev };
 }
 
 /** Model / part codes: tokens with letters and digits, 4+ characters without hyphens, not specs. */
@@ -353,7 +398,7 @@ const EXCLUSIVE: Set<string>[] = [
 
 export function titleFeatures(title: string): TitleFeatures {
   const prepared = prepare(title);
-  const { codes: codeList, next: codeNext } = scanCodes(prepared);
+  const { codes: codeList, next: codeNext, prev: codePrevRaw } = scanCodes(prepared);
   const codes = new Set(codeList);
   const specs = new Map<Dim, Set<string>>();
   const add = (d: Dim, v: string) => {
@@ -419,6 +464,10 @@ export function titleFeatures(title: string): TitleFeatures {
 
   const core = prepared.split(/\b(?:with|includes?|including)\b|\s[+&]\s/)[0].replace(NOT_ACCESSORY, " ");
   const accessory = ACCESSORY_HINT.test(core) && words(core).some((w) => ACCESSORY_NOUNS.has(w));
+  // Nouns in add-on clauses: "Console Bundle with Mario Kart World and Nintendo Switch 2 Camera".
+  const addons = new Set<string>();
+  if (ADDON_HINT.test(prepared))
+    for (const m of prepared.matchAll(ADDON_CLAUSE)) for (const w of words(m[1].replace(NOT_ACCESSORY, " "))) if (ADDON_NOUNS.has(w)) addons.add(w.replace(/s$/, ""));
 
   const plain = ws.filter((w) => !/\d/.test(w));
   // A single letter after a line word is a model designator ("Series X", "EOS R", "Galaxy Z").
@@ -456,6 +505,8 @@ export function titleFeatures(title: string): TitleFeatures {
     codes,
     firstCode: codeList[0],
     codeNext,
+    codePrevRaw,
+    addons,
     specs,
     variants,
     accessory,
@@ -537,8 +588,12 @@ function idfWeights(fs: TitleFeatures[]): Weight {
   return (t) => w.get(t) ?? unseen;
 }
 
-/** A word right after a code that names a model ("G502 X", "G502 Hero", "M550 Max"). */
-const tightWord = (w: string) => VARIANT_WORDS.has(w) || w.length <= 2 || /\d/.test(w) || w === "hero";
+/**
+ * A word right after a code that names a model ("G502 X", "G502 Hero", "M550 Max"). A variant word
+ * counts only where the title uses it as one ("Air" in "AF100ME Air Fryer" does not).
+ */
+const tightWord = (w: string, f: TitleFeatures) =>
+  (VARIANT_WORDS.has(w) && f.variants.has(w)) || w.length <= 2 || /\d/.test(w) || w === "hero";
 
 function sharesCode(a: TitleFeatures, b: TitleFeatures): boolean {
   for (const c of a.codes) if (b.codes.has(c)) return true;
@@ -553,9 +608,23 @@ function codeConflict(a: TitleFeatures, b: TitleFeatures): boolean {
     if (!b.codes.has(c)) continue;
     const x = a.codeNext.get(c);
     const y = b.codeNext.get(c);
-    if (x !== y && ((x !== undefined && tightWord(x)) || (y !== undefined && tightWord(y)))) return true;
+    if (x !== y && ((x !== undefined && tightWord(x, a)) || (y !== undefined && tightWord(y, b)))) return true;
+    const pa = (a.codePrev ?? staticPrev(a)).get(c);
+    const pb = (b.codePrev ?? staticPrev(b)).get(c);
+    if (pa !== undefined && pb !== undefined && pa !== pb) return true;
   }
   return false;
+}
+
+/** Previous words that are model words, judged without a result set (static generic list only). */
+function staticPrev(f: TitleFeatures): Map<string, string> {
+  return modelPrev(f, isStaticGeneric);
+}
+
+function modelPrev(f: TitleFeatures, generic: (w: string) => boolean): Map<string, string> {
+  const out = new Map<string, string>();
+  for (const [c, w] of f.codePrevRaw) if (w.length >= 3 && !generic(w) && w !== f.brand && !KNOWN_BRANDS.has(w) && !/\d/.test(w)) out.set(c, w);
+  return out;
 }
 
 /** Hard evidence of different products (see the module comment). */
@@ -563,6 +632,7 @@ function conflicts(a: TitleFeatures, b: TitleFeatures): boolean {
   if (a.brand && b.brand && a.brand !== b.brand) return true;
   if (a.knownBrand && b.knownBrand && a.knownBrand !== b.knownBrand) return true;
   if (a.variantKey !== b.variantKey || a.accessory !== b.accessory) return true;
+  if (!setsEqual(a.addons, b.addons)) return true;
   for (let i = 0; i < a.exclusive.length; i++) if (a.exclusive[i] && b.exclusive[i] && a.exclusive[i] !== b.exclusive[i]) return true;
   if (codeConflict(a, b)) return true;
   return specConflict(a, b);
@@ -596,7 +666,9 @@ const STATIC_GENERIC = new Set(
     "cellphone tablet laptop notebook watch smartwatch controller gamepad mouse keyboard monitor display screen cable " +
     "cord charger adapter vacuum cleaner purifier fryer kettle blender machine maker iron dryer hairdryer chair desk " +
     "lamp bottle backpack bag shoes sneakers stroller toothbrush electric version warranty year years generation " +
-    "black usb type genuine brand hot sale best top high super ultra-thin certified compatible sealed box"
+    "black usb type genuine brand hot sale best top high super ultra-thin certified compatible sealed box " +
+    "storage performance rechargeable liter liters capacity size power battery cordless aluminium material " +
+    "color colors style design function functions technology tech support home office travel daily"
   ).split(/\s+/),
 );
 const isStaticGeneric = (w: string) => STATIC_GENERIC.has(w);
@@ -674,7 +746,10 @@ export function groupProducts(products: Product[], opts: MatchOptions = {}): Pro
   for (const f of fs) for (const t of f.plainWords) df.set(t, (df.get(t) ?? 0) + 1);
   const common = Math.max(3, (opts.genericShare ?? GENERIC_SHARE) * fs.length);
   const generic = (t: string) => STATIC_GENERIC.has(t) || (!FEATURE_WORDS.has(t) && (df.get(t) ?? 0) >= common);
-  for (const f of fs) f.sig = signature(f.plainWords, generic);
+  for (const f of fs) {
+    f.sig = signature(f.plainWords, generic);
+    f.codePrev = modelPrev(f, generic);
+  }
 
   const clusters: Cluster[] = [];
   // Without a shared code a match needs the same brand, the same model words and no conflicting
@@ -738,7 +813,7 @@ function cachedFeatures(title: string): TitleFeatures {
     if (featureCache.size >= FEATURE_CACHE_MAX) featureCache.delete(featureCache.keys().next().value as string);
     featureCache.set(title, f);
   }
-  return { ...f, codes: new Set(f.codes), tokens: new Set(f.tokens), sig: undefined };
+  return { ...f, codes: new Set(f.codes), tokens: new Set(f.tokens), sig: undefined, codePrev: undefined };
 }
 
 /** The model numbers as an index key; "" when none. */

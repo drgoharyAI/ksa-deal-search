@@ -629,3 +629,25 @@ stricter of the two settings with equal precision, so 0.02 was kept to protect p
 
 Adversarial pairs: 25/25 as expected (22 apart, 3 must-merge). Per-query top-10 metrics and result
 counts over all 40 queries: identical to before 17b.
+
+## 17b review round 3 (code neighbours, add-ons, spelling)
+- A shared code no longer overrides a different model word right before it ("GSR 120-LI" vs
+  "GSB 120-LI"); spec-like codes (number + unit: "120-LI", "18V-55") are model numbers, not codes.
+- Add-on nouns (camera, controller, charger, case, game, card, cable...) in "with / and / + / &
+  / includes / bundle" clauses must match ("... and Nintendo Switch 2 Camera"); the product's own
+  MagSafe / charging case does not count.
+- Recall: descriptive, unit and material words are generic (storage, performance, rechargeable,
+  liter, cordless, aluminium...); spellings unified (aluminum/aluminium, grey/gray, litre/liter,
+  cancelling/canceling); "Oral-B" = "Oral B"; a code's "/01" suffix is the same model; colour
+  modifiers (pale, mist, blush, nickel...) are colour words; a variant word right after a code
+  counts only if the title uses it as a variant ("AF100ME Air Fryer").
+- eval/groups-adversarial.json now has 60 pairs (the reviewer's 30 + 5 follow-ups added as dev
+  data): 60/60 as expected. Gold gains the recorded Switch 2 bundle-with-camera pair.
+
+| half | merge precision | merge recall | wrong merges |
+|---|---|---|---|
+| tune (20 queries) | 100% (26/26) | 45.6% (26/57) | 0/49 |
+| held out (20) | 100% (35/35) | 53.8% (35/65) | 0/62 |
+
+Per-query top-10 metrics and result counts: identical to before 17b. Cold grouping: 1,915 unseen
+titles ~170 ms (~133 ms per 1,500); 1,500 same-brand titles 65 ms cold, 15 ms warm.
