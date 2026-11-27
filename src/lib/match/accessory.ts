@@ -43,9 +43,18 @@ function foreignAccessoryIdx(title: string, queryTokens: string[]): { tt: string
 }
 
 /** Candidate: the title core holds an accessory word the query does not name. Price decides the rest. */
-export function isAccessory(title: string, queryTokens: string[]): boolean {
-  return foreignAccessoryIdx(title, queryTokens).idx.length > 0;
+export function isAccessory(title: string, queryTokens: string[], variants?: string[][]): boolean {
+  const { tt, idx } = foreignAccessoryIdx(title, queryTokens);
+  if (!variants) return idx.length > 0;
+  // "accessory/accessories" well after the product noun is the shop's category label
+  // ("Dashcam ... Vehicle Accessories", "Car accessory"), not what the item is.
+  const heads = variants.map(headNoun).filter((h): h is string => !!h);
+  const headAt = tt.findIndex((t) => heads.some((h) => formsMatch(h, t)));
+  const label = (i: number) => CATEGORY_LABEL.has(tt[i]) && headAt >= 0 && i > headAt + 2;
+  return idx.some((i) => !label(i));
 }
+
+const CATEGORY_LABEL = new Set(["accessory", "accessories"]);
 
 /**
  * Strong: such a word directly followed by "for"/"compatible", or "replacement" (not in the
@@ -142,11 +151,11 @@ export function dropAccessories(products: Product[], queryTokens: string[], vari
   const live = products.filter(
     (p) => !isStrongAccessory(p.title, queryTokens, variants) && !isForAccessory(p.title, variants),
   );
-  const mains = live.filter((p) => !isAccessory(p.title, queryTokens));
+  const mains = live.filter((p) => !isAccessory(p.title, queryTokens, variants));
   if (!live.length) return live;
   if (mains.length) {
     const cutoff = PRICE_RATIO * median(mains.map((p) => p.listPrice));
-    return live.filter((p) => !isAccessory(p.title, queryTokens) || p.listPrice >= cutoff);
+    return live.filter((p) => !isAccessory(p.title, queryTokens, variants) || p.listPrice >= cutoff);
   }
   // No clear main product (their own titles may hold "case"/"band"): split only at a wide price gap.
   const cutoff = gapCutoff(live.map((p) => p.listPrice));

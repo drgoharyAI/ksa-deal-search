@@ -423,3 +423,14 @@ describe("12d round 5: standard name equivalents; ISBN product codes", () => {
     expect(isBookCode("B0CHX1W1XY", ["dash", "cam"])).toBe(false);
   });
 });
+
+describe("12d round 6: 'accessories' as a shop category label", () => {
+  const v = [["dash", "cam"]];
+  it("is not a candidate well after the product noun", () => {
+    expect(isAccessory("2.4 Inch Dashcam Car Camera HD 1080P Dash Cam Recorder Vehicle Accessories", v[0], v)).toBe(false);
+  });
+  it("still counts right after the product noun or before it", () => {
+    expect(isAccessory("Dash Cam Accessories Kit", v[0], v)).toBe(true);
+    expect(isAccessory("Accessories for Dash Cam", v[0], v)).toBe(true);
+  });
+});

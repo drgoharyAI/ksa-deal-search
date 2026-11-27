@@ -258,3 +258,14 @@ but it also admits "Coffee Art Stencil Maker", p@10 70% to 60%).
 | tuning (15) | 98.0% | 0% | 1.3% | 92.1% | 100% |
 | holdout (8) | 95.0% | 3.8% | 0% | 86.3% | 75.0% |
 | all (23) | 97.0% | 1.3% | 0.9% | 90.1% | 91.3% |
+
+## 12d round 6: "accessories" after the product noun is a shop label (kept)
+"accessory/accessories" more than two tokens after the product noun is the seller's category
+label ("Dashcam ... Night Vision Vehicle Accessories", "Car accessory"), not what the item is, so
+it no longer makes the item a price-tested accessory candidate. Right after the product noun
+("Dash Cam Accessories Kit") or before it, it still counts. Recovers the cheapest dash cam.
+| set | p@10 | acc@10 | wrong@10 | recall | cheapest-first |
+|---|---|---|---|---|---|
+| tuning (15) | 98.0% | 0% | 1.3% | 92.1% | 100% |
+| holdout (8) | 95.0% | 3.8% | 0% | 86.5% | 87.5% |
+| all (23) | 97.0% | 1.3% | 0.9% | 90.2% | 95.7% |
