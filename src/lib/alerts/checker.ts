@@ -42,7 +42,7 @@ export type CheckerDeps = {
 
 export type CycleReport = { checked: number; groups: number; fired: number; retried: number; failedGroups: number; deferred: number };
 
-type GroupOutcome = { ok: true; products: Product[] } | { ok: false; status: "blocked" | "error" };
+type GroupOutcome = { ok: true; products: Product[]; outOfStock: Set<string> } | { ok: false; status: "blocked" | "error" };
 
 
 function filterFor(w: Watch, products: Product[]): Product[] {
@@ -95,7 +95,10 @@ export async function runCycle(deps: CheckerDeps): Promise<CycleReport> {
     try {
       const r = await deps.search({ query: g.query, sites: [g.site], sort: "price" });
       const st = r.statuses.find((s) => s.site === g.site);
-      outcome = st && st.status !== "ok" ? { ok: false, status: st.status } : { ok: true, products: r.products };
+      outcome =
+        st && st.status !== "ok"
+          ? { ok: false, status: st.status }
+          : { ok: true, products: r.products, outOfStock: new Set((r.outOfStock ?? []).map((o) => `${o.site}\u0000${o.id}`)) };
     } catch (e) {
       console.warn("[alerts] check failed", g.site, e instanceof Error ? e.message : String(e));
       outcome = { ok: false, status: "error" };
@@ -121,7 +124,14 @@ export async function runCycle(deps: CheckerDeps): Promise<CycleReport> {
         ? (products.find((p) => p.site === w.site && p.id === w.productId) ?? null)
         : cheapestConfident(filterFor(w, products)); // the search form's filters, applied to each store's answer
     if (!hit) {
-      updateWatch(db, w.id, { lastCheckedAt: now, lastCheckStatus: w.kind === "product" ? "not found" : "no match" });
+      // A watched product its store now marks out of stock says so, rather than "not found".
+      const gone = w.kind === "product" && answered.some((o) => o.outOfStock.has(`${w.site}\u0000${w.productId}`));
+      updateWatch(db, w.id, { lastCheckedAt: now, lastCheckStatus: gone ? "out of stock" : w.kind === "product" ? "not found" : "no match" });
+      continue;
+    }
+    if (hit.pickupOnly) {
+      // Branch pickup only: not a deliverable price, so no price point and no alert.
+      updateWatch(db, w.id, { lastCheckedAt: now, lastCheckStatus: "pickup only" });
       continue;
     }
 

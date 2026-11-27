@@ -12,6 +12,7 @@ import { defaultTarget } from "@/src/lib/alerts/shared";
 import Sparkline from "./Sparkline";
 import Button from "./ui/Button";
 import Price from "./ui/Price";
+import Badge from "./ui/Badge";
 import StoreMark from "./ui/StoreMark";
 import { SaveToggle, SavedContext, viewHandlers } from "./Saved";
 import CardDetails from "./CardDetails";
@@ -205,6 +206,7 @@ function ResultCard({ product: p, query, compareChecked = false, onCompare, vari
         <div className="card__store">
           <StoreMark id={p.site} size={18} />
           {!likely && <span className="card__flag">Less likely match</span>}
+          {p.pickupOnly && <Badge>Branch pickup only</Badge>}
         </div>
         <h3 className="card__title" title={p.title}>
           {p.title}

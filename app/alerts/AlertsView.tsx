@@ -24,6 +24,8 @@ const CHECK_TEXT: Record<string, string> = {
   error: "last check failed",
   "not found": "not in the store's results last time",
   "no match": "no confident match last time",
+  "out of stock": "out of stock at the store last time",
+  "pickup only": "branch pickup only last time, so no alert",
 };
 
 async function getJson<T>(url: string): Promise<T> {

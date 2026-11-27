@@ -45,11 +45,12 @@ describe("stock: stores with a stock field map it", () => {
     expect(ps.length).toBeGreaterThan(0);
     for (const p of ps) expect(p.inStock).toBe(true);
   });
-  it("SACO: badges map both ways on a real page (the fixture has out-of-stock cards)", () => {
+  it("SACO: in stock or branch pickup only on a real page; never out of stock", () => {
     const ps = normalized("saco-sa", sacoSa);
     expect(ps.filter((p) => p.inStock === true).length).toBeGreaterThan(0);
-    expect(ps.filter((p) => p.inStock === false).length).toBeGreaterThan(0);
-    expect(ps.every((p) => typeof p.inStock === "boolean")).toBe(true);
+    expect(ps.filter((p) => p.pickupOnly).length).toBeGreaterThan(0);
+    expect(ps.every((p) => (p.inStock === true) !== (p.pickupOnly === true))).toBe(true);
+    expect(ps.some((p) => p.inStock === false)).toBe(false);
   });
   it("Trendyol and SHEIN fixtures predate the stock field: unknown, kept", () => {
     for (const [site, f] of [["trendyol-sa", trendyolSa], ["shein-sa", sheinSa]] as const) {

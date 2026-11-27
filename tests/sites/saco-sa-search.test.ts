@@ -1,6 +1,11 @@
 import { describe, it, expect } from "vitest";
 import fixture from "../fixtures/saco-sa-search.json";
-import { normalizeSearchItem, sanitizeQ, searchCalls, stockOf } from "@/src/sites/saco-sa/search";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+import { classify } from "api-anything";
+import type { Operation } from "api-anything";
+import spec from "../../api-specs/saco-sa.json";
+import { availabilityOf, isNoResults, normalizeSearchItem, sanitizeQ, searchCalls } from "@/src/sites/saco-sa/search";
 
 const SKU = "000000000000103346";
 const URL1 = `https://www.saco.sa/en/product/black-decker-1800w-air-fryer-af7210-b5-p-${SKU}`;
@@ -75,20 +80,44 @@ describe("normalizeSearchItem", () => {
   });
 });
 
-describe("stockOf (SACO card badge + cart button)", () => {
-  it("In stock and Limited stock are in stock", () => {
-    expect(stockOf("In stock", "Add to cart")).toBe(true);
-    expect(stockOf("Limited stock", "Add to cart")).toBe(true);
+describe("availabilityOf (SACO card badge + cart button), explicit signals only", () => {
+  it("In stock and Limited stock with Add to cart are in stock", () => {
+    expect(availabilityOf("In stock", "Add to cart")).toBe("in-stock");
+    expect(availabilityOf("Limited stock", "Add to cart")).toBe("in-stock");
+    expect(normalizeSearchItem(card())).toMatchObject({ inStock: true });
+    expect(normalizeSearchItem(card())).not.toHaveProperty("pickupOnly");
   });
-  it("Out of stock with only Click and pick is out of stock", () => {
-    expect(stockOf("Out of stock", "Click and pick")).toBe(false);
-    expect(normalizeSearchItem(card({ stock: "Out of stock", cart: "Click and pick" }))?.inStock).toBe(false);
+  it("Click and pick (badge Out of stock, or none) is branch pickup only: kept, not out of stock", () => {
+    expect(availabilityOf("Out of stock", "Click and pick")).toBe("pickup-only");
+    expect(availabilityOf(undefined, "Click and pick")).toBe("pickup-only");
+    const p = normalizeSearchItem(card({ stock: "Out of stock", cart: "Click and pick" }))!;
+    expect(p.pickupOnly).toBe(true);
+    expect(p).not.toHaveProperty("inStock");
   });
-  it("a contradiction (Out of stock, yet Add to cart) or no badge is unknown: never guessed", () => {
-    expect(stockOf("Out of stock", "Add to cart")).toBeUndefined();
-    expect(stockOf(undefined, "Add to cart")).toBeUndefined();
-    expect(stockOf("Ships in 3 days", undefined)).toBeUndefined();
-    expect(normalizeSearchItem(card({ stock: undefined }))).not.toHaveProperty("inStock");
+  it("anything else is unknown: Out of stock with no button or Add to cart, a contradiction, no badge", () => {
+    expect(availabilityOf("Out of stock", undefined)).toBeUndefined();
+    expect(availabilityOf("Out of stock", "Add to cart")).toBeUndefined();
+    expect(availabilityOf("In stock", "Click and pick")).toBeUndefined();
+    expect(availabilityOf(undefined, "Add to cart")).toBeUndefined();
+    expect(availabilityOf("Ships in 3 days", undefined)).toBeUndefined();
+    for (const over of [{ stock: undefined }, { stock: "Out of stock", cart: undefined }]) {
+      const p = normalizeSearchItem(card(over))!;
+      expect(p).not.toHaveProperty("inStock");
+      expect(p).not.toHaveProperty("pickupOnly");
+    }
+  });
+});
+
+describe("SKUs", () => {
+  it("accepts a lettered SKU; its product url ends with it lower-cased; the id keeps it whole", () => {
+    const p = normalizeSearchItem(
+      card({ id: "S0000002030", title: "Homix 2600W Automatic Electronic Garment Steam Press White", url: "https://www.saco.sa/en/product/homix-2600w-automatic-electronic-garment-steam-press-white-p-s0000002030" }),
+    );
+    expect(p?.id).toBe("S0000002030");
+  });
+  it("still rejects a SKU with other characters, or a url for another SKU", () => {
+    expect(normalizeSearchItem(card({ id: "S-1", url: "https://www.saco.sa/en/product/x-p-s-1" }))).toBeNull();
+    expect(normalizeSearchItem(card({ id: "S0000002030", url: "https://www.saco.sa/en/product/x-p-s0000002031" }))).toBeNull();
   });
 });
 
@@ -114,5 +143,23 @@ describe("searchCalls", () => {
   });
   it("skips empty terms", () => {
     expect(searchCalls({ terms: "¿¿", exclude: [] }, ["drill"])).toEqual([]);
+  });
+});
+
+describe("no-results page (live answer for q=zxqvbnmplk, 2026-11-27)", () => {
+  const body = readFileSync(join(process.cwd(), "tests/fixtures/saco-sa-empty.html"), "utf8");
+  const op = (spec as unknown as { operations: Operation[] }).operations[0];
+  const observed = { status: 200, headers: { "content-type": "text/html; charset=utf-8" }, body, url: "https://www.saco.sa/en/products-search?q=zxqvbnmplk" };
+  it("the recipe reads it as ok (the page's sign-in strings would otherwise make it auth, and no item drift)", () => {
+    expect(classify(op, observed).class).toBe("ok");
+    const bare = structuredClone(op);
+    bare.response.html!.items = bare.response.html!.items.split(", div:has")[0];
+    expect(classify(bare, observed).class).not.toBe("ok");
+  });
+  it("its only item is the No results marker, which the pipeline skips: an empty answer", () => {
+    expect(isNoResults({ noResults: "No results found!" })).toBe(true);
+    expect(isNoResults(card())).toBe(false);
+    expect(isNoResults({ noResults: "", id: "1" })).toBe(false);
+    expect(normalizeSearchItem({ noResults: "No results found!" })).toBeNull();
   });
 });

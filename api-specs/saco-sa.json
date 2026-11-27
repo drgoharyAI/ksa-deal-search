@@ -55,7 +55,7 @@
         "format": "html",
         "contentType": "text/html; charset=utf-8",
         "html": {
-          "items": "section:has(> div > a[href*=\"/product/\"]):has(button.add-to-cart[data-id])",
+          "items": "section:has(> div > a[href*=\"/product/\"]):has(button.add-to-cart[data-id]), div:has(> h2 + p.text-gray.text-sm)",
           "fields": {
             "id": "button.add-to-cart@data-id",
             "title": "button.add-to-cart@data-name",
@@ -66,7 +66,8 @@
             "image": "img@src",
             "rating": ".star-rating@style",
             "stock": "div.md\\:hidden > span:last-child",
-            "cart": "button.add-to-cart > span"
+            "cart": "button.add-to-cart > span",
+            "noResults": "h2"
           }
         }
       },

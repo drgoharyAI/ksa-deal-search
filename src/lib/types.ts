@@ -21,6 +21,12 @@ export type Product = {
    * pipeline drops it), true = in stock. Absent = the store says nothing reliable: kept, never guessed.
    */
   inStock?: boolean;
+  /**
+   * The store offers it only for pickup at a branch, not delivery (SACO's "Click and pick"). Kept and
+   * labelled, but ranked after deliverable items in its match tier, with no deal badge and never an
+   * alert trigger.
+   */
+  pickupOnly?: true;
   image: string;
   url: string;
   shipping?: number | null;
@@ -73,6 +79,11 @@ export type SiteAdapter = {
     variants: string[],
   ): { op: string; args: Record<string, string> }[];
   normalizeSearchItem(raw: unknown): Product | null;
+  /**
+   * Optional: true for a raw item that is the store's "no results" message, not a product (a page
+   * recipe matches it so an empty search reads as ok). Such items are skipped, never counted.
+   */
+  isNoResults?(raw: unknown): boolean;
   /**
    * Optional custom executor (e.g. Playwright); default is api-anything via aaCall. `signal`: once
    * aborted, a call still waiting for the browser answers class "aborted" without loading a page.

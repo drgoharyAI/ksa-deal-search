@@ -70,11 +70,14 @@ export const priceOf = (p: Product): number => p.finalPrice ?? p.listPrice;
 /** Default alert target: 5% under the price, to the halala. */
 export const defaultTarget = (price: number): number => Math.round(price * 0.95 * 100) / 100;
 
-/** The cheapest confident match ("less likely" matches never count), or null. */
+/**
+ * The cheapest confident, deliverable match, or null. "Less likely" matches and branch-pickup-only
+ * listings never count (no alert fires on them, history does not call them the cheapest).
+ */
 export function cheapestConfident(products: Product[]): Product | null {
   let best: Product | null = null;
   for (const p of products) {
-    if (!isLikelyMatch(p)) continue;
+    if (!isLikelyMatch(p) || p.pickupOnly) continue;
     if (!best || priceOf(p) < priceOf(best)) best = p;
   }
   return best;

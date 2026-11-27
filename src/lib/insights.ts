@@ -1,6 +1,7 @@
 import "server-only";
 import type { Db } from "./db";
 import type { DealBadge, DealInsight, PriceTrend, Product } from "./types";
+import { deliverable } from "./availability";
 
 /**
  * Price observations and the deal insights built from them (spec: "Comparison and deal-insight
@@ -185,9 +186,11 @@ export function insightsFor(db: Db, products: Product[], now = Date.now()): Map<
   const stmt = db.prepare(
     "SELECT site, productId, price, origPrice, at FROM observations WHERE site = ? AND productId = ? AND at >= ? ORDER BY at",
   );
-  const peerMedian = peerMedianOf(products);
+  // Branch-pickup-only listings get no badge or trend and are not peers of the others.
+  const shown = products.filter(deliverable);
+  const peerMedian = peerMedianOf(shown);
   const out = new Map<string, { deal?: DealInsight; trend?: PriceTrend }>();
-  for (const p of products) {
+  for (const p of shown) {
     const price = priceOf(p);
     if (!valid(price) || out.has(key(p.site, p.id))) continue;
     const history = stmt.all(p.site, p.id, now - PRUNE_AFTER) as Observation[];
@@ -232,7 +235,8 @@ export function recordObservations(db: Db, products: Product[], now = Date.now()
     for (const p of products) {
       const price = priceOf(p);
       const k = key(p.site, p.id);
-      if (!valid(price) || !p.id || seen.has(k)) continue;
+      // A branch-pickup-only price is not a deliverable price: it is not part of the history.
+      if (!valid(price) || !p.id || seen.has(k) || p.pickupOnly) continue;
       seen.add(k);
       const orig = valid(p.origPrice) ? p.origPrice : null;
       // A cached store answer is stamped with when the store gave it, so the hourly dedupe drops

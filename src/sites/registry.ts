@@ -59,6 +59,7 @@ export const sites: Record<string, SiteAdapter> = {
     label: "SACO",
     searchCalls: sacoSa.searchCalls,
     normalizeSearchItem: sacoSa.normalizeSearchItem,
+    isNoResults: sacoSa.isNoResults,
   },
   "shein-sa": {
     id: "shein-sa",

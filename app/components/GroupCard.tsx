@@ -11,6 +11,7 @@ import { CardCompare, CardMedia, CardWatch, dealExplanation, type CompareControl
 import { isFromPrice, storeDiscount } from "@/src/lib/discount";
 import { formatMoney } from "@/src/lib/money";
 import Button from "./ui/Button";
+import Badge from "./ui/Badge";
 import { SaveToggle, viewHandlers } from "./Saved";
 import CardDetails from "./CardDetails";
 
@@ -47,6 +48,7 @@ function Row({ p, best, color, compare, query }: { p: Product; best: boolean; co
       </span>
       <span className="gcard__tags">
         {best && <span className="gcard__tag gcard__tag--best">Best price</span>}
+        {p.pickupOnly && <Badge>Branch pickup only</Badge>}
         {discount > 0 && (
           <span className="gcard__tag">
             {`−${discount}%`}

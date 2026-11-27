@@ -15,6 +15,7 @@ import { markWeakMatches } from "@/src/lib/match/structure";
 import { scoreMatches } from "@/src/lib/match/confidence";
 import { sites as registry } from "@/src/sites/registry";
 import { rank, type SortKey } from "./rank";
+import { deliverableFirst } from "./availability";
 import { hasValidPrice, isExcluded, notOutOfStock, passesPriceRating, ratinglessSites } from "./filters";
 
 export type SearchInput = {
@@ -37,6 +38,8 @@ export type SearchResult = {
    * look-alike, as before grouping), so a twin at another store is only here, for the group's rows.
    */
   groupExtras?: Product[];
+  /** Listings dropped because their store marks them out of stock (site and id), when any. */
+  outOfStock?: { site: string; id: string }[];
   reason?: string;
 };
 
@@ -117,6 +120,7 @@ export async function fetchSite(
       if (r.ok) {
         const at = cachedAt(r);
         if (Array.isArray(r.data)) for (const item of r.data) {
+          if (adapter.isNoResults?.(item)) continue;
           raws.push(item);
           if (at !== undefined) answeredAt.set(item, at);
         }
@@ -219,8 +223,9 @@ export function assembleResults(
       seen.add(k);
       return true;
     })
-    .filter(hasValidPrice)
-    .filter(notOutOfStock);
+    .filter(hasValidPrice);
+  const outOfStock = products.filter((p) => !notOutOfStock(p)).map((p) => ({ site: p.site, id: p.id }));
+  products = products.filter(notOutOfStock);
 
   if (pq.exclude.length) products = products.filter((p) => !isExcluded(p, pq.exclude));
   // Stores whose whole result carries no rating (Jarir never shows one): a rating filter keeps
@@ -240,8 +245,8 @@ export function assembleResults(
   opts.onFiltered?.(products);
   // Groups come from listings deduped within each store only, so each store keeps its row; the
   // product list stays deduped across stores until the grouped card shows the groups.
-  const perStore = rank(dedupeByStore(products), input.sort);
-  products = rank(dedupe(products), input.sort);
+  const perStore = deliverableFirst(rank(dedupeByStore(products), input.sort));
+  products = deliverableFirst(rank(dedupe(products), input.sort));
   const groups = orderGroups(groupProducts(perStore), input.sort).filter((g) => g.members.length > 1);
   const groupOf = new Map(groups.flatMap((g) => g.members.map((p) => [p, g.key] as const)));
   const listed = new Set(products);
@@ -251,6 +256,7 @@ export function assembleResults(
   products = products.map((p) => (groupOf.has(p) ? { ...p, groupKey: groupOf.get(p)! } : p));
 
   const result: SearchResult = { products, statuses, queryTokens, groups: groupRefs(groups), groupExtras };
+  if (outOfStock.length) result.outOfStock = outOfStock;
   if (!products.length) result.reason = NO_MATCH_REASON;
   return result;
 }

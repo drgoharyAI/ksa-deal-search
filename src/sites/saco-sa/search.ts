@@ -27,16 +27,27 @@ function ratingOf(v: unknown): number | null {
 }
 
 /**
- * Stock from the card's badge, read with its cart button. "In stock" / "Limited stock" -> true.
- * "Out of stock" (SACO cannot deliver it from the default region; such cards offer only "Click and
- * pick") -> false, unless the same card still says "Add to cart" (a contradiction: unknown).
- * No badge or any other text -> unknown.
+ * Availability from the card's stock badge and its cart button, only from explicit signals:
+ * - "in-stock": badge "In stock" / "Limited stock" with no "Click and pick" button;
+ * - "pickup-only": the button offers only "Click and pick" (SACO cannot deliver it from the default
+ *   region; the badge then says "Out of stock", or nothing);
+ * - undefined (unknown, kept as an ordinary listing): anything else, e.g. "Out of stock" with
+ *   "Add to cart" or with no button, or an in-stock badge next to "Click and pick".
  */
-export function stockOf(badge: unknown, cart: unknown): boolean | undefined {
+export function availabilityOf(badge: unknown, cart: unknown): "in-stock" | "pickup-only" | undefined {
   const b = typeof badge === "string" ? badge.trim().toLowerCase() : "";
-  if (b === "in stock" || b === "limited stock") return true;
-  if (b === "out of stock") return typeof cart === "string" && /^add to cart$/i.test(cart.trim()) ? undefined : false;
+  const c = typeof cart === "string" ? cart.trim().toLowerCase() : "";
+  const pickup = c === "click and pick";
+  if (b === "in stock" || b === "limited stock") return pickup ? undefined : "in-stock";
+  if (pickup && (b === "out of stock" || b === "")) return "pickup-only";
   return undefined;
+}
+
+/** An item of SACO's no-results page ("No results found!" heading), not a product. */
+export function isNoResults(raw: unknown): boolean {
+  if (!raw || typeof raw !== "object") return false;
+  const r = raw as Record<string, unknown>;
+  return typeof r.noResults === "string" && r.noResults.trim() !== "" && r.id === undefined && r.price === undefined;
 }
 
 export function normalizeSearchItem(raw: unknown): Product | null {
@@ -46,10 +57,11 @@ export function normalizeSearchItem(raw: unknown): Product | null {
   if (price === null || price <= 0) return null;
   // The KSA storefront prices in SAR; a card naming another currency is not used.
   if (r.currency !== undefined && r.currency !== "SAR") return null;
+  // Numeric SKUs ("000000000000103346") and lettered ones ("S0000002030"); the url ends with it, lower-cased.
   const sku = typeof r.id === "string" ? r.id.trim() : "";
-  if (!/^\d+$/.test(sku)) return null;
+  if (!/^[A-Za-z0-9]+$/.test(sku)) return null;
   const url = typeof r.url === "string" ? r.url.split(/[?#]/)[0] : "";
-  if (!url.startsWith(URL_PREFIX) || !url.endsWith(`-p-${sku}`)) return null;
+  if (!url.startsWith(URL_PREFIX) || !url.toLowerCase().endsWith(`-p-${sku.toLowerCase()}`)) return null;
   const title = typeof r.title === "string" ? r.title.trim() : "";
   if (!title) return null;
 
@@ -57,11 +69,11 @@ export function normalizeSearchItem(raw: unknown): Product | null {
   const origPrice = orig !== null && orig > price ? orig : null;
   const discountPct = origPrice !== null ? Math.round((1 - price / origPrice) * 100) : null;
   const img = typeof r.image === "string" ? r.image : "";
-  const inStock = stockOf(r.stock, r.cart);
+  const availability = availabilityOf(r.stock, r.cart);
 
   return {
     site: "saco-sa",
-    id: sku.replace(/^0+(?=\d)/, ""),
+    id: /^\d+$/.test(sku) ? sku.replace(/^0+(?=\d)/, "") : sku,
     title,
     listPrice: price,
     origPrice,
@@ -69,7 +81,8 @@ export function normalizeSearchItem(raw: unknown): Product | null {
     currency: "SAR",
     rating: ratingOf(r.rating),
     soldCount: 0,
-    ...(inStock !== undefined && { inStock }),
+    ...(availability === "in-stock" && { inStock: true }),
+    ...(availability === "pickup-only" && { pickupOnly: true as const }),
     image: img.startsWith("https://") ? img : "",
     url,
     shipping: null,

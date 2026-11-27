@@ -10,6 +10,7 @@ import { CardMedia, Trend, dealExplanation } from "./ResultCard";
 import StoreLogo from "./StoreLogo";
 import Button from "./ui/Button";
 import StoreMark from "./ui/StoreMark";
+import Badge from "./ui/Badge";
 import { SaveToggle, viewHandlers } from "./Saved";
 
 /** What a ticked product that is not in the current results is called. */
@@ -266,6 +267,7 @@ export function CompareDialog({ items, missing = [], open, onClose, onRemove, br
                 <th key={productKey(p)} scope="col" className="cmp__product">
                   <CardMedia src={p.image} site={p.site} className="cmp__media" size={160} />
                   <StoreMark id={p.site} size={16} />
+                  {p.pickupOnly && <Badge>Branch pickup only</Badge>}
                   <span className="cmp__title" dir="auto">
                     {p.title}
                   </span>
