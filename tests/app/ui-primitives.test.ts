@@ -129,13 +129,13 @@ describe("Skeleton, EmptyState, ErrorState, SectionHeader, footer", () => {
 
 describe("DiscoverCard", () => {
   const item = {
-    site: "jarir", id: "J1", title: "سماعات AirPods 4", url: "https://jarir.example/J1", image: null, currency: "SAR",
+    site: "jarir", id: "J1", title: "سماعات AirPods 4", url: "https://www.jarir.com/sa-en/J1", image: null, currency: "SAR",
     price: 450, previousPrice: 500, dropPct: 10, deal: { badge: "lowest-30d" as const, label: "Lowest in 30 days" }, seenAt: Date.now(),
   };
   it("shows the store, the title link, the drop against the highest seen price, and the badge", () => {
     const out = html(h(DiscoverCard, { item }));
     expect(out).toContain("Jarir");
-    expect(out).toContain('href="https://jarir.example/J1" target="_blank" rel="noopener noreferrer" dir="auto"');
+    expect(out).toContain('href="https://www.jarir.com/sa-en/J1" target="_blank" rel="noopener noreferrer" dir="auto"');
     // Visible: the struck price is our own observation, not the store's "was" price.
     expect(out).toContain('<span class="price__was-label">highest seen </span><s class="price__orig">SAR 500</s>');
     expect(out).toContain("−10%");

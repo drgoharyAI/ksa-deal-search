@@ -57,7 +57,7 @@ export default function HistoryView() {
         <SectionHeader
           as="h1"
           title="Search history"
-          note="Every search you run is kept on this device so you can run it again."
+          note="Every search run here is kept by this app on its server, for anyone who can open it, so it can be run again."
           actions={
             items.length > 0 && (
               <Button

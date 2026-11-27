@@ -7,15 +7,19 @@ import Price from "./ui/Price";
 import SectionHeader from "./ui/SectionHeader";
 import StoreMark from "./ui/StoreMark";
 import When from "./When";
+import { storeImage, storeLink } from "@/src/lib/store-hosts";
 
 export function DiscoverCard({ item: d }: { item: DiscoverItem }) {
   const [imgFailed, setImgFailed] = useState(false);
+  // Drawn only when on the store's own hosts (store-hosts.ts), whatever the database holds.
+  const href = storeLink(d.site, d.url);
+  const image = storeImage(d.site, d.image);
   return (
     <article className="dcard">
       <div className="dcard__media">
-        {d.image && !imgFailed ? (
+        {image && !imgFailed ? (
           // eslint-disable-next-line @next/next/no-img-element -- remote store images stay off Next's optimizer
-          <img src={d.image} alt="" width={160} height={160} loading="lazy" decoding="async" referrerPolicy="no-referrer" onError={() => setImgFailed(true)} />
+          <img src={image} alt="" width={160} height={160} loading="lazy" decoding="async" referrerPolicy="no-referrer" onError={() => setImgFailed(true)} />
         ) : (
           <span className="card__noimg">No image</span>
         )}
@@ -23,10 +27,14 @@ export function DiscoverCard({ item: d }: { item: DiscoverItem }) {
       <div className="dcard__body">
         <StoreMark id={d.site} size={18} />
         <h3 className="dcard__title">
-          <a className="dcard__link" href={d.url} target="_blank" rel="noopener noreferrer" dir="auto">
-            {d.title}
-            <span className="visually-hidden"> (opens in a new tab)</span>
-          </a>
+          {href ? (
+            <a className="dcard__link" href={href} target="_blank" rel="noopener noreferrer" dir="auto">
+              {d.title}
+              <span className="visually-hidden"> (opens in a new tab)</span>
+            </a>
+          ) : (
+            <span dir="auto">{d.title}</span>
+          )}
         </h3>
         <Price amount={d.price} currency={d.currency} original={d.previousPrice} discountPct={d.dropPct} discountFrom="history" size="sm" originalLabel="highest seen" showOriginalLabel />
         {d.deal && <Badge tone="accent">{d.deal.label}</Badge>}
@@ -61,7 +69,7 @@ export default function HomeDiscover() {
   if (!items.length) return null;
   return (
     <section className="home-block" aria-labelledby="disc-head">
-      <SectionHeader id="disc-head" title="Recently seen deals" note="Drops and 30-day lows in prices your searches recorded. The struck price is the highest seen in 30 days." />
+      <SectionHeader id="disc-head" title="Recently seen deals" note="Drops and 30-day lows in prices this app's searches recorded. The struck price is the highest seen in 30 days." />
       <ul className="dgrid" role="list">
         {items.map((d) => (
           <li key={`${d.site}:${d.id}`}>

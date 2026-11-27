@@ -1,5 +1,6 @@
 import type { NewWatch } from "./repo";
 import type { WatchFilters, WatchStatus } from "./shared";
+import { storeImage, storeLink } from "@/src/lib/store-hosts";
 
 /** Input checks for the watches API. Pure; `siteIds` is the server's store registry keys. */
 type Ok<T> = { ok: true; value: T };
@@ -11,16 +12,6 @@ const MAX_TARGET = 10_000_000;
 const str = (v: unknown, max: number): string | null => (typeof v === "string" && v.trim() && v.length <= max ? v.trim() : null);
 
 const validTarget = (v: unknown): v is number => typeof v === "number" && Number.isFinite(v) && v > 0 && v <= MAX_TARGET;
-
-const httpUrl = (v: unknown): string | null => {
-  if (typeof v !== "string" || v.length > 2000) return null;
-  try {
-    const u = new URL(v);
-    return u.protocol === "https:" || u.protocol === "http:" ? u.toString() : null;
-  } catch {
-    return null;
-  }
-};
 
 export type NewWatchInput = NewWatch & { price?: number };
 
@@ -38,10 +29,11 @@ export function parseNewWatch(body: unknown, siteIds: ReadonlySet<string>): Ok<N
     if (!site) return { ok: false, error: "Unknown store" };
     const productId = str(b.productId, 200);
     if (!productId) return { ok: false, error: "A product watch needs the product id" };
-    const url = httpUrl(b.url);
-    if (!url) return { ok: false, error: "A product watch needs the product link" };
+    // The store's own page and image CDN only (store-hosts.ts): a watch's link reaches Telegram.
+    const url = storeLink(site, b.url);
+    if (!url) return { ok: false, error: "A product watch needs its https link on that store's site" };
     const title = str(b.title, 500) ?? productId;
-    const image = httpUrl(b.image);
+    const image = storeImage(site, b.image);
     return { ok: true, value: { kind: "product", site, productId, query, sites: [site], target: b.target, title, url, image, currency, price } };
   }
   if (b.kind === "search") {

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import type { ViewedItem } from "@/src/lib/saved-shared";
 import { formatMoney } from "@/src/lib/money";
-import { httpsUrl } from "@/src/lib/view";
+import { storeImage, storeLink } from "@/src/lib/store-hosts";
 import { recordView } from "./Saved";
 import Button from "./ui/Button";
 import SectionHeader from "./ui/SectionHeader";
@@ -12,13 +12,15 @@ import When from "./When";
 
 function ViewedCard({ item: v }: { item: ViewedItem }) {
   const [imgFailed, setImgFailed] = useState(false);
-  const href = httpsUrl(v.url);
+  // Drawn only when on the store's own hosts (store-hosts.ts), whatever the database holds.
+  const href = storeLink(v.site, v.url);
+  const image = storeImage(v.site, v.image);
   return (
     <article className="vcard">
       <div className="vcard__media">
-        {v.image && !imgFailed ? (
+        {image && !imgFailed ? (
           // eslint-disable-next-line @next/next/no-img-element -- remote store images stay off Next's optimizer
-          <img src={v.image} alt="" width={120} height={120} loading="lazy" decoding="async" referrerPolicy="no-referrer" onError={() => setImgFailed(true)} />
+          <img src={image} alt="" width={120} height={120} loading="lazy" decoding="async" referrerPolicy="no-referrer" onError={() => setImgFailed(true)} />
         ) : (
           <span className="card__noimg">No image</span>
         )}
@@ -91,7 +93,7 @@ export default function RecentlyViewed({ limit = 12 }: { limit?: number }) {
       <SectionHeader
         id="viewed-head"
         title="Recently viewed"
-        note="Products you opened at a store from this app, newest first. The price is what it cost then."
+        note="Products opened at a store from this app, newest first, kept by the app on its server for anyone who can open it. The price is what it cost then."
         actions={
           <Button size="sm" variant="ghost" onClick={() => void clear()}>
             Clear all<span className="visually-hidden"> recently viewed</span>

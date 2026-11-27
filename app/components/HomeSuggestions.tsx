@@ -84,7 +84,7 @@ export default function HomeSuggestions({ onPick }: { onPick: (query: string) =>
       <SectionHeader
         id="sugg-head"
         title="Search again"
-        note="From your own search history on this device."
+        note="From the search history this app keeps on its server, shared by anyone who can open it."
         actions={
           <Button size="sm" variant="ghost" onClick={() => void clearAll()}>
             Clear all<span className="visually-hidden"> search history</span>

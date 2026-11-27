@@ -26,7 +26,7 @@ const product: Product = {
   rating: null,
   soldCount: 0,
   image: "",
-  url: "https://jarir.example/J1",
+  url: "https://www.jarir.com/sa-en/J1",
   finalPrice: 499,
   detailStatus: "ok",
   matchScore: 0.9,
@@ -50,7 +50,7 @@ const jsonReq = (path: string, method: string, body: unknown, headers: Record<st
   new Request(`${BASE}${path}`, { method, headers: { "content-type": "application/json", ...headers }, body: JSON.stringify(body) });
 const plain = (path: string, method = "GET", headers: Record<string, string> = {}) => new Request(`${BASE}${path}`, { method, headers });
 
-const productBody = { kind: "product", site: "jarir", productId: "J1", query: "airpods 4", target: 470, title: "AirPods 4", url: "https://jarir.example/J1", price: 499 };
+const productBody = { kind: "product", site: "jarir", productId: "J1", query: "airpods 4", target: 470, title: "AirPods 4", url: "https://www.jarir.com/sa-en/J1", price: 499 };
 
 beforeEach(() => {
   state.db = openDb(":memory:");

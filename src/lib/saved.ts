@@ -1,6 +1,6 @@
 import "server-only";
 import type { Db } from "./db";
-import { httpsUrl } from "./view";
+import { storeImage, storeLink } from "./store-hosts";
 import { MAX_SAVED, MAX_VIEWED, type ProductSnapshot, type SavedItem, type ViewedItem } from "./saved-shared";
 
 /**
@@ -41,9 +41,10 @@ export function parseSnapshot(body: unknown, siteIds: ReadonlySet<string>, opts:
   if (!id || id.length > MAX_ID || hasControl(id)) return { ok: false, error: "A product needs its store id" };
   const title = typeof b.title === "string" ? b.title.trim() : "";
   if (!title || title.length > MAX_TITLE_IN) return { ok: false, error: "A product needs a title" };
-  const url = typeof b.url === "string" && b.url.length <= MAX_URL ? httpsUrl(b.url) : null;
-  if (!url) return { ok: false, error: "A product needs its https store link" };
-  const image = typeof b.image === "string" && b.image && b.image.length <= MAX_URL ? httpsUrl(b.image) : null;
+  // The store's own page and image CDN only (store-hosts.ts): no lookalike link under its logo.
+  const url = typeof b.url === "string" && b.url.length <= MAX_URL ? storeLink(site, b.url) : null;
+  if (!url) return { ok: false, error: "A product needs its https link on that store's site" };
+  const image = typeof b.image === "string" && b.image && b.image.length <= MAX_URL ? storeImage(site, b.image) : null;
   let price: number | null = null;
   if (b.price !== undefined && b.price !== null) {
     if (!okPrice(b.price)) return { ok: false, error: "The price must be a number above 0" };
@@ -79,11 +80,22 @@ export function removeFavourite(db: Db, site: string, id: string): boolean {
 
 /** Saved products, newest first, each with the latest price our observations hold for it. */
 export function listFavourites(db: Db): SavedItem[] {
-  const rows = db.prepare("SELECT * FROM favourites ORDER BY savedAt DESC, rowid DESC").all() as unknown as SavedRow[];
-  const latest = db.prepare("SELECT price, at FROM observations WHERE site = ? AND productId = ? ORDER BY at DESC, id DESC LIMIT 1");
+  // One query: each saved product with its newest observation (a window over its observations).
+  const rows = db
+    .prepare(
+      `SELECT f.*, o.price AS obsPrice, o.at AS obsAt
+       FROM favourites f
+       LEFT JOIN (
+         SELECT site, productId, price, at,
+                ROW_NUMBER() OVER (PARTITION BY site, productId ORDER BY at DESC, id DESC) AS n
+         FROM observations
+         WHERE (site, productId) IN (SELECT site, productId FROM favourites)
+       ) o ON o.site = f.site AND o.productId = f.productId AND o.n = 1
+       ORDER BY f.savedAt DESC, f.rowid DESC`,
+    )
+    .all() as unknown as (SavedRow & { obsPrice: number | null; obsAt: number | null })[];
   return rows.map((r) => {
-    const o = latest.get(r.site, r.productId) as { price: number; at: number } | undefined;
-    const obs = o && Number.isFinite(o.price) && o.price > 0 ? { price: o.price, at: o.at } : null;
+    const obs = r.obsPrice !== null && r.obsAt !== null && Number.isFinite(r.obsPrice) && r.obsPrice > 0 ? { price: r.obsPrice, at: r.obsAt } : null;
     // A change only from a price observed after saving, so the figure means "since you saved it".
     const change = obs && obs.at > r.savedAt ? Math.round((obs.price - r.price) * 100) / 100 : null;
     return { site: r.site, id: r.productId, title: r.title, url: r.url, image: r.image, price: r.price, currency: r.currency, query: r.query, savedAt: r.savedAt, latest: obs, change };

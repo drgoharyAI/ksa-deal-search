@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import type { SavedItem } from "@/src/lib/saved-shared";
 import { storeLabel } from "@/src/lib/stores";
 import { formatMoney } from "@/src/lib/money";
-import { httpsUrl } from "@/src/lib/view";
+import { storeImage, storeLink } from "@/src/lib/store-hosts";
 import { defaultTarget } from "@/src/lib/alerts/shared";
 import AppHeader from "../components/AppHeader";
 import AppFooter from "../components/AppFooter";
@@ -31,16 +31,18 @@ function SavedRow({ item: f, onRemove }: { item: SavedItem; onRemove: (f: SavedI
   const [imgFailed, setImgFailed] = useState(false);
   const [watch, setWatch] = useState<"closed" | "open" | "saved">("closed");
   const [busy, setBusy] = useState(false);
-  const href = httpsUrl(f.url);
+  // Drawn only when on the store's own hosts (store-hosts.ts), whatever the database holds.
+  const href = storeLink(f.site, f.url);
+  const image = storeImage(f.site, f.image);
   const store = storeLabel(f.site);
   const now = f.latest?.price ?? f.price;
   const change = changeText(f);
   return (
     <li className="saved">
       <div className="saved__media">
-        {f.image && !imgFailed ? (
+        {image && !imgFailed ? (
           // eslint-disable-next-line @next/next/no-img-element -- remote store images stay off Next's optimizer
-          <img src={f.image} alt="" width={96} height={96} loading="lazy" decoding="async" referrerPolicy="no-referrer" onError={() => setImgFailed(true)} />
+          <img src={image} alt="" width={96} height={96} loading="lazy" decoding="async" referrerPolicy="no-referrer" onError={() => setImgFailed(true)} />
         ) : (
           <span className="card__noimg">No image</span>
         )}
@@ -161,7 +163,7 @@ export default function SavedView() {
         <SectionHeader
           as="h1"
           title="Saved products"
-          note="Kept on this device. The latest price comes from your own searches; the stores are not contacted to refresh it."
+          note="Kept by this app on its server: anyone who can open the app sees this list. The latest price comes from searches run here; the stores are not contacted to refresh it."
         />
         {notice && <ErrorState message={notice} />}
         {state.phase === "loading" ? (

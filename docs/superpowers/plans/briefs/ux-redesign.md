@@ -34,3 +34,7 @@ Source: owner's detailed brief ("Principal Product Designer…"), condensed here
   - U4: compare
   - U5: discovery features
   - U6: responsive, accessibility, QA and deploy
+- **Known exposure (U5):**
+  - A shareable results URL runs its store search automatically when opened.
+  - Anyone who can reach the app and opens such a link sends that search to the stores from the owner's IP (and may start the owner's Chrome for noon).
+  - The request guard still requires an allowed host and same-origin browser fetches, so another site cannot trigger it. Opening the link in this app is enough.
