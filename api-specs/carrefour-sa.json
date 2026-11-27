@@ -1,0 +1,98 @@
+{
+  "name": "carrefour-sa",
+  "baseUrl": "https://www.carrefourksa.com",
+  "operations": [
+    {
+      "name": "search",
+      "request": {
+        "method": "GET",
+        "url": "https://www.carrefourksa.com/mafsau/en/search?keyword=laptop&currentPage=0&sortBy=relevance",
+        "headers": {
+          "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/jxl,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
+          "accept-language": "en-US,en;q=0.9",
+          "priority": "u=0, i",
+          "sec-ch-ua": "\"Chromium\";v=\"158\", \"Not.A/Brand\";v=\"24\", \"Google Chrome\";v=\"158\"",
+          "sec-ch-ua-mobile": "?0",
+          "sec-ch-ua-platform": "\"Windows\"",
+          "sec-fetch-dest": "document",
+          "sec-fetch-mode": "navigate",
+          "sec-fetch-site": "none",
+          "sec-fetch-user": "?1",
+          "upgrade-insecure-requests": "1",
+          "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/158.0.0.0 Safari/537.36"
+        }
+      },
+      "slots": [
+        {
+          "param": "q",
+          "at": [
+            "query:keyword"
+          ]
+        },
+        {
+          "param": "page",
+          "at": [
+            "query:currentPage"
+          ]
+        },
+        {
+          "param": "sort",
+          "at": [
+            "query:sortBy"
+          ]
+        }
+      ],
+      "volatile": [],
+      "trigger": {
+        "url": "https://www.carrefourksa.com/mafsau/en/search?keyword={q}&currentPage={page}&sortBy={sort}"
+      },
+      "match": {
+        "method": "GET",
+        "host": "www.carrefourksa.com",
+        "path": "/mafsau/en/search"
+      },
+      "response": {
+        "format": "html",
+        "contentType": "text/html; charset=utf-8",
+        "html": {
+          "items": "div.group:has(> a[href*=\"/p/\"])",
+          "fields": {
+            "title": ".line-clamp-2",
+            "price": ".items-baseline > :nth-child(2)",
+            "orig": ".items-baseline > :nth-child(3)",
+            "disc": ".text-xs.font-bold.left",
+            "url": "a@href"
+          }
+        }
+      },
+      "params": [
+        {
+          "name": "q",
+          "type": "string",
+          "required": true,
+          "example": "laptop"
+        },
+        {
+          "name": "page",
+          "type": "string",
+          "required": false,
+          "example": "0"
+        },
+        {
+          "name": "sort",
+          "type": "string",
+          "required": false,
+          "example": "relevance",
+          "enum": [
+            "relevance",
+            "price_asc"
+          ]
+        }
+      ],
+      "readOnly": true,
+      "minTier": 1,
+      "learnedLoggedIn": false,
+      "learnedAt": "2026-11-27T09:55:11.689Z"
+    }
+  ]
+}
