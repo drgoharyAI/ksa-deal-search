@@ -251,7 +251,7 @@ non-goals for these three.
   TLS-impersonating client. Personal-volume traffic only, no captcha solving. If none
   is reliable, noon stays out of v1.
 - **noon KSA via Playwright (owner, 2026-11-27): works.** The app starts the
-  installed `chrome.exe` with a dedicated profile (`.noon-profile/`, gitignored),
+  installed `chrome.exe` with a dedicated profile (`%LOCALAPPDATA%\deal-search\noon-profile`, outside the repo, overridable with `NOON_PROFILE_DIR`),
   with `--remote-debugging-port` bound to 127.0.0.1 on a random free port and the
   window off-screen. It attaches with `chromium.connectOverCDP` and reads product cards
   from the search page HTML. Headless and Playwright-launched Chrome get blocked

@@ -4,7 +4,7 @@ import net from "node:net";
 import fs from "node:fs";
 import path from "node:path";
 import type { Browser, Page } from "playwright-core";
-import { migrateLegacyProfile, resolveProfileDir } from "./profile";
+import { chooseProfileDir, resolveProfileDir } from "./profile";
 
 /**
  * Owner's installed Google Chrome, started by us with normal flags plus a localhost-only
@@ -128,17 +128,11 @@ export type ChromeDeps = {
 
 const portFile = (profileDir: string) => path.join(profileDir, "DevToolsActivePort");
 
-let resolvedProfileDir: string | null = null;
+/** Chosen once per process, at first launch (never at import): see chooseProfileDir. */
+let chosenProfileDir: string | null = null;
+const lazyProfileDir = () => (chosenProfileDir ??= chooseProfileDir(resolveProfileDir()));
 
-const realDeps: ChromeDeps = {
-  // Lazy: resolved (and the old in-repo profile moved) on first launch, not at import time.
-  get profileDir() {
-    if (!resolvedProfileDir) {
-      resolvedProfileDir = resolveProfileDir();
-      migrateLegacyProfile(resolvedProfileDir);
-    }
-    return resolvedProfileDir;
-  },
+const realDeps: Omit<ChromeDeps, "profileDir"> = {
   findChrome,
   readActivePort(profileDir) {
     try {
@@ -205,8 +199,8 @@ async function waitForPort(d: ChromeDeps, proc: ChromeProc, port: number, timeou
  * of spawning: a second Chrome on the same profile would only hand off to the first one.
  */
 export function createChromeLauncher(overrides: Partial<ChromeDeps> = {}): Launcher {
-  const d: ChromeDeps = { ...realDeps, ...overrides };
   return async () => {
+    const d: ChromeDeps = { ...realDeps, ...overrides, profileDir: overrides.profileDir ?? lazyProfileDir() };
     let proc: ChromeProc | null = null;
     let port = await existingPort(d);
     if (port === null) {
