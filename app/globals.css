@@ -210,7 +210,9 @@ p.wordmark { font-family: var(--font-display); font-weight: var(--display-weight
 @media (hover: hover) { .nav__link:hover { background: var(--color-paper-2); } }
 
 /* Deal badge and price trend on cards (local price observations): calm tints, one word of colour */
-.deal { position: relative; z-index: var(--z-raised); align-self: flex-start; padding: var(--space-3xs) var(--space-xs); border: var(--rule-hair) solid var(--color-rule-2); border-radius: var(--radius-input); background: var(--color-paper-2); color: var(--color-ink-2); font-size: var(--text-sm); font-weight: 500; cursor: help; }
+.card__deal { display: grid; justify-items: start; gap: var(--space-3xs); }
+.deal { padding: var(--space-3xs) var(--space-xs); border: var(--rule-hair) solid var(--color-rule-2); border-radius: var(--radius-input); background: var(--color-paper-2); color: var(--color-ink-2); font-size: var(--text-sm); font-weight: 500; }
+.deal__why { font-size: var(--text-sm); color: var(--color-warn-ink); }
 .deal--lowest-30d, .deal--below-usual { border-color: var(--color-success-edge); background: var(--color-success-well); color: var(--color-success); }
 .deal--fake-deal { border-color: var(--color-warn-edge); background: var(--color-warn-well); color: var(--color-warn-ink); }
 .card__trend { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2xs) var(--space-xs); }

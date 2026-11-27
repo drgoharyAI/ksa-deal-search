@@ -37,3 +37,18 @@ describe("TtlCache", () => {
     expect(c.get("c")).toBe(3);
   });
 });
+
+describe("cachedAt", () => {
+  it("tells when an object value was cached, also on later hits", async () => {
+    const { cachedAt } = await import("@/src/lib/cache");
+    vi.useFakeTimers();
+    vi.setSystemTime(5000);
+    const c = new TtlCache<{ n: number }>(60_000);
+    const v = { n: 1 };
+    expect(cachedAt(v)).toBeUndefined();
+    c.set("a", v);
+    vi.advanceTimersByTime(30_000);
+    expect(cachedAt(c.get("a"))).toBe(5000);
+    expect(cachedAt(1)).toBeUndefined();
+  });
+});

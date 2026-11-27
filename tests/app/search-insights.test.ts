@@ -71,7 +71,7 @@ describe("/api/search deal insights", () => {
     ins.run(Date.now() - 2 * DAY);
     const body = (await (await search.POST(req())).json()) as { products: Product[] };
     expect(body.products[0].deal).toEqual({ badge: "lowest-30d", label: "Lowest in 30 days" });
-    expect(body.products[0].trend?.points).toEqual([100, 100, 80]);
+    expect(body.products[0].trend?.points.map((p) => p.price)).toEqual([100, 100, 80]);
   });
   it("still answers the search when the database fails", async () => {
     state.dbFails = true;

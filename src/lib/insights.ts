@@ -17,6 +17,8 @@ const KSA_OFFSET = 3 * HOUR;
 
 export const MIN_OBSERVATIONS = 3;
 export const MIN_DAYS = 2;
+/** The observations must also span at least this long, so 23:00 and 01:00 do not count as two days. */
+export const MIN_SPAN = 20 * HOUR;
 /** "Below usual price": more than 10% under the 30-day median. */
 export const BELOW_USUAL = 0.9;
 /** Fake deal (a): a discount is claimed, but the price is not below its usual price. */
@@ -50,7 +52,8 @@ export const FAKE_REASONS = {
 
 const priceOf = (p: Product) => p.finalPrice ?? p.listPrice;
 const valid = (n: unknown): n is number => typeof n === "number" && Number.isFinite(n) && n > 0;
-const dayOf = (at: number) => Math.floor((at + KSA_OFFSET) / DAY);
+/** The Saudi calendar day (days since the epoch, UTC+3) of a timestamp. */
+export const ksaDay = (at: number) => Math.floor((at + KSA_OFFSET) / DAY);
 
 export function median(xs: number[]): number {
   const s = [...xs].sort((a, b) => a - b);
@@ -58,9 +61,14 @@ export function median(xs: number[]): number {
   return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2;
 }
 
-/** Enough data for a badge or a trend: at least 3 observations over at least 2 days. */
+/**
+ * Enough data for a badge or a trend: at least 3 observations on at least 2 Saudi days, with at
+ * least 20 hours between the first and the last.
+ */
 export function hasEnoughData(obs: { at: number }[]): boolean {
-  return obs.length >= MIN_OBSERVATIONS && new Set(obs.map((o) => dayOf(o.at))).size >= MIN_DAYS;
+  if (obs.length < MIN_OBSERVATIONS || new Set(obs.map((o) => ksaDay(o.at))).size < MIN_DAYS) return false;
+  const ats = obs.map((o) => o.at);
+  return Math.max(...ats) - Math.min(...ats) >= MIN_SPAN;
 }
 
 /**
@@ -137,16 +145,26 @@ function unrealisticWas(price: number, origPrice: number | null, discountPct: nu
   return price >= NORMAL_RANGE_FLOOR * peerMedian;
 }
 
-/** Daily minimum over the last 30 days (oldest first) and the change against about a week ago. */
+/**
+ * Daily minimum over the last 30 days, oldest first, each point placed on its day (0 = 29 days
+ * ago, 29 = today) so gaps show; today's point is the current price. Plus the change against
+ * about a week ago.
+ */
 export function trendFor(obs: Observation[], price: number, now: number): PriceTrend | undefined {
   const recent = obs.filter((o) => o.at >= now - WINDOW);
   if (!hasEnoughData(recent)) return undefined;
+  const today = ksaDay(now);
   const byDay = new Map<number, number>();
   for (const o of recent) {
-    const d = dayOf(o.at);
-    byDay.set(d, Math.min(byDay.get(d) ?? Infinity, o.price));
+    const d = ksaDay(o.at);
+    if (d !== today) byDay.set(d, Math.min(byDay.get(d) ?? Infinity, o.price));
   }
-  const points = [...byDay.entries()].sort((a, b) => a[0] - b[0]).map(([, p]) => p);
+  byDay.set(today, price);
+  const first = today - (WINDOW / DAY - 1);
+  const points = [...byDay.entries()]
+    .filter(([d]) => d >= first)
+    .sort((a, b) => a[0] - b[0])
+    .map(([d, p]) => ({ day: d - first, price: p }));
   // "Last week": the latest observation 7 to 14 days old.
   const ref = recent.filter((o) => o.at <= now - 7 * DAY && o.at >= now - 14 * DAY).at(-1);
   const trend: PriceTrend = { points };
@@ -199,7 +217,7 @@ export function pruneObservations(db: Db, now = Date.now()): number {
 
 /**
  * Records one observation per product, in one transaction, skipping any product already observed
- * in the last hour. Prunes old rows at most once an hour.
+ * within the hour before its answer time (`fetchedAt`, else now). Prunes old rows at most once an hour.
  */
 export function recordObservations(db: Db, products: Product[], now = Date.now()): number {
   const insert = db.prepare(
@@ -217,7 +235,10 @@ export function recordObservations(db: Db, products: Product[], now = Date.now()
       if (!valid(price) || !p.id || seen.has(k)) continue;
       seen.add(k);
       const orig = valid(p.origPrice) ? p.origPrice : null;
-      added += Number(insert.run(p.site, p.id, price, orig, now, p.site, p.id, now - HOUR).changes);
+      // A cached store answer is stamped with when the store gave it, so the hourly dedupe drops
+      // a repeat of an answer already recorded instead of logging it as a new sighting.
+      const at = valid(p.fetchedAt) ? Math.min(p.fetchedAt, now) : now;
+      added += Number(insert.run(p.site, p.id, price, orig, at, p.site, p.id, at - HOUR).changes);
     }
     db.exec("COMMIT");
   } catch (e) {

@@ -6,7 +6,9 @@ import {
   DAY,
   FAKE_REASONS,
   HOUR,
+  hasEnoughData,
   insightsFor,
+  ksaDay,
   PRUNE_AFTER,
   pruneObservations,
   recordObservations,
@@ -107,12 +109,12 @@ describe("Fake deal", () => {
 describe("trend", () => {
   it("is the daily minimum over the last 30 days, oldest first", () => {
     const obs = withCurrent([ob(200, ago(40)), ob(110, ago(3, 2)), ob(105, ago(3, 1)), ob(100, ago(2))], { price: 95, origPrice: null }, NOW);
-    expect(trendFor(obs, 95, NOW)?.points).toEqual([105, 100, 95]);
+    expect(trendFor(obs, 95, NOW)?.points).toEqual([{ day: 26, price: 105 }, { day: 27, price: 100 }, { day: 29, price: 95 }]);
   });
   it("computes the change against the latest observation 7 to 14 days old", () => {
     const obs = set([[100, 10], [100, 8], [90, 3]], 88);
     expect(trendFor(obs, 88, NOW)?.changePct7d).toBe(-12);
-    expect(trendFor(set([[100, 5], [90, 3]], 88), 88, NOW)).toEqual({ points: [100, 90, 88] });
+    expect(trendFor(set([[100, 5], [90, 3]], 88), 88, NOW)).toEqual({ points: [{ day: 24, price: 100 }, { day: 26, price: 90 }, { day: 29, price: 88 }] });
   });
   it("is absent without enough data", () => {
     expect(trendFor(set([[100, 1]], 90), 90, NOW)).toBeUndefined();
@@ -156,9 +158,9 @@ describe("observations in the database", () => {
     recordObservations(db, [product()], NOW - 20 * 60_000);
     const out = insightsFor(db, [p], NOW).get("amazon-sa\u0000A1");
     expect(out?.deal?.badge).toBe("lowest-30d");
-    expect(out?.trend?.points).toEqual([100, 100, 80]);
+    expect(out?.trend?.points).toEqual([{ day: 26, price: 100 }, { day: 27, price: 100 }, { day: 29, price: 80 }]);
     const [annotated] = attachInsights([p], insightsFor(db, [p], NOW));
-    expect(annotated).toMatchObject({ deal: { label: "Lowest in 30 days" }, trend: { points: [100, 100, 80] } });
+    expect(annotated).toMatchObject({ deal: { label: "Lowest in 30 days" }, trend: { points: [{ day: 26, price: 100 }, { day: 27, price: 100 }, { day: 29, price: 80 }] } });
   });
   it("gives nothing on a first sighting", () => {
     expect(insightsFor(db, [product()], NOW).size).toBe(0);
@@ -171,24 +173,39 @@ describe("observations in the database", () => {
   });
 });
 
+/**
+ * A database exactly at the Task 16 schema (version 1): the Task 16 tables as created then,
+ * built from a migrated database's SQL with later columns on watches taken out.
+ */
+function v1Db(): Db {
+  const src = openDb(":memory:");
+  const sql = (
+    src
+      .prepare("SELECT sql FROM sqlite_master WHERE sql IS NOT NULL AND tbl_name IN ('searches', 'watches', 'price_points', 'alert_events') ORDER BY rowid")
+      .all() as { sql: string }[]
+  ).map((r) => r.sql.replace(/,\s*filters TEXT NOT NULL DEFAULT '\{\}'/, ""));
+  src.close();
+  const db = openDb(":memory:");
+  for (const t of ["observations", "alert_events", "price_points", "watches", "searches"]) db.exec(`DROP TABLE IF EXISTS ${t}`);
+  for (const q of sql) db.exec(q);
+  db.prepare("UPDATE schema_version SET version = 1").run();
+  return db;
+}
+
 describe("migration", () => {
   it("upgrades a database at the Task 16 schema (version 1) and keeps its data", () => {
-    const db = openDb(":memory:");
-    db.exec("DROP TABLE observations");
-    db.prepare("UPDATE schema_version SET version = 1").run();
+    const db = v1Db();
     db.prepare("INSERT INTO searches (at, query, sites, sort, filters, resultCount) VALUES (1, 'q', '[]', 'price', '{}', 0)").run();
     migrate(db);
     expect((db.prepare("SELECT version FROM schema_version").get() as { version: number }).version).toBe(SCHEMA_VERSION);
-    expect(SCHEMA_VERSION).toBe(2);
+    expect(SCHEMA_VERSION).toBeGreaterThanOrEqual(2);
     expect((db.prepare("SELECT count(*) n FROM searches").get() as { n: number }).n).toBe(1);
     const idx = db.prepare("SELECT name FROM sqlite_master WHERE type = 'index' AND tbl_name = 'observations'").all() as { name: string }[];
     expect(idx.map((i) => i.name)).toContain("observations_item");
     db.close();
   });
   it("migrates a shared handle opened before the upgrade (dev hot reload)", () => {
-    const db = openDb(":memory:");
-    db.exec("DROP TABLE observations");
-    db.prepare("UPDATE schema_version SET version = 1").run();
+    const db = v1Db();
     const g = globalThis as unknown as { __dealSearchDb?: Db; __dealSearchDbSchema?: number };
     const saved = { db: g.__dealSearchDb, v: g.__dealSearchDbSchema };
     g.__dealSearchDb = db;
@@ -201,5 +218,81 @@ describe("migration", () => {
       g.__dealSearchDbSchema = saved.v;
       db.close();
     }
+  });
+});
+
+describe("review fixes", () => {
+  it("Saudi days: 20:00 and 22:00 UTC fall on different Saudi days", () => {
+    const a = Date.UTC(2026, 10, 26, 20);
+    const b = Date.UTC(2026, 10, 26, 22);
+    expect(ksaDay(b)).toBe(ksaDay(a) + 1);
+    expect(ksaDay(Date.UTC(2026, 10, 26, 1))).toBe(ksaDay(a));
+  });
+  it("two Saudi days are not enough without 20 hours between the first and last observation", () => {
+    const a = Date.UTC(2026, 10, 26, 20);
+    expect(hasEnoughData([{ at: a }, { at: a + HOUR }, { at: a + 2 * HOUR }])).toBe(false);
+    expect(hasEnoughData([{ at: a }, { at: a + HOUR }, { at: a + 20 * HOUR - 1 }])).toBe(false);
+    expect(hasEnoughData([{ at: a }, { at: a + HOUR }, { at: a + 20 * HOUR }])).toBe(true);
+    const at = Date.UTC(2026, 10, 26, 23);
+    const obs = withCurrent([ob(100, a), ob(100, a + HOUR)], { price: 80, origPrice: null }, at);
+    expect(badgeFor({ price: 80, origPrice: null, discountPct: null, obs, peerMedian: null, now: at })).toBeUndefined();
+  });
+  it("today's sparkline point is the current price, even when earlier today was lower", () => {
+    const obs = withCurrent([ob(100, ago(3)), ob(70, NOW - 3 * HOUR)], { price: 90, origPrice: null }, NOW);
+    expect(trendFor(obs, 90, NOW)?.points).toEqual([{ day: 26, price: 100 }, { day: 29, price: 90 }]);
+  });
+  it("points sit on their day, so gaps between days stay visible", () => {
+    const t = trendFor(set([[120, 20], [110, 19], [100, 4]], 95), 95, NOW);
+    expect(t?.points.map((p) => p.day)).toEqual([9, 10, 25, 29]);
+  });
+  it("records a cached answer at its original time, so the hourly dedupe drops a repeat", () => {
+    const db = openDb(":memory:");
+    const fetched = NOW - 50 * 60_000;
+    expect(recordObservations(db, [product({ fetchedAt: fetched })], fetched)).toBe(1);
+    // 70 minutes after the first sighting, the same cached answer is served again.
+    expect(recordObservations(db, [product({ fetchedAt: fetched })], NOW + 20 * 60_000)).toBe(0);
+    // A fresh answer at that time is a new sighting.
+    expect(recordObservations(db, [product({ fetchedAt: NOW + 20 * 60_000 })], NOW + 20 * 60_000)).toBe(1);
+    // A cached answer first seen now is stored with its cache time, never in the future.
+    expect(recordObservations(db, [product({ id: "B", fetchedAt: NOW - 5 * 60_000 })], NOW)).toBe(1);
+    expect(db.prepare("SELECT at FROM observations WHERE productId = 'B'").get()).toEqual({ at: NOW - 5 * 60_000 });
+    expect(recordObservations(db, [product({ id: "C", fetchedAt: NOW + HOUR })], NOW)).toBe(1);
+    expect(db.prepare("SELECT at FROM observations WHERE productId = 'C'").get()).toEqual({ at: NOW });
+    db.close();
+  });
+});
+
+describe("boundaries", () => {
+  const none = set([], 100);
+  const b = (orig: number, pct: number | null, peer: number | null) => badge(none, 100, orig, pct, peer)?.reason;
+  it("no-history rule fires at exactly 70%, exactly 3x and exactly 0.5x the peer median", () => {
+    expect(b(300, 70, 200)).toBe(FAKE_REASONS.unrealistic);
+    expect(b(300, 69.9, 200)).toBeUndefined();
+    expect(b(299.99, 70, 200)).toBeUndefined();
+    expect(b(300, 70, 200.01)).toBeUndefined();
+    // Without a store discountPct, the discount comes from the "was" price (300 -> 100 is 66.7%).
+    expect(b(300, null, 150)).toBeUndefined();
+    expect(b(400, null, 150)).toBe(FAKE_REASONS.unrealistic);
+  });
+  it("usual-price rule fires at exactly 98% of the median and not below it", () => {
+    const hist: [number, number][] = [[100, 5], [100, 4]];
+    expect(badge(set(hist, 98, 105), 98, 105, null)?.reason).toBe(FAKE_REASONS.usual);
+    expect(badge(set(hist, 97.9, 105), 97.9, 105, null)?.badge).not.toBe("fake-deal");
+  });
+  describe("peers in the result set", () => {
+    let db: Db;
+    beforeEach(() => (db = openDb(":memory:")));
+    afterEach(() => db.close());
+    const fake = product({ id: "F", finalPrice: 100, listPrice: 100, origPrice: 500, discountPct: 80 });
+    const peer = (i: number, over: Partial<Product> = {}) => product({ id: `P${i}`, finalPrice: 110, listPrice: 110, ...over });
+    const reason = (ps: Product[]) => insightsFor(db, ps, NOW).get("amazon-sa\u0000F")?.deal?.reason;
+    it("needs at least 4 confident listings", () => {
+      expect(reason([peer(1), peer(2), peer(3), fake])).toBe(FAKE_REASONS.unrealistic);
+      expect(reason([peer(1), peer(2), fake])).toBeUndefined();
+    });
+    it("leaves out weak and low-confidence matches", () => {
+      expect(reason([peer(1), peer(2), peer(3, { weakMatch: true }), fake])).toBeUndefined();
+      expect(reason([peer(1), peer(2), peer(3, { matchScore: 0.3 }), fake])).toBeUndefined();
+    });
   });
 });

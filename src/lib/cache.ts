@@ -1,3 +1,11 @@
+/** When each cached object value was stored: a later hit is still the answer from that time. */
+const storedAt = new WeakMap<object, number>();
+
+/** When a value returned by a TtlCache was stored (ms), or undefined for a value never cached. */
+export function cachedAt(v: unknown): number | undefined {
+  return typeof v === "object" && v !== null ? storedAt.get(v) : undefined;
+}
+
 export class TtlCache<T> {
   private store = new Map<string, { v: T; exp: number }>();
   private maxEntries: number;
@@ -31,6 +39,7 @@ export class TtlCache<T> {
     for (const [k, e] of this.store) if (now >= e.exp) this.store.delete(k);
     this.store.delete(key);
     this.store.set(key, { v, exp: now + this.ttlMs });
+    if (typeof v === "object" && v !== null) storedAt.set(v, now);
     while (this.store.size > this.maxEntries) {
       const oldest = this.store.keys().next().value as string;
       this.store.delete(oldest);

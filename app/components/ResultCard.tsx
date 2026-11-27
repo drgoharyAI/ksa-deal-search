@@ -18,7 +18,7 @@ const DEAL_EXPLAIN: Record<DealInsight["badge"], string> = {
   normal: "In line with the prices we've seen over the last 30 days",
 };
 
-/** The tooltip and screen-reader text for a deal badge; a fake deal names the rule that fired. */
+/** The explanation for a deal badge; a fake deal names the rule that fired. */
 export function dealExplanation(d: DealInsight): string {
   return d.badge === "fake-deal" && d.reason ? d.reason : DEAL_EXPLAIN[d.badge];
 }
@@ -30,24 +30,34 @@ export function trendChange(pct: number): { arrow: string; spoken: string; text:
   return { arrow: down ? "↓" : "↑", spoken: down ? "Down " : "Up ", text: `${Math.abs(pct)}% vs last week` };
 }
 
+/**
+ * The badge. A fake deal shows its reason as visible text under the badge (no hover needed, read
+ * once); the other badges explain themselves to screen readers only.
+ */
 function DealBadge({ deal }: { deal: DealInsight }) {
   const explain = dealExplanation(deal);
+  const visible = deal.badge === "fake-deal";
   return (
-    <p className={`deal deal--${deal.badge}`} title={explain}>
-      {deal.label}
-      <span className="visually-hidden">. {explain}</span>
-    </p>
+    <div className="card__deal">
+      <p className={`deal deal--${deal.badge}`}>
+        {deal.label}
+        {!visible && <span className="visually-hidden">. {explain}</span>}
+      </p>
+      {visible && <p className="deal__why">{explain}</p>}
+    </div>
   );
 }
 
 function Trend({ trend, title }: { trend: PriceTrend; title: string }) {
   const change = trend.changePct7d === undefined ? null : trendChange(trend.changePct7d);
+  const first = trend.points[0].day;
+  const span = trend.points[trend.points.length - 1].day - first + 1;
   return (
     <div className="card__trend">
       <Sparkline
-        points={trend.points.map((price, at) => ({ at, price }))}
-        target={NaN}
-        label={`Lowest price per day for ${title}, ${trend.points.length} days`}
+        points={trend.points.map((pt) => ({ at: pt.day - first, price: pt.price }))}
+        span={span}
+        label={`Lowest price per day for ${title}, over ${span} days`}
       />
       {change && (
         <span className="card__change">

@@ -1,4 +1,5 @@
 import { aaCall, type AaResult } from "@/src/lib/aa";
+import { cachedAt } from "@/src/lib/cache";
 import type { ParsedQuery, Product, SiteAdapter, SiteStatus } from "@/src/lib/types";
 import { parseQuery } from "@/src/lib/query/parse";
 import { expandTerms } from "@/src/lib/query/synonyms";
@@ -82,10 +83,16 @@ async function runSite(
       ),
     );
     const raws: unknown[] = [];
+    // When each raw item's answer came from the store: a cached answer keeps its original time.
+    const answeredAt = new Map<unknown, number>();
     const failed: Extract<AaResult, { ok: false }>[] = [];
     for (const r of results) {
       if (r.ok) {
-        if (Array.isArray(r.data)) raws.push(...r.data);
+        const at = cachedAt(r);
+        if (Array.isArray(r.data)) for (const item of r.data) {
+          raws.push(item);
+          if (at !== undefined) answeredAt.set(item, at);
+        }
       } else if (EMPTY_CLASSES.has(r.class)) {
         console.warn("[search] call answered no results", adapter.id, r.class, r.reason);
       } else failed.push(r);
@@ -96,6 +103,8 @@ async function runSite(
     for (const raw of raws) {
       try {
         const p = adapter.normalizeSearchItem(raw);
+        const at = answeredAt.get(raw);
+        if (p && at !== undefined) p.fetchedAt = at;
         if (p) products.push(p);
       } catch {
         // skip malformed item

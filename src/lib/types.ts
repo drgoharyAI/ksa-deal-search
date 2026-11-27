@@ -25,6 +25,8 @@ export type Product = {
   deal?: DealInsight;
   /** Price trend from local price observations; absent without enough data. */
   trend?: PriceTrend;
+  /** When the store gave this answer (ms); for a cached answer, when it was cached. Set by the pipeline. */
+  fetchedAt?: number;
   /** No product-detail calls: every product is "ok" and finalPrice = listPrice. */
   detailStatus: "pending" | "ok" | "failed";
 };
@@ -34,8 +36,11 @@ export type DealBadge = "fake-deal" | "lowest-30d" | "below-usual" | "normal";
 /** `reason`: set on "fake-deal", saying which rule fired. */
 export type DealInsight = { badge: DealBadge; label: string; reason?: string };
 
-/** `points`: daily lowest price over the last 30 days, oldest first. `changePct7d`: vs about a week ago. */
-export type PriceTrend = { points: number[]; changePct7d?: number };
+/**
+ * `points`: lowest price per Saudi day over the last 30 days, oldest first; `day` 0 is 29 days ago
+ * and 29 is today (today's point is the current price). `changePct7d`: vs about a week ago.
+ */
+export type PriceTrend = { points: { day: number; price: number }[]; changePct7d?: number };
 
 export type ParsedQuery = {
   terms: string;

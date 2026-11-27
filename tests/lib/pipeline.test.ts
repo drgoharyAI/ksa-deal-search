@@ -365,3 +365,24 @@ describe("call budget", () => {
     }
   });
 });
+
+describe("answer time (fetchedAt) for price observations", () => {
+  it("stamps products from a cached answer with the time it was cached", async () => {
+    const { TtlCache } = await import("@/src/lib/cache");
+    const cache = new TtlCache<{ ok: true; tier: number; data: unknown }>(2 * 3_600_000);
+    const answer = { ok: true as const, tier: 1, data: fixture.data };
+    const at = Date.now() - 50 * 60_000;
+    const clock = vi.spyOn(Date, "now").mockReturnValue(at);
+    cache.set("k", answer);
+    clock.mockRestore();
+    mock.mockImplementation(async () => cache.get("k")!);
+    const r = await runSearch({ ...base, query: "anc earbuds" });
+    expect(r.products.length).toBeGreaterThan(0);
+    for (const p of r.products) expect(p.fetchedAt).toBe(at);
+  });
+  it("leaves fetchedAt unset for an answer that never went through a cache", async () => {
+    mock.mockImplementation(okFixture);
+    const r = await runSearch({ ...base, query: "anc earbuds" });
+    expect(r.products.every((p) => p.fetchedAt === undefined)).toBe(true);
+  });
+});
