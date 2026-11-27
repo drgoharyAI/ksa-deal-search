@@ -401,7 +401,7 @@ Same greedy ablation on `data/accessory-words.json` (the price-tested candidate 
 would remove 40 of 61 words with recall 90.2%→90.6% and nothing else moving, but that includes
 the generic accessory vocabulary of every category (strap, band, stand, adapter, bag, tempered
 glass, lens, replacement, spare). Removing those because 29 queries do not need them would be
-overfitting in the other direction, so only the 23 category-specific words go: mousepad, mat,
+overfitting in the other direction, so only the 24 category-specific words go: mousepad, mat,
 liner, tray, sprayer, dispenser, rack, mold, mould, bumper, puller, socket, station, clicker,
 riser, nozzle, comb, hood, reader, cookbook, brushes, switches, feet, eartips.
 | set | p@10 | acc@10 | wrong@10 | recall | cheapest-first |
@@ -410,3 +410,15 @@ riser, nozzle, comb, hood, reader, cookbook, brushes, switches, feet, eartips.
 | holdout (8) | 98.8% | 1.3% | 0% | 86.5% | 100% |
 | holdout2 (6) | 95.0% | 1.7% | 0% | 89.8% | 83.3% |
 | all (29) | 97.9% | 0.7% | 0.7% | 90.2% | 93.1% |
+
+## 12e final (after round 6)
+| set | p@10 | acc@10 | wrong@10 | recall | cheapest-first |
+|---|---|---|---|---|---|
+| tuning (15) | 98.7% | 0% | 1.3% | 92.4% | 93.3% |
+| holdout (8) | 98.8% | 1.3% | 0% | 86.5% | 100% |
+| holdout2 (6) | 95.0% | 1.7% | 0% | 89.8% | 83.3% |
+| all (29) | 97.9% | 0.7% | 0.7% | 90.2% | 93.1% |
+Every target is met on every set except holdout2 cheapest-first (83.3% vs 85%). Its one miss is
+baby stroller, whose cheapest item labelled relevant is a 10-pack of reflective patches (its
+white twin is labelled accessory), so no correct ranking can pass it. Rounds 5 and 6 (list
+removals) gave no p@10 gain; the work stopped after them with the targets otherwise met.
