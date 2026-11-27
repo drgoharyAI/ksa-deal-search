@@ -354,3 +354,25 @@ describe("anc aliases (12c)", () => {
     expect(matchesAllTokens([["anc", "earbuds"]], "Anker Soundcore R50i NC True Wireless Earbuds")).toBe(true);
   });
 });
+
+describe("12d round 1: accessory-category queries, 'replacement' position", () => {
+  const wc = [["wireless", "charger", "15w"]];
+  it("a charger query keeps chargers described with accessory words", () => {
+    const ps = [
+      prod("15W Wireless Charger Stand Pad Fast Charging Dock Station For iPhone", 11, "a"),
+      prod("Car Phone Holder Wireless Charger 15W Air Vent Mount", 16, "b"),
+      prod("Anker 3-in-1 Wireless Charger 15W", 270, "c"),
+      prod("Silicone Case for Wireless Charger 15W", 9, "d"),
+    ];
+    expect(dropAccessories(ps, wc[0], wc).map((p) => p.id)).toEqual(["a", "b", "c"]);
+  });
+  it("a leading 'For' needs an accessory word the query does not name", () => {
+    expect(isForAccessory("For MagSafe Charger for iPhone - 15W Fast Wireless Charging", [["wireless", "charger"]])).toBe(false);
+    expect(isForAccessory("For iPhone 16 Silicone Case", [["iphone", "16"]])).toBe(true);
+  });
+  it("'replacement' marks a part only before the product noun", () => {
+    const t = [["electric", "toothbrush"]];
+    expect(isStrongAccessory("Replacement Brush Heads for Oral-B Electric Toothbrush", t[0], t)).toBe(true);
+    expect(isStrongAccessory("Seago Electric Toothbrush USB Rechargeable 4 Replacement Heads", t[0], t)).toBe(false);
+  });
+});

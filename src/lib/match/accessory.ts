@@ -58,7 +58,12 @@ const PIECES = /\b\d+\s*-?\s*(?:pcs|pc|pieces?)\b|\b(?:pack|set) of \d+/i;
 
 export function isStrongAccessory(title: string, queryTokens: string[], variants: string[][] = []): boolean {
   const { tt, idx } = foreignAccessoryIdx(title, queryTokens);
-  if (idx.some((i) => tt[i] === "replacement" || tt[i + 1] === "for" || tt[i + 1] === "compatible")) return true;
+  // "Replacement Heads for Oral-B Toothbrush" is a part; "Electric Toothbrush ... Replacement Heads"
+  // is the product sold with spares: "replacement" counts only before the product noun.
+  const heads = (variants.length ? variants : [queryTokens]).map(headNoun).filter((h): h is string => !!h);
+  const headAt = tt.findIndex((t) => heads.some((h) => formsMatch(h, t)));
+  const beforeHead = (i: number) => headAt < 0 || i < headAt;
+  if (idx.some((i) => (tt[i] === "replacement" && beforeHead(i)) || tt[i + 1] === "for" || tt[i + 1] === "compatible")) return true;
   const q = queryTokens.map((t) => t.toLowerCase());
   const isPart = (t: string | undefined) => !!t && PART.has(t) && !q.some((x) => formsMatch(x, t));
   if (PIECES.test(title) && tt.some(isPart)) return true;
@@ -88,7 +93,7 @@ export function isForAccessory(title: string, variants: string[][]): boolean {
   const f = tt.findIndex((t, i) => FOR_WORDS.has(t) && !USE_WORDS.has(tt[i - 1]));
   if (f < 0) return false;
   // Some sellers open every title with "For ...": then it takes an accessory word as well.
-  if (f === 0 && !tt.some((t) => isAccessoryWord(t))) return false;
+  if (f === 0 && !tt.some((t) => isAccessoryWord(t) && !variants.some((v) => v.some((q) => formsMatch(q, t))))) return false;
   const before = tt.slice(0, f);
   return variants.every((v) => {
     const head = headNoun(v);
@@ -121,7 +126,19 @@ function gapCutoff(prices: number[]): number | null {
  * Drop strong accessories. Then drop candidates priced far below the non-candidates' median.
  * With no non-candidates, drop only the candidates below a >= GAP_RATIO price gap, if one exists.
  */
+/**
+ * The shopper asks for an accessory category itself ("wireless charger", "usb-c cable"): the
+ * accessory vocabulary then describes the item ("Charger Stand", "Charging Pad", "Cable with
+ * Adapter"), so only the "made for" structure ("Case for Wireless Charger") marks an add-on.
+ */
+export const isAccessoryQuery = (variants: string[][]): boolean =>
+  variants.some((v) => {
+    const h = headNoun(v);
+    return !!h && isAccessoryWord(h);
+  });
+
 export function dropAccessories(products: Product[], queryTokens: string[], variants: string[][] = [queryTokens]): Product[] {
+  if (isAccessoryQuery(variants)) return products.filter((p) => !isForAccessory(p.title, variants));
   const live = products.filter(
     (p) => !isStrongAccessory(p.title, queryTokens, variants) && !isForAccessory(p.title, variants),
   );

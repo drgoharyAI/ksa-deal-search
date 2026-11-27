@@ -186,3 +186,25 @@ The tuning agent flagged 9 labels as wrong; all were confirmed under the rubric.
 | tuning (15) | 98% | 0% | 1% | 91% | 100% |
 | holdout (8) | 76% | 13% | 10% | 76% | 50% |
 The rules overfit the tuning set. Worst holdout queries: ipad air (wrong@10 80%), coffee machine (acc@10 40%, recall 61%), wireless charger 15w (recall 39%), running shoes (recall 71%).
+
+# Task 12d: generalization rounds (dev set = 15 tuning + 8 holdout queries)
+
+Baseline (12c final, labels corrected):
+| set | p@10 | acc@10 | wrong@10 | recall | cheapest-first |
+|---|---|---|---|---|---|
+| tuning (15) | 98.0% | 0% | 1.3% | 91.2% | 100% |
+| holdout (8) | 76.3% | 12.5% | 10.0% | 75.9% | 50% |
+| all (23) | 90.4% | 4.3% | 4.3% | 85.9% | 82.6% |
+
+## 12d round 1: accessory-category queries; "replacement" by position (kept)
+When the query's product noun is itself an accessory word ("wireless charger", "usb-c cable"),
+accessory vocabulary describes the item ("Charger Stand", "Charging Pad/Dock/Station", "Phone
+Holder Wireless Charger"), so only the "made for" structure ("Case for Wireless Charger") drops an
+item. "replacement" is strong only before the product noun ("Electric Toothbrush ... 4 Replacement
+Heads" is the toothbrush with spares). A leading "For" needs an accessory word the query does not
+name ("For MagSafe Charger ..." for a charger query).
+| set | p@10 | acc@10 | wrong@10 | recall | cheapest-first |
+|---|---|---|---|---|---|
+| tuning (15) | 98.0% | 0% | 1.3% | 91.5% | 100% |
+| holdout (8) | 76.3% | 12.5% | 10.0% | 82.6% | 62.5% |
+| all (23) | 90.4% | 4.3% | 4.3% | 88.4% | 87.0% |
