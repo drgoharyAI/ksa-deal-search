@@ -86,7 +86,7 @@ async function runSite(
         Promise.resolve()
           .then(() => exec(c))
           .catch(
-            (e): AaResult => ({ ok: false, class: "error", reason: e instanceof Error ? e.message : String(e) }),
+            (e: unknown): AaResult => ({ ok: false, class: "error", reason: e instanceof Error ? e.message : String(e) }),
           ),
       ),
     );
@@ -205,3 +205,5 @@ export async function runSearch(input: SearchInput, opts: SearchOptions = {}): P
   if (!products.length) result.reason = NO_MATCH_REASON;
   return result;
 }
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- p is a member of groups, and groupOf maps every group member
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- guarded by groupOf.has(p) in the same expression

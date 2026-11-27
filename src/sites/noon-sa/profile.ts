@@ -25,8 +25,11 @@ export type ProfileFs = {
 };
 
 const realFs: ProfileFs = {
+  // eslint-disable-next-line security/detect-non-literal-fs-filename -- injected fs for the app's own profile dirs (tests pass fakes), not request input
   exists: (p) => fs.existsSync(p),
+  // eslint-disable-next-line security/detect-non-literal-fs-filename -- injected fs for the app's own profile dirs (tests pass fakes), not request input
   mkdir: (p) => void fs.mkdirSync(p, { recursive: true }),
+  // eslint-disable-next-line security/detect-non-literal-fs-filename -- injected fs for the app's own profile dirs (tests pass fakes), not request input
   rename: (a, b) => fs.renameSync(a, b),
 };
 

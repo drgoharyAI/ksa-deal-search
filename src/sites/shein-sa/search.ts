@@ -229,6 +229,7 @@ export async function loadSearch(page: SheinPage, url: string): Promise<RawShein
   }
   checkBlocked(page, 200, "search");
   if (!info) {
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion -- page data is untyped; the cast names the expected shape, checked by Array.isArray below
     info = (await page
       .evaluate(() => {
         const w = window as unknown as { gbRawData?: { results?: { bffProductsInfo?: unknown } } };
@@ -256,6 +257,7 @@ export const backoffFile = (): string => path.join(resolveSheinProfileDir(), "de
 const fileStore: BackoffStore = {
   load() {
     try {
+      // eslint-disable-next-line security/detect-non-literal-fs-filename -- the back-off file inside the app's own SHEIN profile dir
       const v = JSON.parse(fs.readFileSync(backoffFile(), "utf8")) as Partial<Backoff>;
       const blockedUntil = Number(v.blockedUntil);
       const strikes = Number(v.strikes);
@@ -266,7 +268,9 @@ const fileStore: BackoffStore = {
   },
   save(v) {
     try {
+      // eslint-disable-next-line security/detect-non-literal-fs-filename -- the back-off file inside the app's own SHEIN profile dir
       fs.mkdirSync(path.dirname(backoffFile()), { recursive: true });
+      // eslint-disable-next-line security/detect-non-literal-fs-filename -- the back-off file inside the app's own SHEIN profile dir
       fs.writeFileSync(backoffFile(), JSON.stringify(v));
     } catch {
       // best effort: the in-memory back-off still applies

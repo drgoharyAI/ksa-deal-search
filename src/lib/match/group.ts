@@ -74,6 +74,7 @@ const COLORS = new Set(
   ).split(/\s+/),
 );
 const COLOR_PAIRS = ["space gray", "space grey", "space black", "rose gold", "jet black", "sky blue", "navy blue", "light blue", "dark blue", "light gray", "dark gray", "dark green", "light pink", "hot pink", "army green"];
+// eslint-disable-next-line security/detect-non-literal-regexp -- built from the constant COLOR_PAIRS list above, no input
 const COLOR_PAIR_RE = new RegExp(`\\b(?:${COLOR_PAIRS.join("|")})\\b`);
 
 /** Words that name a different model of the same line or a special run. Two titles must carry the same set. */
@@ -330,6 +331,7 @@ const SPELLING_MAP: Record<string, string> = {
   "women’s": "women",
   ladies: "women",
 };
+// eslint-disable-next-line security/detect-non-literal-regexp -- built from the constant SPELLING_MAP keys above, no input
 const SPELLING = new RegExp(`\\b(?:${Object.keys(SPELLING_MAP).join("|")})\\b`, "g");
 
 /** The title without compatibility lists and "upgrade from" phrases. */
@@ -352,6 +354,7 @@ const SPEC_RULES: SpecRule[] = [
   { hint: ["gen"], dim: "ifgen", re: /\b(?:pcie?|pci[\s-]express|usb|nvme|thunderbolt)\s*(?:\d(?:\.\d)?\s*)?gen\s*(\d(?:x\d)?)\b/g, val: (m) => m[1] },
   { hint: ["gen"], dim: "gen", re: /(?<![\d.])(\d+)(?:st|nd|rd|th)?\s*(?:-\s*)?gen(?:eration)?\b/g, val: (m) => m[1] },
   { hint: ["gen"], dim: "gen", re: /\bgen(?:eration)?\s*(?:-\s*)?(\d+)\b/g, val: (m) => m[1] },
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- the regex only matches fhd|qhd|uhd, all keys of the map
   { hint: ["hd"], dim: "res", re: /\b(fhd|qhd|uhd)\b/g, val: (m) => ({ fhd: "1080", qhd: "1440", uhd: "2160" })[m[1]]! },
   { hint: ["bluetooth", "bt"], dim: "bt", re: /\b(?:bluetooth|bt)\s*(?:version\s*|ver\.?\s*|v\.?\s*)?(\d(?:\.\d)?)\b/g, val: (m) => num(m[1]) },
   { hint: ["dpi"], dim: "dpi", re: /(?<![\d.])(\d+(?:\.\d+)?)\s*k\s*dpi\b/g, val: (m) => String(Math.round(Number(m[1]) * 1000)) },
@@ -1193,6 +1196,7 @@ function dropSharedCodes(fs: TitleFeatures[]): void {
 export function orderGroups(groups: ProductGroup[], sort: SortKey): ProductGroup[] {
   const lead = new Map<Product, ProductGroup>();
   for (const g of groups) lead.set(rank(g.members, sort)[0], g);
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- the keys passed to rank() are lead's own keys
   return rank([...lead.keys()], sort).map((p) => lead.get(p)!);
 }
 

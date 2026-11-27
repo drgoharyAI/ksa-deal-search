@@ -128,6 +128,7 @@ export type ChromeDeps = {
    * process adopt an orphan Chrome instead of spawning a second one (which hands off and exits).
    */
   readOwnPortFile?(profileDir: string): OwnPortFile | null;
+  // eslint-disable-next-line security/detect-non-literal-fs-filename -- Chrome install paths from a fixed list and the operator's CHROME_PATH
   writeOwnPortFile?(profileDir: string, f: OwnPortFile): void;
   removeOwnPortFile?(profileDir: string): void;
   /** True if a process with this pid exists. */
@@ -181,6 +182,7 @@ const realDeps: Omit<Deps, "profileDir"> = {
   },
   writeOwnPortFile(profileDir, f) {
     try {
+      // eslint-disable-next-line security/detect-non-literal-fs-filename -- a file inside the app's own Chrome profile dir
       fs.writeFileSync(ownPortFile(profileDir), JSON.stringify(f));
     } catch {
       // best effort: without it a later run spawns instead of adopting
@@ -192,6 +194,7 @@ const realDeps: Omit<Deps, "profileDir"> = {
     } catch {
       // best effort
     }
+      // eslint-disable-next-line security/detect-non-literal-fs-filename -- a file inside the app's own Chrome profile dir
   },
   pidAlive(pid) {
     try {
@@ -203,6 +206,7 @@ const realDeps: Omit<Deps, "profileDir"> = {
     }
   },
   freePort() {
+      // eslint-disable-next-line security/detect-non-literal-fs-filename -- a file inside the app's own Chrome profile dir
     return new Promise((resolve, reject) => {
       const srv = net.createServer();
       srv.unref();

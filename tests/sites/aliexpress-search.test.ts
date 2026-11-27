@@ -67,12 +67,12 @@ describe("normalizeSearchItem", () => {
     const ok = ps.filter((p) => p !== null);
     expect(ok.length).toBeGreaterThanOrEqual(50);
     for (const p of ok) {
-      for (const v of Object.values(p!)) {
+      for (const v of Object.values(p)) {
         if (typeof v === "number") expect(Number.isNaN(v)).toBe(false);
       }
-      expect(p!.url.startsWith("https://www.aliexpress.com/item/")).toBe(true);
-      expect(p!.currency).toBe("SAR");
-      expect(p!.image.startsWith("https://")).toBe(true);
+      expect(p.url.startsWith("https://www.aliexpress.com/item/")).toBe(true);
+      expect(p.currency).toBe("SAR");
+      expect(p.image.startsWith("https://")).toBe(true);
     }
   });
 });

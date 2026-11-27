@@ -71,6 +71,7 @@ export function resemblance(
   const docs = products.map((p) => [...new Set(tokenize(p.title).filter((w) => !hasDigit(w) && !q.some((x) => formsMatch(x, w))))]);
   const df = new Map<string, number>();
   for (const ws of docs) for (const w of ws) df.set(w, (df.get(w) ?? 0) + 1);
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- df counts every word of docs, so each lookup hits
   const vecs = docs.map((ws) => normalize(new Map(ws.filter((w) => df.get(w)! >= 2).map((w) => [w, Math.log((n + 1) / df.get(w)!)]))));
 
   const cut = refRatio * median(products.map((p) => p.listPrice));

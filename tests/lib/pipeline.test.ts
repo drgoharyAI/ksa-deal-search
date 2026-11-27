@@ -47,7 +47,7 @@ describe("runSearch", () => {
     expect(filler.queryTokens[0]).toEqual(["anc", "earbuds"]);
     expect(filler.products.map((p) => p.id)).toEqual(plain.products.map((p) => p.id));
     // the store still gets the shopper's own words
-    expect(String(mock.mock.calls.at(-1)?.[2]?.q ?? JSON.stringify(mock.mock.calls.at(-1)))).toContain("best");
+    expect(mock.mock.calls.at(-1)?.[2]?.q ?? JSON.stringify(mock.mock.calls.at(-1))).toContain("best");
   });
 
   it("explicit filters override inline ones", async () => {

@@ -67,11 +67,11 @@ export function createReplayExec(recordings: Recording[]): { exec: CallExec; mis
     byStore.set(rec.store, m);
   }
   const missing: MissingCall[] = [];
-  const exec: CallExec = async (adapter, call) => {
+  const exec: CallExec = (adapter, call) => {
     const hit = byStore.get(adapter.id)?.get(callKey(call.op, call.args));
-    if (hit) return hit;
+    if (hit) return Promise.resolve(hit);
     missing.push({ store: adapter.id, op: call.op, args: call.args });
-    return NOT_RECORDED;
+    return Promise.resolve(NOT_RECORDED);
   };
   return { exec, missing };
 }

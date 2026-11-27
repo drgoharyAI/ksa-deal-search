@@ -21,7 +21,10 @@ export default function HistoryView() {
     try {
       const r = await fetch("/api/history", { cache: "no-store" });
       const d = (await r.json().catch(() => null)) as { items?: HistoryEntry[]; error?: string } | null;
-      if (!r.ok || !d?.items) return setState({ phase: "error", message: d?.error ?? "Could not load the history" });
+      if (!r.ok || !d?.items) {
+        setState({ phase: "error", message: d?.error ?? "Could not load the history" });
+        return;
+      }
       setState({ phase: "ready", items: d.items });
     } catch {
       setState({ phase: "error", message: "Could not reach the app server" });
@@ -29,6 +32,7 @@ export default function HistoryView() {
   }
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- load() sets state only after its awaited fetch, never synchronously
     void load();
   }, []);
 

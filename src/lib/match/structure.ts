@@ -80,6 +80,7 @@ export function typicality(titles: string[], variants: string[][]): number[] {
   const df = new Map<string, number>();
   for (const ws of words) for (const w of ws) df.set(w, (df.get(w) ?? 0) + 1);
   const common = COMMON_SHARE * titles.length;
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- df counts every word of words, so each lookup hits
   return words.map((ws) => (ws.length ? ws.reduce((s, w) => s + Math.min(1, df.get(w)! / common), 0) / ws.length : 1));
 }
 

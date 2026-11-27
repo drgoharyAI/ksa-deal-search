@@ -12,6 +12,13 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Local-only, gitignored folders: Chrome profiles, api-anything homes, agent tooling,
+    // eval dumps. Linting them reported thousands of hits in Chrome's own bundled JS.
+    ".noon-profile*/**",
+    ".aa-home*/**",
+    ".superpowers/**",
+    ".claude/**",
+    "eval/dump/**",
   ]),
 ]);
 

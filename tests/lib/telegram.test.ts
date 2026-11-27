@@ -65,6 +65,7 @@ describe("sendTelegram", () => {
     expect(JSON.stringify(r2)).toContain("401");
   });
   it("reports a timeout", async () => {
+    // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors -- mirrors fetch, which rejects with the signal's reason (a DOMException)
     const slow = vi.fn((_u: string, init: RequestInit) => new Promise<Response>((_, rej) => init.signal?.addEventListener("abort", () => rej(init.signal?.reason))));
     const r = await sendTelegram("x", { env: ENV, fetch: slow as unknown as typeof fetch, timeoutMs: 20 });
     expect(r).toEqual({ ok: false, error: "Telegram did not answer within 10 seconds" });

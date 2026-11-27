@@ -52,6 +52,7 @@ export default function AlertsView() {
 
   useEffect(() => {
     // Only the alerts this page shows are marked seen: one that fires meanwhile stays unread.
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- load() sets state only after its awaited fetches, never synchronously
     void load().then((data) => {
       if (!data?.events.length) return;
       const upTo = Math.max(...data.events.map((e) => e.id));
@@ -63,11 +64,11 @@ export default function AlertsView() {
     });
   }, []);
 
-  async function change(method: "PATCH" | "DELETE", body: Record<string, unknown>): Promise<string | null> {
+  async function change(method: "PATCH" | "DELETE", body: { id: number } & Record<string, unknown>): Promise<string | null> {
     try {
       const r =
         method === "DELETE"
-          ? await fetch(`/api/watches?id=${body.id}`, { method })
+          ? await fetch(`/api/watches?id=${String(body.id)}`, { method })
           : await fetch("/api/watches", { method, headers: JSON_HEADERS, body: JSON.stringify(body) });
       if (!r.ok) {
         const d = (await r.json().catch(() => null)) as { error?: string } | null;
@@ -229,7 +230,7 @@ export default function AlertsView() {
                           <button
                             type="button"
                             className="btn btn--quiet btn--small"
-                            onClick={async () => setNotice(await change("PATCH", { id: w.id, status: w.status === "active" ? "paused" : "active" }))}
+                            onClick={() => void change("PATCH", { id: w.id, status: w.status === "active" ? "paused" : "active" }).then(setNotice)}
                           >
                             {w.status === "active" ? "Pause" : "Resume"}
                             <span className="visually-hidden"> {name}</span>
@@ -237,8 +238,8 @@ export default function AlertsView() {
                           <button
                             type="button"
                             className="btn btn--quiet btn--small"
-                            onClick={async () => {
-                              if (window.confirm(`Stop watching "${name}"?`)) setNotice(await change("DELETE", { id: w.id }));
+                            onClick={() => {
+                              if (window.confirm(`Stop watching "${name}"?`)) void change("DELETE", { id: w.id }).then(setNotice);
                             }}
                           >
                             Delete<span className="visually-hidden"> {name}</span>

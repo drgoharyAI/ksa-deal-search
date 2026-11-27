@@ -6,6 +6,7 @@ import { ensureChecker } from "@/src/lib/alerts/service";
 import { dbFailure, json } from "@/src/lib/api";
 
 /** The fired-alert log, the unread count (header badge) and whether Telegram is set up (never the token). */
+// eslint-disable-next-line @typescript-eslint/require-await -- route handlers share one async Promise<Response> shape (callers and tests await every handler)
 export async function GET(req: Request) {
   const rejected = rejectCrossSite(req);
   if (rejected) return rejected;

@@ -25,16 +25,17 @@ type SqliteModule = typeof import("node:sqlite");
  * warning is dropped, every other warning still goes through.
  */
 function loadSqlite(): SqliteModule {
+  // eslint-disable-next-line @typescript-eslint/unbound-method -- saved to be restored, and only ever called as orig.call(process, ...)
   const orig = process.emitWarning;
   process.emitWarning = function (this: unknown, warning: string | Error, ...rest: unknown[]) {
     const msg = typeof warning === "string" ? warning : warning?.message;
     const type = typeof rest[0] === "string" ? rest[0] : (rest[0] as { type?: string } | undefined)?.type;
     const name = typeof warning === "object" ? warning?.name : undefined;
     if ((type === "ExperimentalWarning" || name === "ExperimentalWarning") && /sqlite/i.test(msg ?? "")) return;
-    return (orig as (...a: unknown[]) => void).call(process, warning, ...rest);
-  } as typeof process.emitWarning;
+    (orig as (...a: unknown[]) => void).call(process, warning, ...rest);
+  };
   try {
-    return process.getBuiltinModule("node:sqlite") as SqliteModule;
+    return process.getBuiltinModule("node:sqlite");
   } finally {
     process.emitWarning = orig;
   }
@@ -133,6 +134,7 @@ export function migrate(db: Db): void {
 
 /** Opens (creating the folder and file if needed) and migrates a database file. */
 export function openDb(file: string): Db {
+  // eslint-disable-next-line security/detect-non-literal-fs-filename -- the database folder from the operator's DEAL_SEARCH_DB or LOCALAPPDATA, not request input
   if (file !== ":memory:") fs.mkdirSync(path.dirname(file), { recursive: true });
   const { DatabaseSync } = loadSqlite();
   const db = new DatabaseSync(file);

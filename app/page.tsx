@@ -144,8 +144,14 @@ export default function Home() {
     abortRef.current = null;
     // A picked suggestion (or a re-run from History) is passed in because the state update has not landed yet.
     const v = query === undefined ? base : { ...base, query };
-    if (!v.query.trim()) return fail("Enter something to search for");
-    if (!v.sites.length) return fail("Pick at least one store");
+    if (!v.query.trim()) {
+      fail("Enter something to search for");
+      return;
+    }
+    if (!v.sites.length) {
+      fail("Pick at least one store");
+      return;
+    }
 
     const ctrl = new AbortController();
     abortRef.current = ctrl;
@@ -176,7 +182,8 @@ export default function Home() {
       const data = (await res.json().catch(() => null)) as (Omit<Results, "query" | "sites" | "filters"> & { error?: string }) | null;
       if (ctrl.signal.aborted) return;
       if (!res.ok || !data || !Array.isArray(data.products)) {
-        return fail(data?.error ?? "The search failed; try again");
+        fail(data?.error ?? "The search failed; try again");
+        return;
       }
       setResults({ products: data.products, groups: Array.isArray(data.groups) ? data.groups : [], groupExtras: Array.isArray(data.groupExtras) ? data.groupExtras : [], statuses: data.statuses ?? [], reason: data.reason, query: v.query.trim(), sites: v.sites, filters: { minPrice: body.minPrice, maxPrice: body.maxPrice, minRating: body.minRating } });
       setWatchOpen(false);

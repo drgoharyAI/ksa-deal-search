@@ -124,7 +124,7 @@ describe("computeMetrics", () => {
 
   it("only the first 10 count; unlabelled items are counted separately", () => {
     const many = Array.from({ length: 12 }, (_, i) => prod(`x${i}`, i + 1));
-    const l: Record<string, Label> = Object.fromEntries(many.slice(0, 5).map((p) => [labelKey(p), "relevant" as Label]));
+    const l: Record<string, Label> = Object.fromEntries(many.slice(0, 5).map((p) => [labelKey(p), "relevant"]));
     const m = computeMetrics({ results: many, kept: many, recorded: mapOf(many), labels: l, constraints: none });
     expect(m.top).toBe(10);
     expect(m.precisionAt10).toBe(0.5);

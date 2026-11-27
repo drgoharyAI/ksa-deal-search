@@ -21,6 +21,7 @@ const cache = new Map<string, RegExp>();
 function re(src: string): RegExp {
   let r = cache.get(src);
   if (!r) {
+    // eslint-disable-next-line security/detect-non-literal-regexp -- sources are the repo's own data/*.json patterns, cached; no user input
     r = new RegExp(src);
     cache.set(src, r);
   }

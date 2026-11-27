@@ -43,5 +43,6 @@ function sortBy(products: Product[], sort: SortKey): Product[] {
   const min = Math.min(...prices);
   const max = Math.max(...prices);
   const score = new Map(out.map((p) => [p, dealScore(p, min, max)]));
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- score has an entry for every item of out (built from out above)
   return out.sort((a, b) => score.get(b)! - score.get(a)!);
 }

@@ -144,7 +144,9 @@ export async function aaCall(
     return out.result;
   });
   inflight.set(key, p);
-  const done = () => void (inflight.get(key) === p && inflight.delete(key));
+  const done = () => {
+    if (inflight.get(key) === p) inflight.delete(key);
+  };
   p.then(done, done);
   return p;
 }

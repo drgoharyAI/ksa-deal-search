@@ -7,6 +7,7 @@ import { bad, dbFailure, json } from "@/src/lib/api";
 
 // No route segment config (cacheComponents): reading req.url keeps these handlers dynamic.
 
+// eslint-disable-next-line @typescript-eslint/require-await -- route handlers share one async Promise<Response> shape (callers and tests await every handler)
 export async function GET(req: Request) {
   const rejected = rejectCrossSite(req);
   if (rejected) return rejected;
@@ -19,6 +20,7 @@ export async function GET(req: Request) {
 }
 
 /** DELETE ?id=N removes one entry; DELETE ?all=1 clears the history. */
+// eslint-disable-next-line @typescript-eslint/require-await -- route handlers share one async Promise<Response> shape (callers and tests await every handler)
 export async function DELETE(req: Request) {
   const rejected = rejectCrossSite(req);
   if (rejected) return rejected;

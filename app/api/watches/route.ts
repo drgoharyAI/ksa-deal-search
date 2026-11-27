@@ -8,6 +8,7 @@ import { bad, dbFailure, json, readJson } from "@/src/lib/api";
 
 const SITE_IDS = new Set(Object.keys(sites));
 
+// eslint-disable-next-line @typescript-eslint/require-await -- route handlers share one async Promise<Response> shape (callers and tests await every handler)
 export async function GET(req: Request) {
   const rejected = rejectCrossSite(req);
   if (rejected) return rejected;
@@ -76,6 +77,7 @@ export async function PATCH(req: Request) {
   }
 }
 
+// eslint-disable-next-line @typescript-eslint/require-await -- route handlers share one async Promise<Response> shape (callers and tests await every handler)
 export async function DELETE(req: Request) {
   const rejected = rejectCrossSite(req);
   if (rejected) return rejected;

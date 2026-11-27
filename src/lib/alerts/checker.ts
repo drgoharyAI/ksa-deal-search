@@ -204,14 +204,15 @@ export function createChecker(
   };
 
   const schedule = (ms: number) => {
-    timer = setTimeout(async () => {
+    const cycle = async () => {
       try {
         await runNow({ onlyDue: true });
       } catch (e) {
         console.warn("[alerts] cycle failed", e instanceof Error ? e.message : String(e));
       }
       if (started) schedule(opts.intervalMs);
-    }, ms);
+    };
+    timer = setTimeout(() => void cycle(), ms);
     (timer as { unref?: () => void }).unref?.();
   };
 

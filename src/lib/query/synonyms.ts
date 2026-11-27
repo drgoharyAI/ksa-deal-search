@@ -7,6 +7,7 @@ function escapeRegExp(s: string): string {
 }
 
 function memberRegExp(member: string): RegExp {
+  // eslint-disable-next-line security/detect-non-literal-regexp -- member is a data/synonyms.json entry passed through escapeRegExp
   return new RegExp(`(?<![\\w-])${escapeRegExp(member)}(?![\\w-])`);
 }
 

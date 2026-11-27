@@ -72,6 +72,7 @@ export function viewItems(units: Unit[], f: ChipFilters, ctx: ChipContext, sort:
     const rows = rank(pass, "price");
     byLead.set(rows[0], { kind: "group", key: u.key, best: rows[0], rows, storeCount: new Set(rows.map((p) => p.site)).size, colors: u.colors });
   }
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- the keys passed to rank() are byLead's own keys
   return rank([...byLead.keys()], sort).map((p) => byLead.get(p)!);
 }
 

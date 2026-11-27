@@ -140,7 +140,9 @@ export async function getSuggestions(rawQ: string): Promise<string[]> {
     return merged;
   })();
   inflight.set(q, p);
-  const done = () => void (inflight.get(q) === p && inflight.delete(q));
+  const done = () => {
+    if (inflight.get(q) === p) inflight.delete(q);
+  };
   p.then(done, done);
   return p;
 }

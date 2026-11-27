@@ -67,7 +67,12 @@ export default function QueryCombobox({ value, onChange, onSubmit, loading, inva
   const memo = useRef(new Map<string, string[]>());
   const inputRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => () => void (blurTimer.current && clearTimeout(blurTimer.current)), []);
+  useEffect(
+    () => () => {
+      if (blurTimer.current) clearTimeout(blurTimer.current);
+    },
+    [],
+  );
 
   const q = norm(value);
 
@@ -77,8 +82,11 @@ export default function QueryCombobox({ value, onChange, onSubmit, loading, inva
     if (!open || q.length < MIN_SUGGEST_CHARS) return;
     const cached = memo.current.get(q);
     const ctrl = new AbortController();
-    const timer = setTimeout(async () => {
-      if (cached) return setRemote({ q, items: cached });
+    const fetchSuggestions = async () => {
+      if (cached) {
+        setRemote({ q, items: cached });
+        return;
+      }
       try {
         const res = await fetch(`/api/suggest?q=${encodeURIComponent(q)}`, { signal: ctrl.signal });
         const data = (await res.json()) as { suggestions?: unknown };
@@ -91,7 +99,8 @@ export default function QueryCombobox({ value, onChange, onSubmit, loading, inva
       } catch {
         // Aborted or offline: keep what is shown.
       }
-    }, cached ? 0 : DEBOUNCE_MS);
+    };
+    const timer = setTimeout(() => void fetchSuggestions(), cached ? 0 : DEBOUNCE_MS);
     return () => {
       clearTimeout(timer);
       ctrl.abort();
