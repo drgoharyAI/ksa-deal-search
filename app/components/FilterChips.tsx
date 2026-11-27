@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, type CSSProperties } from "react";
-import { NO_FILTERS, activeCount, activeSummary, isActive, type ChipFilters, type Facets } from "@/src/lib/chips";
+import type { ChipFilters, Facets } from "@/src/lib/chips";
 import { brandLabel } from "@/src/lib/specs";
 import Button from "./ui/Button";
 import Chip from "./ui/Chip";
@@ -18,8 +18,10 @@ type Props = {
   /** Whole-SAR bounds of the current results' prices. */
   bounds: { min: number; max: number } | null;
   currency?: string;
-  /** Filters kept from the previous query (rating, discounted), named in a short note. */
+  /** Filters kept from the previous query (rating, discounted, deals), named in a short note. */
   kept?: string[];
+  /** Prefix for ids, so two copies of the panel never share one (sidebar and sheet are never both shown). */
+  idPrefix?: string;
 };
 
 const toggle = (xs: string[], x: string) => (xs.includes(x) ? xs.filter((y) => y !== x) : [...xs, x]);
@@ -35,14 +37,13 @@ function Count({ n }: { n: number }) {
 }
 
 /**
- * Quick filters over the current results: instant and client-side (no new request). Each option
- * shows how many results it would leave given the other active filters.
+ * The filters over the current results: instant and client-side (no new request). Each option
+ * shows how many results it would leave given the other active filters. A group of options shows
+ * only when the results carry that data: no rating filter without ratings, no deal filter without
+ * a deal our history backs.
  */
-export default function FilterChips({ filters: f, onChange, facets, bounds, currency = "SAR", kept = [] }: Props) {
+export default function FilterChips({ filters: f, onChange, facets, bounds, currency = "SAR", kept = [], idPrefix = "facet" }: Props) {
   const [moreBrands, setMoreBrands] = useState(false);
-  // Below 40rem the bar folds behind a "Filters" toggle (CSS shows it open on wider screens).
-  const [open, setOpen] = useState(false);
-  const n = activeCount(f);
   const set = (patch: Partial<ChipFilters>) => onChange({ ...f, ...patch });
 
   const top = facets.brands.slice(0, TOP_BRANDS);
@@ -60,69 +61,49 @@ export default function FilterChips({ filters: f, onChange, facets, bounds, curr
     return Number.isFinite(n) && n >= 0 ? n : undefined;
   };
 
+  const showRating = facets.rated > 0 || f.minRating !== undefined;
+  const showDiscounted = facets.discounted > 0 || f.discounted;
+  const showDeals = facets.deals > 0 || !!f.deals;
+
   return (
-    <section className="facets" aria-label="Filter these results" data-open={open || undefined}>
-      {kept.length > 0 && <p className="facets__note">Filters kept: {kept.join(", ")}</p>}
-      <div className="facets__bar">
-        <Button size="sm" aria-expanded={open} aria-controls="facets-body" onClick={() => setOpen(!open)}>
-          {n ? `Filters (${n} active)` : "Filters"}
-        </Button>
-        {n > 0 && <p className="facets__summary">{activeSummary(f, currency)}</p>}
-      </div>
-      <div className="facets__body" id="facets-body">
-        {facets.stores.length > 1 && (
-          <fieldset className="facet">
-            <legend className="facet__legend">Store</legend>
-            <div className="facet__options">
-              {facets.stores.map((s) => (
-                <Chip key={s.id} kind="checkbox" className="fchip" checked={f.stores.includes(s.id)} onChange={() => set({ stores: toggle(f.stores, s.id) })}>
-                  <StoreMark id={s.id} size={18} />
-                  <Count n={s.count} />
-                </Chip>
-              ))}
-            </div>
-          </fieldset>
-        )}
+    <div className="facets">
+      {kept.length > 0 && <p className="facets__note">Filters kept from your last search: {kept.join(", ")}</p>}
 
-        {facets.brands.length > 0 && (
-          <fieldset className="facet">
-            <legend className="facet__legend">Brand</legend>
-            <div className="facet__options" id="facet-brands">
-              {shownBrands.map((b) => (
-                <Chip key={b.id} kind="checkbox" className="fchip" checked={f.brands.includes(b.id)} onChange={() => set({ brands: toggle(f.brands, b.id) })}>
-                  <span className="chip__name">{brandLabel(b.id)}</span>
-                  <Count n={b.count} />
-                </Chip>
-              ))}
-              {(hiddenCount > 0 || moreBrands) && rest.length > 0 && (
-                <Button size="sm" variant="ghost" aria-expanded={moreBrands} aria-controls="facet-brands" onClick={() => setMoreBrands(!moreBrands)}>
-                  {moreBrands ? "Fewer brands" : `More brands (${hiddenCount})`}
-                </Button>
-              )}
-            </div>
-          </fieldset>
-        )}
+      {facets.stores.length > 1 && (
+        <fieldset className="facet">
+          <legend className="facet__legend">Store</legend>
+          <div className="facet__options facet__options--stack">
+            {facets.stores.map((s) => (
+              <Chip key={s.id} kind="checkbox" className="fchip" checked={f.stores.includes(s.id)} onChange={() => set({ stores: toggle(f.stores, s.id) })}>
+                <StoreMark id={s.id} size={18} />
+                <Count n={s.count} />
+              </Chip>
+            ))}
+          </div>
+        </fieldset>
+      )}
 
-        {bounds && bounds.max > bounds.min && (
-          <fieldset className="facet">
-            <legend className="facet__legend">Price, {currency}</legend>
-            <div className="facet__options facet__price">
-              <div className="range" style={{ "--lo": (lo - bounds.min) / (bounds.max - bounds.min), "--hi": (hi - bounds.min) / (bounds.max - bounds.min) } as CSSProperties}>
-                <input
-                  type="range"
-                  className="range__input"
-                  // Thumbs meeting mid-range: the low one goes on top so it can still be dragged down.
-                  style={lo >= hi - 1 && hi > bounds.min ? { zIndex: 2 } : undefined}
-                  aria-valuetext={`${currency} ${lo}`}
-                  aria-label="Lowest price"
-                  min={bounds.min}
-                  max={bounds.max}
-                  step={1}
-                  value={lo}
-                  onChange={(e) => setLo(Number(e.target.value))}
-                />
-                <input type="range" className="range__input" aria-valuetext={`${currency} ${hi}`} aria-label="Highest price" min={bounds.min} max={bounds.max} step={1} value={hi} onChange={(e) => setHi(Number(e.target.value))} />
-              </div>
+      {bounds && bounds.max > bounds.min && (
+        <fieldset className="facet">
+          <legend className="facet__legend">Price, {currency}</legend>
+          <div className="facet__price">
+            <div className="range" style={{ "--lo": (lo - bounds.min) / (bounds.max - bounds.min), "--hi": (hi - bounds.min) / (bounds.max - bounds.min) } as CSSProperties}>
+              <input
+                type="range"
+                className="range__input"
+                // Thumbs meeting mid-range: the low one goes on top so it can still be dragged down.
+                style={lo >= hi - 1 && hi > bounds.min ? { zIndex: 2 } : undefined}
+                aria-valuetext={`${currency} ${lo}`}
+                aria-label="Lowest price"
+                min={bounds.min}
+                max={bounds.max}
+                step={1}
+                value={lo}
+                onChange={(e) => setLo(Number(e.target.value))}
+              />
+              <input type="range" className="range__input" aria-valuetext={`${currency} ${hi}`} aria-label="Highest price" min={bounds.min} max={bounds.max} step={1} value={hi} onChange={(e) => setHi(Number(e.target.value))} />
+            </div>
+            <div className="range__fields">
               <label className="range__field">
                 <span className="label">From</span>
                 <Input size="compact" type="number" inputMode="decimal" min={0} placeholder={String(bounds.min)} value={f.minPrice ?? ""} onChange={(e) => set({ minPrice: typed(e.target.value) })} />
@@ -132,11 +113,13 @@ export default function FilterChips({ filters: f, onChange, facets, bounds, curr
                 <Input size="compact" type="number" inputMode="decimal" min={0} placeholder={String(bounds.max)} value={f.maxPrice ?? ""} onChange={(e) => set({ maxPrice: typed(e.target.value) })} />
               </label>
             </div>
-          </fieldset>
-        )}
+          </div>
+        </fieldset>
+      )}
 
+      {showRating && (
         <fieldset className="facet">
-          <legend className="facet__legend">Rating</legend>
+          <legend className="facet__legend">Minimum rating</legend>
           <div className="facet__options">
             {facets.ratings.map((r) => (
               <Chip key={r.min ?? "any"} kind="toggle" className="fchip" pressed={f.minRating === r.min} onToggle={() => set({ minRating: r.min })}>
@@ -149,19 +132,49 @@ export default function FilterChips({ filters: f, onChange, facets, bounds, curr
             ))}
           </div>
         </fieldset>
+      )}
 
-        <div className="facets__actions">
-          <Chip kind="toggle" className="fchip" pressed={f.discounted} onToggle={() => set({ discounted: !f.discounted })}>
-            <span className="chip__name">Only discounted</span>
-            <Count n={facets.discounted} />
-          </Chip>
-          {isActive(f) && (
-            <Button size="sm" variant="ghost" onClick={() => onChange(NO_FILTERS)}>
-              Clear all filters
-            </Button>
-          )}
-        </div>
-      </div>
-    </section>
+      {(showDiscounted || showDeals) && (
+        <fieldset className="facet">
+          <legend className="facet__legend">Deals</legend>
+          <div className="facet__options facet__options--stack">
+            {showDiscounted && (
+              <Chip kind="toggle" className="fchip" pressed={f.discounted} onToggle={() => set({ discounted: !f.discounted })}>
+                <span className="chip__name">Only discounted</span>
+                <Count n={facets.discounted} />
+              </Chip>
+            )}
+            {showDeals && (
+              <Chip kind="toggle" className="fchip" pressed={!!f.deals} onToggle={() => set({ deals: !f.deals })}>
+                <span className="chip__name">
+                  Verified deals
+                  <span className="visually-hidden">, lowest in 30 days or below the usual price, from our price history</span>
+                </span>
+                <Count n={facets.deals} />
+              </Chip>
+            )}
+          </div>
+        </fieldset>
+      )}
+
+      {facets.brands.length > 0 && (
+        <fieldset className="facet">
+          <legend className="facet__legend">Brand</legend>
+          <div className="facet__options" id={`${idPrefix}-brands`}>
+            {shownBrands.map((b) => (
+              <Chip key={b.id} kind="checkbox" className="fchip" checked={f.brands.includes(b.id)} onChange={() => set({ brands: toggle(f.brands, b.id) })}>
+                <span className="chip__name">{brandLabel(b.id)}</span>
+                <Count n={b.count} />
+              </Chip>
+            ))}
+            {(hiddenCount > 0 || moreBrands) && rest.length > 0 && (
+              <Button size="sm" variant="ghost" aria-expanded={moreBrands} aria-controls={`${idPrefix}-brands`} onClick={() => setMoreBrands(!moreBrands)}>
+                {moreBrands ? "Fewer brands" : `More brands (${hiddenCount})`}
+              </Button>
+            )}
+          </div>
+        </fieldset>
+      )}
+    </div>
   );
 }

@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import FilterChips from "@/app/components/FilterChips";
+import ResultsLayout from "@/app/components/ResultsLayout";
 import { CompareDialog, CompareTray } from "@/app/components/Compare";
 import ResultTiers from "@/app/components/ResultTiers";
 import { NO_FILTERS, chipContext, facetCounts, priceBounds } from "@/src/lib/chips";
@@ -28,21 +29,33 @@ describe("FilterChips (17c)", () => {
     expect(out).toContain('aria-label="Lowest price"');
     expect(out).toContain('aria-label="Highest price"');
   });
-  it("a folded-bar toggle with the active count and summary; prices spoken with the currency", () => {
-    expect(out).toContain('aria-expanded="false"');
-    expect(out).toContain("Filters (1 active)");
-    expect(out).toContain("4+ stars");
+  it("prices are spoken with the currency", () => {
     expect(out).toContain('aria-valuetext="SAR 2000"');
     expect(out).toContain('aria-valuetext="SAR 3000"');
   });
+  it("the layout lists the active filters as removable chips, with clear all, beside the sidebar", () => {
+    const lay = renderToStaticMarkup(
+      createElement(ResultsLayout, {
+        filters: f, onFilters: noop, facets: facetCounts(ps, f, ctx), bounds: priceBounds(ps), currency: "SAR", kept: [],
+        sort: "price", onSort: noop, view: "grid", onView: noop, shown: 1, ready: true,
+      }, null),
+    );
+    expect(lay).toContain('aria-label="Active filters"');
+    expect(lay).toContain('<span class="achip__label">4+ stars</span>');
+    expect(lay).toContain(", remove this filter");
+    expect(lay).toContain("Clear all");
+    // Server render (no window): the desktop sidebar, so no Filters button.
+    expect(lay).toContain('class="rside"');
+    expect(lay).not.toContain("rtools__filters");
+    expect(lay).toContain('aria-pressed="true">Grid</button>');
+  });
   it("names the filters kept from the previous query", () => {
     const k = renderToStaticMarkup(createElement(FilterChips, { filters: f, onChange: noop, facets: facetCounts(ps, f, ctx), bounds: priceBounds(ps), kept: ["rating"] }));
-    expect(k).toContain("Filters kept: rating");
+    expect(k).toContain("Filters kept from your last search: rating");
   });
   it("rating and discount chips are pressed buttons", () => {
     expect(out).toMatch(/aria-pressed="true"[^>]*>.*?4\+/);
     expect(out).toContain("Only discounted");
-    expect(out).toContain("Clear all filters");
   });
 });
 

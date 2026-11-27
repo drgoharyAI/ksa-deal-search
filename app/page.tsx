@@ -17,12 +17,13 @@ import { SkeletonCard } from "./components/ui/Skeleton";
 import WatchForm, { postWatch } from "./components/WatchForm";
 import { cheapestConfident, defaultTarget, priceOf } from "@/src/lib/alerts/shared";
 import { HOME_ENTRY, historyMove, valuesFromUrl } from "@/src/lib/rerun";
-import FilterChips from "./components/FilterChips";
+import ResultsLayout from "./components/ResultsLayout";
 import { CompareDialog, CompareTray } from "./components/Compare";
 import {
-  NO_FILTERS, chipContext, chipParamsOnly, chipsForNewQuery, facetCountsFor, filtersFromSearch, isActive, priceBounds,
-  withChipParams, type ChipFilters,
+  NO_FILTERS, activeChips, chipContext, chipParamsOnly, chipsForNewQuery, facetCountsFor, filtersFromSearch, isActive, priceBounds,
+  withChipParams, type ChipFilters, type KeptChip,
 } from "@/src/lib/chips";
+import { browserStorage, readView, writeView, type ResultsView } from "@/src/lib/filter-drawer";
 import { toggleCompare } from "@/src/lib/compare";
 import { productKey } from "@/src/lib/specs";
 import { allMembers, buildUnits, viewItems } from "@/src/lib/view";
@@ -59,7 +60,7 @@ const INITIAL: FormValues = {
   minRating: "",
 };
 
-const SKELETONS = 10;
+const SKELETONS = 8;
 
 const NO_COMPARE: { list: Product[]; full: boolean } = { list: [], full: false };
 
@@ -86,7 +87,14 @@ export default function Home() {
   const [chips, setChips] = useState<ChipFilters>(NO_FILTERS);
   const [chipsRead, setChipsRead] = useState(false);
   /** Chips carried over from the previous query (rating, discounted); named in a note. */
-  const [keptChips, setKeptChips] = useState<("rating" | "discounted")[]>([]);
+  const [keptChips, setKeptChips] = useState<KeptChip[]>([]);
+  // Grid cards or list rows, remembered per browser. Results never render on the server, so
+  // reading storage in the initializer cannot cause a hydration mismatch.
+  const [view, setView] = useState<ResultsView>(() => readView(browserStorage()));
+  const changeView = useCallback((v: ResultsView) => {
+    setView(v);
+    writeView(browserStorage(), v);
+  }, []);
   // One state, so the toggle below can be one stable function for every (memoized) card.
   const [cmp, setCmp] = useState<{ list: Product[]; full: boolean }>(NO_COMPARE);
   const compareList = cmp.list;
@@ -232,7 +240,7 @@ export default function Home() {
   const bounds = useMemo(() => priceBounds(all), [all]);
   const items = useMemo(() => viewItems(units, chips, chipCtx, values.sort), [units, chips, chipCtx, values.sort]);
   const filtering = isActive(chips) && all.length > 0;
-  const kept = keptChips.filter((k) => (k === "rating" ? chips.minRating !== undefined : chips.discounted));
+  const kept = keptChips.filter((k) => (k === "rating" ? chips.minRating !== undefined : k === "deals" ? !!chips.deals : chips.discounted));
   // The live region hears "N of M results" once a change settles (a dragged slider fires many).
   const filterLive = filtering ? `${items.length} of ${units.length} results` : "";
   const [liveFilter, setLiveFilter] = useState("");
@@ -370,6 +378,13 @@ export default function Home() {
     }
   }
 
+  /** Search again with some form values changed (an empty state's "search all stores"). */
+  function searchWith(patch: Partial<FormValues>) {
+    const v = { ...values, ...patch };
+    setValues(v);
+    void search(undefined, v);
+  }
+
   function stop() {
     abortRef.current?.abort();
     abortRef.current = null;
@@ -385,6 +400,13 @@ export default function Home() {
   const waiting = loading && all.length === 0;
   const cheapest = useMemo(() => (all.length ? cheapestConfident(all) : null), [all]);
   const formError = errorField === "form" ? error : null;
+  const currency = all[0]?.currency || "SAR";
+  // Store coverage for the header: answered so far while searching, then stores with results.
+  const answered = stores.filter((e) => e.state !== "searching").length;
+  const withResults = stores.filter((e) => e.state === "ok").length;
+  const coverage = !stores.length ? "" : loading ? `${answered} of ${stores.length} stores answered` : `Results from ${withResults} of ${stores.length} ${stores.length === 1 ? "store" : "stores"}`;
+  const lastChip = activeChips(chips, currency).at(-1);
+  const formLimits = !!(run && (run.filters.minPrice !== undefined || run.filters.maxPrice !== undefined || run.filters.minRating !== undefined));
 
   // A short summary at milestones (start, first results, end), never a line per store.
   let live = "";
@@ -415,13 +437,14 @@ export default function Home() {
           loading={loading}
           error={error}
           errorField={errorField}
+          compact={!home}
         />
 
         <p className="visually-hidden" role="status" aria-live="polite">
           {live}
         </p>
 
-        {formError && <ErrorState message={formError} />}
+        {formError && <ErrorState message={formError} onRetry={() => void search()} retryLabel="Search again" />}
 
         <StatusBar stores={stores} stopped={!!run?.stream.stopped} />
 
@@ -440,10 +463,15 @@ export default function Home() {
         {!home && (
           <section className="results" aria-labelledby="results-head" aria-busy={loading || undefined}>
             <div className="results__head">
-              <h2 id="results-head">
-                {waiting ? "Searching" : results && filtering ? `${items.length} of ${units.length} results` : results && items.length ? `${items.length} ${items.length === 1 ? "result" : "results"}${loading ? " so far" : ""}` : "Results"}
-              </h2>
-              {results && items.length > 0 && <p className="results__note">Prices exclude shipping</p>}
+              <div className="results__title">
+                <h2 id="results-head">
+                  {waiting ? "Searching" : results && filtering ? `${items.length} of ${units.length} results` : results && items.length ? `${items.length} ${items.length === 1 ? "result" : "results"}${loading ? " so far" : ""}` : "Results"}
+                </h2>
+                <p className="results__note">
+                  {coverage}
+                  {results && items.length > 0 && <span className="results__ship">Prices exclude shipping</span>}
+                </p>
+              </div>
               {!loading && results && cheapest && !watchOpen && !watchSaved && (
                 <Button size="sm" onClick={() => setWatchOpen(true)}>
                   Watch this search
@@ -474,33 +502,72 @@ export default function Home() {
               />
             )}
 
-            {all.length > 0 && <FilterChips filters={chips} onChange={setChips} facets={facets} bounds={bounds} currency={all[0].currency || "SAR"} kept={kept} />}
-
-            {waiting ? (
-              <ul className="grid" aria-hidden="true">
-                {Array.from({ length: SKELETONS }, (_, i) => (
-                  <li key={i}>
-                    <SkeletonCard />
-                  </li>
-                ))}
-              </ul>
-            ) : results && items.length ? (
-              <GroupOpenContext value={groupOpen}>
-                <ResultTiers items={items} query={results.query} compare={compare} />
-              </GroupOpenContext>
-            ) : results && filtering ? (
-              <EmptyState
-                title="No results match these filters"
-                body="Loosen a filter above, or clear them all."
-                action={
-                  <Button size="sm" onClick={() => setChips(NO_FILTERS)}>
-                    Clear all filters
-                  </Button>
-                }
-              />
-            ) : results && !loading ? (
-              <EmptyState title={results.reason ?? "No products matched your search and filters"} body="Try fewer words, another store, or looser price and rating filters." />
-            ) : null}
+            <ResultsLayout
+              filters={chips}
+              onFilters={setChips}
+              facets={facets}
+              bounds={bounds}
+              currency={currency}
+              kept={kept}
+              sort={values.sort}
+              onSort={(sort) => setValues((v) => ({ ...v, sort }))}
+              view={view}
+              onView={changeView}
+              shown={items.length}
+              ready={all.length > 0}
+            >
+              {waiting ? (
+                <ul className={view === "list" ? "grid grid--list" : "grid"} aria-hidden="true">
+                  {Array.from({ length: SKELETONS }, (_, i) => (
+                    <li key={i}>
+                      <SkeletonCard variant={view} />
+                    </li>
+                  ))}
+                </ul>
+              ) : results && items.length ? (
+                <GroupOpenContext value={groupOpen}>
+                  <ResultTiers items={items} query={results.query} compare={compare} view={view} />
+                </GroupOpenContext>
+              ) : results && filtering ? (
+                <EmptyState
+                  title="No results match these filters"
+                  body={`${units.length} ${units.length === 1 ? "result is" : "results are"} hidden by the filters. Remove one, or clear them all.`}
+                  action={
+                    <div className="empty__actions">
+                      {lastChip && (
+                        <Button size="sm" variant="secondary" onClick={() => setChips(lastChip.without)}>
+                          {`Remove "${lastChip.label}"`}
+                        </Button>
+                      )}
+                      <Button size="sm" variant="ghost" onClick={() => setChips(NO_FILTERS)}>
+                        Clear all filters
+                      </Button>
+                    </div>
+                  }
+                />
+              ) : results && !loading ? (
+                <EmptyState
+                  title={results.reason ?? "No products matched your search"}
+                  body="Try fewer words, or search more stores."
+                  action={
+                    (results.sites.length < STORES.length || formLimits) && (
+                      <div className="empty__actions">
+                        {results.sites.length < STORES.length && (
+                          <Button size="sm" variant="secondary" onClick={() => searchWith({ sites: STORES.map((st) => st.id) })}>
+                            {`Search all ${STORES.length} stores`}
+                          </Button>
+                        )}
+                        {formLimits && (
+                          <Button size="sm" variant="ghost" onClick={() => searchWith({ minPrice: "", maxPrice: "", minRating: "" })}>
+                            Search without price and rating limits
+                          </Button>
+                        )}
+                      </div>
+                    )
+                  }
+                />
+              ) : null}
+            </ResultsLayout>
           </section>
         )}
       </main>
