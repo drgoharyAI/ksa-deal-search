@@ -161,3 +161,18 @@ Recovers cheap real products whose titles mention a part (0.5 was also tried: re
 | p@10 | acc@10 | wrong@10 | recall | cheapest-first |
 |---|---|---|---|---|
 | 98% | 0% | 1.3% | 91% (90.2→90.9) | 80% |
+
+## Round 15: BRAND_PRICE_RATIO 0.25 -> 0.15 (reverted)
+No metric moved (p@10 98%, recall 91%, cheapest-first 80%).
+
+## Round 16: GAP_RATIO 4 -> 3 (reverted)
+No metric moved. Two consecutive rounds without improvement: stop (Task 12 Step 6).
+
+## Final (after round 14)
+| p@10 | acc@10 | wrong@10 | recall | cheapest-first |
+|---|---|---|---|---|
+| 98% | 0% | 1.3% | 91% | 80% |
+Every target is met except cheapest-relevant-first (80% vs 90%). The three misses (air fryer,
+samsung galaxy s24, ps5 controller) are queries whose cheapest item labelled "relevant" is an
+accessory (paper liners, a Galaxy S26 screen protector, a PS5 controller silicone cover); see the
+Task 12c report for the suspected label errors.
