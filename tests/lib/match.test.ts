@@ -1,11 +1,11 @@
 import { describe, it, expect } from "vitest";
-import { tokenize } from "@/src/lib/match/tokenize";
+import { tokenize, tokenizeKeepDigits } from "@/src/lib/match/tokenize";
 import { scoreRelevance, filterRelevant, matchesAllTokens } from "@/src/lib/match/relevance";
 import { isAccessory, isStrongAccessory, dropAccessories, isForAccessory } from "@/src/lib/match/accessory";
 import { dedupe } from "@/src/lib/match/dedupe";
 import { specMatches } from "@/src/lib/match/spec";
 import { isBookCode, isOtherProduct } from "@/src/lib/match/category";
-import { dropBrandPriceOutliers } from "@/src/lib/match/price";
+import { dropBrandPriceOutliers, tierCutoff } from "@/src/lib/match/price";
 import type { Product } from "@/src/lib/types";
 
 const prod = (title: string, listPrice = 10, id = title): Product => ({
@@ -432,5 +432,35 @@ describe("12d round 6: 'accessories' as a shop category label", () => {
   it("still counts right after the product noun or before it", () => {
     expect(isAccessory("Dash Cam Accessories Kit", v[0], v)).toBe(true);
     expect(isAccessory("Accessories for Dash Cam", v[0], v)).toBe(true);
+  });
+});
+
+describe("brand price tiers (12e)", () => {
+  const at = (rows: [string, number, string][]) => rows.map(([t, pr, site], i) => ({ ...prod(t, pr, String(i)), site }));
+  const switch2 = at([
+    ["Nintendo Switch 2 Game - Metroid Prime 4", 105, "a"], ["Nintendo Switch 2 Amiibo Samus", 119, "b"],
+    ["Nintendo Switch2 Ac Adapter", 120, "c"], ["EA Sports FC26 - Nintendo Switch 2", 120, "c"],
+    ["Nintendo Switch 2 Donkey Kong Bananza", 293, "b"], ["Nintendo Switch 2 Joy-Con 2 Pair", 350, "b"],
+    ["Nintendo Switch 2 Mario Kart World", 323, "c"], ["Nintendo Switch 2 Pro Controller", 339, "d"],
+    ["Nintendo Switch 2 Console", 2049, "b"], ["Nintendo Switch 2 Standalone", 2049, "c"],
+    ["Nintendo Switch 2 + Mario Kart World Bundle", 2397, "c"], ["Nintendo Switch 2 Console (KSA)", 2299, "b"],
+  ]);
+  it("keeps only the upper price tier when the ecosystem outnumbers the product", () => {
+    expect(dropBrandPriceOutliers(switch2, ["nintendo", "switch", "2"]).map((p) => p.listPrice)).toEqual([2049, 2049, 2397, 2299]);
+  });
+  it("no split when the tiers are close (one product line, several models)", () => {
+    const phones = at([["iPhone 16 128GB", 2999, "a"], ["iPhone 16 Plus", 3499, "b"], ["iPhone 16 Pro", 4299, "a"], ["iPhone 16 Pro Max", 5199, "c"], ["iPhone 16 256GB", 3399, "b"]]);
+    expect(tierCutoff(phones)).toBeNull();
+  });
+  it("no split when the upper tier is one store", () => {
+    const one = switch2.map((p) => (p.listPrice > 1000 ? { ...p, site: "b" } : p));
+    expect(tierCutoff(one)).toBeNull();
+  });
+});
+
+describe("single-digit model numbers stay in the query (12e)", () => {
+  it("'nintendo switch 2' needs the 2", () => {
+    expect(matchesAllTokens([tokenizeKeepDigits("nintendo switch 2")], "Nintendo Switch OLED White")).toBe(false);
+    expect(matchesAllTokens([tokenizeKeepDigits("nintendo switch 2")], "Nintendo Switch 2 Console")).toBe(true);
   });
 });

@@ -51,7 +51,7 @@ export function scoreRelevance(
   title: string,
   idf?: Map<string, number>,
 ): number {
-  const tt = tokenize(title);
+  const tt = tokenizeKeepDigits(title);
   let best = 0;
   for (const variant of queryTokens) {
     let total = 0;

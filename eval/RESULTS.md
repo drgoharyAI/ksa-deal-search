@@ -300,3 +300,32 @@ drivers. None carries a word that separates it from the product without costing 
 |---|---|---|---|---|
 | 70% | 20% | 0% | 89% | 50% |
 Failures: nintendo switch 2 (acc@10 100%: games, cases and controllers titled with the console name), baby stroller (p@10 50%, recall 72%), air purifier (p@10 80%). Good: electric kettle, gaming chair, macbook air m3. Takeaway: word lists don't transfer to new categories; structural signals are needed.
+
+# Task 12e: structural signals (dev set = all 29 queries: 15 tuning + 8 holdout + 6 holdout2)
+
+Targets per set: p@10 >= 90%, acc@10 <= 3%, wrong@10 <= 5%, recall >= 80%, cheapest-first >= 85%.
+
+Baseline (12d final):
+| set | p@10 | acc@10 | wrong@10 | recall | cheapest-first |
+|---|---|---|---|---|---|
+| tuning (15) | 98.0% | 0% | 1.3% | 92.1% | 100% |
+| holdout (8) | 95.0% | 3.8% | 0% | 86.5% | 87.5% |
+| holdout2 (6) | 70.0% | 20.0% | 0% | 89.3% | 50.0% |
+| all (29) | 91.4% | 5.2% | 0.7% | 90.0% | 86.2% |
+
+## 12e round 1: single-digit model numbers; brand price tiers (kept)
+Two root causes in nintendo switch 2. (a) The query tokenizer dropped 1-character tokens, so the
+"2" was never required and Switch 1 / OLED / Lite consoles matched; query tokens now keep digits.
+(b) The 12c brand price check compares against the median, but for a platform query the
+ecosystem (games, controllers, adapters titled "... Nintendo Switch 2") outnumbers the product,
+so the median is an accessory price. New price-structure test (`price.ts` `tierCutoff`): the best
+two-group split of log prices; when the upper group's geometric mean is 4x the lower one's and it
+is a real market (3+ items, 2+ stores), the lower group is dropped. No vocabulary; brand queries
+only (unbranded categories legitimately span 5 to 5,000 SAR). On every other brand query the two
+tiers are under 2x apart (model lines: 128GB vs Pro Max), so nothing changes there.
+| set | p@10 | acc@10 | wrong@10 | recall | cheapest-first |
+|---|---|---|---|---|---|
+| tuning (15) | 98.0% | 0% | 1.3% | 92.1% | 100% |
+| holdout (8) | 95.0% | 3.8% | 0% | 86.5% | 87.5% |
+| holdout2 (6) | 83.3% | 6.7% | 0% | 89.3% | 50.0% |
+| all (29) | 94.1% | 2.4% | 0.7% | 90.0% | 86.2% |
