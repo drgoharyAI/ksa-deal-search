@@ -5,7 +5,7 @@
 // reported for the tuning and the held-out half separately. Also scores the grouped view (each
 // group shown once, at its best member) with the per-query top-10 metrics of scripts/eval.mjs.
 //
-// Usage: node scripts/eval-groups.mjs [--threshold 0.6]
+// Usage: node scripts/eval-groups.mjs [--threshold 0.6] [--skip-stores a,b]
 import { readFileSync, existsSync, readdirSync } from "node:fs";
 import path from "node:path";
 import { loadEval, root } from "./lib/load-ts.mjs";
@@ -22,7 +22,9 @@ const goldOf = new Map(gold.map((g) => [g.query, g]));
 const sets = ["queries", "queries-holdout", "queries-holdout2", "queries-holdout3", "queries-holdout4"];
 const queries = sets.flatMap((f) => JSON.parse(readFileSync(path.join(root, `eval/${f}.json`), "utf8")));
 const recDir = path.join(root, "eval/recorded");
-const storeDirs = readdirSync(recDir).filter((s) => ev.sites[s]);
+const si = argv.indexOf("--skip-stores");
+const skip = new Set(si >= 0 ? argv[si + 1].split(",").filter(Boolean) : []);
+const storeDirs = readdirSync(recDir).filter((s) => ev.sites[s] && !skip.has(s));
 const pct = (x) => (x === null || Number.isNaN(x) ? "  n/a" : `${(x * 100).toFixed(1)}%`);
 const warn = console.warn;
 console.warn = () => {};

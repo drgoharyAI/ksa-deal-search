@@ -2,7 +2,9 @@
 // "price") with no network, and scores each query against eval/labels/<slug>.json.
 // Unlabelled queries print their top 10 instead of metrics. Writes eval/last-run.json.
 //
-// Usage: node scripts/eval.mjs [--queries "q1|q2"] [--top N]
+// Usage: node scripts/eval.mjs [--queries "q1|q2"] [--top N] [--skip-stores a,b]
+// --skip-stores replays without those stores' recordings (e.g. to check a newly recorded store
+// leaves the other stores' metrics unchanged).
 import { readFileSync, writeFileSync, existsSync, readdirSync } from "node:fs";
 import path from "node:path";
 import { loadEval, root } from "./lib/load-ts.mjs";
@@ -19,7 +21,8 @@ let queries = JSON.parse(readFileSync(path.join(root, "eval/queries.json"), "utf
 if (flag("--queries")) queries = flag("--queries").split("|").map((q) => q.trim());
 
 const recDir = path.join(root, "eval/recorded");
-const storeDirs = existsSync(recDir) ? readdirSync(recDir).filter((s) => ev.sites[s]) : [];
+const skip = new Set((flag("--skip-stores") ?? "").split(",").filter(Boolean));
+const storeDirs = existsSync(recDir) ? readdirSync(recDir).filter((s) => ev.sites[s] && !skip.has(s)) : [];
 const readJson = (f) => JSON.parse(readFileSync(f, "utf8"));
 const pct = (x) => (x === null || x === undefined ? "  n/a" : `${(x * 100).toFixed(0).padStart(4)}%`);
 

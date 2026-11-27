@@ -651,3 +651,27 @@ counts over all 40 queries: identical to before 17b.
 
 Per-query top-10 metrics and result counts: identical to before 17b. Cold grouping: 1,915 unseen
 titles ~170 ms (~133 ms per 1,500); 1,500 same-brand titles 65 ms cold, 15 ms warm.
+
+# Out-of-stock filter and SACO (owner requests, 2026-11-27)
+
+Out-of-stock filter: the pipeline and the eval's eligibility drop only products whose store marks
+them out of stock (`inStock: false`). The recordings of the five recorded stores carry no stock
+field (AliExpress, Amazon, Jarir and noon state none; Trendyol's `isSoldOut` was not picked when
+they were recorded), so every metric is identical to before.
+
+SACO (`saco-sa`) recorded for 8 queries where it sells the product kind (air fryer, hair dryer,
+robot vacuum, coffee machine, electric kettle, blender, steam iron, car vacuum cleaner): 16 calls,
+all ok. 490 of its 844 recorded products are in stock and labelled (the 354 out-of-stock ones
+never reach the results). `--skip-stores saco-sa` reproduces the pre-SACO numbers exactly.
+
+| run | p@10 | acc@10 | wrong@10 | recall | cheapest-first |
+|---|---|---|---|---|---|
+| 15 tuning queries, without SACO | 99% | 1% | 0% | 92% | 93% |
+| 15 tuning queries, with SACO | 100% | 0% | 0% | 92% | 93% |
+| 8 SACO queries, without SACO | 89% | 1% | 4% | 90% | 63% |
+| 8 SACO queries, with SACO | 89% | 0% | 4% | 90% | 63% |
+
+Per query with SACO: hair dryer p@10 90% -> 100%; blender 50% -> 40% (a Trendyol "Handheld Coffee And
+Milk Blender", off-topic, enters the top 10 once SACO's 29 blenders join the result set: match
+confidence is computed over the whole result set; no SACO product is in the top 10). Grouping: merge precision and recall unchanged (100% / 45.6% and
+100% / 55.4%), 0 wrong merges; multi-store groups 72 -> 78 (tune) and 112 -> 124 (held out).
