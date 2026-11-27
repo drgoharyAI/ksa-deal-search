@@ -12,3 +12,5 @@ export { plannedCalls, callKey, querySlug, createReplayExec, recordedProducts } 
 export { computeMetrics, aggregate, labelKey } from "./metrics";
 export { groupProducts, orderGroups, titleFeatures, sameProduct, modelCodes } from "@/src/lib/match/group";
 export { computeGroupMetrics } from "./groups";
+export { dedupeByStore } from "@/src/lib/match/dedupe";
+export { rank } from "@/src/lib/rank";

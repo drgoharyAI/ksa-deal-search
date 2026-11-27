@@ -34,7 +34,9 @@ for (const [i, query] of queries.entries()) {
   const { exec } = ev.createReplayExec(recordings);
   let kept = [];
   const r = await ev.runSearch({ query, sites: recordings.map((x) => x.store), sort: "price" }, { exec, onFiltered: (p) => (kept = p) });
-  const groups = ev.groupProducts(r.products, threshold === undefined ? {} : { threshold });
+  // The pipeline groups listings deduped within each store (src/lib/pipeline.ts); same here.
+  const perStore = ev.rank(ev.dedupeByStore(kept), "price");
+  const groups = ev.groupProducts(perStore, threshold === undefined ? {} : { threshold });
   const g = goldOf.get(query);
   const split = g?.split ?? (i % 2 === 0 ? "tune" : "heldout");
   const t = tot[split];

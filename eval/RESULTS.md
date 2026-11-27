@@ -575,3 +575,30 @@ Per-query top-10 metrics (scripts/eval.mjs, all 40 queries): identical before an
 query (p@10 95%, acc@10 1%, wrong@10 2%, recall 90%, cheapest-first 80%). Grouped view (each group
 once, at its best member, scripts/eval-groups.mjs): p@10 and cheapest-first equal to the flat list
 on both halves. 243 multi-store groups over the 40 queries.
+
+## 17b review round 1 (grouping fixes)
+Fixes: variant, model, condition and bundle words are read from the whole title (only true
+compatibility lists such as "for iPhone 17 16 15" and "upgrade from P40i" are left out); a
+condition family (renewed/refurbished/reconditioned, used/pre-owned, open box, like new, grade
+A/B/C) must match, any condition vs none included; one side an accessory (case, ear pads,
+replacement...) is a conflict; codes conflict when the first codes differ or a model word right
+after a shared code differs ("G502 Hero" / "G502 X"); storage or RAM stated by one side only, or a
+pack of more than one on one side only, is a conflict; transfer speed (MB/s, Gbps) and watch band
+type are compared. Clustering compares only clusters sharing the brand or a code, once per
+distinct title, with features cached by title: 1,915 recorded products 4.2 s -> ~40 ms warm
+(features cached), ~170 ms cold; 1,500 products with 6x duplicate titles 1.4 s -> ~80 ms.
+`products` is deduped across stores again (one card per look-alike, as before 17b); groups are
+built from listings deduped within each store, and members missing from `products` come back in
+`groupExtras`.
+
+Gold: 9 recorded wrong merges added as different pairs (122 same / 109 different). Threshold kept
+at 0.6 (set in round 1). On the tune half 0.5 and 0.55 also reach 100% precision, but they make
+1-2 wrong held-out merges, so the round-1 value stays.
+
+| half | merge precision | merge recall | wrong merges |
+|---|---|---|---|
+| tune (20 queries) | 100% (30/30) | 52.6% (30/57) | 0/47 |
+| held out (20) | 100% (39/39) | 60.0% (39/65) | 0/62 |
+
+All 16 adversarial pairs from the review stay apart (unit tests in tests/lib/group.test.ts).
+Per-query top-10 metrics over all 40 queries and per-query result counts: identical to before 17b.

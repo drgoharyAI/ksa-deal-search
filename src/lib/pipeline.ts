@@ -7,7 +7,7 @@ import { matchTerms } from "@/src/lib/query/filler";
 import { tokenizeKeepDigits } from "@/src/lib/match/tokenize";
 import { filterRelevant } from "@/src/lib/match/relevance";
 import { dropAccessories } from "@/src/lib/match/accessory";
-import { dedupeByStore } from "@/src/lib/match/dedupe";
+import { dedupe, dedupeByStore } from "@/src/lib/match/dedupe";
 import { groupProducts, groupRefs, orderGroups, type GroupRef } from "@/src/lib/match/group";
 import { isBookCode, isOtherProduct } from "@/src/lib/match/category";
 import { applyBrandPriceRules } from "@/src/lib/match/price";
@@ -32,6 +32,11 @@ export type SearchResult = {
   queryTokens: string[][];
   /** The same product at several stores (src/lib/match/group.ts), in display order; ids only. */
   groups?: GroupRef[];
+  /**
+   * Group members missing from `products`: `products` stays deduped across stores (one card per
+   * look-alike, as before grouping), so a twin at another store is only here, for the group's rows.
+   */
+  groupExtras?: Product[];
   reason?: string;
 };
 
@@ -182,13 +187,17 @@ export async function runSearch(input: SearchInput, opts: SearchOptions = {}): P
   products = markWeakMatches(products, queryTokens);
   products = scoreMatches(products, queryTokens);
   opts.onFiltered?.(products);
-  // Look-alikes merge within a store; the same product at other stores is grouped instead.
-  products = rank(dedupeByStore(products), input.sort);
-  const groups = orderGroups(groupProducts(products), input.sort).filter((g) => g.members.length > 1);
+  // Groups come from listings deduped within each store only, so each store keeps its row; the
+  // product list stays deduped across stores until the grouped card shows the groups.
+  const perStore = rank(dedupeByStore(products), input.sort);
+  products = rank(dedupe(products), input.sort);
+  const groups = orderGroups(groupProducts(perStore), input.sort).filter((g) => g.members.length > 1);
   const groupOf = new Map(groups.flatMap((g) => g.members.map((p) => [p, g.key] as const)));
+  const listed = new Set(products);
+  const groupExtras = groups.flatMap((g) => g.members.filter((p) => !listed.has(p))).map((p) => ({ ...p, groupKey: groupOf.get(p)! }));
   products = products.map((p) => (groupOf.has(p) ? { ...p, groupKey: groupOf.get(p)! } : p));
 
-  const result: SearchResult = { products, statuses, queryTokens, groups: groupRefs(groups) };
+  const result: SearchResult = { products, statuses, queryTokens, groups: groupRefs(groups), groupExtras };
   if (!products.length) result.reason = NO_MATCH_REASON;
   return result;
 }

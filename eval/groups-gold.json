@@ -1,5 +1,5 @@
 {
- "about": "Reviewed cross-store pairs for grouping (src/lib/match/group.ts). Candidates from scripts/eval-group-candidates.mjs, labelled by reading titles; ambiguous pairs left out. split: tune (even query index across queries*.json) or heldout.",
+ "about": "Reviewed cross-store pairs for grouping (src/lib/match/group.ts). Candidates from scripts/eval-group-candidates.mjs, labelled by reading titles; ambiguous pairs left out. split: tune (even query index across queries*.json) or heldout. Review round 1 added recorded wrong merges (Core300S Pro vs Core300S, Air touch V2 vs P1, filter bundle, G502 Hero vs G502 X, M500 vs M550 Max, pack of 6, renewed grade B vs renewed) as different pairs.",
  "queries": [
   {
    "query": "anc earbuds under 300",
@@ -78,6 +78,18 @@
     [
      "noon-sa:N70105536V",
      "trendyol-sa:1198517342"
+    ],
+    [
+     "jarir:650565",
+     "amazon-sa:B0FSKZGHFJ"
+    ],
+    [
+     "jarir:646828",
+     "amazon-sa:B0FSKYPH22"
+    ],
+    [
+     "jarir:648455",
+     "amazon-sa:B0FSKXDS55"
     ]
    ]
   },
@@ -298,6 +310,10 @@
     [
      "aliexpress:1005007714521230",
      "amazon-sa:B0FBG2N8L6"
+    ],
+    [
+     "trendyol-sa:90252232",
+     "amazon-sa:B07W6JNFYQ"
     ]
    ]
   },
@@ -506,6 +522,10 @@
     [
      "noon-sa:N38712237A",
      "trendyol-sa:1201670468"
+    ],
+    [
+     "amazon-sa:B08BGHSL14",
+     "noon-sa:N53263750A"
     ]
    ]
   },
@@ -769,6 +789,10 @@
     [
      "aliexpress:1005006335914112",
      "amazon-sa:B0FSDD4X3B"
+    ],
+    [
+     "noon-sa:ZD73CF8C079A390682020Z",
+     "trendyol-sa:883835127"
     ]
    ]
   },
@@ -813,6 +837,18 @@
     [
      "noon-sa:ZC8341611CED5E22DC4CCZ",
      "amazon-sa:B0CG1N11DV"
+    ],
+    [
+     "amazon-sa:B0F2MLPWTG",
+     "noon-sa:Z4A99D4DF5269C341E1CFZ"
+    ],
+    [
+     "amazon-sa:B09SPTDML7",
+     "noon-sa:N53327525A"
+    ],
+    [
+     "noon-sa:Z7A5C3C78D4DDA0CCDD39Z",
+     "trendyol-sa:889417901"
     ]
    ]
   },

@@ -72,9 +72,10 @@ describe("specConflict", () => {
     expect(specConflict(f("MacBook Air M3 13"), f("MacBook Air M2 13"))).toBe(true);
     expect(specConflict(f("Apple iphone16 128GB"), f("Apple iPhone 16 128GB"))).toBe(false);
   });
-  it("RAM and storage are separate dimensions", () => {
+  it("RAM and storage are separate dimensions; either stated by one side only is a conflict", () => {
     const f = (t: string) => titleFeatures(t);
-    expect(specConflict(f("Galaxy S24 8GB RAM 256GB"), f("Galaxy S24 256GB"))).toBe(false);
+    expect(specConflict(f("Galaxy S24 8GB RAM 256GB"), f("Galaxy S24 256GB"))).toBe(true);
+    expect(specConflict(f("Galaxy S24 8GB RAM 256GB"), f("Galaxy S24 256GB 8GB RAM"))).toBe(false);
     expect(specConflict(f("Galaxy S24 8GB RAM 256GB"), f("Galaxy S24 12GB RAM 256GB"))).toBe(true);
   });
 });
@@ -232,5 +233,54 @@ describe("dedupeByStore", () => {
     const b = P("noon-sa", "b", "Sony WH-1000XM5 Headphones White", 900);
     const c = P("amazon-sa", "c", "Sony WH-1000XM5 Headphones Black", 1200);
     expect(dedupeByStore([a, b, c]).map((p) => p.id)).toEqual(["b", "c"]);
+  });
+});
+
+describe("review round 1 (adversarial pairs: all must stay apart)", () => {
+  const apart: [string, string, string][] = [
+    ["renewed after 'for'", "Sony WH-1000XM5 Wireless Noise Cancelling Headphones, Black", "Sony WH-1000XM5 Wireless Headphones for Travel and Work - Renewed"],
+    ["open box", "Sony WH-1000XM5 Wireless Noise Cancelling Headphones, Black", "Sony WH-1000XM5 Wireless Noise Cancelling Headphones Black (Open Box)"],
+    ["pre-owned", "Sony WH-1000XM5 Wireless Noise Cancelling Headphones, Black", "Sony WH-1000XM5 Wireless Noise Cancelling Headphones Black Pre-Owned"],
+    ["reconditioned", "Sony WH-1000XM5 Wireless Noise Cancelling Headphones, Black", "Sony WH-1000XM5 Wireless Noise Cancelling Headphones Black Reconditioned"],
+    ["renewed grade", "Apple iPhone 16 Pro (128 GB) - Black Titanium (Renewed)", "Renewed Grade B Apple iPhone 16 Pro, 128 GB, Natural Titanium, 5G"],
+    ["accessory with the product code", "Sony WH-1000XM5 Wireless Noise Canceling Over-Ear Headphones, Black", "WH-1000XM5 Replacement Ear Pads Protein Leather Headphone Cushions"],
+    ["storage on one side", "Samsung Galaxy S24 Ultra 5G SM-S928B Titanium Black", "Samsung Galaxy S24 Ultra 5G SM-S928B 512GB Titanium Black"],
+    ["pack of 2", "Anker USB C Cable 100W 6ft, Pack of 2", "Anker USB C Cable 100W 6ft A8866"],
+    ["4 pack with code", "Philips Sonicare BrushSync HX6064 Replacement Brush Heads, 4 Pack", "Philips Sonicare HX6064 Brush Head"],
+    ["pro after 'for'", "LEVOIT Air Purifier for Home Bedroom, Core 300S", "LEVOIT Air Purifier for Home Bedroom, Core 300S Pro"],
+    ["word right after a shared code", "G502 Hero Rgb 910- 005471 Wired Gaming Mouse", "Logitech G502 X Wired Gaming Mouse"],
+    ["first own code differs", "AZDOME M500 (Upgraded M550-max) Dash Cam Ultra HD 4K", "M550MAX 4K Dash Cam with 3 Lenses"],
+    ["speed", "SSK 1TB Portable SSD External Solid State Drive USB C Up to 1050MB/s", "SSK 1TB Portable SSD External Solid State Drive USB C Up to 550MB/s"],
+    ["watch band", "Apple Watch Ultra 2 GPS + Cellular 49mm Natural Titanium Case with Black Titanium Milanese Loop", "Apple Watch Ultra 2 GPS + Cellular 49mm Natural Titanium Case with Blue Alpine Loop"],
+    ["bundle after 'for'", "Xiaomi Smart Air Purifier 4 Compact BHR8762GB White", "Xiaomi Smart Air Purifier 4 Compact BHR8762GB for Home & Replacement Filter Bundle"],
+  ];
+  for (const [name, a, b] of apart) {
+    it(name, () => {
+      const ps = [P("amazon-sa", "a", a, 100), P("noon-sa", "b", b, 90)];
+      expect(groupProducts(ps).every((g) => g.members.length === 1)).toBe(true);
+    });
+  }
+  it("a true compatibility list is still ignored", () => {
+    expect(same("Belkin BoostCharge Pro 15W Wireless Charging Stand for iPhone 17 16 15 Pro Max", "Belkin BoostCharge Pro 15W Wireless Charging Stand White")).toBe(true);
+  });
+  it("single-unit counts are no conflict", () => {
+    expect(same("Oral-B Vitality Cross Action Rechargeable Electric Toothbrush, 1 Count Black", "Oral-B Vitality Cross Action Rechargeable Electric Toothbrush")).toBe(true);
+  });
+});
+
+describe("groupProducts speed", () => {
+  it("groups 1,500 products quickly", () => {
+    const brandsL = ["Sony", "Anker", "Philips", "Logitech", "Kenwood", "Xiaomi"];
+    const nouns = ["Headphones", "Power Bank", "Air Fryer", "Gaming Mouse", "Blender", "Kettle"];
+    const sites = ["amazon-sa", "noon-sa", "jarir", "trendyol-sa", "aliexpress"];
+    const ps: Product[] = [];
+    for (let i = 0; i < 1500; i++) {
+      const b = brandsL[i % 6];
+      const n = nouns[(i >> 3) % 6];
+      ps.push(P(sites[i % 5], `p${i}`, `${b} ${n} Model ${i % 40} Wireless Portable Edition ${i % 7}L ${100 + (i % 9) * 50}W`, 50 + (i % 97)));
+    }
+    const t = performance.now();
+    groupProducts(ps);
+    expect(performance.now() - t).toBeLessThan(1500);
   });
 });

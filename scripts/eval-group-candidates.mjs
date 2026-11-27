@@ -35,7 +35,9 @@ for (const query of queries) {
     .filter(existsSync)
     .map((f) => JSON.parse(readFileSync(f, "utf8")));
   const { exec } = ev.createReplayExec(recordings);
-  const r = await ev.runSearch({ query, sites: recordings.map((x) => x.store), sort: "price" }, { exec });
+  let kept = [];
+  await ev.runSearch({ query, sites: recordings.map((x) => x.store), sort: "price" }, { exec, onFiltered: (p) => (kept = p) });
+  const r = { products: ev.rank(ev.dedupeByStore(kept), "price") };
   const groups = ev.groupProducts(r.products);
   const groupOf = new Map();
   for (const g of groups) for (const p of g.members) groupOf.set(p, g.key);

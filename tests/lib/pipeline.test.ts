@@ -409,9 +409,38 @@ describe("runSearch cross-store groups", () => {
         { key: "g:g1:1", memberKeys: ["g2:1", "g1:1"], bestKey: "g2:1", colors: { "g2:1": "silver", "g1:1": "black" } },
       ]);
       expect(r.products.every((p) => p.groupKey === "g:g1:1")).toBe(true);
+      expect(r.groupExtras).toEqual([]);
     } finally {
       delete sites.g1;
       delete sites.g2;
+    }
+  });
+});
+
+describe("runSearch keeps one card per look-alike until the grouped card ships", () => {
+  it("a twin at another store is a group member listed in groupExtras, not a second card", async () => {
+    const site = (id: string, price: number) => ({
+      id,
+      label: id,
+      searchCalls: () => [{ op: "search", args: {} }],
+      runCall: async () => ({ ok: true as const, tier: 1, data: [{}] }),
+      normalizeSearchItem: () => ({
+        site: id, id: "1", title: "Sony WH-1000XM5 Wireless Noise Cancelling Headphones Black", listPrice: price,
+        origPrice: null, discountPct: null, currency: "SAR", rating: null, soldCount: 0, image: "",
+        url: `https://${id}.example/1`, detailStatus: "ok" as const,
+      }),
+      fetchDetail: async (p: never) => p,
+    });
+    sites.t1 = site("t1", 1200);
+    sites.t2 = site("t2", 1100);
+    try {
+      const r = await runSearch({ ...base, sites: ["t1", "t2"], query: "sony headphones" });
+      expect(r.products.map((p) => p.site)).toEqual(["t2"]);
+      expect(r.groups?.[0].memberKeys).toEqual(["t2:1", "t1:1"]);
+      expect(r.groupExtras?.map((p) => `${p.site}:${p.groupKey}`)).toEqual(["t1:g:t1:1"]);
+    } finally {
+      delete sites.t1;
+      delete sites.t2;
     }
   });
 });
