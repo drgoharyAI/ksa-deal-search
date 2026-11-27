@@ -1,0 +1,18 @@
+# gitleaks config (task 18): the default rules, plus path allowlists for gitignored, local-only
+# folders that `gitleaks dir .` would otherwise scan (Chrome profiles, api-anything homes, build
+# output, eval dumps, agent notes). .env.local is deliberately NOT allowlisted: a scan of the
+# working tree should keep reporting the local Telegram token so nobody forgets it is there.
+# Path separators match both / and \ (\x5c), so the same file works on Windows and Linux.
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "gitignored local-only folders"
+paths = [
+  '''^\.noon-profile[^/\x5c]*[/\x5c]''',
+  '''^\.aa-home[^/\x5c]*[/\x5c]''',
+  '''^\.next[/\x5c]''',
+  '''^node_modules[/\x5c]''',
+  '''^\.superpowers[/\x5c]''',
+  '''^eval[/\x5c]dump[/\x5c]''',
+]

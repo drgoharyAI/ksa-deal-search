@@ -48,6 +48,7 @@ export async function openSheinBrowser({
     ...(offscreen ? ["--window-position=-32000,-32000"] : []),
     "about:blank",
   ];
+  // nosemgrep: javascript.lang.security.detect-child-process.detect-child-process -- Chrome from a fixed install list or the operator's CHROME_PATH, argv array, no shell
   const proc = spawn(chromePath, args, { stdio: "ignore" });
   let browser;
   for (let i = 0; i < 80 && !browser; i++) {

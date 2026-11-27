@@ -1,0 +1,7 @@
+# Reviewed gitleaks false positives in git history (task 18). One fingerprint per line.
+# Jarir's public Constructor.io autocomplete key (shipped to every browser; also in api-specs/jarir.json).
+c6ae023cafbed7a7915650a7c59d82bc473161da:src/lib/suggest.ts:generic-api-key:21
+# A noon product title ("... Keycaps, ...") in a recorded search answer, not a key.
+f9ecfa96708c4d5433ab06c445c7c46a2db907d4:eval/recorded/noon-sa/mechanical-keyboard-wired.json:generic-api-key:1
+# The same title in the working tree (gitleaks dir).
+eval/recorded/noon-sa/mechanical-keyboard-wired.json:generic-api-key:1

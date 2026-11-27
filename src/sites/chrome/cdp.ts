@@ -249,6 +249,7 @@ const realDeps: Omit<Deps, "profileDir"> = {
     }
   },
   spawnChrome(chromePath, args) {
+    // nosemgrep: javascript.lang.security.detect-child-process.detect-child-process -- Chrome from a fixed install list or the operator's CHROME_PATH, argv array, no shell
     const proc = spawn(chromePath, args, { stdio: "ignore" });
     proc.on("error", () => {});
     return proc;

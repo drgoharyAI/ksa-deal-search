@@ -18,7 +18,7 @@ type Source = { id: string; url: (q: string) => string; parse: (data: unknown) =
 
 const AMAZON_SA_MARKETPLACE = "A17E79C6D8DWNP";
 // The same public Constructor.io key and client the Jarir search spec (api-specs/jarir.json) uses.
-const JARIR_KEY = "key_KcSYfmQTEwRpBnd9";
+const JARIR_KEY = "key_KcSYfmQTEwRpBnd9"; // gitleaks:allow (public browser key, see above)
 
 const values = (list: unknown, field = "value"): string[] =>
   Array.isArray(list)
