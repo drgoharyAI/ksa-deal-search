@@ -112,3 +112,13 @@ Station"), and legs/feet join the part words ("Air Fryer Silicone Rubber Legs").
 | p@10 | acc@10 | wrong@10 | recall | cheapest-first |
 |---|---|---|---|---|
 | 91% (90.7→91.3) | 2% | 4.7% | 90% | 73% |
+
+## Round 9: price sanity for brand queries (kept)
+`src/lib/match/price.ts` + `data/brands.json`: when the query names a known brand, items priced
+below 0.25 x the median of the matching items (5+ items) are dropped: clones that claim the brand
+("Apple Watch Series 10 Smart Watch" at 70 SAR) and parts that slipped past the word rules.
+Unbranded queries are untouched (marketplace robot vacuums or smart watches legitimately start at
+a few riyals).
+| p@10 | acc@10 | wrong@10 | recall | cheapest-first |
+|---|---|---|---|---|
+| 96% | 2% | 1.3% | 90% | 80% |

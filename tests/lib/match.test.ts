@@ -5,6 +5,7 @@ import { isAccessory, isStrongAccessory, dropAccessories, isForAccessory } from 
 import { dedupe } from "@/src/lib/match/dedupe";
 import { specMatches } from "@/src/lib/match/spec";
 import { isOtherProduct } from "@/src/lib/match/category";
+import { dropBrandPriceOutliers } from "@/src/lib/match/price";
 import type { Product } from "@/src/lib/types";
 
 const prod = (title: string, listPrice = 10, id = title): Product => ({
@@ -308,5 +309,20 @@ describe("title core needs a query word (12c)", () => {
   });
   it("'built-in' starts the add-on part", () => {
     expect(isAccessory("20000mAh Power Bank built-in 4 charging cables", ["power", "bank", "20000mah"])).toBe(false);
+  });
+});
+
+describe("dropBrandPriceOutliers (12c)", () => {
+  const set = (rows: [string, number][]) => rows.map(([t, pr], i) => prod(t, pr, String(i)));
+  const watches = set([
+    ["Apple Watch Series 10 Smart Watch Clone", 70], ["Apple Watch SE 3 GPS 40mm", 899],
+    ["Apple Watch Series 11 GPS 42mm", 1599], ["Apple Watch Ultra 3", 3299], ["Apple Watch SE 3 GPS 44mm", 999],
+  ]);
+  it("drops far-below-median items in a brand query", () => {
+    expect(dropBrandPriceOutliers(watches, ["apple", "watch"]).map((p) => p.id)).toEqual(["1", "2", "3", "4"]);
+  });
+  it("leaves unbranded queries and small sets alone", () => {
+    expect(dropBrandPriceOutliers(watches, ["smart", "watch"])).toHaveLength(5);
+    expect(dropBrandPriceOutliers(watches.slice(0, 3), ["apple", "watch"])).toHaveLength(3);
   });
 });

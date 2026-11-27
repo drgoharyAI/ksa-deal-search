@@ -1,5 +1,5 @@
 {
-  "at": "2026-11-27T02:04:56.002Z",
+  "at": "2026-11-27T02:05:41.305Z",
   "queries": [
     {
       "query": "anc earbuds under 300",
@@ -614,70 +614,21 @@
         }
       ],
       "recordedItems": 475,
-      "results": 104,
+      "results": 97,
       "missingCalls": [],
       "labelled": true,
       "metrics": {
         "top": 10,
-        "precisionAt10": 0.3,
+        "precisionAt10": 1,
         "accessoryAt10": 0,
-        "wrongModelAt10": 0.5,
+        "wrongModelAt10": 0,
         "unlabeledAt10": 0,
         "recall": 0.8607594936708861,
         "relevantRecorded": 158,
         "relevantKept": 136,
-        "cheapestRelevantFirst": false
+        "cheapestRelevantFirst": true
       },
       "top": [
-        {
-          "key": "aliexpress:1005009657036132",
-          "store": "aliexpress",
-          "price": 53.44,
-          "title": "2025 T900 Ultra 2 Smart Watch Men 49mm Series 8 2.3 \"AMOLED Screen NFC Compass Waterproof For Apple Watch IWO Ultra 8 Smartwatc",
-          "label": "off-topic"
-        },
-        {
-          "key": "aliexpress:1005012577564194",
-          "store": "aliexpress",
-          "price": 68.87,
-          "title": "Apple Watch New Series 10 Watch 10 GPS Smart Watch Memory Music Video Bluetooth Call Heart Rate Waterproof NFC Smartwatch For Apple Android",
-          "label": "wrong-model"
-        },
-        {
-          "key": "aliexpress:1005012556664544",
-          "store": "aliexpress",
-          "price": 72.82,
-          "title": "Apple Watch Smart For GPS Smart Watch Men For Apple Watch 10 Series Always On Display Body Temperature BT Call NFC Women DT Smartwatch For IOS Android",
-          "label": "wrong-model"
-        },
-        {
-          "key": "aliexpress:1005013463365715",
-          "store": "aliexpress",
-          "price": 72.82,
-          "title": "Apple Watch GPS Watch 10 Series Smart Bracelet Woman HD AMOLED Screen Music Bluetooth Call NFC Sport Waterproof Smartwatch For Apple Android",
-          "label": "wrong-model"
-        },
-        {
-          "key": "aliexpress:1005013542812839",
-          "store": "aliexpress",
-          "price": 74.15,
-          "title": "Apple Watch 2026 New For Apple GPS Watch 10 Smart Watch Men HD AMOLED Memory Music 3D Surround Bluetooth Call Waterproof Smartwatch Woman",
-          "label": "wrong-model"
-        },
-        {
-          "key": "aliexpress:1005013339777841",
-          "store": "aliexpress",
-          "price": 81.85,
-          "title": "Apple Watch New 2026 Original For Apple Watch 10 Smart Watch Men Body Temperature Bluetooth Call NFC GPS Sports Women SmartWatch for Apple",
-          "label": "wrong-model"
-        },
-        {
-          "key": "aliexpress:1005013701554317",
-          "store": "aliexpress",
-          "price": 95.45,
-          "title": "2026 New GPS Outdoor Smart Watch Men Women Bluetooth Call Health Monitoring Compass Altimeter Sports Fitness Tracker For Apple",
-          "label": "off-topic"
-        },
         {
           "key": "aliexpress:1005006631563482",
           "store": "aliexpress",
@@ -697,6 +648,55 @@
           "store": "noon-sa",
           "price": 899,
           "title": "Apple Watch SE 3 GPS 40mm (International Version) Aluminium Case, Starlight Sport Band - S/M",
+          "label": "relevant"
+        },
+        {
+          "key": "noon-sa:N70223287V",
+          "store": "noon-sa",
+          "price": 899,
+          "title": "Apple Watch SE 3 GPS 40mm (International Version) Midnight Aluminium Case With Midnight Sport Band - S/M",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005005880057599",
+          "store": "aliexpress",
+          "price": 940.9,
+          "title": "100% Original Apple Watch SE (2nd Gen) 40mm / 44mm Aluminum Case with Sport Band iOS SmartWatch",
+          "label": "relevant"
+        },
+        {
+          "key": "noon-sa:N70437069V",
+          "store": "noon-sa",
+          "price": 955,
+          "title": "Apple Watch SE 3 (2026) GPS 40mm (International Version) Midnight Aluminium Case  With Navy Blue Sport Band - S/M",
+          "label": "relevant"
+        },
+        {
+          "key": "noon-sa:N70434678V",
+          "store": "noon-sa",
+          "price": 971,
+          "title": "Apple Watch SE 3 (2026) GPS 40mm (Middle East Version) Midnight Aluminium Case With Navy Blue Sport Band - S/M",
+          "label": "relevant"
+        },
+        {
+          "key": "noon-sa:N70434643V",
+          "store": "noon-sa",
+          "price": 975.65,
+          "title": "Apple Watch SE 3 (2026) GPS 40mm (Middle East Version) Starlight Aluminium Case With Sand Sport Band - S/M",
+          "label": "relevant"
+        },
+        {
+          "key": "jarir:666614",
+          "store": "jarir",
+          "price": 999,
+          "title": "Apple Watch SE 3 40 Smartwatch, GPS, Starlight Aluminum Case, Starlight Sport Band, Small/Medium",
+          "label": "relevant"
+        },
+        {
+          "key": "jarir:666626",
+          "store": "jarir",
+          "price": 999,
+          "title": "Apple Watch SE 3 40 Smartwatch, GPS, Midnight Aluminum Case, Midnight Sport Band, Medium/Large",
           "label": "relevant"
         }
       ]
@@ -2104,10 +2104,10 @@
   ],
   "overall": {
     "queries": 15,
-    "precisionAt10": 0.9133333333333334,
+    "precisionAt10": 0.9600000000000001,
     "accessoryAt10": 0.020000000000000004,
-    "wrongModelAt10": 0.04666666666666666,
+    "wrongModelAt10": 0.013333333333333334,
     "recall": 0.8979236525313057,
-    "cheapestRelevantFirst": 0.7333333333333333
+    "cheapestRelevantFirst": 0.8
   }
 }
