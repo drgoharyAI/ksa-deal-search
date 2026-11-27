@@ -16,11 +16,13 @@ import ErrorState from "./components/ui/ErrorState";
 import { SkeletonCard } from "./components/ui/Skeleton";
 import WatchForm, { postWatch } from "./components/WatchForm";
 import { cheapestConfident, defaultTarget, priceOf } from "@/src/lib/alerts/shared";
-import { HOME_ENTRY, historyMove, valuesFromUrl } from "@/src/lib/rerun";
+import { HOME_ENTRY, historyMove } from "@/src/lib/rerun";
+import { parseShare, runOnce, shareSearch } from "@/src/lib/share";
+import CopyLink from "./components/CopyLink";
 import ResultsLayout from "./components/ResultsLayout";
 import { CompareDialog, CompareTray } from "./components/Compare";
 import {
-  NO_FILTERS, activeChips, chipContext, chipParamsOnly, chipsForNewQuery, facetCountsFor, filtersFromSearch, isActive, priceBounds,
+  NO_FILTERS, activeChips, chipContext, chipsForNewQuery, facetCountsFor, filtersFromSearch, isActive, priceBounds,
   withChipParams, type ChipFilters, type KeptChip,
 } from "@/src/lib/chips";
 import { browserStorage, readView, writeView, type ResultsView } from "@/src/lib/filter-drawer";
@@ -36,8 +38,11 @@ import {
 } from "@/src/lib/search-stream";
 
 type Filters = { minPrice?: number; maxPrice?: number; minRating?: number };
-/** The search on screen: its store row and view model (streamed in), and what it asked for. */
-type Run = { stream: StreamState; query: string; sites: string[]; filters: Filters };
+/**
+ * The search on screen: its store row and view model (streamed in), and what it asked for. `form`:
+ * the form values it ran with (one object for the run's life, so the URL follows it, not each event).
+ */
+type Run = { stream: StreamState; query: string; sites: string[]; filters: Filters; form: FormValues };
 type Results = {
   products: Product[];
   /** The same product at several stores (ids), and members missing from `products`. */
@@ -183,7 +188,8 @@ export default function Home() {
       // over. When chips were on, AppHeader pushed a new "/" entry: it is marked, so Back and
       // Forward can tell it from the results entry.
       home: () => {
-        if (withCompareParam(withChipParams("", chips), cmp.keys) !== "") window.history.replaceState({ ...(window.history.state as object | null), [HOME_ENTRY]: true }, "", "/");
+        // A results URL (it carries the query) or chip params: AppHeader pushed a new "/" entry.
+        if (run || withCompareParam(withChipParams("", chips), cmp.keys) !== "") window.history.replaceState({ ...(window.history.state as object | null), [HOME_ENTRY]: true }, "", "/");
         resetHome(true);
       },
       pop: () => {
@@ -191,6 +197,17 @@ export default function Home() {
         const move = historyMove(qs, window.history.state, { stashed: !!stashRef.current, showingHome });
         if (move === "home") {
           if (!showingHome) resetHome(true);
+          return;
+        }
+        if (move === "run") {
+          // Back to a search left before any result came: run it again, as its shared link would.
+          const shared = parseShare(qs, INITIAL);
+          if (shared) {
+            setChips(shared.chips);
+            setCmp({ keys: shared.cmp, full: false });
+            setValues(shared.values);
+            void search(undefined, shared.values);
+          }
           return;
         }
         const s = stashRef.current;
@@ -216,8 +233,10 @@ export default function Home() {
     };
   }, []);
 
-  // A History "Re-run" link: fill the form from the URL, clean the URL, and search once.
-  // The chip filters come back from the URL too (a refresh or Back keeps them).
+  // A results URL (a shared link, a reload, a History "Re-run" link): fill the form from it, put
+  // the chips and the compare selection back, and run that search once. runOnce defers the run to
+  // the next task, so React's Strict Mode double mount (dev) still searches once.
+  const autoRan = useRef(false);
   useEffect(() => {
     const qs = window.location.search;
     // Read once after hydration (the server render has no URL state); not a cascade.
@@ -227,21 +246,30 @@ export default function Home() {
     setCmp({ keys, full: false });
     setMemory(keys.length ? readMemory(sessionStore()) : null);
     setChipsRead(true);
-    const fromUrl = valuesFromUrl(qs, INITIAL);
-    if (!fromUrl) return;
-    window.history.replaceState(null, "", window.location.pathname + withCompareParam(chipParamsOnly(qs), keys));
-    setValues(fromUrl.values);
-    if (fromUrl.run) void search(undefined, fromUrl.values);
+    const shared = parseShare(qs, INITIAL);
+    if (!shared) return;
+    // The link in its own words: unknown keys and the old "run=1" dropped.
+    window.history.replaceState(window.history.state, "", window.location.pathname + shareSearch(shared.values, shared.chips, shared.cmp));
+    setValues(shared.values);
+    return runOnce(autoRan, () => void search(undefined, shared.values));
     // Runs once on mount by design.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Chip and compare changes write the URL in place (replaceState: no history entry, no request).
+  // The URL follows the page in place (replaceState: no history entry, no request): with a search
+  // on screen it is the whole shareable link (query, stores, sort, limits, chips, compare);
+  // without one, only the chip and compare keys.
+  const runForm = run?.form;
   useEffect(() => {
     if (!chipsRead) return;
-    const next = withCompareParam(withChipParams(window.location.search, chips), cmp.keys);
-    if (next !== window.location.search) window.history.replaceState(window.history.state, "", window.location.pathname + next);
-  }, [chips, cmp.keys, chipsRead]);
+    const next = runForm
+      ? shareSearch({ ...runForm, sort: values.sort }, chips, cmp.keys)
+      : withCompareParam(withChipParams(window.location.search, chips), cmp.keys);
+    if (next === window.location.search) return;
+    // A results entry is never the marked "go home" entry, even when a search replaced that entry.
+    const state = Object.entries((window.history.state as Record<string, unknown> | null) ?? {}).filter(([k]) => !runForm || k !== HOME_ENTRY);
+    window.history.replaceState(Object.fromEntries(state), "", window.location.pathname + next);
+  }, [chips, cmp.keys, chipsRead, runForm, values.sort]);
 
   // Cards: a cross-store group is one card, every other product one card. Chips narrow the cards
   // (a group passes when any member does), then sort and the match tiers apply; no new request.
@@ -332,7 +360,7 @@ export default function Home() {
       maxPrice: toNum(v.maxPrice),
       minRating: toNum(v.minRating),
     };
-    const meta = { query: v.query.trim(), sites: v.sites, filters: { minPrice: body.minPrice, maxPrice: body.maxPrice, minRating: body.minRating } };
+    const meta = { query: v.query.trim(), sites: v.sites, filters: { minPrice: body.minPrice, maxPrice: body.maxPrice, minRating: body.minRating }, form: { ...v, query: v.query.trim() } };
     setRun({ ...meta, stream: initStream(v.sites) });
     const request = (url: string) =>
       fetch(url, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body), signal: ctrl.signal });
@@ -507,11 +535,14 @@ export default function Home() {
                   {results && items.length > 0 && <span className="results__ship">Prices exclude shipping</span>}
                 </p>
               </div>
-              {!loading && results && cheapest && !watchOpen && !watchSaved && (
-                <Button size="sm" onClick={() => setWatchOpen(true)}>
-                  Watch this search
-                </Button>
-              )}
+              <div className="results__actions">
+                {results && <CopyLink />}
+                {!loading && results && cheapest && !watchOpen && !watchSaved && (
+                  <Button size="sm" onClick={() => setWatchOpen(true)}>
+                    Watch this search
+                  </Button>
+                )}
+              </div>
               {/* Always in the page, so screen readers announce the text when it changes. */}
               <p className={!loading && watchSaved ? "results__note" : "visually-hidden"} role="status">
                 {!loading && watchSaved && (
@@ -612,6 +643,7 @@ export default function Home() {
         slots={slots}
         full={cmp.full}
         waiting={loading}
+        searched={!!run}
         onRemove={removeCompare}
         onClear={() => setCmp(NO_COMPARE)}
         onOpen={() => setCompareOpen(true)}

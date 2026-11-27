@@ -25,6 +25,11 @@ type TrayProps = {
   full: boolean;
   /** A search is streaming: a missing product may still arrive. */
   waiting: boolean;
+  /**
+   * A search is on screen (its query is in the URL): a missing product has left those results.
+   * Without one (an older link that carries only the keys), the tray says to open the search.
+   */
+  searched?: boolean;
   onRemove: (key: string) => void;
   onClear: () => void;
   onOpen: () => void;
@@ -37,12 +42,13 @@ type TrayProps = {
  * store's mark) per product, each a button that removes it, a note, "Clear" and "Compare (N)".
  * N counts the products that can be compared now; one that left the results says so.
  */
-export function CompareTray({ slots, full, waiting, onRemove, onClear, onOpen, rerun }: TrayProps) {
+export function CompareTray({ slots, full, waiting, searched = false, onRemove, onClear, onOpen, rerun }: TrayProps) {
   const live = slots.filter((s) => s.product).length;
   const gone = slots.length - live;
-  // Nothing ticked is on screen and no search can be offered (a shared link opened in another
-  // browser): say what to do, and offer no action that cannot work. Shareable result URLs are U5.
-  const orphaned = live === 0 && gone > 0 && !waiting && !rerun;
+  // Nothing ticked is on screen and no search can be offered (an older link with only `cmp=`):
+  // say what to do, and offer no action that cannot work. A results URL carries its query, so a
+  // shared link runs its search and this never shows for one.
+  const orphaned = live === 0 && gone > 0 && !waiting && !rerun && !searched;
   let note = "";
   if (full) note = `You can compare up to ${MAX_COMPARE} products. Remove one to add another.`;
   else if (orphaned) note = "Open the original search to see these products.";

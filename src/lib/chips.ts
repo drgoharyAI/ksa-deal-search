@@ -192,11 +192,6 @@ export function withChipParams(search: string, f: ChipFilters): string {
   return s ? `?${s}` : "";
 }
 
-/** Only the chip keys of `search` (drops a re-run link's own keys once it has been read). */
-export function chipParamsOnly(search: string): string {
-  return withChipParams("", filtersFromSearch(search));
-}
-
 /** Query-independent filters a new query keeps (named in a note). */
 export type KeptChip = "rating" | "discounted" | "deals";
 

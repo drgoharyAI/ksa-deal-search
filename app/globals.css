@@ -181,6 +181,13 @@
 .results__head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: var(--space-xs) var(--space-md); }
 .results__title { display: grid; gap: var(--space-3xs); min-width: 0; }
 .results__head h2 { font-size: var(--text-2xl); }
+.results__actions { display: flex; flex-wrap: wrap; align-items: flex-start; gap: var(--space-xs); min-width: 0; }
+/* Copy link: the URL carries the search, filters and compare; "Link copied" in words, or the link to copy by hand */
+.copylink { display: grid; justify-items: end; gap: var(--space-3xs); min-width: 0; max-width: 100%; }
+.copylink__done { font-size: var(--text-sm); font-weight: 500; color: var(--color-accent-strong); }
+.copylink__manual { display: grid; gap: var(--space-2xs); width: min(28rem, calc(100vw - 2 * var(--gutter))); }
+.copylink__row { display: flex; gap: var(--space-xs); min-width: 0; }
+.copylink__field { flex: 1 1 auto; width: auto; font-size: var(--text-sm); }
 .results__note { display: flex; flex-wrap: wrap; gap: 0 var(--space-md); font-size: var(--text-sm); color: var(--color-muted); font-variant-numeric: tabular-nums; }
 .results__note a { color: var(--color-ink); text-decoration-color: var(--color-accent); }
 .results__divider { display: grid; gap: var(--space-2xs); padding-top: var(--space-md); border-top: var(--border); }
