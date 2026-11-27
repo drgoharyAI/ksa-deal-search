@@ -5,7 +5,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 vi.mock("@/src/lib/aa", () => ({ aaCall: vi.fn() }));
 
 import { aaCall } from "@/src/lib/aa";
-import { MSG_UNSUPPORTED, runSearch } from "@/src/lib/pipeline";
+import { MSG_UNSUPPORTED, fetchSite, prepareSearch, runSearch } from "@/src/lib/pipeline";
 import { sites } from "@/src/sites/registry";
 
 const mock = vi.mocked(aaCall);
@@ -39,6 +39,40 @@ describe("runSearch honours its signal", () => {
       expect(runCall).toHaveBeenCalledWith({ op: "search", args: {} }, { signal: ctrl.signal });
     } finally {
       delete sites.sig;
+    }
+  });
+});
+
+describe("store links and pictures from a store answer", () => {
+  it("keeps the store's own picture and clears a foreign one", async () => {
+    mock.mockResolvedValue({
+      ok: true,
+      tier: 1,
+      data: [
+        { id: "1", title: "AirPods Pro 2", price: 900, currency: "SAR", image: "https://ae01.alicdn.com/kf/a.jpg" },
+        { id: "2", title: "AirPods Pro 2 case", price: 950, currency: "SAR", image: "https://evil.example/pixel.gif" },
+      ],
+    });
+    const input = { query: "airpods pro 2", sites: ["aliexpress"], sort: "price" as const };
+    const out = await fetchSite(sites.aliexpress, prepareSearch(input));
+    expect(new Map(out.products.map((p) => [p.id, p.image]))).toEqual(new Map([
+      ["1", "https://ae01.alicdn.com/kf/a.jpg"],
+      ["2", ""],
+    ]));
+  });
+
+  it("a registered store's listing linking elsewhere is dropped", async () => {
+    const orig = sites.jarir.normalizeSearchItem;
+    sites.jarir.normalizeSearchItem = (raw) => {
+      const p = orig(raw);
+      return p ? { ...p, url: "https://evil.example/x" } : p;
+    };
+    try {
+      mock.mockResolvedValue({ ok: true, tier: 1, data: [{ id: "1", title: "AirPods Pro 2", price: "900", path: "airpods-1" }] });
+      const r = await runSearch({ query: "airpods pro 2", sites: ["jarir"], sort: "price" });
+      expect(r.products).toEqual([]);
+    } finally {
+      sites.jarir.normalizeSearchItem = orig;
     }
   });
 });

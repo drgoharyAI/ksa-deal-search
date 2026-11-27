@@ -14,6 +14,7 @@ import { applyBrandPriceRules } from "@/src/lib/match/price";
 import { markWeakMatches } from "@/src/lib/match/structure";
 import { scoreMatches } from "@/src/lib/match/confidence";
 import { sites as registry } from "@/src/sites/registry";
+import { STORE_HOST_SITES, storeImage, storeLink } from "@/src/lib/store-hosts";
 import { rank, type SortKey } from "./rank";
 import { hasValidPrice, isExcluded, notOutOfStock, passesPriceRating, ratinglessSites } from "./filters";
 
@@ -138,13 +139,24 @@ export async function fetchSite(
     for (const f of failed) console.warn("[search] call failed", adapter.id, f.class, f.reason);
 
     const products: Product[] = [];
+    const hostChecked = STORE_HOST_SITES.includes(adapter.id);
     for (const raw of raws) {
       try {
         const p = adapter.normalizeSearchItem(raw);
-        if (p && p.title.length > MAX_TITLE) p.title = p.title.slice(0, MAX_TITLE);
+        if (!p) continue;
+        // Store-supplied links and pictures (src/lib/store-hosts.ts): a link must be the store's
+        // own https page (else the product is dropped), a picture its own image host (else none).
+        // Every registered store has rules (tests/lib/store-hosts.test.ts); a test-only fake has none.
+        if (hostChecked) {
+          const url = storeLink(adapter.id, p.url);
+          if (!url) continue;
+          p.url = url;
+          p.image = p.image ? (storeImage(adapter.id, p.image) ?? "") : "";
+        }
+        if (p.title.length > MAX_TITLE) p.title = p.title.slice(0, MAX_TITLE);
         const at = answeredAt.get(raw);
-        if (p && at !== undefined) p.fetchedAt = at;
-        if (p) products.push(p);
+        if (at !== undefined) p.fetchedAt = at;
+        products.push(p);
       } catch {
         // skip malformed item
       }
