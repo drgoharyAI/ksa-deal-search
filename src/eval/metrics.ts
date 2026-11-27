@@ -1,5 +1,5 @@
 import type { Product } from "@/src/lib/types";
-import { hasValidPrice, isExcluded, passesPriceRating, ratinglessSites, type PriceRatingFilters } from "@/src/lib/filters";
+import { hasValidPrice, isExcluded, notOutOfStock, passesPriceRating, ratinglessSites, type PriceRatingFilters } from "@/src/lib/filters";
 
 export type Label = "relevant" | "accessory" | "wrong-model" | "off-topic";
 
@@ -36,15 +36,16 @@ export type OverallMetrics = {
 const priceOf = (p: Product) => p.finalPrice ?? p.listPrice;
 
 /**
- * Eligible = would survive the query's own filters in the pipeline (valid price, -exclude words,
- * price bounds on listPrice, minRating with the ratingless-store rule). Same predicates as
+ * Eligible = would survive the query's own filters in the pipeline (valid price, not marked out
+ * of stock by its store, -exclude words, price bounds on listPrice, minRating with the
+ * ratingless-store rule). Same predicates as
  * src/lib/pipeline.ts; ratingless stores are judged from this query's recorded products.
  */
 function eligibleUnder(recorded: Map<string, Product>, c: Constraints): (p: Product) => boolean {
   const bySite = new Map<string, Product[]>();
   for (const p of recorded.values()) bySite.set(p.site, [...(bySite.get(p.site) ?? []), p]);
   const ratingless = ratinglessSites([...bySite].map(([site, products]) => ({ site, products })));
-  return (p) => hasValidPrice(p) && !isExcluded(p, c.exclude) && passesPriceRating(p, c, ratingless);
+  return (p) => hasValidPrice(p) && notOutOfStock(p) && !isExcluded(p, c.exclude) && passesPriceRating(p, c, ratingless);
 }
 
 /**

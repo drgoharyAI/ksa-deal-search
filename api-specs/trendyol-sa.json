@@ -69,7 +69,8 @@
           "image=image",
           "path=url",
           "freeShipping=freeCargo",
-          "merchantId=merchantId"
+          "merchantId=merchantId",
+          "soldOut=tagStockBar.isSoldOut"
         ],
         "embedded": {
           "regex": "window\\[\"__single-search-result__PROPS\"\\]=(\\{)"

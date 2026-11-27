@@ -21,6 +21,13 @@ function absoluteUrl(v: unknown): string | null {
   }
 }
 
+/** Unbxd `inStockFlag` ("true" / "false", picked as `inStock`); anything else is unknown. */
+function stockOf(v: unknown): boolean | undefined {
+  if (v === true || v === "true") return true;
+  if (v === false || v === "false") return false;
+  return undefined;
+}
+
 /** Compares on `price` (shelf price), never `memberPrice`. Repeats of an id are dropped by the pipeline's site+id dedupe. */
 export function normalizeSearchItem(raw: unknown): Product | null {
   if (!raw || typeof raw !== "object") return null;
@@ -38,6 +45,7 @@ export function normalizeSearchItem(raw: unknown): Product | null {
 
   const rating = typeof r.rating === "number" && Number.isFinite(r.rating) && r.rating > 0 ? r.rating : null;
   const img = typeof r.image === "string" ? r.image : "";
+  const inStock = stockOf(r.inStock);
   return {
     site: "extra-sa",
     id,
@@ -48,6 +56,7 @@ export function normalizeSearchItem(raw: unknown): Product | null {
     currency: "SAR",
     rating,
     soldCount: 0,
+    ...(inStock !== undefined && { inStock }),
     image: img.startsWith("//") ? `https:${img}` : img,
     url,
     shipping: null,

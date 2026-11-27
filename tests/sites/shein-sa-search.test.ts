@@ -79,6 +79,14 @@ describe("normalizeSearchItem", () => {
     expect(normalizeSearchItem({ ...base, origPrice: 25 })!).toMatchObject({ origPrice: null, discountPct: null });
   });
 
+  it("stock: soldOutStatus (raw soldOut) true -> out of stock; null/missing -> unknown", () => {
+    const base = { id: "42", price: 25, url: "https://ar.shein.com/Floral-Dress-p-42.html" };
+    expect(normalizeSearchItem({ ...base, soldOut: true })?.inStock).toBe(false);
+    expect(normalizeSearchItem({ ...base, soldOut: false })?.inStock).toBe(true);
+    expect(normalizeSearchItem({ ...base, soldOut: null })).not.toHaveProperty("inStock");
+    expect(normalizeSearchItem(base)).not.toHaveProperty("inStock");
+  });
+
   it("null when id, price or KSA url missing", () => {
     expect(normalizeSearchItem({ price: 5, url: "https://ar.shein.com/X-p-.html" })).toBeNull();
     expect(normalizeSearchItem({ id: "1", price: null, url: "https://ar.shein.com/X-p-1.html" })).toBeNull();
@@ -99,6 +107,11 @@ const goods = (id: string, over: Record<string, unknown> = {}) => ({
 });
 
 describe("toRawItems", () => {
+  it("carries soldOutStatus as soldOut; a non-boolean flag is null", () => {
+    const [a, b, c] = toRawItems([goods("1", { soldOutStatus: true }), goods("2", { soldOutStatus: false }), goods("3", { soldOutStatus: "0" })]);
+    expect([a.soldOut, b.soldOut, c.soldOut]).toEqual([true, false, null]);
+  });
+
   it("maps bff products and dedupes by goods_id", () => {
     const items = toRawItems([goods("11"), goods("12"), goods("11")]);
     expect(items.map((i) => i.id)).toEqual(["11", "12"]);

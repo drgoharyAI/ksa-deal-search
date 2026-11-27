@@ -50,6 +50,14 @@ describe("normalizeSearchItem", () => {
     expect(normalizeSearchItem({ id: "1", price: 5, url: "/en-sa/../ar-sa/x" })).toBeNull();
     expect(normalizeSearchItem({ id: "1", price: 5, url: "/ar-sa/x" })).toBeNull();
   });
+  it("stock: inStockFlag \"false\" -> out of stock, \"true\" -> in stock, anything else -> unknown", () => {
+    const base = { id: "1", price: 5, url: URL1 };
+    expect(normalizeSearchItem({ ...base, inStock: "false" })?.inStock).toBe(false);
+    expect(normalizeSearchItem({ ...base, inStock: "true" })?.inStock).toBe(true);
+    expect(normalizeSearchItem({ ...base, inStock: false })?.inStock).toBe(false);
+    expect(normalizeSearchItem(base)).not.toHaveProperty("inStock");
+    expect(normalizeSearchItem({ ...base, inStock: "maybe" })).not.toHaveProperty("inStock");
+  });
   it("fixture: >=10 normalize, no NaN, KSA url, SAR", () => {
     const items = (fixture as { data: unknown[] }).data;
     const ok = items.map(normalizeSearchItem).filter((p) => p !== null);

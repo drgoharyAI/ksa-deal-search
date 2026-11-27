@@ -15,7 +15,7 @@ import { markWeakMatches } from "@/src/lib/match/structure";
 import { scoreMatches } from "@/src/lib/match/confidence";
 import { sites as registry } from "@/src/sites/registry";
 import { rank, type SortKey } from "./rank";
-import { hasValidPrice, isExcluded, passesPriceRating, ratinglessSites } from "./filters";
+import { hasValidPrice, isExcluded, notOutOfStock, passesPriceRating, ratinglessSites } from "./filters";
 
 export type SearchInput = {
   query: string;
@@ -219,7 +219,8 @@ export function assembleResults(
       seen.add(k);
       return true;
     })
-    .filter(hasValidPrice);
+    .filter(hasValidPrice)
+    .filter(notOutOfStock);
 
   if (pq.exclude.length) products = products.filter((p) => !isExcluded(p, pq.exclude));
   // Stores whose whole result carries no rating (Jarir never shows one): a rating filter keeps

@@ -54,6 +54,13 @@ describe("normalizeSearchItem", () => {
     expect(p.origPrice).toBe(1000);
     expect(p.discountPct).toBe(95);
   });
+  it("stock: tagStockBar.isSoldOut (picked as soldOut) true -> out of stock; missing -> unknown", () => {
+    const base = { id: 1, priceNum: 5, path: "/en/x" };
+    expect(normalizeSearchItem({ ...base, soldOut: true })?.inStock).toBe(false);
+    expect(normalizeSearchItem({ ...base, soldOut: false })?.inStock).toBe(true);
+    expect(normalizeSearchItem(base)).not.toHaveProperty("inStock");
+    expect(normalizeSearchItem({ ...base, soldOut: "yes" })).not.toHaveProperty("inStock");
+  });
   it("null product without path", () => {
     expect(normalizeSearchItem({ id: 1, priceNum: 5 })).toBeNull();
     expect(normalizeSearchItem({ id: 1, priceNum: 5, path: "" })).toBeNull();

@@ -268,6 +268,58 @@ describe("runSearch", () => {
     const r = await runSearch({ ...base, sites: ["nope", "aliexpress"], query: "anc earbuds" });
     expect(r.statuses.map((s) => s.site)).toEqual(["aliexpress"]);
   });
+
+  it("drops only products the store marks out of stock; in stock and unknown stock are kept", async () => {
+    const TITLES: Record<string, string> = { a: "Philips Air Fryer XL HD9270", b: "Tefal Easy Fry Air Fryer EY501", c: "Ninja Air Fryer AF100" };
+    const item = (id: string, inStock?: boolean) => ({ id, title: TITLES[id], price: 300, inStock });
+    sites.stocky = {
+      id: "stocky",
+      label: "Stocky",
+      searchCalls: () => [{ op: "search", args: {} }],
+      runCall: async () => ({ ok: true, tier: 1, data: [item("a", true), item("b", false), item("c")] }),
+      normalizeSearchItem: (raw) => {
+        const r = raw as { id: string; title: string; price: number; inStock?: boolean };
+        return {
+          site: "stocky", id: r.id, title: r.title, listPrice: r.price, origPrice: null, discountPct: null,
+          currency: "SAR", rating: null, soldCount: 0, image: "", url: `https://stocky.example/${r.id}`,
+          finalPrice: r.price, detailStatus: "ok", ...(r.inStock !== undefined && { inStock: r.inStock }),
+        };
+      },
+    };
+    try {
+      let kept: { id: string }[] = [];
+      const r = await runSearch({ ...base, sites: ["stocky"], query: "air fryer" }, { onFiltered: (p) => (kept = p) });
+      expect(r.statuses).toEqual([{ site: "stocky", status: "ok" }]);
+      expect(kept.map((p) => p.id).sort()).toEqual(["a", "c"]);
+      const all = [...r.products, ...(r.groupExtras ?? [])];
+      expect(all.some((p) => p.id === "b")).toBe(false);
+      expect(all.map((p) => p.id).sort()).toEqual(["a", "c"]);
+    } finally {
+      delete sites.stocky;
+    }
+  });
+
+  it("a store whose every listing is out of stock answers ok with no products, not an error", async () => {
+    sites.stocky = {
+      id: "stocky",
+      label: "Stocky",
+      searchCalls: () => [{ op: "search", args: {} }],
+      runCall: async () => ({ ok: true, tier: 1, data: [{ id: "b" }] }),
+      normalizeSearchItem: () => ({
+        site: "stocky", id: "b", title: "Air Fryer", listPrice: 300, origPrice: null, discountPct: null,
+        currency: "SAR", rating: null, soldCount: 0, image: "", url: "https://stocky.example/b",
+        finalPrice: 300, detailStatus: "ok", inStock: false,
+      }),
+    };
+    try {
+      const r = await runSearch({ ...base, sites: ["stocky"], query: "air fryer" });
+      expect(r.statuses).toEqual([{ site: "stocky", status: "ok" }]);
+      expect(r.products).toEqual([]);
+      expect(r.reason).toBe("No products matched your search and filters");
+    } finally {
+      delete sites.stocky;
+    }
+  });
 });
 
 describe("POST /api/search", () => {

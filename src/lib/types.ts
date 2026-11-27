@@ -16,6 +16,11 @@ export type Product = {
   /** Match confidence 0..1 from the result set (src/lib/match/confidence.ts); below MATCH_THRESHOLD ranks as "less likely". */
   matchScore?: number;
   soldCount: number;
+  /**
+   * Stock as the store's search answer states it: false = the store marks it out of stock (the
+   * pipeline drops it), true = in stock. Absent = the store says nothing reliable: kept, never guessed.
+   */
+  inStock?: boolean;
   image: string;
   url: string;
   shipping?: number | null;

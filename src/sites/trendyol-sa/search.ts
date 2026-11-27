@@ -9,6 +9,11 @@ const num = (v: unknown): number | null => {
   return typeof n === "number" && Number.isFinite(n) ? n : null;
 };
 
+/** `tagStockBar.isSoldOut` (picked as `soldOut`): true = out of stock; a missing flag is unknown. */
+function stockOf(soldOut: unknown): boolean | undefined {
+  return typeof soldOut === "boolean" ? !soldOut : undefined;
+}
+
 export function normalizeSearchItem(raw: unknown): Product | null {
   if (!raw || typeof raw !== "object") return null;
   const r = raw as Record<string, unknown>;
@@ -26,6 +31,7 @@ export function normalizeSearchItem(raw: unknown): Product | null {
 
   const rating = typeof r.rating === "number" && Number.isFinite(r.rating) ? r.rating : null;
   const img = typeof r.image === "string" ? r.image : "";
+  const inStock = stockOf(r.soldOut);
   return {
     site: "trendyol-sa",
     id,
@@ -36,6 +42,7 @@ export function normalizeSearchItem(raw: unknown): Product | null {
     currency: "SAR",
     rating,
     soldCount: 0,
+    ...(inStock !== undefined && { inStock }),
     image: img.startsWith("//") ? `https:${img}` : img,
     url: `https://www.trendyol.sa/${path}`,
     shipping: null,

@@ -72,6 +72,8 @@ export type RawSheinItem = {
   reviews: number | null;
   image: string | null;
   url: string;
+  /** bff `soldOutStatus` (boolean); absent or null when the payload has no such flag. */
+  soldOut?: boolean | null;
 };
 
 function num(v: unknown): number | null {
@@ -112,6 +114,7 @@ export function toRawItems(products: unknown[]): RawSheinItem[] {
       reviews: num(g.comment_num),
       image: img ? (img.startsWith("//") ? `https:${img}` : img) : null,
       url: `${ORIGIN}/${encodeURI(slug)}-p-${id}.html`,
+      soldOut: typeof g.soldOutStatus === "boolean" ? g.soldOutStatus : null,
     });
   }
   return out;
@@ -157,6 +160,8 @@ export function normalizeSearchItem(raw: unknown): Product | null {
   let image = typeof r.image === "string" ? r.image : "";
   if (image.startsWith("//")) image = `https:${image}`;
   if (!image.startsWith("https://")) image = "";
+  // soldOutStatus true = out of stock; anything but a boolean is unknown.
+  const inStock = typeof r.soldOut === "boolean" ? !r.soldOut : undefined;
 
   return {
     site: "shein-sa",
@@ -168,6 +173,7 @@ export function normalizeSearchItem(raw: unknown): Product | null {
     currency: "SAR",
     rating: rating !== null && rating > 0 && rating <= 5 ? rating : null,
     soldCount: 0,
+    ...(inStock !== undefined && { inStock }),
     image,
     url: parsed.url,
     shipping: null,

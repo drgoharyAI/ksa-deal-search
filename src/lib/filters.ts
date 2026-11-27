@@ -12,6 +12,9 @@ const isNum = (n: number | undefined): n is number => typeof n === "number" && N
 
 export const hasValidPrice = (p: Product): boolean => Number.isFinite(p.listPrice) && p.listPrice > 0;
 
+/** Drops only what the store explicitly marks out of stock; unknown stock (no `inStock`) is kept. */
+export const notOutOfStock = (p: Product): boolean => p.inStock !== false;
+
 /**
  * A "-word" exclusion: the word is a whole title word (case-insensitive), a part of a hyphenated
  * one ("pro-max"), or its plural. Never a substring: "-pro" must keep "Waterproof", "-case"
