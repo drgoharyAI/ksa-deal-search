@@ -2,7 +2,7 @@
 
 # KSA Deal Search
 
-**One search across eight Saudi online stores, with deals marked only when the price history backs them.**
+**One search across nine Saudi online stores, with deals marked only when the price history backs them.**
 
 [![CI](https://github.com/drgoharyAI/ksa-deal-search/actions/workflows/ci.yml/badge.svg)](https://github.com/drgoharyAI/ksa-deal-search/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-176a53.svg)](LICENSE)
@@ -23,7 +23,7 @@
 
 </div>
 
-A self-hosted **Next.js 16 + TypeScript** app that searches eight Saudi online stores at once,
+A self-hosted **Next.js 16 + TypeScript** app that searches nine Saudi online stores at once,
 drops accessories and look-alikes, groups the same product across stores, and ranks the rest by
 price, discount or deal score. All matching and ranking is rule-based: word rules plus statistics
 of each result set. **No AI or LLM is involved.**
@@ -53,6 +53,7 @@ It is a personal-use tool, built to run on your own machine or a home server. Re
 | <img src="public/stores/trendyol-sa.png" height="20" alt=""> | Trendyol KSA | `trendyol-sa` | API Anything spec |
 | <img src="public/stores/extra-sa.ico" height="20" alt=""> | eXtra | `extra-sa` | API Anything spec |
 | <img src="public/stores/carrefour-sa.ico" height="20" alt=""> | Carrefour KSA | `carrefour-sa` | API Anything spec |
+| <img src="public/stores/saco-sa.ico" height="20" alt=""> | SACO | `saco-sa` | API Anything spec (its server-rendered search page) |
 | <img src="public/stores/shein-sa.ico" height="20" alt=""> | SHEIN KSA | `shein-sa` | Real Google Chrome, driven over CDP (off by default) |
 
 <details>
@@ -81,7 +82,7 @@ Jarir's mark; see [public/stores/SOURCES.md](public/stores/SOURCES.md).
 | --- | --- |
 | **Streaming results.** Each store's results appear as it answers, with a live status per store (searching, results, no results, unavailable, failed). | **Cross-store grouping.** The same product at several stores becomes one card with one row per store, matched by model codes, brand, specs and variant words. |
 | **Honest deal badges.** "Lowest in 30 days", "Below usual price" and "Fake deal": a claimed discount that the app's own price history, or the result set, does not support. | **Smart query parsing.** Price bounds (`under 300`, `50-150`), minimum rating (`>4 stars`) and exclusions (`-case`) are read from the query text. |
-| **Relevance filtering.** Drops accessories, parts, books and other product kinds that share the query's words, and clones far below a model's usual price. Weaker matches go under "Less likely matches". | **Filter chips.** Store, brand, price range, rating and "only discounted", each with a live count. |
+| **Relevance filtering.** Drops listings the store marks out of stock, and accessories, parts, books and other product kinds that share the query's words, and clones far below a model's usual price. Weaker matches go under "Less likely matches". | **Filter chips.** Store, brand, price range, rating and "only discounted", each with a live count. |
 | **Compare.** A side-by-side table of 2 to 4 products with their parsed specs. | **Price history sparkline.** Every search records prices to a local SQLite file (`node:sqlite`); cards and watches show the trend. |
 | **Telegram alerts.** Watch a product or a whole search; a background checker re-runs it on a schedule and notifies by Telegram (optional) and on the Alerts page. | **Search history and suggestions.** Re-run past searches, autocomplete from your history and from Amazon's and Jarir's public suggestions, and a "recently seen deals" home view. |
 
@@ -120,11 +121,11 @@ same result in one answer. A search runs through `src/lib/pipeline.ts`:
 flowchart TD
     Q["Query text"] --> P["Parse: price bounds, rating, -exclusions, filler words"]
     P --> S["Synonyms from data/synonyms.json"]
-    S --> AA["API Anything specs: AliExpress, Amazon, Jarir, Trendyol, eXtra, Carrefour"]
+    S --> AA["API Anything specs: AliExpress, Amazon, Jarir, Trendyol, eXtra, Carrefour, SACO"]
     S --> CDP["Real Chrome over CDP: noon, SHEIN"]
     AA --> N["Normalize to Product: SAR price, English title, store URL"]
     CDP --> N
-    N --> F["Filters: valid price, exclusions"]
+    N --> F["Filters: valid price, not marked out of stock, exclusions"]
     F --> R["Relevance: required title words, other product kinds"]
     R --> A["Accessory and part drop, brand price rules"]
     A --> B["Price and rating bounds"]

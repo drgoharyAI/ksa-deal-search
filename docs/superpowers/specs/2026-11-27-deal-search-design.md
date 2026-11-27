@@ -267,6 +267,25 @@ non-goals for these three.
   Anything first, Playwright as a fallback. `finalPrice = listPrice`, and cards say
   "shipping not included".
 - **More KSA stores (owner, 2026-11-27):** eXtra (`extra-sa`, extra.com), Carrefour KSA (`carrefour-sa`, carrefourksa.com), SHEIN KSA (`shein-sa`), Temu KSA (`temu-sa`). All must be Saudi storefronts with SAR prices and English titles. Each is spiked first with the usual method: API Anything at tier 1–2, then real Chrome over CDP only if blocked. Personal-volume traffic only, no CAPTCHA solving. A store that can't be read reliably is dropped and reported.
+- **SACO KSA (owner request, 2026-11-27):** site id `saco-sa`, label "SACO" (saco.sa, the Saudi
+  home, hardware and tools retailer). The English storefront `www.saco.sa/en` is a Next.js site whose
+  search page (`/en/products-search?q={q}&sortBy={sort}&sortDir={dir}`) is server-rendered from SACO's
+  Algolia index (default region Central, prices in SAR). The op is an API Anything **HTML recipe at
+  tier 1** (plain HTTP, no cookies, no login), learned with `capture` + `add`, like Carrefour. The
+  storefront's public Algolia search key was not used: calling a third-party index with a key read
+  from the site's JavaScript was refused by this session's permission check, and the page itself
+  carries every field. Each card's add-to-cart button gives the SKU, English name, SAR price and
+  currency; the card adds the struck-out price, a whole-star rating and a stock badge. Two calls per
+  search (best match and lowest price, main term only): SACO's search handles typos and synonyms, and
+  each page is about 1.9 MB. No Chrome. SACO's robots.txt disallows `/products-search` for crawlers;
+  this is a personal, user-initiated search at a low rate (see the README's personal-use note).
+  Spike: `docs/superpowers/spikes/2026-11-27-saco-sa.md`.
+- **Out-of-stock listings (owner request, 2026-11-27):** a product the store's search answer
+  explicitly marks out of stock is dropped in the pipeline's filter step; unknown stock is kept, and
+  stock is never guessed from a missing field. `Product.inStock` is set only from a stated field:
+  eXtra `inStockFlag`, Trendyol `tagStockBar.isSoldOut`, SHEIN `soldOutStatus`, SACO's card badge
+  ("Out of stock" with only "Click and pick" offered). AliExpress, Amazon, Jarir, noon and Carrefour
+  state nothing reliable in search results, so their products stay unknown.
 
 ## Search history and price alerts (owner, 2026-11-27)
 These move out of non-goals.
