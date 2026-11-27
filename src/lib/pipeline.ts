@@ -54,6 +54,9 @@ const AA_BLOCKED_CLASSES = new Set([...BLOCKED_CLASSES, "drift"]);
 
 const MSG_BLOCKED = "Store blocked the request; try again later";
 const MSG_FAILED = "Store request failed";
+const MSG_UNREADABLE = "Store results could not be read";
+/** "input": the store answered "no results" (e.g. Trendyol's 404 past the last page): an empty answer. */
+const EMPTY_CLASSES = new Set(["input"]);
 
 const isNum = (n: number | undefined): n is number => typeof n === "number" && Number.isFinite(n);
 
@@ -81,8 +84,11 @@ async function runSite(
     const raws: unknown[] = [];
     const failed: Extract<AaResult, { ok: false }>[] = [];
     for (const r of results) {
-      if (!r.ok) failed.push(r);
-      else if (Array.isArray(r.data)) raws.push(...r.data);
+      if (r.ok) {
+        if (Array.isArray(r.data)) raws.push(...r.data);
+      } else if (EMPTY_CLASSES.has(r.class)) {
+        console.warn("[search] call answered no results", adapter.id, r.class, r.reason);
+      } else failed.push(r);
     }
     for (const f of failed) console.warn("[search] call failed", adapter.id, f.class, f.reason);
 
@@ -97,7 +103,7 @@ async function runSite(
     }
 
     let status: SiteStatus = { site: adapter.id, status: "ok" };
-    if (failed.length && failed.length === results.length) {
+    if (failed.length && !results.some((r) => r.ok)) {
       // api-anything stores: a runtime drift is almost always an anti-bot page, so "blocked".
       // Custom executors (noon) keep their own drift ("no product cards") as an error.
       const blockedClasses = adapter.runCall ? BLOCKED_CLASSES : AA_BLOCKED_CLASSES;
@@ -107,6 +113,11 @@ async function runSite(
         status: blocked ? "blocked" : "error",
         message: blocked ? MSG_BLOCKED : MSG_FAILED,
       };
+    } else if (raws.length && !products.length) {
+      // The store answered items but none could be read: its page or payload changed. "ok, 0
+      // results" would read as "nothing matched at this store".
+      console.warn("[search] no item could be normalized", adapter.id, raws.length);
+      status = { site: adapter.id, status: "error", message: MSG_UNREADABLE };
     } else if (failed.length) {
       status = { ...status, message: `${failed.length} of ${results.length} requests failed` };
     }

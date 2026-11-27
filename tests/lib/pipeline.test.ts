@@ -131,12 +131,56 @@ describe("runSearch", () => {
     try {
       const r = await runSearch({ ...base, sites: ["bad2", "bad3"], query: "anc earbuds" });
       expect(r.statuses.find((s) => s.site === "bad2")?.status).toBe("error");
-      expect(r.statuses.find((s) => s.site === "bad3")?.status).toBe("ok");
+      // every item failed to normalize: the store's page changed, not "0 results" (final review M2)
+      expect(r.statuses.find((s) => s.site === "bad3")?.status).toBe("error");
     } finally {
       delete sites.bad2;
       delete sites.bad3;
       warn.mockRestore();
     }
+  });
+
+  it("answered items that all fail to normalize -> error, generic message; empty answer stays ok (final review M2)", async () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const site = (id: string, data: unknown[]) => ({
+      id,
+      label: id,
+      searchCalls: () => [{ op: "search", args: {} }],
+      runCall: async () => ({ ok: true as const, tier: 1, data }),
+      normalizeSearchItem: () => null,
+      fetchDetail: async (p: never) => p,
+    });
+    sites.changed = site("changed", [{ name: "x" }, { name: "y" }]);
+    sites.empty = site("empty", []);
+    try {
+      const r = await runSearch({ ...base, sites: ["changed", "empty"], query: "anc earbuds" });
+      expect(r.statuses).toEqual([
+        { site: "changed", status: "error", message: "Store results could not be read" },
+        { site: "empty", status: "ok" },
+      ]);
+    } finally {
+      delete sites.changed;
+      delete sites.empty;
+      warn.mockRestore();
+    }
+  });
+
+  it("class input (no results / page past the end) is an empty answer, not a failure (final review M4)", async () => {
+    vi.spyOn(console, "warn").mockImplementation(() => {});
+    mock.mockResolvedValue({ ok: false, class: "input", reason: "HTTP 404" });
+    const all = await runSearch({ ...base, query: "anc earbuds" });
+    expect(all.statuses[0]).toEqual({ site: "aliexpress", status: "ok" });
+
+    let n = 0;
+    mock.mockImplementation(async () => (n++ === 0 ? okFixture() : { ok: false as const, class: "input" as const, reason: "HTTP 404" }));
+    const some = await runSearch({ ...base, query: "anc earbuds" });
+    expect(some.statuses[0]).toEqual({ site: "aliexpress", status: "ok" });
+    expect(some.products.length).toBeGreaterThan(0);
+
+    let k = 0;
+    mock.mockImplementation(async () => (k++ === 0 ? { ok: false as const, class: "blocked", reason: "403" } : { ok: false as const, class: "input" as const, reason: "HTTP 404" }));
+    const blocked = await runSearch({ ...base, query: "anc earbuds" });
+    expect(blocked.statuses[0].status).toBe("blocked");
   });
 
   it("api-anything store: all calls drift (anti-bot page) -> blocked with generic message", async () => {

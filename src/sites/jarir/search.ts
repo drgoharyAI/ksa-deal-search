@@ -21,6 +21,7 @@ export function normalizeSearchItem(raw: unknown): Product | null {
   if (origPrice !== null) discountPct = Math.round((1 - price / origPrice) * 100);
 
   const path = typeof r.path === "string" ? r.path.replace(/^\/+/, "") : "";
+  if (!path) return null; // no product page: the link would be the Jarir home page
   const img = typeof r.image === "string" ? r.image : "";
   return {
     site: "jarir",

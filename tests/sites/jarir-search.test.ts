@@ -10,6 +10,11 @@ describe("sanitizeQ", () => {
 });
 
 describe("normalizeSearchItem", () => {
+  it("no product path: null, never a link to the Jarir home page (final review M6)", () => {
+    expect(normalizeSearchItem({ id: "1", title: "TV", price: "1999", path: "" })).toBeNull();
+    expect(normalizeSearchItem({ id: "1", title: "TV", price: "1999", path: "/" })).toBeNull();
+    expect(normalizeSearchItem({ id: "1", title: "TV", price: "1999" })).toBeNull();
+  });
   it("maps a discounted item", () => {
     const p = normalizeSearchItem({
       id: "682538",
