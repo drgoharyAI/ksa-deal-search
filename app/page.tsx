@@ -7,8 +7,12 @@ import { defaultSites } from "@/src/lib/stores";
 import SearchForm, { type ErrorField, type FormValues } from "./components/SearchForm";
 import StatusBar from "./components/StatusBar";
 import ResultTiers from "./components/ResultTiers";
+import AppHeader from "./components/AppHeader";
+import WatchForm, { postWatch } from "./components/WatchForm";
+import { cheapestConfident, defaultTarget, priceOf } from "@/src/lib/alerts/shared";
+import { valuesFromUrl } from "@/src/lib/rerun";
 
-type Results = { products: Product[]; statuses: SiteStatus[]; reason?: string };
+type Results = { products: Product[]; statuses: SiteStatus[]; reason?: string; query: string; sites: string[] };
 type Phase = "idle" | "loading" | "done" | "error";
 
 const INITIAL: FormValues = {
@@ -40,8 +44,21 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
   const [errorField, setErrorField] = useState<ErrorField>(null);
   const abortRef = useRef<AbortController | null>(null);
+  const [watchOpen, setWatchOpen] = useState(false);
+  const [watchSaved, setWatchSaved] = useState(false);
 
   useEffect(() => () => abortRef.current?.abort(), []);
+
+  // A History "Re-run" link: fill the form from the URL, clean the URL, and search once.
+  useEffect(() => {
+    const fromUrl = valuesFromUrl(window.location.search, INITIAL);
+    if (!fromUrl) return;
+    window.history.replaceState(null, "", window.location.pathname);
+    setValues(fromUrl.values);
+    if (fromUrl.run) void search(undefined, fromUrl.values);
+    // Runs once on mount by design.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Sort changes re-rank the current results in place; no new request.
   const products = useMemo(() => (results ? rank(results.products, values.sort) : []), [results, values.sort]);
@@ -58,11 +75,11 @@ export default function Home() {
     setPending(null);
   };
 
-  async function search(query?: string) {
+  async function search(query?: string, base: FormValues = values) {
     abortRef.current?.abort();
     abortRef.current = null;
-    // A picked suggestion is passed in because the state update has not landed yet.
-    const v = query === undefined ? values : { ...values, query };
+    // A picked suggestion (or a re-run from History) is passed in because the state update has not landed yet.
+    const v = query === undefined ? base : { ...base, query };
     if (!v.query.trim()) return fail("Enter something to search for");
     if (!v.sites.length) return fail("Pick at least one store");
 
@@ -93,7 +110,9 @@ export default function Home() {
       if (!res.ok || !data || !Array.isArray(data.products)) {
         return fail(data?.error ?? "The search failed; try again");
       }
-      setResults({ products: data.products, statuses: data.statuses ?? [], reason: data.reason });
+      setResults({ products: data.products, statuses: data.statuses ?? [], reason: data.reason, query: v.query.trim(), sites: v.sites });
+      setWatchOpen(false);
+      setWatchSaved(false);
       setPending(null);
       setPhase("done");
     } catch (e) {
@@ -112,6 +131,7 @@ export default function Home() {
   }
 
   const loading = phase === "loading";
+  const cheapest = useMemo(() => (results ? cheapestConfident(results.products) : null), [results]);
   const formError = errorField === "form" ? error : null;
 
   let live = "";
@@ -121,12 +141,7 @@ export default function Home() {
 
   return (
     <div className="app">
-      <header className="topbar">
-        <div className="container topbar__inner">
-          <h1 className="wordmark">Deal search</h1>
-          <p className="topbar__note">Five Saudi stores, prices in SAR</p>
-        </div>
-      </header>
+      <AppHeader current="search" />
 
       <main className="container main">
         <SearchForm
@@ -155,7 +170,32 @@ export default function Home() {
           <div className="results__head">
             <h2 id="results-head">{loading ? "Searching" : results && products.length ? `${products.length} results` : "Results"}</h2>
             {!loading && results && products.length > 0 && <p className="results__note">Prices exclude shipping</p>}
+            {!loading && results && cheapest && !watchOpen && !watchSaved && (
+              <button type="button" className="btn btn--quiet btn--small" onClick={() => setWatchOpen(true)}>
+                Watch this search
+              </button>
+            )}
+            {!loading && watchSaved && (
+              <p className="results__note" role="status">
+                Watching this search. <a href="/alerts">See alerts</a>
+              </p>
+            )}
           </div>
+          {!loading && results && cheapest && watchOpen && (
+            <WatchForm
+              label={`Alert me when a match is at or under, ${cheapest.currency || "SAR"}`}
+              initial={defaultTarget(priceOf(cheapest))}
+              onCancel={() => setWatchOpen(false)}
+              onSave={async (target) => {
+                const err = await postWatch({ kind: "search", query: results.query, sites: results.sites, target });
+                if (!err) {
+                  setWatchOpen(false);
+                  setWatchSaved(true);
+                }
+                return err;
+              }}
+            />
+          )}
 
           {loading ? (
             <ul className="grid" aria-hidden="true">
@@ -171,7 +211,7 @@ export default function Home() {
               ))}
             </ul>
           ) : results && products.length ? (
-            <ResultTiers products={products} />
+            <ResultTiers products={products} query={results.query} />
           ) : results ? (
             <div className="empty">
               <p className="empty__title">{results.reason ?? "No products matched your search and filters"}</p>
