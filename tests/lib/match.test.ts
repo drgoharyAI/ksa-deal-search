@@ -4,7 +4,7 @@ import { scoreRelevance, filterRelevant, matchesAllTokens } from "@/src/lib/matc
 import { isAccessory, isStrongAccessory, dropAccessories, isForAccessory } from "@/src/lib/match/accessory";
 import { dedupe } from "@/src/lib/match/dedupe";
 import { specMatches } from "@/src/lib/match/spec";
-import { isOtherProduct } from "@/src/lib/match/category";
+import { isBookCode, isOtherProduct } from "@/src/lib/match/category";
 import { dropBrandPriceOutliers } from "@/src/lib/match/price";
 import type { Product } from "@/src/lib/types";
 
@@ -406,5 +406,20 @@ describe("12d round 4: compound words open or closed", () => {
   });
   it("still needs every word", () => {
     expect(matchesAllTokens([["dash", "cam"]], "Action Cam 4K Waterproof")).toBe(false);
+  });
+});
+
+describe("12d round 5: standard name equivalents; ISBN product codes", () => {
+  it("matches abbreviations and equivalent names", () => {
+    expect(matchesAllTokens([["dash", "cam"]], "XUSHIDZ 1080P Dash Camera Night Vision")).toBe(true);
+    expect(matchesAllTokens([["external", "ssd", "1tb"]], "SanDisk 1TB Portable SSD USB-C")).toBe(true);
+    expect(matchesAllTokens([["external", "ssd", "1tb"]], "External 1TB Solid State Drive USB 3.2")).toBe(true);
+    expect(matchesAllTokens([["running", "shoes"]], "Men Mesh Running Sneakers Lightweight")).toBe(true);
+  });
+  it("an ISBN-13 product code is a book unless the query asks for one", () => {
+    expect(isBookCode("9789363382367", ["dash", "cam"])).toBe(true);
+    expect(isBookCode("9789363382368", ["dash", "cam"])).toBe(false);
+    expect(isBookCode("9789363382367", ["dash", "cam", "book"])).toBe(false);
+    expect(isBookCode("B0CHX1W1XY", ["dash", "cam"])).toBe(false);
   });
 });

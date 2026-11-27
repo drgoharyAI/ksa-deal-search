@@ -22,3 +22,14 @@ export function isOtherProduct(title: string, queryTokens: string[]): boolean {
     (ph) => !ph.every((w) => q.has(w)) && tt.some((_, i) => ph.every((w, k) => tt[i + k] === w)),
   );
 }
+
+/**
+ * A product code that is a valid ISBN-13 (978/979 prefix, check digit) is a book, whatever its
+ * title says ("Dash Cameras Explained"). Shoppers asking for a book say so.
+ */
+export function isBookCode(id: string, queryTokens: string[]): boolean {
+  if (!/^97[89]\d{10}$/.test(id) || queryTokens.some((t) => /^(?:books?|novels?)$/i.test(t))) return false;
+  let sum = 0;
+  for (let i = 0; i < 12; i++) sum += Number(id[i]) * (i % 2 ? 3 : 1);
+  return (10 - (sum % 10)) % 10 === Number(id[12]);
+}

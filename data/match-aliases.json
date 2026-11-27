@@ -3,5 +3,9 @@
   ["earbuds", "earphones", "tws", "buds"],
   ["ps5", "playstation 5", "playstation5", "dualsense"],
   ["controller", "gamepad"],
-  ["laptop", "notebook", "computer"]
+  ["laptop", "notebook", "computer"],
+  ["cam", "camera"],
+  ["ssd", "solid state drive"],
+  ["external", "portable"],
+  ["shoes", "sneakers", "trainers"]
 ]

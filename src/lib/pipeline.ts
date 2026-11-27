@@ -6,7 +6,7 @@ import { tokenize } from "@/src/lib/match/tokenize";
 import { filterRelevant } from "@/src/lib/match/relevance";
 import { dropAccessories } from "@/src/lib/match/accessory";
 import { dedupe } from "@/src/lib/match/dedupe";
-import { isOtherProduct } from "@/src/lib/match/category";
+import { isBookCode, isOtherProduct } from "@/src/lib/match/category";
 import { dropBrandPriceOutliers } from "@/src/lib/match/price";
 import { sites as registry } from "@/src/sites/registry";
 import { rank, type SortKey } from "./rank";
@@ -144,7 +144,7 @@ export async function runSearch(input: SearchInput, opts: SearchOptions = {}): P
   const ratingless = ratinglessSites(outs.map((o) => ({ site: o.status.site, products: o.products })));
 
   products = filterRelevant(products, queryTokens);
-  products = products.filter((p) => !isOtherProduct(p.title, queryTokens.flat()));
+  products = products.filter((p) => !isBookCode(p.id, queryTokens.flat()) && !isOtherProduct(p.title, queryTokens.flat()));
   products = dropAccessories(products, queryTokens.flat(), queryTokens);
   products = dropBrandPriceOutliers(products, queryTokens[0]);
   products = products.filter((p) => passesPriceRating(p, { minPrice, maxPrice, minRating }, ratingless));

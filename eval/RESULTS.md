@@ -244,3 +244,17 @@ adjacent title tokens joined. Softens round 1; no new vocabulary.
 | tuning (15) | 98.0% | 0% | 1.3% | 92.1% | 100% |
 | holdout (8) | 95.0% | 3.8% | 0% | 83.3% | 75.0% |
 | all (23) | 97.0% | 1.3% | 0.9% | 89.0% | 91.3% |
+
+## 12d round 5: standard name equivalents; ISBN product codes are books (kept)
+Matching-only alias groups (`data/match-aliases.json`, never sent to stores) for standard
+equivalents the all-words rule rejected: cam = camera, ssd = solid state drive, external =
+portable (a portable SSD is an external SSD), shoes = sneakers = trainers. Because "camera" also
+admits "Dash Cameras Explained", a product whose code is a valid ISBN-13 (978/979 prefix + check
+digit) is dropped as a book unless the query says "book"; all 104 such recorded items are labelled
+off-topic. Tried and removed in the same round: machine = maker (coffee machine recall 61% to 83%,
+but it also admits "Coffee Art Stencil Maker", p@10 70% to 60%).
+| set | p@10 | acc@10 | wrong@10 | recall | cheapest-first |
+|---|---|---|---|---|---|
+| tuning (15) | 98.0% | 0% | 1.3% | 92.1% | 100% |
+| holdout (8) | 95.0% | 3.8% | 0% | 86.3% | 75.0% |
+| all (23) | 97.0% | 1.3% | 0.9% | 90.1% | 91.3% |
