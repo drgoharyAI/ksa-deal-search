@@ -3,6 +3,7 @@ import * as aliexpress from "./aliexpress/search";
 import * as amazonSa from "./amazon-sa/search";
 import * as jarir from "./jarir/search";
 import * as noonSa from "./noon-sa/search";
+import * as trendyolSa from "./trendyol-sa/search";
 
 export const sites: Record<string, SiteAdapter> = {
   aliexpress: {
@@ -32,6 +33,13 @@ export const sites: Record<string, SiteAdapter> = {
     searchCalls: noonSa.searchCalls,
     normalizeSearchItem: noonSa.normalizeSearchItem,
     runCall: noonSa.runCall,
+    fetchDetail: async (p) => p,
+  },
+  "trendyol-sa": {
+    id: "trendyol-sa",
+    label: "Trendyol KSA",
+    searchCalls: trendyolSa.searchCalls,
+    normalizeSearchItem: trendyolSa.normalizeSearchItem,
     fetchDetail: async (p) => p,
   },
 };
