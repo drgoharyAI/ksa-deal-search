@@ -22,6 +22,10 @@ export class TtlCache<T> {
     return e.v;
   }
 
+  clear(): void {
+    this.store.clear();
+  }
+
   set(key: string, v: T): void {
     const now = Date.now();
     for (const [k, e] of this.store) if (now >= e.exp) this.store.delete(k);

@@ -3,6 +3,7 @@
 import type { SortKey } from "@/src/lib/rank";
 import { STORES } from "@/src/lib/stores";
 import StoreLogo from "./StoreLogo";
+import QueryCombobox from "./QueryCombobox";
 
 export type FormValues = {
   query: string;
@@ -24,7 +25,8 @@ const SORTS: { value: SortKey; label: string }[] = [
 type Props = {
   values: FormValues;
   onChange: (next: FormValues) => void;
-  onSubmit: () => void;
+  /** Run the search; `query` overrides values.query (a picked suggestion not yet in state). */
+  onSubmit: (query?: string) => void;
   onStop: () => void;
   loading: boolean;
   error: string | null;
@@ -56,20 +58,13 @@ export default function SearchForm({ values, onChange, onSubmit, onStop, loading
           What are you looking for?
         </label>
         <div className="search__row">
-          <input
-            id="q"
-            name="q"
-            type="search"
-            className="input input--query"
-            autoComplete="off"
-            enterKeyHint="search"
-            spellCheck={false}
-            maxLength={200}
-            placeholder="anc earbuds under 300"
+          <QueryCombobox
             value={values.query}
-            onChange={(e) => set("query", e.target.value)}
-            aria-invalid={queryError ? true : undefined}
-            aria-describedby="q-help"
+            onChange={(q) => set("query", q)}
+            onSubmit={onSubmit}
+            loading={loading}
+            invalid={!!queryError}
+            describedBy="q-help"
           />
           <button type="submit" className="btn btn--primary" disabled={loading} aria-busy={loading || undefined}>
             {loading ? "Searching" : "Search"}

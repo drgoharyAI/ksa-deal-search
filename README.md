@@ -95,12 +95,35 @@ Restart the server after editing either file.
 4. Register it in `src/sites/registry.ts`, and add the same id and label to `src/lib/stores.ts`
    (the client-side list; `tests/lib/stores.test.ts` checks they match).
 
+## Search suggestions
+
+As you type (2 characters or more, after a 150 ms pause) the query box suggests searches,
+Google-style. The app's own route `GET /api/suggest?q=` merges, in this order, up to 8 English
+suggestions from:
+
+1. Amazon KSA's public autocomplete (`completion.amazon.sa`, the service amazon.sa's search box uses);
+2. Jarir's public Constructor.io autocomplete (`ac.cnstrc.com`, the same public key the Jarir search uses).
+
+No AI is involved. Each source gets 1.5 s; a slow or failing one is skipped, and a source that
+answers 403 or 429 is left alone for 10 minutes. Answers are cached on the server for 5 minutes.
+
+Keys: Up and Down move through the list, Enter picks and searches, Escape or Tab closes it,
+Shift+Delete removes a highlighted recent search.
+
+Privacy: what you type in the query box (2 to 80 characters, lower-cased) is sent from the app
+server to Amazon's and Jarir's suggestion services. No cookies or account details go with it.
+Your last 20 searches are kept only in your browser (`localStorage`, key
+`deal-search:recent-searches`) and are shown first, marked "recent". To clear them, remove one
+with Shift+Delete, or clear this site's data in the browser (or run
+`localStorage.removeItem("deal-search:recent-searches")` in its console).
+
 ## Privacy
 
 `API_ANYTHING_LOCAL_ONLY=1` keeps API Anything local: specs, cookies and caches stay in
 `.aa-home/`, and it sends no request to the shared API Anything registry (no spec lookups,
 pulls or publishing). The app has no accounts and
-stores no searches. Requests go straight from your machine to the stores.
+stores no searches on the server (recent searches stay in your browser; see Search suggestions).
+Requests go straight from your machine to the stores.
 
 ## Verified
 

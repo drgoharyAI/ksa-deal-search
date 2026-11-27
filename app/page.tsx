@@ -58,26 +58,28 @@ export default function Home() {
     setPending(null);
   };
 
-  async function search() {
+  async function search(query?: string) {
     abortRef.current?.abort();
     abortRef.current = null;
-    if (!values.query.trim()) return fail("Enter something to search for");
-    if (!values.sites.length) return fail("Pick at least one store");
+    // A picked suggestion is passed in because the state update has not landed yet.
+    const v = query === undefined ? values : { ...values, query };
+    if (!v.query.trim()) return fail("Enter something to search for");
+    if (!v.sites.length) return fail("Pick at least one store");
 
     const ctrl = new AbortController();
     abortRef.current = ctrl;
     setError(null);
     setErrorField(null);
     setPhase("loading");
-    setPending(values.sites);
+    setPending(v.sites);
 
     const body = {
-      query: values.query,
-      sites: values.sites,
-      sort: values.sort,
-      minPrice: toNum(values.minPrice),
-      maxPrice: toNum(values.maxPrice),
-      minRating: toNum(values.minRating),
+      query: v.query,
+      sites: v.sites,
+      sort: v.sort,
+      minPrice: toNum(v.minPrice),
+      maxPrice: toNum(v.maxPrice),
+      minRating: toNum(v.minRating),
     };
     try {
       const res = await fetch("/api/search", {
@@ -130,7 +132,7 @@ export default function Home() {
         <SearchForm
           values={values}
           onChange={setValues}
-          onSubmit={search}
+          onSubmit={(q) => void search(q)}
           onStop={stop}
           loading={loading}
           error={error}
