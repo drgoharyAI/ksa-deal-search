@@ -7,6 +7,8 @@ import { CompareDialog, CompareTray } from "@/app/components/Compare";
 import ResultTiers from "@/app/components/ResultTiers";
 import { NO_FILTERS, chipContext, facetCounts, priceBounds } from "@/src/lib/chips";
 import type { Product } from "@/src/lib/types";
+import type { CompareSlot } from "@/src/lib/compare";
+import { productKey } from "@/src/lib/specs";
 
 const P = (id: string, o: Partial<Product> = {}): Product => ({
   site: "amazon-sa", id, title: `Item ${id}`, listPrice: 10, origPrice: null, discountPct: null, currency: "SAR",
@@ -17,6 +19,7 @@ const ps = [
   P("b", { title: "Apple iPhone 15 128GB", listPrice: 3000, site: "noon-sa", rating: 4.2 }),
 ];
 const noop = () => {};
+const count = (s: string, needle: string) => s.split(needle).length - 1;
 
 describe("FilterChips (17c)", () => {
   const f = { ...NO_FILTERS, minRating: 4 };
@@ -66,21 +69,70 @@ describe("Compare UI (17c)", () => {
     expect(withCmp).toContain("checked");
     expect(renderToStaticMarkup(createElement(ResultTiers, { products: ps }))).not.toContain("Compare");
   });
-  it("the tray says why a fifth was refused; Compare stays off under 2", () => {
-    const tray = renderToStaticMarkup(createElement(CompareTray, { items: [ps[0]], full: false, onRemove: noop, onClear: noop, onOpen: noop }));
-    expect(tray).toContain("Compare (1)");
-    expect(tray).toContain("disabled");
-    expect(tray).toContain("Tick one more product");
-    const full = renderToStaticMarkup(createElement(CompareTray, { items: ps, full: true, onRemove: noop, onClear: noop, onOpen: noop }));
+  const live = (p: Product): CompareSlot => ({ key: productKey(p), site: p.site, product: p, snap: { title: p.title, image: p.image } });
+  const tray = (o: Partial<Parameters<typeof CompareTray>[0]>) =>
+    renderToStaticMarkup(createElement(CompareTray, { slots: [], full: false, waiting: false, onRemove: noop, onClear: noop, onOpen: noop, ...o }));
+  it("the tray says why one past the limit was refused; Compare stays off under 2", () => {
+    const one = tray({ slots: [live(ps[0])] });
+    expect(one).toContain("Compare (1)");
+    expect(one).toContain("disabled");
+    expect(one).toContain("Tick one more product");
+    const full = tray({ slots: ps.map(live), full: true });
     expect(full).toContain("up to 4 products");
+    expect(full).toContain("tray__note--full");
+    expect(tray({ slots: [] })).toContain("hidden");
+  });
+  it("the tray names each product, removes each one, and offers Clear", () => {
+    const out = tray({ slots: ps.map(live) });
+    expect(out).toContain("Compare (2)");
+    expect(out).not.toContain("disabled");
+    expect(count(out, 'class="tray__chip"')).toBe(2);
+    expect(out).toContain("Remove<span class=\"visually-hidden\"> Apple iPhone 15 128GB from compare</span>");
+    expect(out).toContain(">Clear<");
+  });
+  it("a ticked product no longer in the results shows as such, is not counted, and keeps its store mark", () => {
+    const gone: CompareSlot = { key: "jarir+x9", site: "jarir", product: null, snap: null };
+    const out = tray({ slots: [...ps.map(live), gone] });
+    expect(out).toContain("No longer in results");
+    expect(out).toContain("tray__item--gone");
+    expect(out).toContain("Compare (2)");
+    expect(out).toContain("1 ticked product is no longer in the results.");
+    expect(out).toContain("/stores/jarir.");
+    expect(out).toContain("A product from Jarir");
+    expect(tray({ slots: [gone], waiting: true })).toContain("Not in results yet");
+    expect(tray({ slots: [gone], rerun: { query: "airpods 4", onRun: noop } })).toContain("Search &quot;airpods 4&quot; again");
   });
   it("the table marks the lowest price and the rows that differ", () => {
     const d = renderToStaticMarkup(createElement(CompareDialog, { items: ps, open: false, onClose: noop }));
     expect(d).toContain('scope="row"');
     expect(d).toContain("cmp__lowest");
-    expect(d).toContain("Lowest");
+    expect(d).toContain("Lowest price");
     expect(d).toContain("cmp__row--differs");
     expect(d).toMatch(/<td class="cmp__diff/);
     expect(d).toContain("Storage");
+  });
+  it("the table: full titles, store marks, explicit 'Not listed', a store link per product, no shipping row", () => {
+    const d = renderToStaticMarkup(createElement(CompareDialog, { items: ps, open: false, onClose: noop, onRemove: noop }));
+    expect(d).toContain("Samsung Galaxy S24 256GB");
+    expect(d).toContain("storemark");
+    expect(d).toContain('<span class="cmp__none">Not listed</span>');
+    expect(d).toContain("<s class=\"cmp__was\">SAR 2,500</s>");
+    expect(d).toContain("View on noon KSA");
+    expect(d).toContain('target="_blank" rel="noopener noreferrer"');
+    expect(d).toContain("Prices exclude shipping.");
+    expect(d).not.toMatch(/>Shipping<|Total price/);
+    expect(d).toContain("Show only differences");
+    expect(count(d, 'class="cmp__remove"')).toBe(2);
+  });
+  it("mixed currencies: no lowest price, and the price row says why", () => {
+    const d = renderToStaticMarkup(createElement(CompareDialog, { items: [ps[0], P("u", { currency: "USD", listPrice: 5 })], open: false, onClose: noop }));
+    expect(d).not.toContain("cmp__lowest");
+    expect(d).toContain("Different currencies, not compared");
+  });
+  it("products left out of the table are named", () => {
+    const gone: CompareSlot = { key: "jarir+x9", site: "jarir", product: null, snap: { title: "Old kettle", image: "" } };
+    const d = renderToStaticMarkup(createElement(CompareDialog, { items: ps, missing: [gone], open: false, onClose: noop }));
+    expect(d).toContain("no longer in results");
+    expect(d).toContain("Old kettle");
   });
 });

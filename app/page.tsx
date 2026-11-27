@@ -24,7 +24,9 @@ import {
   withChipParams, type ChipFilters, type KeptChip,
 } from "@/src/lib/chips";
 import { browserStorage, readView, writeView, type ResultsView } from "@/src/lib/filter-drawer";
-import { toggleCompare } from "@/src/lib/compare";
+import {
+  MIN_COMPARE, keysFromSearch, readMemory, resolveSelection, sessionStore, toggleKey, withCompareParam, writeMemory, type CompareMemory,
+} from "@/src/lib/compare";
 import { productKey } from "@/src/lib/specs";
 import { allMembers, buildUnits, viewItems } from "@/src/lib/view";
 import type { GroupRef } from "@/src/lib/match/group";
@@ -62,7 +64,12 @@ const INITIAL: FormValues = {
 
 const SKELETONS = 8;
 
-const NO_COMPARE: { list: Product[]; full: boolean } = { list: [], full: false };
+/** The compare selection: product keys in the order ticked (kept in the URL), and whether one was refused. */
+type CompareState = { keys: string[]; full: boolean };
+const NO_COMPARE: CompareState = { keys: [], full: false };
+
+/** The same search words (trimmed, any case). */
+const sameQuery = (a: string, b: string) => a.trim().toLowerCase() === b.trim().toLowerCase();
 
 const toNum = (s: string): number | undefined => {
   const t = s.trim();
@@ -95,10 +102,11 @@ export default function Home() {
     setView(v);
     writeView(browserStorage(), v);
   }, []);
-  // One state, so the toggle below can be one stable function for every (memoized) card.
-  const [cmp, setCmp] = useState<{ list: Product[]; full: boolean }>(NO_COMPARE);
-  const compareList = cmp.list;
-  const compareFull = cmp.full;
+  // One state, so the toggle below can be one stable function for every (memoized) card. The keys
+  // live in the URL (`cmp=`), so a reload, Back or a shared link keeps them; `memory` (this tab's
+  // sessionStorage) names the products and their search after a reload.
+  const [cmp, setCmp] = useState<CompareState>(NO_COMPARE);
+  const [memory, setMemory] = useState<CompareMemory | null>(null);
   const [compareOpen, setCompareOpen] = useState(false);
   // Groups the user opened, by row key: kept while a streamed search reshapes the cards.
   const [openRows, setOpenRows] = useState<ReadonlySet<string>>(() => new Set());
@@ -175,7 +183,7 @@ export default function Home() {
       // over. When chips were on, AppHeader pushed a new "/" entry: it is marked, so Back and
       // Forward can tell it from the results entry.
       home: () => {
-        if (withChipParams("", chips) !== "") window.history.replaceState({ ...(window.history.state as object | null), [HOME_ENTRY]: true }, "", "/");
+        if (withCompareParam(withChipParams("", chips), cmp.keys) !== "") window.history.replaceState({ ...(window.history.state as object | null), [HOME_ENTRY]: true }, "", "/");
         resetHome(true);
       },
       pop: () => {
@@ -193,6 +201,7 @@ export default function Home() {
           setPhase("done");
         }
         setChips(filtersFromSearch(qs));
+        setCmp({ keys: keysFromSearch(qs), full: false });
       },
     };
   });
@@ -214,22 +223,25 @@ export default function Home() {
     // Read once after hydration (the server render has no URL state); not a cascade.
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setChips(filtersFromSearch(qs));
+    const keys = keysFromSearch(qs);
+    setCmp({ keys, full: false });
+    setMemory(keys.length ? readMemory(sessionStore()) : null);
     setChipsRead(true);
     const fromUrl = valuesFromUrl(qs, INITIAL);
     if (!fromUrl) return;
-    window.history.replaceState(null, "", window.location.pathname + chipParamsOnly(qs));
+    window.history.replaceState(null, "", window.location.pathname + withCompareParam(chipParamsOnly(qs), keys));
     setValues(fromUrl.values);
     if (fromUrl.run) void search(undefined, fromUrl.values);
     // Runs once on mount by design.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Chip changes write the URL in place (replaceState: no history entry, no request).
+  // Chip and compare changes write the URL in place (replaceState: no history entry, no request).
   useEffect(() => {
     if (!chipsRead) return;
-    const next = withChipParams(window.location.search, chips);
+    const next = withCompareParam(withChipParams(window.location.search, chips), cmp.keys);
     if (next !== window.location.search) window.history.replaceState(window.history.state, "", window.location.pathname + next);
-  }, [chips, chipsRead]);
+  }, [chips, cmp.keys, chipsRead]);
 
   // Cards: a cross-store group is one card, every other product one card. Chips narrow the cards
   // (a group passes when any member does), then sort and the match tiers apply; no new request.
@@ -248,8 +260,25 @@ export default function Home() {
     const t = setTimeout(() => setLiveFilter(filterLive), 400);
     return () => clearTimeout(t);
   }, [filterLive]);
-  const compareKeys = useMemo(() => new Set(compareList.map(productKey)), [compareList]);
-  const onToggleCompare = useCallback((p: Product) => setCmp((c) => toggleCompare(c.list, p)), []);
+  // The ticked products, resolved against every result (filtered-out ones included, so a filter
+  // never drops them); a key the results do not have stays as a "no longer in results" slot.
+  const byKey = useMemo(() => new Map(all.map((p) => [productKey(p), p])), [all]);
+  const slots = useMemo(() => resolveSelection(cmp.keys, byKey, memory?.snaps), [cmp.keys, byKey, memory]);
+  const compareItems = useMemo(() => slots.flatMap((s) => (s.product ? [s.product] : [])), [slots]);
+  const compareMissing = useMemo(() => slots.filter((s) => !s.product), [slots]);
+  // This tab remembers the search and each ticked product, to name them after a reload.
+  useEffect(() => {
+    if (!chipsRead) return;
+    if (!cmp.keys.length) {
+      writeMemory(sessionStore(), null);
+      return;
+    }
+    const snaps = Object.fromEntries(slots.flatMap((s) => (s.snap ? [[s.key, s.snap]] : [])));
+    writeMemory(sessionStore(), { query: results?.query ?? memory?.query ?? "", sites: results?.sites ?? memory?.sites ?? [], snaps });
+  }, [slots, cmp.keys, results, memory, chipsRead]);
+  const compareKeys = useMemo(() => new Set(cmp.keys), [cmp.keys]);
+  const onToggleCompare = useCallback((p: Product) => setCmp((c) => toggleKey(c.keys, productKey(p))), []);
+  const removeCompare = useCallback((key: string) => setCmp((c) => ({ keys: c.keys.filter((k) => k !== key), full: false })), []);
   const compare = useMemo(() => ({ isChecked: (p: Product) => compareKeys.has(productKey(p)), onToggle: onToggleCompare }), [compareKeys, onToggleCompare]);
   const stores = useMemo(() => (run ? storeEntries(run.stream) : []), [run]);
 
@@ -286,7 +315,13 @@ export default function Home() {
     setKeptChips(carried.kept);
     setWatchOpen(false);
     setWatchSaved(false);
-    setCmp(NO_COMPARE);
+    // A different query starts a fresh comparison; the same one (or a reload's re-run) keeps it.
+    const from = results?.query ?? memory?.query;
+    if (from !== undefined && !sameQuery(from, v.query)) {
+      setCmp(NO_COMPARE);
+      setMemory(null);
+    }
+    setCompareOpen(false);
     setOpenRows(new Set());
 
     const body = {
@@ -574,13 +609,26 @@ export default function Home() {
       <AppFooter />
 
       <CompareTray
-        items={compareList}
-        full={compareFull}
-        onRemove={(p) => setCmp((c) => ({ list: c.list.filter((x) => productKey(x) !== productKey(p)), full: false }))}
+        slots={slots}
+        full={cmp.full}
+        waiting={loading}
+        onRemove={removeCompare}
         onClear={() => setCmp(NO_COMPARE)}
         onOpen={() => setCompareOpen(true)}
+        rerun={
+          !results && !loading && memory?.query && compareMissing.length > 0
+            ? { query: memory.query, onRun: () => searchWith({ query: memory.query, ...(memory.sites.length ? { sites: memory.sites } : {}) }) }
+            : undefined
+        }
       />
-      <CompareDialog items={compareList} open={compareOpen} onClose={() => setCompareOpen(false)} />
+      <CompareDialog
+        items={compareItems}
+        missing={compareMissing}
+        open={compareOpen && compareItems.length >= MIN_COMPARE}
+        onClose={() => setCompareOpen(false)}
+        onRemove={removeCompare}
+        brands={chipCtx.brands}
+      />
     </div>
   );
 }
