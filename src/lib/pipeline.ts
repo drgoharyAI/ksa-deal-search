@@ -27,7 +27,20 @@ export type SearchResult = {
 
 export const NO_MATCH_REASON = "No products matched your search and filters";
 
-type Call = { op: string; args: Record<string, string> };
+export type Call = { op: string; args: Record<string, string> };
+
+/** Sends one store call. Default: the adapter's own runCall, else api-anything via aaCall. */
+export type CallExec = (adapter: SiteAdapter, call: Call) => Promise<AaResult>;
+
+/**
+ * Development hooks (eval harness). Production passes none, so behaviour is unchanged:
+ * - exec replaces the transport for every store call (e.g. replaying recorded answers);
+ * - onFiltered sees the products that passed every filter, before dedupe and ranking.
+ */
+export type SearchOptions = {
+  exec?: CallExec;
+  onFiltered?: (products: Product[]) => void;
+};
 
 // api-anything classes meaning "the store is refusing us" (vs a plain error).
 const BLOCKED_CLASSES = new Set(["blocked", "rate"]);
@@ -42,11 +55,13 @@ async function runSite(
   adapter: SiteAdapter,
   pq: ParsedQuery,
   variants: string[],
+  execOverride?: CallExec,
 ): Promise<{ products: Product[]; status: SiteStatus }> {
   try {
     const calls = adapter.searchCalls(pq, variants);
-    const exec: (c: Call) => Promise<AaResult> =
-      adapter.runCall?.bind(adapter) ??
+    const exec: (c: Call) => Promise<AaResult> = execOverride
+      ? (c) => execOverride(adapter, c)
+      : adapter.runCall?.bind(adapter) ??
       ((c) => aaCall(adapter.id, c.op, c.args, { ttlMs: 600_000, lane: "search" }));
     const results = await Promise.all(
       calls.map((c) =>
@@ -96,7 +111,7 @@ async function runSite(
   }
 }
 
-export async function runSearch(input: SearchInput): Promise<SearchResult> {
+export async function runSearch(input: SearchInput, opts: SearchOptions = {}): Promise<SearchResult> {
   const pq = parseQuery(input.query);
   const minPrice = input.minPrice ?? pq.minPrice;
   const maxPrice = input.maxPrice ?? pq.maxPrice;
@@ -106,7 +121,7 @@ export async function runSearch(input: SearchInput): Promise<SearchResult> {
   const queryTokens = [tokenize(pq.terms), ...variants.map(tokenize)];
 
   const adapters = input.sites.map((id) => registry[id]).filter((a): a is SiteAdapter => !!a);
-  const outs = await Promise.all(adapters.map((a) => runSite(a, pq, variants)));
+  const outs = await Promise.all(adapters.map((a) => runSite(a, pq, variants, opts.exec)));
   const statuses = outs.map((o) => o.status);
 
   const seen = new Set<string>();
@@ -147,6 +162,7 @@ export async function runSearch(input: SearchInput): Promise<SearchResult> {
   if (isNum(minRating)) {
     products = products.map((p) => (p.rating === null && ratingless.has(p.site) ? { ...p, ratingUnavailable: true } : p));
   }
+  opts.onFiltered?.(products);
   products = rank(dedupe(products), input.sort);
 
   const result: SearchResult = { products, statuses, queryTokens };

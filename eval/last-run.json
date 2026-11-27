@@ -1,0 +1,504 @@
+{
+  "at": "2026-11-27T01:31:01.002Z",
+  "queries": [
+    {
+      "query": "anc earbuds under 300",
+      "slug": "anc-earbuds-under-300",
+      "stores": [
+        {
+          "store": "aliexpress",
+          "complete": true,
+          "calls": 4
+        },
+        {
+          "store": "amazon-sa",
+          "complete": true,
+          "calls": 4
+        },
+        {
+          "store": "jarir",
+          "complete": true,
+          "calls": 4
+        },
+        {
+          "store": "noon-sa",
+          "complete": true,
+          "calls": 2
+        },
+        {
+          "store": "trendyol-sa",
+          "complete": true,
+          "calls": 4
+        }
+      ],
+      "statuses": [
+        {
+          "site": "aliexpress",
+          "status": "ok"
+        },
+        {
+          "site": "amazon-sa",
+          "status": "ok"
+        },
+        {
+          "site": "jarir",
+          "status": "ok"
+        },
+        {
+          "site": "noon-sa",
+          "status": "ok"
+        },
+        {
+          "site": "trendyol-sa",
+          "status": "ok"
+        }
+      ],
+      "recordedItems": 682,
+      "results": 345,
+      "missingCalls": [],
+      "labelled": false,
+      "metrics": null,
+      "top": [
+        {
+          "key": "trendyol-sa:1174016929",
+          "store": "trendyol-sa",
+          "price": 8.32,
+          "title": "A high-quality wireless earbud that delivers a superior stereo sound experience.",
+          "label": null
+        },
+        {
+          "key": "aliexpress:1005012229570528",
+          "store": "aliexpress",
+          "price": 9.24,
+          "title": "Wireless Bluetooth 5.4 Earbuds Long-Lasting TWS Noise Cancellation Headphones Touch Control Mini Earphones With Mic for Music",
+          "label": null
+        },
+        {
+          "key": "aliexpress:1005007925093526",
+          "store": "aliexpress",
+          "price": 9.75,
+          "title": "895B TWS Wireless Earbuds Noise Canceling Waterproof Ear Buds In-Ear Stereo Headphones with LED Display Charging Case",
+          "label": null
+        },
+        {
+          "key": "aliexpress:1005008932971097",
+          "store": "aliexpress",
+          "price": 10.91,
+          "title": "TWS Wireless Bluetooth Earphones ANC Noise Reduction Earbuds With Microphone Exercise Music Headphones",
+          "label": null
+        },
+        {
+          "key": "aliexpress:1005007097095373",
+          "store": "aliexpress",
+          "price": 10.91,
+          "title": "TWS Pro60 Bluetooth Earphones Wireless Headphones Noise Cancelling Headset with Mic HiFi Stereo Sports Earbuds for Smartphones",
+          "label": null
+        },
+        {
+          "key": "aliexpress:1005007568176613",
+          "store": "aliexpress",
+          "price": 11.25,
+          "title": "E6S Wireless Bluetooth Earphones TWS Bluetooth Headset Wireless Earbuds Noise Cancelling Earphones with Microphone Headphones",
+          "label": null
+        },
+        {
+          "key": "aliexpress:1005013556532145",
+          "store": "aliexpress",
+          "price": 11.7,
+          "title": "Pro5S wireless Bluetooth Earphones Stereo Headphones in-ear high-fidelity earbuds noise-cancelling mini sports headphones",
+          "label": null
+        },
+        {
+          "key": "aliexpress:1005006237174179",
+          "store": "aliexpress",
+          "price": 12.2,
+          "title": "NEW A6S TWS Wireless Bluetooth Headphones Sport in Ear Earphone With Microphone Mini Pods Earbuds Noise Cancelling Headsets",
+          "label": null
+        },
+        {
+          "key": "trendyol-sa:1029696897",
+          "store": "trendyol-sa",
+          "price": 13.15,
+          "title": "M5 sports Bluetooth 5.0 Wireless Earbuds Magnetic In-Ear Headset with Mic",
+          "label": null
+        },
+        {
+          "key": "aliexpress:1005012742101670",
+          "store": "aliexpress",
+          "price": 13.46,
+          "title": "Bluetooth Earbuds Wireless Earphones Bluetooth Earphones Bluetooth Headphones with ANC Improve Focus in Noisy Environments",
+          "label": null
+        }
+      ]
+    },
+    {
+      "query": "iphone 16",
+      "slug": "iphone-16",
+      "stores": [
+        {
+          "store": "aliexpress",
+          "complete": true,
+          "calls": 2
+        },
+        {
+          "store": "amazon-sa",
+          "complete": true,
+          "calls": 2
+        },
+        {
+          "store": "jarir",
+          "complete": true,
+          "calls": 2
+        },
+        {
+          "store": "noon-sa",
+          "complete": true,
+          "calls": 2
+        },
+        {
+          "store": "trendyol-sa",
+          "complete": true,
+          "calls": 2
+        }
+      ],
+      "statuses": [
+        {
+          "site": "aliexpress",
+          "status": "ok"
+        },
+        {
+          "site": "amazon-sa",
+          "status": "ok"
+        },
+        {
+          "site": "jarir",
+          "status": "ok"
+        },
+        {
+          "site": "noon-sa",
+          "status": "ok"
+        },
+        {
+          "site": "trendyol-sa",
+          "status": "ok"
+        }
+      ],
+      "recordedItems": 488,
+      "results": 96,
+      "missingCalls": [],
+      "labelled": false,
+      "metrics": null,
+      "top": [
+        {
+          "key": "aliexpress:1005012700711804",
+          "store": "aliexpress",
+          "price": 3.47,
+          "title": "Special specification for special needs customers only 17 16 15 14 13 Pro Max Plus please do not order directly without contact",
+          "label": null
+        },
+        {
+          "key": "trendyol-sa:984511278",
+          "store": "trendyol-sa",
+          "price": 10.89,
+          "title": "Tempered glass camera protection for iPhone 16 plus",
+          "label": null
+        },
+        {
+          "key": "trendyol-sa:899387116",
+          "store": "trendyol-sa",
+          "price": 12.42,
+          "title": "white-1pcs 3-in-1 USB-C SD TF Card Reader, High-Speed Data Transfer, Plug & Play for iPhone 16 15, f",
+          "label": null
+        },
+        {
+          "key": "trendyol-sa:1184251959",
+          "store": "trendyol-sa",
+          "price": 13.26,
+          "title": "B-1PCS Mobile Phone Speaker Charging Port Cleaning Set Dust Plug for iPhone 17 16 15 Earphones Clean",
+          "label": null
+        },
+        {
+          "key": "trendyol-sa:1243548956",
+          "store": "trendyol-sa",
+          "price": 13.37,
+          "title": "B-1PCS Mobile Phone Speaker Charging Port Cleaning Set Dust Plug for iPhone 16 15 14 Earphones Clean",
+          "label": null
+        },
+        {
+          "key": "trendyol-sa:1243514291",
+          "store": "trendyol-sa",
+          "price": 13.42,
+          "title": "B-1PCS Metal USB C Dust Plug for IPhone 16 15 Pro 14 17 Samsung Xiaomi Android Charging Port Protect",
+          "label": null
+        },
+        {
+          "key": "trendyol-sa:1230560461",
+          "store": "trendyol-sa",
+          "price": 13.43,
+          "title": "1Pcs 1-12PCS Retractable Speaker Charging Port Cleaning Set Dust Plug for iPhone 17 16 Earphones Cle",
+          "label": null
+        },
+        {
+          "key": "trendyol-sa:1137008112",
+          "store": "trendyol-sa",
+          "price": 15.84,
+          "title": "For iPhone 7-14 For Apple iPhone 17 16 15 14 13 11 12 Pro Max Plus In-ear Lightning 3.5MM Wired Ear",
+          "label": null
+        },
+        {
+          "key": "trendyol-sa:1184167852",
+          "store": "trendyol-sa",
+          "price": 22.05,
+          "title": "iPhone17 Pro Navy With Box Luxury Tech Woven for Magsafe Magnetic Phone Case for Iphone 18 17 Air 16",
+          "label": null
+        },
+        {
+          "key": "aliexpress:1005011651372808",
+          "store": "aliexpress",
+          "price": 32.99,
+          "title": "WYLIE for IPhone 16 Built-in (MEP) Integrated Card Slot Finished Product Dual Card+eSIM OTA Upgrade 5G Signal US Version Only",
+          "label": null
+        }
+      ]
+    },
+    {
+      "query": "usb-c cable 100w",
+      "slug": "usb-c-cable-100w",
+      "stores": [
+        {
+          "store": "aliexpress",
+          "complete": true,
+          "calls": 3
+        }
+      ],
+      "statuses": [
+        {
+          "site": "aliexpress",
+          "status": "ok"
+        }
+      ],
+      "recordedItems": 124,
+      "results": 110,
+      "missingCalls": [],
+      "labelled": false,
+      "metrics": null,
+      "top": [
+        {
+          "key": "aliexpress:1005005912594648",
+          "store": "aliexpress",
+          "price": 4.24,
+          "title": "USB C Cable Baseus Type Baseus USB Type C To USB C Cable For iPhone 18 17 100W/5A PD Fast Charging Charger Cord For Macbook Xiaomi Samsung Type-C Cable",
+          "label": null
+        },
+        {
+          "key": "aliexpress:1005006510589628",
+          "store": "aliexpress",
+          "price": 4.24,
+          "title": "USB C Cable 100W Baseus 100W Type C To USB C Cable For iPhone 18 17 16 Fast Charging Charger Cord For Macbook iPad Samsung Xiaomi Fast USB C Wire",
+          "label": null
+        },
+        {
+          "key": "aliexpress:4000802127824",
+          "store": "aliexpress",
+          "price": 4.24,
+          "title": "USB C Cable Baseus 100W/5A USB C To USB Type C Cable For iPhone 17 16 PD Fast Charging Charger Cord For Macbook Samsung Xiaomi Type-C Cable",
+          "label": null
+        },
+        {
+          "key": "aliexpress:1005001535435098",
+          "store": "aliexpress",
+          "price": 4.24,
+          "title": "USB C to USB C Cable 3m 100W, WOTOBE Long 10ft USB Type-C 5A E Mark Fast Charging Nylon Braided Cord Compatible MacBook Pro iPad",
+          "label": null
+        },
+        {
+          "key": "aliexpress:1005008308756135",
+          "store": "aliexpress",
+          "price": 4.24,
+          "title": "Essager 100W Type C To Type C Cable For IPhone16 15 Xiaomi Samsung Huawei PD Fast Charging For Macbook Tablet Laptop LED Cable",
+          "label": null
+        },
+        {
+          "key": "aliexpress:1005002023404248",
+          "store": "aliexpress",
+          "price": 4.24,
+          "title": "XIAOMI Original Usb Type C Cable 120W 100W 90W 67W 45W Turbo Fast Charger Mi 17 15 14 13 12 T Pro Ultra Poco F8 X8 X7 Redmi Note",
+          "label": null
+        },
+        {
+          "key": "aliexpress:1005013255305743",
+          "store": "aliexpress",
+          "price": 4.91,
+          "title": "Toocki 6A USB To Type C Cable for Huawei Xiaomi PD 100W Fast Charging Charger USB C Data Cord Quick Charge for Samsung Oneplus",
+          "label": null
+        },
+        {
+          "key": "aliexpress:1005013266158674",
+          "store": "aliexpress",
+          "price": 4.91,
+          "title": "Toocki 100W Type C to USB C Cable PD 3.0 Quick Charge 4.0 Fast Charging Type C to Type C for iPhone 15 Macbook Samsung Xiaomi",
+          "label": null
+        },
+        {
+          "key": "aliexpress:1005008326414705",
+          "store": "aliexpress",
+          "price": 4.91,
+          "title": "3PCS 100W 6A USB Type C USB Cable Super Fast Charing Line for Xiaomi Samsung Huawei Honor Quick Charge USB C Cables Data Cord",
+          "label": null
+        },
+        {
+          "key": "aliexpress:1005013652290787",
+          "store": "aliexpress",
+          "price": 4.99,
+          "title": "1-2Pcs Burgundy Braided Cord 100W Quick Charging Data Cord 90 Degree USB Type C Cable for iPhone Duo 18 Pro Max 17 16 Samsung",
+          "label": null
+        }
+      ]
+    },
+    {
+      "query": "air fryer",
+      "slug": "air-fryer",
+      "stores": [],
+      "statuses": [],
+      "recordedItems": 0,
+      "results": 0,
+      "missingCalls": [],
+      "labelled": false,
+      "metrics": null,
+      "top": []
+    },
+    {
+      "query": "apple watch",
+      "slug": "apple-watch",
+      "stores": [],
+      "statuses": [],
+      "recordedItems": 0,
+      "results": 0,
+      "missingCalls": [],
+      "labelled": false,
+      "metrics": null,
+      "top": []
+    },
+    {
+      "query": "power bank 20000mah",
+      "slug": "power-bank-20000mah",
+      "stores": [],
+      "statuses": [],
+      "recordedItems": 0,
+      "results": 0,
+      "missingCalls": [],
+      "labelled": false,
+      "metrics": null,
+      "top": []
+    },
+    {
+      "query": "mechanical keyboard -wired",
+      "slug": "mechanical-keyboard-wired",
+      "stores": [],
+      "statuses": [],
+      "recordedItems": 0,
+      "results": 0,
+      "missingCalls": [],
+      "labelled": false,
+      "metrics": null,
+      "top": []
+    },
+    {
+      "query": "gaming mouse",
+      "slug": "gaming-mouse",
+      "stores": [],
+      "statuses": [],
+      "recordedItems": 0,
+      "results": 0,
+      "missingCalls": [],
+      "labelled": false,
+      "metrics": null,
+      "top": []
+    },
+    {
+      "query": "samsung galaxy s24",
+      "slug": "samsung-galaxy-s24",
+      "stores": [],
+      "statuses": [],
+      "recordedItems": 0,
+      "results": 0,
+      "missingCalls": [],
+      "labelled": false,
+      "metrics": null,
+      "top": []
+    },
+    {
+      "query": "laptop backpack",
+      "slug": "laptop-backpack",
+      "stores": [],
+      "statuses": [],
+      "recordedItems": 0,
+      "results": 0,
+      "missingCalls": [],
+      "labelled": false,
+      "metrics": null,
+      "top": []
+    },
+    {
+      "query": "4k monitor 27",
+      "slug": "4k-monitor-27",
+      "stores": [],
+      "statuses": [],
+      "recordedItems": 0,
+      "results": 0,
+      "missingCalls": [],
+      "labelled": false,
+      "metrics": null,
+      "top": []
+    },
+    {
+      "query": "ps5 controller",
+      "slug": "ps5-controller",
+      "stores": [],
+      "statuses": [],
+      "recordedItems": 0,
+      "results": 0,
+      "missingCalls": [],
+      "labelled": false,
+      "metrics": null,
+      "top": []
+    },
+    {
+      "query": "robot vacuum",
+      "slug": "robot-vacuum",
+      "stores": [],
+      "statuses": [],
+      "recordedItems": 0,
+      "results": 0,
+      "missingCalls": [],
+      "labelled": false,
+      "metrics": null,
+      "top": []
+    },
+    {
+      "query": "smart watch >4 stars",
+      "slug": "smart-watch-4-stars",
+      "stores": [],
+      "statuses": [],
+      "recordedItems": 0,
+      "results": 0,
+      "missingCalls": [],
+      "labelled": false,
+      "metrics": null,
+      "top": []
+    },
+    {
+      "query": "hair dryer",
+      "slug": "hair-dryer",
+      "stores": [],
+      "statuses": [],
+      "recordedItems": 0,
+      "results": 0,
+      "missingCalls": [],
+      "labelled": false,
+      "metrics": null,
+      "top": []
+    }
+  ],
+  "overall": null
+}
