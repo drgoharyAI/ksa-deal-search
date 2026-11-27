@@ -220,3 +220,16 @@ thinkpad, kindle, dualsense` join the list (like the existing pixel / playstatio
 | tuning (15) | 98.0% | 0% | 1.3% | 91.5% | 100% |
 | holdout (8) | 88.8% | 10.0% | 0% | 82.6% | 75.0% |
 | all (23) | 94.8% | 3.5% | 0.9% | 88.4% | 91.3% |
+
+## 12d round 3: fastening and consumable part nouns (kept)
+The part-noun rule (a part noun within two tokens after the product noun) only knew device parts.
+Added generic fastening and consumable parts that sellers name right after the product they serve:
+descaler, descaling, towel, rag, cloth, adhesive, clip(s), buckle(s), lock(s), laces, insole(s)
+("Shoe Locks", "Shoe Clip", "Coffee Machine Descaler", "Dash Cam Special Adhesive"). Tried and
+removed in the same round: "cleaning" ("5 Cleaning Modes"), "head(s)" ("2 Toothbrush Heads"
+included in a kit) and "tape" ("Mouse-Black Ink+Tape"): each cost recall.
+| set | p@10 | acc@10 | wrong@10 | recall | cheapest-first |
+|---|---|---|---|---|---|
+| tuning (15) | 98.0% | 0% | 1.3% | 91.5% | 100% |
+| holdout (8) | 95.0% | 3.8% | 0% | 82.5% | 75.0% |
+| all (23) | 97.0% | 1.3% | 0.9% | 88.4% | 91.3% |

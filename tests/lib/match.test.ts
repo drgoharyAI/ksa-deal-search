@@ -386,3 +386,14 @@ describe("12d round 2: product lines name their brand", () => {
     expect(dropBrandPriceOutliers(ps, ["ipad", "air"]).map((p) => p.id)).toEqual(["1", "2", "3", "4"]);
   });
 });
+
+describe("12d round 3: fastening and consumable part nouns", () => {
+  it("drops parts and consumables named right after the product noun", () => {
+    expect(isStrongAccessory("No-Tie Shoe Locks, Quick-Adjust Buckles for Running Shoes", ["running", "shoes"], [["running", "shoes"]])).toBe(true);
+    expect(isStrongAccessory("JUE-FISH Coffee Machine Descaler, Descaling Solution", ["coffee", "machine"], [["coffee", "machine"]])).toBe(true);
+    expect(isStrongAccessory("3M Foam Tape DDPAI Dash Cam Special Adhesive", ["dash", "cam"], [["dash", "cam"]])).toBe(true);
+  });
+  it("keeps the product whose features mention them", () => {
+    expect(isStrongAccessory("Rotating Electric Toothbrush, 5 Cleaning Modes", ["electric", "toothbrush"], [["electric", "toothbrush"]])).toBe(false);
+  });
+});
