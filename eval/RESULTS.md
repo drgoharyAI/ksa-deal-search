@@ -378,3 +378,20 @@ and ipad air their cheapest-first; with the condition nothing else moves.
 | holdout (8) | 98.8% | 1.3% | 0% | 86.5% | 100% |
 | holdout2 (6) | 95.0% | 1.7% | 0% | 89.3% | 83.3% |
 | all (29) | 97.9% | 0.7% | 0.7% | 90.0% | 93.1% |
+
+## 12e round 5: word lists removed where structure covers them (kept)
+Greedy ablation on the dev set (remove one entry at a time, keep the removal when no set loses on
+any metric): 38 of the 39 part nouns in `data/part-words.json` go, including all 15 added in 12d
+(descaler, towel, rag, cloth, adhesive, clip(s), buckle(s), lock(s), laces, insole(s)) and the 12c
+device parts (pad, mat, band, strap, diffuser, filter, dock, station, ...). Those items are now
+caught by the accessory-word price test, the price tiers or the weak-match tier. Only "switch"
+stays (keyboard p@10 80%→50% without it). The 12c book words (dummies, paperback, hardcover,
+recipe book, cookbooks) go too (ISBN codes + weak tier). Kept because removal costs: macro keypad
+words (keyboard p@10 80%→50%), trademark product lines in brands.json (ipad air p@10 100%→0%).
+Recall rises slightly (fewer real products caught by a part word).
+| set | p@10 | acc@10 | wrong@10 | recall | cheapest-first |
+|---|---|---|---|---|---|
+| tuning (15) | 98.7% | 0% | 1.3% | 92.3% | 93.3% |
+| holdout (8) | 98.8% | 1.3% | 0% | 86.5% | 100% |
+| holdout2 (6) | 95.0% | 1.7% | 0% | 89.8% | 83.3% |
+| all (29) | 97.9% | 0.7% | 0.7% | 90.2% | 93.1% |

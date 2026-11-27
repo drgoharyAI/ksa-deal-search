@@ -273,8 +273,9 @@ describe("isForAccessory (12c)", () => {
 
 describe("part nouns after the product noun (12c)", () => {
   it("is strong when a part noun follows the product noun", () => {
-    expect(isStrongAccessory("Textured Gaming Mouse Pad", ["gaming", "mouse"], [["gaming", "mouse"]])).toBe(true);
-    expect(isStrongAccessory("Hair Dryer Folding Diffuser Blue", ["hair", "dryer"], [["hair", "dryer"]])).toBe(true);
+    // 12e: the part-noun list shrank to "switch"; pads and diffusers are left to the price test.
+    expect(isStrongAccessory("Mechanical Keyboard Switches Pack", ["mechanical", "keyboard"], [["mechanical", "keyboard"]])).toBe(false);
+    expect(isStrongAccessory("Mechanical Keyboard Switch Red", ["mechanical", "keyboard"], [["mechanical", "keyboard"]])).toBe(true);
   });
   it("is not strong for a category word (bag, charger) or a far part noun", () => {
     expect(isStrongAccessory("Backpack Laptop Bag 15.6 Inch", ["laptop", "backpack"], [["laptop", "backpack"]])).toBe(false);
@@ -291,9 +292,9 @@ describe("title core (12c)", () => {
 });
 
 describe("isOtherProduct (12c)", () => {
-  it("drops books about the product and macro keypads", () => {
-    expect(isOtherProduct("Apple Watch for Dummies, 2nd Edition", ["apple", "watch"])).toBe(true);
-    expect(isOtherProduct('The "I Love My Air Fryer" 5-Ingredient Recipe Book', ["air", "fryer"])).toBe(true);
+  it("drops recipe-count books and macro keypads", () => {
+    // 12e: the book words (dummies, paperback, hardcover, recipe book) were removed: ISBN codes and
+    // the weak-match tier cover them on the dev set.
     expect(isOtherProduct("Paleo Cooking with Your Air Fryer - 75 Recipes", ["air", "fryer"])).toBe(true);
     expect(isOtherProduct("OSU Mini Keypad 2 Key Mechanical Keyboard", ["mechanical", "keyboard"])).toBe(true);
     expect(isOtherProduct("RGB 3 Keys Macro Mechanical Keyboard", ["mechanical", "keyboard"])).toBe(true);
@@ -388,10 +389,8 @@ describe("12d round 2: product lines name their brand", () => {
 });
 
 describe("12d round 3: fastening and consumable part nouns", () => {
-  it("drops parts and consumables named right after the product noun", () => {
-    expect(isStrongAccessory("No-Tie Shoe Locks, Quick-Adjust Buckles for Running Shoes", ["running", "shoes"], [["running", "shoes"]])).toBe(true);
-    expect(isStrongAccessory("JUE-FISH Coffee Machine Descaler, Descaling Solution", ["coffee", "machine"], [["coffee", "machine"]])).toBe(true);
-    expect(isStrongAccessory("3M Foam Tape DDPAI Dash Cam Special Adhesive", ["dash", "cam"], [["dash", "cam"]])).toBe(true);
+  it("12e: the 12d consumable part nouns are no longer in the list", () => {
+    expect(isStrongAccessory("JUE-FISH Coffee Machine Descaler, Descaling Solution", ["coffee", "machine"], [["coffee", "machine"]])).toBe(false);
   });
   it("keeps the product whose features mention them", () => {
     expect(isStrongAccessory("Rotating Electric Toothbrush, 5 Cleaning Modes", ["electric", "toothbrush"], [["electric", "toothbrush"]])).toBe(false);
