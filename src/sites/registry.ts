@@ -1,6 +1,8 @@
 import type { SiteAdapter } from "@/src/lib/types";
 import * as aliexpress from "./aliexpress/search";
 import * as amazonSa from "./amazon-sa/search";
+import * as carrefourSa from "./carrefour-sa/search";
+import * as extraSa from "./extra-sa/search";
 import * as jarir from "./jarir/search";
 import * as noonSa from "./noon-sa/search";
 import * as trendyolSa from "./trendyol-sa/search";
@@ -40,6 +42,20 @@ export const sites: Record<string, SiteAdapter> = {
     label: "Trendyol KSA",
     searchCalls: trendyolSa.searchCalls,
     normalizeSearchItem: trendyolSa.normalizeSearchItem,
+    fetchDetail: async (p) => p,
+  },
+  "extra-sa": {
+    id: "extra-sa",
+    label: "eXtra",
+    searchCalls: extraSa.searchCalls,
+    normalizeSearchItem: extraSa.normalizeSearchItem,
+    fetchDetail: async (p) => p,
+  },
+  "carrefour-sa": {
+    id: "carrefour-sa",
+    label: "Carrefour KSA",
+    searchCalls: carrefourSa.searchCalls,
+    normalizeSearchItem: carrefourSa.normalizeSearchItem,
     fetchDetail: async (p) => p,
   },
 };

@@ -8,6 +8,8 @@ export const STORES = [
   { id: "jarir", label: "Jarir", logo: "/stores/jarir.svg" },
   { id: "noon-sa", label: "noon KSA", logo: "/stores/noon-sa.ico" },
   { id: "trendyol-sa", label: "Trendyol KSA", logo: "/stores/trendyol-sa.png" },
+  { id: "extra-sa", label: "eXtra", logo: "/stores/extra-sa.ico" },
+  { id: "carrefour-sa", label: "Carrefour KSA", logo: "/stores/carrefour-sa.ico" },
 ] as const;
 
 export type StoreId = (typeof STORES)[number]["id"];
