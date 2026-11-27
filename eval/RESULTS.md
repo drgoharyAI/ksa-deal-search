@@ -122,3 +122,12 @@ a few riyals).
 | p@10 | acc@10 | wrong@10 | recall | cheapest-first |
 |---|---|---|---|---|
 | 96% | 2% | 1.3% | 90% | 80% |
+
+## Round 10: part nouns stand alone; core needs a product word (kept)
+The "part noun right after the product noun" rule no longer needs the word in the accessory list,
+so "switch" can be a part noun ("Mechanical keyboard Switch Gateron") without making every
+"PS5 / Switch" controller a price-tested candidate. The title-core fallback now asks for a
+digit-free query word, so "Ps5 Cooling & Dual Controller Charging Station" is read in full.
+| p@10 | acc@10 | wrong@10 | recall | cheapest-first |
+|---|---|---|---|---|
+| 97% (96.0→96.7) | 0.7% | 2.0% | 90% | 80% |

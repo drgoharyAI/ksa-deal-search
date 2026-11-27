@@ -21,11 +21,13 @@ const isAccessoryWord = (t: string) =>
 
 /**
  * Title tokens before any "with / + / & / includes / including / built-in". When that part names
- * no query word ("Ps5 Cooling & Dual Controller Charging Station"), the whole title is used.
+ * no digit-free query word (product nouns have no digits: "Ps5 Cooling & Dual Controller Charging
+ * Station"), the whole title is used.
  */
 function coreTokens(title: string, queryTokens: string[] = []): string[] {
   const core = tokenize(title.split(CONNECTOR)[0]);
-  if (!queryTokens.length || core.some((t) => queryTokens.some((q) => formsMatch(q, t)))) return core;
+  const words = queryTokens.filter((q) => !hasDigit(q));
+  if (!words.length || core.some((t) => words.some((q) => formsMatch(q, t)))) return core;
   return tokenize(title);
 }
 
@@ -53,12 +55,13 @@ export function isAccessory(title: string, queryTokens: string[]): boolean {
  */
 export function isStrongAccessory(title: string, queryTokens: string[], variants: string[][] = []): boolean {
   const { tt, idx } = foreignAccessoryIdx(title, queryTokens);
-  if (!idx.length) return false;
   if (idx.some((i) => tt[i] === "replacement" || tt[i + 1] === "for" || tt[i + 1] === "compatible")) return true;
+  const q = queryTokens.map((t) => t.toLowerCase());
+  const isPart = (t: string | undefined) => !!t && PART.has(t) && !q.some((x) => formsMatch(x, t));
   return variants.some((v) => {
     const head = headNoun(v);
     const j = head ? tt.findIndex((t) => formsMatch(head, t)) : -1;
-    return j >= 0 && idx.some((i) => (i === j + 1 || i === j + 2) && PART.has(tt[i]));
+    return j >= 0 && (isPart(tt[j + 1]) || isPart(tt[j + 2]));
   });
 }
 

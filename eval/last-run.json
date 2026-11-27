@@ -1,5 +1,5 @@
 {
-  "at": "2026-11-27T02:05:41.305Z",
+  "at": "2026-11-27T02:06:42.572Z",
   "queries": [
     {
       "query": "anc earbuds under 300",
@@ -894,14 +894,14 @@
         }
       ],
       "recordedItems": 494,
-      "results": 140,
+      "results": 138,
       "missingCalls": [],
       "labelled": true,
       "metrics": {
         "top": 10,
         "precisionAt10": 0.6,
-        "accessoryAt10": 0.2,
-        "wrongModelAt10": 0.1,
+        "accessoryAt10": 0.1,
+        "wrongModelAt10": 0.2,
         "unlabeledAt10": 0,
         "recall": 0.879746835443038,
         "relevantRecorded": 158,
@@ -915,13 +915,6 @@
           "price": 4.24,
           "title": "Compact Mechanical Gaming Keyboard with RGB Backlit Computer Keyboard Hot Swappable Keyboard for Windows Laptops and PC Gamers",
           "label": "relevant"
-        },
-        {
-          "key": "aliexpress:1005005550328893",
-          "store": "aliexpress",
-          "price": 21.84,
-          "title": "Mechanical keyboard Switch Gateron White Yellow Silver Pro 2.0 V2 Switch 3pin RGB linear Tactile Red Brown Switchs for Hot-swappable Mechanical keyboard",
-          "label": "accessory"
         },
         {
           "key": "trendyol-sa:1060889296",
@@ -978,6 +971,13 @@
           "price": 37.39,
           "title": "Gaming Keyboard White Mechanical Game USB Keyboards 60% Mini Teclado Spanish Keyborad Teclado PC Key Board Laptop Computer",
           "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005006421437822",
+          "store": "aliexpress",
+          "price": 49.49,
+          "title": "K98 Wireless Gaming Mechanical Feel Keyboard 2.4G+Bluetooth Dual-mode Backlight Desktop PC/Notebook Available Keyboard",
+          "label": "wrong-model"
         }
       ]
     },
@@ -1034,7 +1034,7 @@
         }
       ],
       "recordedItems": 501,
-      "results": 381,
+      "results": 380,
       "missingCalls": [],
       "labelled": true,
       "metrics": {
@@ -1043,9 +1043,9 @@
         "accessoryAt10": 0,
         "wrongModelAt10": 0,
         "unlabeledAt10": 0,
-        "recall": 0.9670588235294117,
+        "recall": 0.9647058823529412,
         "relevantRecorded": 425,
-        "relevantKept": 411,
+        "relevantKept": 410,
         "cheapestRelevantFirst": true
       },
       "top": [
@@ -1594,13 +1594,13 @@
         }
       ],
       "recordedItems": 449,
-      "results": 228,
+      "results": 227,
       "missingCalls": [],
       "labelled": true,
       "metrics": {
         "top": 10,
-        "precisionAt10": 0.9,
-        "accessoryAt10": 0.1,
+        "precisionAt10": 1,
+        "accessoryAt10": 0,
         "wrongModelAt10": 0,
         "unlabeledAt10": 0,
         "recall": 0.917981072555205,
@@ -1615,13 +1615,6 @@
           "price": 47.69,
           "title": "Wireless Gaming Controller Bluetooth 5.4 Gamepad For PC PS3 PS4 PS5 Android IOS For Switch Turbo Macro Back Key",
           "label": "relevant"
-        },
-        {
-          "key": "trendyol-sa:1133886630",
-          "store": "trendyol-sa",
-          "price": 51.25,
-          "title": "Ps5 Cooling & Dual Controller Charging Station with 3 USB & 14 Disc Storage Vertical Stand |   Medina Shop",
-          "label": "accessory"
         },
         {
           "key": "aliexpress:1005013426044828",
@@ -1677,6 +1670,13 @@
           "store": "aliexpress",
           "price": 86.08,
           "title": "RGB Wireless Gamepad,For Playstation 5/PS5 Controller,With Turbo Dual Sense Vibrate Programming 3D Gaming Controller Console",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005007648930345",
+          "store": "aliexpress",
+          "price": 89.09,
+          "title": "Controller For PS5/PS4/PS3/Steam/PC RGB Wireless Control Joystick Hall Linear Trigger Gamepad Turbo Dual Vibration Game Remote",
           "label": "relevant"
         }
       ]
@@ -2104,10 +2104,10 @@
   ],
   "overall": {
     "queries": 15,
-    "precisionAt10": 0.9600000000000001,
-    "accessoryAt10": 0.020000000000000004,
-    "wrongModelAt10": 0.013333333333333334,
-    "recall": 0.8979236525313057,
+    "precisionAt10": 0.9666666666666667,
+    "accessoryAt10": 0.006666666666666667,
+    "wrongModelAt10": 0.020000000000000004,
+    "recall": 0.8977667897862076,
     "cheapestRelevantFirst": 0.8
   }
 }

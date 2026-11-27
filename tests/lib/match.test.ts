@@ -326,3 +326,13 @@ describe("dropBrandPriceOutliers (12c)", () => {
     expect(dropBrandPriceOutliers(watches.slice(0, 3), ["apple", "watch"])).toHaveLength(3);
   });
 });
+
+describe("round 10 part nouns (12c)", () => {
+  it("a part noun right after the product noun needs no accessory-list entry", () => {
+    expect(isStrongAccessory("Mechanical keyboard Switch Gateron Yellow 3pin", ["mechanical", "keyboard"], [["mechanical", "keyboard"]])).toBe(true);
+    expect(isStrongAccessory("Wireless Controller for PS5 and Switch", ["ps5", "controller"], [["ps5", "controller"]])).toBe(false);
+  });
+  it("core falls back to the whole title when only a model token is before '&'", () => {
+    expect(isAccessory("Ps5 Cooling & Dual Controller Charging Station", ["ps5", "controller"])).toBe(true);
+  });
+});
