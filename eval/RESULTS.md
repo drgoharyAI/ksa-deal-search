@@ -269,3 +269,28 @@ it no longer makes the item a price-tested accessory candidate. Right after the 
 | tuning (15) | 98.0% | 0% | 1.3% | 92.1% | 100% |
 | holdout (8) | 95.0% | 3.8% | 0% | 86.5% | 87.5% |
 | all (23) | 97.0% | 1.3% | 0.9% | 90.2% | 95.7% |
+
+## 12d rounds 7-10 (all reverted: no combined improvement)
+- 7: an item whose product noun appears only after "with / includes / built-in" is another
+  product ("Karaoke Microphone with Built-in Speaker"). First try: no metric moved (those items sat
+  below the top 10). Second try with "includes": recall fell on bundles ("Power Kit, Includes
+  20000mAh Power Bank", anc 85%→83%, charger 90%→88%).
+- 8: "handle" as a part noun and "diy" as an accessory word: holdout acc@10 3.8%→1.3%, but
+  "Dualsense Controller Ps5 Handle" (handle = gamepad), "Easy-Grip Handle" coffee makers and
+  "DIY Dial" smart watches were lost (ps5 93.6%→92.7%, smart watch 91.1%→90.0%).
+- 9: "brush" as an accessory word: hair dryer lost cheapest-first, toothbrush recall 88%→85%.
+- 10: removing the 12c "switch" part noun: keyboard p@10 70%→60%.
+Also tried inside kept rounds and removed: accessory words more than two tokens after the
+product noun are never candidates (air fryer p@10 100%→70%); machine = maker (round 5).
+Ablation only (not a round): without the 12c piece-count rule, keyboard p@10 70%→60%, nothing
+else moves, so it stays. Four rounds in a row without a combined gain: stop.
+
+## 12d final (after round 6)
+| set | p@10 | acc@10 | wrong@10 | recall | cheapest-first |
+|---|---|---|---|---|---|
+| tuning (15) | 98.0% | 0% | 1.3% | 92.1% | 100% |
+| holdout (8) | 95.0% | 3.8% | 0% | 86.5% | 87.5% |
+| all (23) | 97.0% | 1.3% | 0.9% | 90.2% | 95.7% |
+Every target is met on both sets except holdout acc@10 (3.8% vs <= 2%): coffee machine has a
+coffee brush kit and a portafilter handle in its top 10, bluetooth speaker a pair of DIY speaker
+drivers. None carries a word that separates it from the product without costing recall elsewhere.

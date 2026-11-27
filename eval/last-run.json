@@ -1,5 +1,5 @@
 {
-  "at": "2026-11-27T02:10:13.586Z",
+  "at": "2026-11-27T07:52:19.692Z",
   "queries": [
     {
       "query": "anc earbuds under 300",
@@ -334,7 +334,7 @@
         }
       ],
       "recordedItems": 534,
-      "results": 326,
+      "results": 353,
       "missingCalls": [],
       "labelled": true,
       "metrics": {
@@ -343,12 +343,40 @@
         "accessoryAt10": 0,
         "wrongModelAt10": 0,
         "unlabeledAt10": 0,
-        "recall": 0.9117647058823529,
+        "recall": 0.9625668449197861,
         "relevantRecorded": 374,
-        "relevantKept": 341,
+        "relevantKept": 360,
         "cheapestRelevantFirst": true
       },
       "top": [
+        {
+          "key": "aliexpress:1005006505041416",
+          "store": "aliexpress",
+          "price": 4.24,
+          "title": "UGREEN PD100W USB Type C To USB C Cable for iPhone Duo 18Pro 17 Samsung S26 25 iPad Laptop Fast Charger Cord 5A E-Marker Chip",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005005912594648",
+          "store": "aliexpress",
+          "price": 4.24,
+          "title": "USB C Cable Baseus Type Baseus USB Type C To USB C Cable For iPhone 18 17 100W/5A PD Fast Charging Charger Cord For Macbook Xiaomi Samsung Type-C Cable",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005006510589628",
+          "store": "aliexpress",
+          "price": 4.24,
+          "title": "USB C Cable 100W Baseus 100W Type C To USB C Cable For iPhone 18 17 16 Fast Charging Charger Cord For Macbook iPad Samsung Xiaomi Fast USB C Wire",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:4000802127824",
+          "store": "aliexpress",
+          "price": 4.24,
+          "title": "USB C Cable Baseus 100W/5A USB C To USB Type C Cable For iPhone 17 16 PD Fast Charging Charger Cord For Macbook Samsung Xiaomi Type-C Cable",
+          "label": "relevant"
+        },
         {
           "key": "aliexpress:1005001535435098",
           "store": "aliexpress",
@@ -364,6 +392,20 @@
           "label": "relevant"
         },
         {
+          "key": "aliexpress:1005002023404248",
+          "store": "aliexpress",
+          "price": 4.24,
+          "title": "XIAOMI Original Usb Type C Cable 120W 100W 90W 67W 45W Turbo Fast Charger Mi 17 15 14 13 12 T Pro Ultra Poco F8 X8 X7 Redmi Note",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005013255305743",
+          "store": "aliexpress",
+          "price": 4.91,
+          "title": "Toocki 6A USB To Type C Cable for Huawei Xiaomi PD 100W Fast Charging Charger USB C Data Cord Quick Charge for Samsung Oneplus",
+          "label": "relevant"
+        },
+        {
           "key": "aliexpress:1005013266158674",
           "store": "aliexpress",
           "price": 4.91,
@@ -375,48 +417,6 @@
           "store": "aliexpress",
           "price": 4.91,
           "title": "3PCS 100W 6A USB Type C USB Cable Super Fast Charing Line for Xiaomi Samsung Huawei Honor Quick Charge USB C Cables Data Cord",
-          "label": "relevant"
-        },
-        {
-          "key": "aliexpress:1005013652290787",
-          "store": "aliexpress",
-          "price": 4.99,
-          "title": "1-2Pcs Burgundy Braided Cord 100W Quick Charging Data Cord 90 Degree USB Type C Cable for iPhone Duo 18 Pro Max 17 16 Samsung",
-          "label": "relevant"
-        },
-        {
-          "key": "aliexpress:1005013478419574",
-          "store": "aliexpress",
-          "price": 5.39,
-          "title": "PD 100W USB C Fast Charging Cable Right Angle 90 Degree Type C Data Cord Mobile Phone Quick Charge Data Cable for Samsung Xiaomi",
-          "label": "relevant"
-        },
-        {
-          "key": "aliexpress:1005006150193514",
-          "store": "aliexpress",
-          "price": 5.45,
-          "title": "Essager 7A Type C USB Cable Wire For Samsung S10 Xiaomi Huawei P30 P40 Pro Mobile Phone 100W Fast Charging USB Type C Data Cord",
-          "label": "relevant"
-        },
-        {
-          "key": "aliexpress:1005013524832728",
-          "store": "aliexpress",
-          "price": 5.46,
-          "title": "2/1PCS Burgundy Braided 90° Elbow Type C To Type C Cable 100W Fast Charging Data Transfer Cord for iPhone 18 ProMax 17 16 15 Duo",
-          "label": "relevant"
-        },
-        {
-          "key": "aliexpress:1005013524900682",
-          "store": "aliexpress",
-          "price": 5.51,
-          "title": "100W USB A/C To Type C Cable 90 Degree Data Cable for IPad MacBook for iPhone 18 Pro Max Samsung Xiaomi Fast Charging Data Cord",
-          "label": "relevant"
-        },
-        {
-          "key": "aliexpress:1005012636954000",
-          "store": "aliexpress",
-          "price": 5.52,
-          "title": "Laptop Mobile Phone 20V/5A QC4 Short USB C Cable Fast Charging Cable PD 100W Type C Data Cord",
           "label": "relevant"
         }
       ]
@@ -474,7 +474,7 @@
         }
       ],
       "recordedItems": 465,
-      "results": 328,
+      "results": 354,
       "missingCalls": [],
       "labelled": true,
       "metrics": {
@@ -483,10 +483,10 @@
         "accessoryAt10": 0,
         "wrongModelAt10": 0,
         "unlabeledAt10": 0,
-        "recall": 0.9030470914127424,
-        "relevantRecorded": 361,
-        "relevantKept": 326,
-        "cheapestRelevantFirst": false
+        "recall": 0.988795518207283,
+        "relevantRecorded": 357,
+        "relevantKept": 353,
+        "cheapestRelevantFirst": true
       },
       "top": [
         {
@@ -1034,7 +1034,7 @@
         }
       ],
       "recordedItems": 501,
-      "results": 381,
+      "results": 382,
       "missingCalls": [],
       "labelled": true,
       "metrics": {
@@ -1043,9 +1043,9 @@
         "accessoryAt10": 0,
         "wrongModelAt10": 0,
         "unlabeledAt10": 0,
-        "recall": 0.9670588235294117,
+        "recall": 0.9694117647058823,
         "relevantRecorded": 425,
-        "relevantKept": 411,
+        "relevantKept": 412,
         "cheapestRelevantFirst": true
       },
       "top": [
@@ -1075,6 +1075,13 @@
           "store": "aliexpress",
           "price": 4.24,
           "title": "2.4GHz Wireless Optical Game Mouse for PC Laptop Computer USB Receiver Mini Portable Mouse Mice",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005009599066007",
+          "store": "aliexpress",
+          "price": 4.24,
+          "title": "Gaming Mouse Wired M3 Colorful Glowing Electric Office Game USB Mice Laptop Accessories",
           "label": "relevant"
         },
         {
@@ -1110,13 +1117,6 @@
           "store": "aliexpress",
           "price": 9.57,
           "title": "MINGCVIL Rechargeable Wireless Mouse Gaming Computer Bluetooth Mouse USB Mechanical E-Sports Backlight PC Mouse For Computer",
-          "label": "relevant"
-        },
-        {
-          "key": "aliexpress:1005006904646242",
-          "store": "aliexpress",
-          "price": 9.91,
-          "title": "Ergonomic Wireless Gaming Mouse RGB Backlight USB Compatible Rechargeable Silent Backlit Mouse for Laptop PC - Silent Gaming Mic",
           "label": "relevant"
         }
       ]
@@ -1183,10 +1183,10 @@
         "accessoryAt10": 0,
         "wrongModelAt10": 0,
         "unlabeledAt10": 0,
-        "recall": 0.9818181818181818,
-        "relevantRecorded": 55,
+        "recall": 1,
+        "relevantRecorded": 54,
         "relevantKept": 54,
-        "cheapestRelevantFirst": false
+        "cheapestRelevantFirst": true
       },
       "top": [
         {
@@ -1594,7 +1594,7 @@
         }
       ],
       "recordedItems": 449,
-      "results": 229,
+      "results": 230,
       "missingCalls": [],
       "labelled": true,
       "metrics": {
@@ -1603,10 +1603,10 @@
         "accessoryAt10": 0,
         "wrongModelAt10": 0,
         "unlabeledAt10": 0,
-        "recall": 0.9211356466876972,
-        "relevantRecorded": 317,
-        "relevantKept": 292,
-        "cheapestRelevantFirst": false
+        "recall": 0.9361022364217252,
+        "relevantRecorded": 313,
+        "relevantKept": 293,
+        "cheapestRelevantFirst": true
       },
       "top": [
         {
@@ -2014,7 +2014,7 @@
         }
       ],
       "recordedItems": 471,
-      "results": 340,
+      "results": 346,
       "missingCalls": [],
       "labelled": true,
       "metrics": {
@@ -2023,9 +2023,9 @@
         "accessoryAt10": 0,
         "wrongModelAt10": 0,
         "unlabeledAt10": 0,
-        "recall": 0.9342105263157895,
+        "recall": 0.95,
         "relevantRecorded": 380,
-        "relevantKept": 355,
+        "relevantKept": 361,
         "cheapestRelevantFirst": true
       },
       "top": [
@@ -2100,14 +2100,1134 @@
           "label": "relevant"
         }
       ]
+    },
+    {
+      "query": "bluetooth speaker",
+      "slug": "bluetooth-speaker",
+      "stores": [
+        {
+          "store": "aliexpress",
+          "complete": true,
+          "calls": 2
+        },
+        {
+          "store": "amazon-sa",
+          "complete": true,
+          "calls": 2
+        },
+        {
+          "store": "jarir",
+          "complete": true,
+          "calls": 2
+        },
+        {
+          "store": "noon-sa",
+          "complete": true,
+          "calls": 2
+        },
+        {
+          "store": "trendyol-sa",
+          "complete": true,
+          "calls": 2
+        }
+      ],
+      "statuses": [
+        {
+          "site": "aliexpress",
+          "status": "ok"
+        },
+        {
+          "site": "amazon-sa",
+          "status": "ok"
+        },
+        {
+          "site": "jarir",
+          "status": "ok"
+        },
+        {
+          "site": "noon-sa",
+          "status": "ok"
+        },
+        {
+          "site": "trendyol-sa",
+          "status": "ok"
+        }
+      ],
+      "recordedItems": 482,
+      "results": 348,
+      "missingCalls": [],
+      "labelled": true,
+      "metrics": {
+        "top": 10,
+        "precisionAt10": 0.9,
+        "accessoryAt10": 0.1,
+        "wrongModelAt10": 0,
+        "unlabeledAt10": 0,
+        "recall": 0.8828828828828829,
+        "relevantRecorded": 444,
+        "relevantKept": 392,
+        "cheapestRelevantFirst": true
+      },
+      "top": [
+        {
+          "key": "aliexpress:1005004772425077",
+          "store": "aliexpress",
+          "price": 4.24,
+          "title": "New Mini Portable Car Audio A9 Dazzling Crack LED Wireless Bluetooth 4.1 Subwoofer Speaker TF Card",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005006075318651",
+          "store": "aliexpress",
+          "price": 4.24,
+          "title": "Creative Hifi Stereo Metal Wireless Subwoofer Wireless Bluetooth Speaker Music Player Mini Speakers",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005004094288848",
+          "store": "aliexpress",
+          "price": 6.66,
+          "title": "TG117 Outdoor Bluetooth Speaker Portable Wireless Speaker Column Dual Bass Sound Bar Subwoofer Music Player Loudspeaker FM Radio",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005009394193346",
+          "store": "aliexpress",
+          "price": 6.69,
+          "title": "A10 Wireless Bluetooth Speaker AUX Input Handsfree Call TF Card Small HD Sound Soundbox Black HIFI Stereo Speaker Outdoors Party",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005003986255449",
+          "store": "aliexpress",
+          "price": 6.82,
+          "title": "SOTAMIA 2Pcs 40MM 50MM Mini Portable Sound Speakers 4 Ohm 3W 8 Ohm 5W DIY Music Bluetooth Speaker Stereo Home Audio Loudspeaker",
+          "label": "accessory"
+        },
+        {
+          "key": "aliexpress:1005003878705012",
+          "store": "aliexpress",
+          "price": 7.13,
+          "title": "Retro Bluetooth Speaker HM11 Classical Retro Music Player Sound Stereo Portable Decoration Mini Speakers Travel Music Player",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005010631934394",
+          "store": "aliexpress",
+          "price": 7.68,
+          "title": "Mini Mushroom Bluetooth Speaker Creative Mini Suction Cup Portable Smart Speaker for Phones ﻿",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005006211973421",
+          "store": "aliexpress",
+          "price": 7.91,
+          "title": "Portable Wireless Caixa De Som Mini Bluetooth Speaker Music Sound Box Blutooth For Subwoofer Bocina System Mp3 Player Handsfree",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005006212045351",
+          "store": "aliexpress",
+          "price": 7.91,
+          "title": "Mini Portable Wireless Caixa De Som Bluetooth Speaker Sound Music Box Blutooth For Subwoofer Blootooth Hifi Acoustics Hand Free",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005007382863041",
+          "store": "aliexpress",
+          "price": 7.91,
+          "title": "Portable Wireless Caixa De Som Bluetooth Speaker Mini Music Sound Box Blutooth For Subwoofer Bocina Handfree Baffe Blootooth USB",
+          "label": "relevant"
+        }
+      ]
+    },
+    {
+      "query": "wireless charger 15w",
+      "slug": "wireless-charger-15w",
+      "stores": [
+        {
+          "store": "aliexpress",
+          "complete": true,
+          "calls": 2
+        },
+        {
+          "store": "amazon-sa",
+          "complete": true,
+          "calls": 2
+        },
+        {
+          "store": "jarir",
+          "complete": true,
+          "calls": 2
+        },
+        {
+          "store": "noon-sa",
+          "complete": true,
+          "calls": 2
+        },
+        {
+          "store": "trendyol-sa",
+          "complete": true,
+          "calls": 2
+        }
+      ],
+      "statuses": [
+        {
+          "site": "aliexpress",
+          "status": "ok"
+        },
+        {
+          "site": "amazon-sa",
+          "status": "ok"
+        },
+        {
+          "site": "jarir",
+          "status": "ok"
+        },
+        {
+          "site": "noon-sa",
+          "status": "ok"
+        },
+        {
+          "site": "trendyol-sa",
+          "status": "ok"
+        }
+      ],
+      "recordedItems": 496,
+      "results": 290,
+      "missingCalls": [],
+      "labelled": true,
+      "metrics": {
+        "top": 10,
+        "precisionAt10": 1,
+        "accessoryAt10": 0,
+        "wrongModelAt10": 0,
+        "unlabeledAt10": 0,
+        "recall": 0.9013698630136986,
+        "relevantRecorded": 365,
+        "relevantKept": 329,
+        "cheapestRelevantFirst": true
+      },
+      "top": [
+        {
+          "key": "aliexpress:1005011567535123",
+          "store": "aliexpress",
+          "price": 4.24,
+          "title": "VIKEFON 15W Phone Magnetic Wireless Charger Pad For Magsafe iPhone 17-12 Pro Max Airpods 4 Pro Magnet Fast Charging Station",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005012553925360",
+          "store": "aliexpress",
+          "price": 5.65,
+          "title": "15W Wireless Charger Pad, Mirror‑Surface Design, Fast Induction Charging.Compatible with iPhone, Samsung and Apple Earphones.",
+          "label": "relevant"
+        },
+        {
+          "key": "trendyol-sa:1199514262",
+          "store": "trendyol-sa",
+          "price": 6.79,
+          "title": "15W Magnetic Wireless Charger with USB-C Cable - Fast Charging Pad for Compatible Smartphones.",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005010692986551",
+          "store": "aliexpress",
+          "price": 6.88,
+          "title": "15W Fast Wireless Charger Pad For Samsung For Galaxy S25 S24 S23 S22 S21 Ultra Z Fold Flip 6 4 5 Note10 Note20 S10 Plus QI Pad",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005013110080677",
+          "store": "aliexpress",
+          "price": 6.99,
+          "title": "15W Wireless Charger Stand Fast Charging Dock for iPhone 17-11 X XR Samsung S22 S21 Xiaomi Phones, Small Size",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005012353564514",
+          "store": "aliexpress",
+          "price": 8.29,
+          "title": "Universal 15W High‑Speed Fast Wireless Charging Pad, Universal Qi‑Certified Induction Charger Compatible with iPhone, Samsung",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005012003268406",
+          "store": "aliexpress",
+          "price": 9.03,
+          "title": "15W Ultra Thin Wireless Charger, Fast Qi Charging Pad with Compact 6cm Size, Lightweight Portable Design for Desk Bedroom Trave",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005012901115788",
+          "store": "aliexpress",
+          "price": 9.37,
+          "title": "Original 15W Magnetic Wireless Charger For Magsafes iPhone 17 16 15 14 13 12 Pro Max Samsung AirPods Fast Charging Type C Charge",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005011841978057",
+          "store": "aliexpress",
+          "price": 9.37,
+          "title": "Universal 15W Fast Wireless Charger Pad Compatible with iPhone 17/16/15 Pro Max, Samsung Galaxy S22/S21 Ultra, Huawei, Xiaomi,",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005013670300561",
+          "store": "aliexpress",
+          "price": 9.78,
+          "title": "15W Fast Wireless Charger Pad Round Non-slip Desktop Charging Dock for iPhone Samsung Xiaomi OnePlus Fast Charging",
+          "label": "relevant"
+        }
+      ]
+    },
+    {
+      "query": "electric toothbrush",
+      "slug": "electric-toothbrush",
+      "stores": [
+        {
+          "store": "aliexpress",
+          "complete": true,
+          "calls": 2
+        },
+        {
+          "store": "amazon-sa",
+          "complete": true,
+          "calls": 2
+        },
+        {
+          "store": "jarir",
+          "complete": true,
+          "calls": 2
+        },
+        {
+          "store": "noon-sa",
+          "complete": true,
+          "calls": 2
+        },
+        {
+          "store": "trendyol-sa",
+          "complete": true,
+          "calls": 2
+        }
+      ],
+      "statuses": [
+        {
+          "site": "aliexpress",
+          "status": "ok"
+        },
+        {
+          "site": "amazon-sa",
+          "status": "ok"
+        },
+        {
+          "site": "jarir",
+          "status": "ok"
+        },
+        {
+          "site": "noon-sa",
+          "status": "ok"
+        },
+        {
+          "site": "trendyol-sa",
+          "status": "ok"
+        }
+      ],
+      "recordedItems": 478,
+      "results": 286,
+      "missingCalls": [],
+      "labelled": true,
+      "metrics": {
+        "top": 10,
+        "precisionAt10": 1,
+        "accessoryAt10": 0,
+        "wrongModelAt10": 0,
+        "unlabeledAt10": 0,
+        "recall": 0.8806818181818182,
+        "relevantRecorded": 352,
+        "relevantKept": 310,
+        "cheapestRelevantFirst": true
+      },
+      "top": [
+        {
+          "key": "aliexpress:1005012503095160",
+          "store": "aliexpress",
+          "price": 4.24,
+          "title": "1Pcs Adult Soft Bristle Sonic Electric Toothbrush Waterproof Portable Intelligent Effective Oral Care for Men Women Home Travel",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005008986247575",
+          "store": "aliexpress",
+          "price": 4.24,
+          "title": "Electric Toothbrush Set Ultrasonic Adult Fully Automatic Smart Sonic Ultra Fine Soft Wool Easy To Carry Full Body Waterproof-",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005012790983555",
+          "store": "aliexpress",
+          "price": 4.24,
+          "title": "Electric Toothbrush for Adults Soft Bristle Portable Battery Endurance IPX6 Waterproof Intelligent Effective Oral Care",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005013106915403",
+          "store": "aliexpress",
+          "price": 5.65,
+          "title": "Jianpai Sonic Electric Toothbrush, Non‑Rechargeable for Adults Men Women Household Soft Bristles IPX6 Waterproof",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005006456321838",
+          "store": "aliexpress",
+          "price": 6.05,
+          "title": "Children Sonic Electric Toothbrush Colorful Cartoon For Kids USB Rechargeable Soft Automatic Waterproof With Replacement Head",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005007170922707",
+          "store": "aliexpress",
+          "price": 6.91,
+          "title": "Sonic Electric Toothbrush for Adults IPX7 Waterproof DuPont Brush Head USB Rechargeable High Frequency Cleaning 6 Cleaning Modes",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005006995463028",
+          "store": "aliexpress",
+          "price": 6.91,
+          "title": "Lipstick Electric Toothbrush Smart Compact and Portable Small Oval Brush Head Deep Cleaning IPX7 Waterproof New Design",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005007171249171",
+          "store": "aliexpress",
+          "price": 8.91,
+          "title": "Six-Speed Automatic Electric Toothbrush Adult & Children's Universal Soft Bristle Charging Smart Toothbrush for All Ages",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005010361724538",
+          "store": "aliexpress",
+          "price": 8.91,
+          "title": "U-Type Toothbrush 360 Degrees Intelligent Silicon Head Sonic Electric Toothbrush Automatic USB Charge Waterproof Toothbrush",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005013489375673",
+          "store": "aliexpress",
+          "price": 9.29,
+          "title": "1 Set Portable X-3 Sonic Electric Toothbrush Set IPX7 Waterproof USB Charging Adjustable Modes Travel Friendly Oral Hygiene",
+          "label": "relevant"
+        }
+      ]
+    },
+    {
+      "query": "running shoes",
+      "slug": "running-shoes",
+      "stores": [
+        {
+          "store": "aliexpress",
+          "complete": true,
+          "calls": 2
+        },
+        {
+          "store": "amazon-sa",
+          "complete": true,
+          "calls": 2
+        },
+        {
+          "store": "jarir",
+          "complete": true,
+          "calls": 2
+        },
+        {
+          "store": "noon-sa",
+          "complete": true,
+          "calls": 2
+        },
+        {
+          "store": "trendyol-sa",
+          "complete": true,
+          "calls": 2
+        }
+      ],
+      "statuses": [
+        {
+          "site": "aliexpress",
+          "status": "ok"
+        },
+        {
+          "site": "amazon-sa",
+          "status": "ok"
+        },
+        {
+          "site": "jarir",
+          "status": "ok"
+        },
+        {
+          "site": "noon-sa",
+          "status": "ok"
+        },
+        {
+          "site": "trendyol-sa",
+          "status": "ok"
+        }
+      ],
+      "recordedItems": 524,
+      "results": 144,
+      "missingCalls": [],
+      "labelled": true,
+      "metrics": {
+        "top": 10,
+        "precisionAt10": 1,
+        "accessoryAt10": 0,
+        "wrongModelAt10": 0,
+        "unlabeledAt10": 0,
+        "recall": 0.7233201581027668,
+        "relevantRecorded": 253,
+        "relevantKept": 183,
+        "cheapestRelevantFirst": true
+      },
+      "top": [
+        {
+          "key": "aliexpress:1005011960325641",
+          "store": "aliexpress",
+          "price": 14.99,
+          "title": "Men's Plus Size Lightweight Breathable Sports Shoes Trendy Running Shoes Mesh Fashion Casual Sneakers",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005010319494622",
+          "store": "aliexpress",
+          "price": 17.79,
+          "title": "Men's Casual Running Shoes Thickened Fleece Lined Sports Sneakers Lightweight Breathable Fashion All-Match Fall Winter 2025 New",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005013589841521",
+          "store": "aliexpress",
+          "price": 20.79,
+          "title": "Men's sports shoes with leather uppers casual white sneakers, versatile trendy shoes running men's shoes oxfords  M82",
+          "label": "relevant"
+        },
+        {
+          "key": "trendyol-sa:990933963",
+          "store": "trendyol-sa",
+          "price": 21.39,
+          "title": "Agile Pro Run Unisex Running Shoes – Lightweight Breathable Knit Sneakers for Walking, Gym & Casual Wear",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005013634648685",
+          "store": "aliexpress",
+          "price": 21.49,
+          "title": "Male Summer Mesh Running Shoes Fashion Breathable Tennis Shoes Soft Soled Comfortable Sneakers for Men Outdoor Sport Casual Shoe",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005007271141956",
+          "store": "aliexpress",
+          "price": 23.91,
+          "title": "Leisure running shoes new summer Men's trendy breathable sneakers soft sole mesh shoes resistant versatile men sports shoes",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005013425553547",
+          "store": "aliexpress",
+          "price": 25.69,
+          "title": "New Luxury Men Shoes Breathable Casual Sneakers for Men Lace-up Platform Running Shoes Man Outdoor Sport Shoes Zapatillas Hombre",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005005218059688",
+          "store": "aliexpress",
+          "price": 25.9,
+          "title": "Men Ultralight Slip-On Running Shoes Women Breathable Outdoor Jogging Sneakers Unisex High Elastic Knitted Summer Sports Boots",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005013652439083",
+          "store": "aliexpress",
+          "price": 27.69,
+          "title": "Men's Sneakers Four Seasons Mesh Breathable Soft Sole Non-slip Comfort Outdoor Casual Running Shoes Fashion Student Sports Shoes",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005013672660598",
+          "store": "aliexpress",
+          "price": 28.49,
+          "title": "Men's Casual Running Shoes Four Seasons Outdoor Sports Breathable Walking Shoes Fashion Thick Bottom Non-slip Sneakers",
+          "label": "relevant"
+        }
+      ]
+    },
+    {
+      "query": "coffee machine",
+      "slug": "coffee-machine",
+      "stores": [
+        {
+          "store": "aliexpress",
+          "complete": true,
+          "calls": 2
+        },
+        {
+          "store": "amazon-sa",
+          "complete": true,
+          "calls": 2
+        },
+        {
+          "store": "jarir",
+          "complete": true,
+          "calls": 2
+        },
+        {
+          "store": "noon-sa",
+          "complete": true,
+          "calls": 2
+        },
+        {
+          "store": "trendyol-sa",
+          "complete": true,
+          "calls": 2
+        }
+      ],
+      "statuses": [
+        {
+          "site": "aliexpress",
+          "status": "ok"
+        },
+        {
+          "site": "amazon-sa",
+          "status": "ok"
+        },
+        {
+          "site": "jarir",
+          "status": "ok"
+        },
+        {
+          "site": "noon-sa",
+          "status": "ok"
+        },
+        {
+          "site": "trendyol-sa",
+          "status": "ok"
+        }
+      ],
+      "recordedItems": 492,
+      "results": 246,
+      "missingCalls": [],
+      "labelled": true,
+      "metrics": {
+        "top": 10,
+        "precisionAt10": 0.7,
+        "accessoryAt10": 0.2,
+        "wrongModelAt10": 0,
+        "unlabeledAt10": 0,
+        "recall": 0.6103286384976526,
+        "relevantRecorded": 426,
+        "relevantKept": 260,
+        "cheapestRelevantFirst": false
+      },
+      "top": [
+        {
+          "key": "trendyol-sa:353074944",
+          "store": "trendyol-sa",
+          "price": 12.27,
+          "title": "Coffee Machine Colored Socks",
+          "label": "off-topic"
+        },
+        {
+          "key": "trendyol-sa:892761997",
+          "store": "trendyol-sa",
+          "price": 14.73,
+          "title": "D1 Coffee Brush Coffee Brush Set Espresso Brush Kit Include Wooden Coffee Grinder Machine Cleaning B",
+          "label": "accessory"
+        },
+        {
+          "key": "trendyol-sa:1159943144",
+          "store": "trendyol-sa",
+          "price": 15.06,
+          "title": "58.5mm Single Layer Secondary Water Distribution Network Stainless Steel Coffee Machine Handle Filte",
+          "label": "accessory"
+        },
+        {
+          "key": "amazon-sa:B0DXVXPS9L",
+          "store": "amazon-sa",
+          "price": 29.92,
+          "title": "Imperial Electric Turkish Coffee Maker, 600W Fast Heating System, 0.3L Compact Capacity, Elegant Design Coffee Machine for Authentic Turkish Coffee Preparation, Easy-to-Use Home and Office Coffee",
+          "label": "relevant"
+        },
+        {
+          "key": "jarir:JPP-8904468304347",
+          "store": "jarir",
+          "price": 39,
+          "title": "Impex Turkish Coffee Machine,Multicolor",
+          "label": "relevant"
+        },
+        {
+          "key": "noon-sa:ZC2B4EA181F51E67C673EZ",
+          "store": "noon-sa",
+          "price": 40.36,
+          "title": "Denx Electric Hot Water Kettle 500ml Stainless Steel Coffee Machine Greek Turkish Coffee Maker Portable Waterproof Electric Hot Boiled Pot Home Portable Tea Maker",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005009128038508",
+          "store": "aliexpress",
+          "price": 42.49,
+          "title": "New American Coffee Machine Automatic 110v Drip Coffee Machine American Milk Tea Machine Coffee Pot",
+          "label": "relevant"
+        },
+        {
+          "key": "jarir:JPP-6291071040420",
+          "store": "jarir",
+          "price": 49,
+          "title": "Nikai Drip Coffee Machine,1.3 L,Black",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005013323876130",
+          "store": "aliexpress",
+          "price": 49.39,
+          "title": "AT05-Moka Pot Italian Coffee Machine Espresso Aluminum Geyser Coffee Maker Latte Stove Classic Coffee Barista Accessories",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005012939689627",
+          "store": "aliexpress",
+          "price": 50.25,
+          "title": "Portable Capsule Coffee Machine Heating fully Semi-automatic Espresso Mini Coffee Maker For Car Outdoor Home Using 5Cups 80ml",
+          "label": "relevant"
+        }
+      ]
+    },
+    {
+      "query": "ipad air",
+      "slug": "ipad-air",
+      "stores": [
+        {
+          "store": "aliexpress",
+          "complete": true,
+          "calls": 2
+        },
+        {
+          "store": "amazon-sa",
+          "complete": true,
+          "calls": 2
+        },
+        {
+          "store": "jarir",
+          "complete": true,
+          "calls": 2
+        },
+        {
+          "store": "noon-sa",
+          "complete": true,
+          "calls": 2
+        },
+        {
+          "store": "trendyol-sa",
+          "complete": true,
+          "calls": 2
+        }
+      ],
+      "statuses": [
+        {
+          "site": "aliexpress",
+          "status": "ok"
+        },
+        {
+          "site": "amazon-sa",
+          "status": "ok"
+        },
+        {
+          "site": "jarir",
+          "status": "ok"
+        },
+        {
+          "site": "noon-sa",
+          "status": "ok"
+        },
+        {
+          "site": "trendyol-sa",
+          "status": "ok"
+        }
+      ],
+      "recordedItems": 513,
+      "results": 76,
+      "missingCalls": [],
+      "labelled": true,
+      "metrics": {
+        "top": 10,
+        "precisionAt10": 1,
+        "accessoryAt10": 0,
+        "wrongModelAt10": 0,
+        "unlabeledAt10": 0,
+        "recall": 1,
+        "relevantRecorded": 107,
+        "relevantKept": 107,
+        "cheapestRelevantFirst": true
+      },
+      "top": [
+        {
+          "key": "noon-sa:N70172847V",
+          "store": "noon-sa",
+          "price": 2799,
+          "title": "Apple Renewed - iPad Air 2024 (6th Gen) M2 11-Inch 128GB Purple Wi-Fi - International Version",
+          "label": "relevant"
+        },
+        {
+          "key": "noon-sa:N72921670V",
+          "store": "noon-sa",
+          "price": 2799,
+          "title": "Apple Renewed - iPad Air 2024 (6th Generation) M2 11-Inch 128GB Starlight 5G - International Version",
+          "label": "relevant"
+        },
+        {
+          "key": "noon-sa:N72921669V",
+          "store": "noon-sa",
+          "price": 2850,
+          "title": "Apple Renewed - iPad Air  2026 (8th Gen) M4 11-Inch Wi-Fi 128GB Blue - International Version",
+          "label": "relevant"
+        },
+        {
+          "key": "noon-sa:N70305415V",
+          "store": "noon-sa",
+          "price": 2885,
+          "title": "Apple iPad Air  2026 (8th Gen) M4 11-inch Wi-Fi 128GB Space Grey - International Version",
+          "label": "relevant"
+        },
+        {
+          "key": "noon-sa:N70395904V",
+          "store": "noon-sa",
+          "price": 2890,
+          "title": "Apple Renewed - iPad Air 2024 (6th Generation) M2 13-Inch 128GB Space Grey Wi-Fi - International Version",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005010485268524",
+          "store": "aliexpress",
+          "price": 2896.88,
+          "title": "IPad Air 4 A14 Bionic chip 10.9Inch 64G/256G Touch ID WiFi 4G 6-core CPU 4-core GPU 16-core Neural Engine.",
+          "label": "relevant"
+        },
+        {
+          "key": "amazon-sa:B0GQVFZ7W7",
+          "store": "amazon-sa",
+          "price": 2899,
+          "title": "Apple iPad Air 11-inch (M4): Liquid Retina Display, 128GB, 12MP Front/Back Camera, Wi-Fi 7 with Apple N1, Touch ID, All-Day Battery Life — Blue",
+          "label": "relevant"
+        },
+        {
+          "key": "noon-sa:N52866668A",
+          "store": "noon-sa",
+          "price": 2906,
+          "title": "Apple iPad Air 2022 (5th Generation) 10.9-inch 64GB 5G Starlight - Middle East Version",
+          "label": "relevant"
+        },
+        {
+          "key": "noon-sa:N70070872V",
+          "store": "noon-sa",
+          "price": 2999,
+          "title": "Apple iPad Air 2024 (6th Generation) M2 11-Inch 128GB Space Grey Wi-Fi - Middle East Version",
+          "label": "relevant"
+        },
+        {
+          "key": "noon-sa:N70305396V",
+          "store": "noon-sa",
+          "price": 3079,
+          "title": "Apple iPad Air  2026 (8th Gen) M4 11-Inch Wi-Fi 128GB Blue - Middle East Version",
+          "label": "relevant"
+        }
+      ]
+    },
+    {
+      "query": "external ssd 1tb",
+      "slug": "external-ssd-1tb",
+      "stores": [
+        {
+          "store": "aliexpress",
+          "complete": true,
+          "calls": 2
+        },
+        {
+          "store": "amazon-sa",
+          "complete": true,
+          "calls": 2
+        },
+        {
+          "store": "jarir",
+          "complete": true,
+          "calls": 2
+        },
+        {
+          "store": "noon-sa",
+          "complete": true,
+          "calls": 2
+        },
+        {
+          "store": "trendyol-sa",
+          "complete": true,
+          "calls": 2
+        }
+      ],
+      "statuses": [
+        {
+          "site": "aliexpress",
+          "status": "ok"
+        },
+        {
+          "site": "amazon-sa",
+          "status": "ok"
+        },
+        {
+          "site": "jarir",
+          "status": "ok"
+        },
+        {
+          "site": "noon-sa",
+          "status": "ok"
+        },
+        {
+          "site": "trendyol-sa",
+          "status": "ok"
+        }
+      ],
+      "recordedItems": 486,
+      "results": 217,
+      "missingCalls": [],
+      "labelled": true,
+      "metrics": {
+        "top": 10,
+        "precisionAt10": 1,
+        "accessoryAt10": 0,
+        "wrongModelAt10": 0,
+        "unlabeledAt10": 0,
+        "recall": 0.959409594095941,
+        "relevantRecorded": 271,
+        "relevantKept": 260,
+        "cheapestRelevantFirst": true
+      },
+      "top": [
+        {
+          "key": "aliexpress:1005012841139708",
+          "store": "aliexpress",
+          "price": 27.15,
+          "title": "1TB External Hard Drive 2TB Portable SSD High Speed Hard Disk USB-C Original Storage Device for Laptop/PC/Phone/Mac",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005012825046433",
+          "store": "aliexpress",
+          "price": 28.73,
+          "title": "1TB Portable SSD 2TB External Hard Drive USB 3.1 High Speed Mobile Data Storage for Laptop Mac PC Compact Durable Use",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005013193287375",
+          "store": "aliexpress",
+          "price": 28.73,
+          "title": "2TB External Hard Drive 1TB Portable SSD USB 3.1 High Speed Mobile Data Storage Hard Disk for Laptop Mac PC",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005013022809063",
+          "store": "aliexpress",
+          "price": 40.29,
+          "title": "External SSD 1TB Drive Portanble SSD 500GB External Hard Drive 1TB External SSD High-speed Fast Transfers Drive for PC Phone Laptop Mobile Hard Drive",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005013223704657",
+          "store": "aliexpress",
+          "price": 41.09,
+          "title": "External SSD 1TB 2TB 4TB Portable Solid State Drive USB3.2 Type-C File Storage for Laptop Mac PC",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005013214761943",
+          "store": "aliexpress",
+          "price": 41.09,
+          "title": "External SSD 1TB External Hard Drive 2TB Portable SSD 1TB USB3.2 Fast Storage Disk for Laptop Desktop Mac Phone",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005013128569024",
+          "store": "aliexpress",
+          "price": 41.69,
+          "title": "External SSD 1TB Stable Solid State Drive High Speed External Hard Drive 1TB Portable SSD Original Hard Disk Hard Drive for Laptop Mac PC",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005013679142890",
+          "store": "aliexpress",
+          "price": 42.49,
+          "title": "External SSD 1TB 4TB Compact Portable SSD 1TB External Solid State Drive 2TB Fast Backup Storage for Laptop/ PC/Mac/Tablet /Phone Secure Storage",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005013031360563",
+          "store": "aliexpress",
+          "price": 42.69,
+          "title": "External SSD 1TB 2TB E61 SSD Portable Fast Transfer External Hard Drive 500GB 1TB 2TB High Speed USB 3.1 Mobile Hard Disk for Desktop Laptops Phones",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005013029069375",
+          "store": "aliexpress",
+          "price": 42.69,
+          "title": "External SSD 1tb 2tb Hdd External Hard Drive USB3.0 Fast Transfer Hard Disk Portable SSD 1tb 2tb flash drive External Hard Drive for PC Laptop Phones",
+          "label": "relevant"
+        }
+      ]
+    },
+    {
+      "query": "dash cam",
+      "slug": "dash-cam",
+      "stores": [
+        {
+          "store": "aliexpress",
+          "complete": true,
+          "calls": 2
+        },
+        {
+          "store": "amazon-sa",
+          "complete": true,
+          "calls": 2
+        },
+        {
+          "store": "jarir",
+          "complete": true,
+          "calls": 2
+        },
+        {
+          "store": "noon-sa",
+          "complete": true,
+          "calls": 2
+        },
+        {
+          "store": "trendyol-sa",
+          "complete": true,
+          "calls": 2
+        }
+      ],
+      "statuses": [
+        {
+          "site": "aliexpress",
+          "status": "ok"
+        },
+        {
+          "site": "amazon-sa",
+          "status": "ok"
+        },
+        {
+          "site": "jarir",
+          "status": "ok"
+        },
+        {
+          "site": "noon-sa",
+          "status": "ok"
+        },
+        {
+          "site": "trendyol-sa",
+          "status": "ok"
+        }
+      ],
+      "recordedItems": 471,
+      "results": 350,
+      "missingCalls": [],
+      "labelled": true,
+      "metrics": {
+        "top": 10,
+        "precisionAt10": 1,
+        "accessoryAt10": 0,
+        "wrongModelAt10": 0,
+        "unlabeledAt10": 0,
+        "recall": 0.9590163934426229,
+        "relevantRecorded": 366,
+        "relevantKept": 351,
+        "cheapestRelevantFirst": true
+      },
+      "top": [
+        {
+          "key": "aliexpress:1005007278313120",
+          "store": "aliexpress",
+          "price": 29.47,
+          "title": "2.4 Inch Dashcam Car Camera HD 1080P Mini Vision Recording Cam Night Auto DVR Loop Dash Recorder Vehicle Accessories",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005006727775126",
+          "store": "aliexpress",
+          "price": 29.91,
+          "title": "Dash Cam Dual camera 1080P Dual camera Dash Cam for cars,Front And Inside,car camera with IR Night Vision,Loop Recording,wide angle Car DVR Came",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005007446278321",
+          "store": "aliexpress",
+          "price": 30.16,
+          "title": "XUSHIDZ 1080P Dash Camera Car Camera Night Vision Vehicle Video Recorder Dashcam DVR Loop Recording Q02 High Cost- Effective",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005009673707414",
+          "store": "aliexpress",
+          "price": 35.79,
+          "title": "1080p Full HD Mini Dash Cam Night Vision Parking Monitor Car DVR Recorder Camera Motion Detector Sensor Loop Recording",
+          "label": "relevant"
+        },
+        {
+          "key": "trendyol-sa:1214426810",
+          "store": "trendyol-sa",
+          "price": 42,
+          "title": "Full HD 1080P Car Dash Cam with Night Vision – Digital Car DVR Camera with Windshield Suction Mount",
+          "label": "relevant"
+        },
+        {
+          "key": "amazon-sa:B0FR7KQ44Y",
+          "store": "amazon-sa",
+          "price": 42.33,
+          "title": "Dash Cam, 1080P Loop Recording, Night Vision, Car Camera, 360 Degree DVR Dash Camera with Parking Monitor",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005011684168653",
+          "store": "aliexpress",
+          "price": 42.86,
+          "title": "WiFi 3 Channel Mini Car DVR Three Way Dash Cam Inside Vehicle Camera DVRs Recorder FHD 1080P Video Dashcam Camcorder Black Box",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005012976109415",
+          "store": "aliexpress",
+          "price": 44.61,
+          "title": "New Mini Car DVR Camera Dashcam For Android USB Video Registrator G-sensor Night Vision WIth ADAS G-Sensor Night Vision",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005012396789282",
+          "store": "aliexpress",
+          "price": 47.29,
+          "title": "New 1080P 3-Lens Dash Cam Full HD 170° Wide Angle Car DVR Recorder G-Sensor Rear Camera for Car",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005009828034624",
+          "store": "aliexpress",
+          "price": 48.38,
+          "title": "2/3 Channel WIFI APP 1080P Dash Cam for Cars Video Recorder Night Vision Options Rear View Camera for Vehicle Car Accessories",
+          "label": "relevant"
+        }
+      ]
     }
   ],
   "overall": {
-    "queries": 15,
-    "precisionAt10": 0.98,
-    "accessoryAt10": 0,
-    "wrongModelAt10": 0.013333333333333334,
-    "recall": 0.9089650528543664,
-    "cheapestRelevantFirst": 0.8
+    "queries": 23,
+    "precisionAt10": 0.9695652173913044,
+    "accessoryAt10": 0.013043478260869568,
+    "wrongModelAt10": 0.008695652173913044,
+    "recall": 0.9017098491148425,
+    "cheapestRelevantFirst": 0.9565217391304348
   }
 }
