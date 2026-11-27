@@ -33,6 +33,7 @@ export const sites: Record<string, SiteAdapter> = {
     searchCalls: noonSa.searchCalls,
     normalizeSearchItem: noonSa.normalizeSearchItem,
     runCall: noonSa.runCall,
+    blockedEndsAt: noonSa.runCall.blockedEndsAt,
   },
   "trendyol-sa": {
     id: "trendyol-sa",
@@ -58,5 +59,6 @@ export const sites: Record<string, SiteAdapter> = {
     searchCalls: sheinSa.searchCalls,
     normalizeSearchItem: sheinSa.normalizeSearchItem,
     runCall: sheinSa.runCall,
+    blockedEndsAt: sheinSa.runCall.blockedEndsAt,
   },
 };

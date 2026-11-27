@@ -2,6 +2,7 @@ import "server-only";
 import { call } from "api-anything";
 import pLimit from "p-limit";
 import { TtlCache } from "./cache";
+import { ABORTED } from "./types";
 
 export type AaResult =
   | { ok: true; tier: number; data: unknown }
@@ -73,6 +74,15 @@ function backingOff(site: string): AaResult | null {
   return { ok: false, class: "blocked", reason: `backing off until ${new Date(until).toISOString()}` };
 }
 
+/** When a store's current back-off ends (ms), or undefined when it is not backing off. */
+export function backoffEndsAt(site: string): number | undefined {
+  const until = backoffUntil.get(site);
+  return until !== undefined && until > Date.now() ? until : undefined;
+}
+
+/** Answer for a call skipped because its caller went away; never cached, never a back-off. */
+const aborted = (): AaResult => ({ ok: false, class: ABORTED, reason: "the search was cancelled" });
+
 /** Test helper: clear every store's back-off. */
 export function resetBackoff(): void {
   backoffUntil.clear();
@@ -115,7 +125,7 @@ export async function aaCall(
   site: string,
   op: string,
   args: Record<string, string>,
-  opts: { ttlMs: number; lane: "search" | "detail" },
+  opts: { ttlMs: number; lane: "search" | "detail"; signal?: AbortSignal },
 ): Promise<AaResult> {
   const cache = cacheFor(opts.ttlMs);
   const key = `${site}/${op}/${JSON.stringify(args)}`;
@@ -124,13 +134,17 @@ export async function aaCall(
   if (hit) return hit;
 
   const pending = inflight.get(key);
-  if (pending) return pending;
+  // A shared call whose first caller went away (aborted in the queue) is asked again for this one.
+  if (pending) return pending.then((r) => (!r.ok && r.class === ABORTED ? aaCall(site, op, args, opts) : r));
+  if (opts.signal?.aborted) return aborted();
 
   const held = backingOff(site);
   if (held) return held;
 
   const p = limits[opts.lane](async () => {
-    // Re-check in the queue: a call queued behind one that got blocked must not send.
+    // Re-check in the queue: a call queued behind one that got blocked must not send, and a call
+    // whose search was cancelled while it waited is not sent at all.
+    if (opts.signal?.aborted) return aborted();
     const heldNow = backingOff(site);
     if (heldNow) return heldNow;
     let out = await callOnce(site, op, args);

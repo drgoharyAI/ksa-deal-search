@@ -1,5 +1,5 @@
 import type { AaResult } from "@/src/lib/aa";
-import type { ParsedQuery, Product } from "@/src/lib/types";
+import { ABORTED, type ParsedQuery, type Product } from "@/src/lib/types";
 import type { Page } from "playwright-core";
 import { TtlCache } from "@/src/lib/cache";
 import { withNoonPage } from "./browser";
@@ -163,6 +163,8 @@ class Blocked extends Error {}
 class Drift extends Error {}
 /** A queued job found the block back-off active; it made no load. */
 class BlockedRecently extends Error {}
+/** The caller went away while this load waited for the browser. */
+class Aborted extends Error {}
 
 const CARD_SEL = '[data-qa="plp-product-box"]';
 const CHALLENGE_SEL = 'iframe[src*="captcha"], #sec-if-cpt-container, [id*="captcha"]';
@@ -255,7 +257,7 @@ export function createRunCall(deps: {
     lastLoad = Date.now();
   }
 
-  return async function runCall(call: { op: string; args: Record<string, string> }): Promise<AaResult> {
+  async function runCall(call: { op: string; args: Record<string, string> }, opts: { signal?: AbortSignal } = {}): Promise<AaResult> {
     const q = sanitizeQ(call.args?.q ?? "");
     const pageNo = call.args?.page ?? "1";
     if (call.op !== "search" || !q || !/^[1-9]\d?$/.test(pageNo)) {
@@ -268,7 +270,9 @@ export function createRunCall(deps: {
     const url = `${BASE}/search/?q=${encodeURIComponent(q)}&page=${pageNo}`;
     try {
       const items = await deps.withPage(async (page) => {
-        // Re-check inside the queue: a call queued behind a blocked one must not load.
+        // Re-check inside the queue: a call queued behind a blocked one must not load, and a call
+        // whose search was cancelled while it waited does not load at all.
+        if (opts.signal?.aborted) throw new Aborted();
         if (recentlyBlocked()) throw new BlockedRecently();
         if (!warmed.has(page)) {
           await gap();
@@ -283,6 +287,7 @@ export function createRunCall(deps: {
       return ok;
     } catch (e) {
       if (e instanceof BlockedRecently) return BLOCKED_RECENTLY;
+      if (e instanceof Aborted) return { ok: false, class: ABORTED, reason: "the search was cancelled" };
       const reason = e instanceof Error ? e.message : String(e);
       if (e instanceof Blocked) {
         blockedUntil = Date.now() + BLOCK_BACKOFF_MS;
@@ -290,7 +295,10 @@ export function createRunCall(deps: {
       }
       return { ok: false, class: e instanceof Drift ? "drift" : "error", reason };
     }
-  };
+  }
+  /** When the current block ends (ms), or undefined when noon is not blocked. */
+  const blockedEndsAt = (): number | undefined => (recentlyBlocked() ? blockedUntil : undefined);
+  return Object.assign(runCall, { blockedEndsAt });
 }
 
 /** Adapter entry point: drives the shared real-Chrome page (server-only). */

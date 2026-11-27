@@ -3,7 +3,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 const callMock = vi.fn();
 vi.mock("api-anything", () => ({ call: (...a: unknown[]) => callMock(...a) }));
 
-import { aaCall, resetBackoff, BACKOFF_MS } from "@/src/lib/aa";
+import { aaCall, backoffEndsAt, resetBackoff, BACKOFF_MS } from "@/src/lib/aa";
 
 const opts = { ttlMs: 60_000, lane: "search" as const };
 let n = 0;
@@ -281,5 +281,51 @@ describe("aaCall concurrent ordering within one search", () => {
     await z;
     expect(await aaCall("co3", "search", { q: "W" }, opts)).toMatchObject({ ok: false, class: "blocked" });
     expect(sent).toEqual(["co3:X", "co3:Y", "co3:Z"]);
+  });
+});
+
+describe("aaCall: a cancelled search (U2 streaming)", () => {
+  it("an aborted signal sends nothing and caches nothing; a later call sends", async () => {
+    callMock.mockResolvedValue({ ok: true, class: "ok", tier: 1, data: 1 });
+    const args = uniq();
+    const ctrl = new AbortController();
+    ctrl.abort();
+    expect(await aaCall("s", "search", args, { ...opts, signal: ctrl.signal })).toMatchObject({ ok: false, class: "aborted" });
+    expect(callMock).not.toHaveBeenCalled();
+    expect(await aaCall("s", "search", args, opts)).toMatchObject({ ok: true });
+    expect(callMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("a call aborted while queued does not send; another caller joined to it is asked again", async () => {
+    const waiting: (() => void)[] = [];
+    // pLimit starts jobs asynchronously: let them start, answer every call sent, repeat.
+    const flush = async () => {
+      for (let i = 0; i < 5; i++) {
+        await new Promise((r) => setTimeout(r, 0));
+        while (waiting.length) waiting.shift()?.();
+      }
+    };
+    callMock.mockImplementation(() => new Promise((r) => waiting.push(() => r({ ok: true, class: "ok", tier: 1, data: 1 }))));
+    // Fill the search lane (3 slots), so the next call waits in the queue.
+    const busy = [uniq(), uniq(), uniq()].map((a) => aaCall("busy", "search", a, opts));
+    const ctrl = new AbortController();
+    const args = uniq();
+    const cancelled = aaCall("s", "search", args, { ...opts, signal: ctrl.signal });
+    const joined = aaCall("s", "search", args, opts);
+    ctrl.abort();
+    await flush();
+    expect(await cancelled).toMatchObject({ ok: false, class: "aborted" });
+    await flush();
+    expect(await joined).toMatchObject({ ok: true });
+    await Promise.all(busy);
+    expect(callMock.mock.calls.filter((c) => c[0] === "s")).toHaveLength(1);
+  });
+
+  it("backoffEndsAt: the end of a store's current back-off, else undefined", async () => {
+    expect(backoffEndsAt("t")).toBeUndefined();
+    callMock.mockResolvedValue({ ok: false, class: "blocked", reason: "403" });
+    const before = Date.now();
+    await aaCall("t", "search", uniq(), opts);
+    expect(backoffEndsAt("t")).toBeGreaterThanOrEqual(before + BACKOFF_MS);
   });
 });

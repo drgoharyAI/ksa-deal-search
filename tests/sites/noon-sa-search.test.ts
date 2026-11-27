@@ -191,6 +191,23 @@ describe("runCall", () => {
     ]);
   });
 
+  it("a call whose search was cancelled while it waited loads nothing and is not cached (U2)", async () => {
+    const page = fakePage({ cards: [{ href: "/saudi-en/a/N1/p/", title: "A", price: "10", origPrice: null, rating: null, reviews: null, image: null }] });
+    const run = runCallWith(page);
+    const ctrl = new AbortController();
+    ctrl.abort();
+    expect(await run(call, { signal: ctrl.signal })).toMatchObject({ ok: false, class: "aborted" });
+    expect(page.visited).toEqual([]);
+    expect(await run(call)).toMatchObject({ ok: true });
+  });
+
+  it("blockedEndsAt: the end of the current block, else undefined (U2)", async () => {
+    const run = runCallWith(fakePage({ status: 403 }));
+    expect(run.blockedEndsAt()).toBeUndefined();
+    await run(call);
+    expect(run.blockedEndsAt()).toBeGreaterThan(Date.now());
+  });
+
   it("403 -> blocked", async () => {
     const r = await runCallWith(fakePage({ status: 403 }))(call);
     expect(r).toMatchObject({ ok: false, class: "blocked" });

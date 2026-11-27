@@ -1,5 +1,5 @@
 import type { AaResult } from "@/src/lib/aa";
-import type { ParsedQuery, Product } from "@/src/lib/types";
+import { ABORTED, type ParsedQuery, type Product } from "@/src/lib/types";
 import type { Page } from "playwright-core";
 import fs from "node:fs";
 import path from "node:path";
@@ -189,6 +189,8 @@ class Blocked extends Error {}
 class Drift extends Error {}
 /** A queued job found the block back-off active; it made no load. */
 class BlockedRecently extends Error {}
+/** The caller went away while this load waited for the browser. */
+class Aborted extends Error {}
 
 function checkBlocked(page: SheinPage, status: number, what: string) {
   if (status === 403 || status === 429) throw new Blocked(`${what}: HTTP ${status}`);
@@ -334,7 +336,7 @@ export function createRunCall(deps: {
     state.lastLoad = Date.now();
   }
 
-  return async function runCall(call: { op: string; args: Record<string, string> }): Promise<AaResult> {
+  async function runCall(call: { op: string; args: Record<string, string> }, opts: { signal?: AbortSignal } = {}): Promise<AaResult> {
     const q = sanitizeQ(call.args?.q ?? "");
     const pageNo = call.args?.page ?? "1";
     if (call.op !== "search" || !q || pageNo !== "1") {
@@ -348,7 +350,9 @@ export function createRunCall(deps: {
     const url = `${ORIGIN}/pdsearch/${encodeURIComponent(q)}/`;
     try {
       const items = await deps.withPage(async (page) => {
-        // Re-check inside the queue: a call queued behind a blocked one must not load.
+        // Re-check inside the queue: a call queued behind a blocked one must not load, and a call
+        // whose search was cancelled while it waited does not load at all.
+        if (opts.signal?.aborted) throw new Aborted();
         if (recentlyBlocked()) throw new BlockedRecently();
         if (!warmed.has(page)) {
           await warmUpIfNeeded(page, gap);
@@ -366,6 +370,7 @@ export function createRunCall(deps: {
       return ok;
     } catch (e) {
       if (e instanceof BlockedRecently) return BLOCKED_RECENTLY;
+      if (e instanceof Aborted) return { ok: false, class: ABORTED, reason: "the search was cancelled" };
       const reason = e instanceof Error ? e.message : String(e);
       if (e instanceof Blocked) {
         state.strikes++;
@@ -375,7 +380,13 @@ export function createRunCall(deps: {
       }
       return { ok: false, class: e instanceof Drift ? "drift" : "error", reason };
     }
+  }
+  /** When the current back-off ends (ms), or undefined when SHEIN is not backing off. */
+  const blockedEndsAt = (): number | undefined => {
+    loadPersisted();
+    return recentlyBlocked() ? state.blockedUntil : undefined;
   };
+  return Object.assign(runCall, { blockedEndsAt });
 }
 
 /** Adapter entry point: drives the shared SHEIN Chrome page (server-only). */

@@ -57,6 +57,9 @@ export type SiteStatus = {
   message?: string;
 };
 
+/** AaResult class of a store call skipped because its search was cancelled (never cached or backed off). */
+export const ABORTED = "aborted";
+
 export type SiteAdapter = {
   id: string;
   label: string;
@@ -65,6 +68,11 @@ export type SiteAdapter = {
     variants: string[],
   ): { op: string; args: Record<string, string> }[];
   normalizeSearchItem(raw: unknown): Product | null;
-  /** Optional custom executor (e.g. Playwright); default is api-anything via aaCall. */
-  runCall?(call: { op: string; args: Record<string, string> }): Promise<AaResult>;
+  /**
+   * Optional custom executor (e.g. Playwright); default is api-anything via aaCall. `signal`: once
+   * aborted, a call still waiting for the browser answers class "aborted" without loading a page.
+   */
+  runCall?(call: { op: string; args: Record<string, string> }, opts?: { signal?: AbortSignal }): Promise<AaResult>;
+  /** With runCall: when the store's current block ends (ms), or undefined when it is not blocked. */
+  blockedEndsAt?(): number | undefined;
 };

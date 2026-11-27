@@ -75,18 +75,31 @@ export const MAX_TITLE = 1000;
 
 const isNum = (n: number | undefined): n is number => typeof n === "number" && Number.isFinite(n);
 
-async function runSite(
+/** One store's answer: its products (normalized, unfiltered) and its status. */
+export type SiteOutcome = { products: Product[]; status: SiteStatus };
+
+/**
+ * Asks one store and normalizes its answer. Never throws. `signal` lets a caller that went away
+ * (a closed search stream) skip the store calls still queued; calls already sent finish and are
+ * cached as usual. runSearch passes none.
+ */
+export async function fetchSite(
   adapter: SiteAdapter,
-  pq: ParsedQuery,
-  variants: string[],
-  execOverride?: CallExec,
-): Promise<{ products: Product[]; status: SiteStatus }> {
+  prepared: Pick<PreparedSearch, "pq" | "variants">,
+  opts: { exec?: CallExec; signal?: AbortSignal } = {},
+): Promise<SiteOutcome> {
+  const { pq, variants } = prepared;
+  const execOverride = opts.exec;
+  const signal = opts.signal;
   try {
     const calls = adapter.searchCalls(pq, variants);
+    const own = adapter.runCall?.bind(adapter);
+    const aaOpts = signal ? { ttlMs: 600_000, lane: "search" as const, signal } : { ttlMs: 600_000, lane: "search" as const };
     const exec: (c: Call) => Promise<AaResult> = execOverride
       ? (c) => execOverride(adapter, c)
-      : adapter.runCall?.bind(adapter) ??
-      ((c) => aaCall(adapter.id, c.op, c.args, { ttlMs: 600_000, lane: "search" }));
+      : own
+        ? (c) => (signal ? own(c, { signal }) : own(c))
+        : (c) => aaCall(adapter.id, c.op, c.args, aaOpts);
     const results = await Promise.all(
       calls.map((c) =>
         Promise.resolve()
@@ -152,12 +165,16 @@ async function runSite(
   }
 }
 
-export async function runSearch(input: SearchInput, opts: SearchOptions = {}): Promise<SearchResult> {
-  const pq = parseQuery(input.query);
-  const minPrice = input.minPrice ?? pq.minPrice;
-  const maxPrice = input.maxPrice ?? pq.maxPrice;
-  const minRating = input.minRating ?? pq.minRating;
+/** What every store call and the assemble step share: the parsed query and the stores to ask. */
+export type PreparedSearch = {
+  pq: ParsedQuery;
+  variants: string[];
+  queryTokens: string[][];
+  adapters: SiteAdapter[];
+};
 
+export function prepareSearch(input: SearchInput): PreparedSearch {
+  const pq = parseQuery(input.query);
   const variants = expandTerms(pq.terms);
   // Digits stay even when single ("nintendo switch 2", "airpods 4"): a model number is a hard attribute.
   // Filler ("best", "cheap", "for") is not a required title word; stores still get the raw words.
@@ -168,9 +185,31 @@ export async function runSearch(input: SearchInput, opts: SearchOptions = {}): P
   const adapters = input.sites
     .map((id) => (Object.hasOwn(registry, id) ? registry[id] : undefined))
     .filter((a): a is SiteAdapter => a !== undefined);
-  const outs = await Promise.all(adapters.map((a) => runSite(a, pq, variants, opts.exec)));
-  const statuses = outs.map((o) => o.status);
+  return { pq, variants, queryTokens, adapters };
+}
 
+export async function runSearch(input: SearchInput, opts: SearchOptions = {}): Promise<SearchResult> {
+  const prepared = prepareSearch(input);
+  const outs = await Promise.all(prepared.adapters.map((a) => fetchSite(a, prepared, { exec: opts.exec })));
+  return assembleResults(input, prepared, outs, opts);
+}
+
+/**
+ * The pure step after the store calls: filters, relevance, dedupe, ranking and grouping over the
+ * stores' outcomes, in the order given (pass them in the order of `prepared.adapters`). The
+ * streaming search calls it with the stores answered so far; with every store it is runSearch.
+ */
+export function assembleResults(
+  input: SearchInput,
+  prepared: Pick<PreparedSearch, "pq" | "queryTokens">,
+  outs: SiteOutcome[],
+  opts: Pick<SearchOptions, "onFiltered"> = {},
+): SearchResult {
+  const { pq, queryTokens } = prepared;
+  const minPrice = input.minPrice ?? pq.minPrice;
+  const maxPrice = input.maxPrice ?? pq.maxPrice;
+  const minRating = input.minRating ?? pq.minRating;
+  const statuses = outs.map((o) => o.status);
   const seen = new Set<string>();
   let products = outs
     .flatMap((o) => o.products)
