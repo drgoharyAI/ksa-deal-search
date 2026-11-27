@@ -8,6 +8,7 @@ import { dropAccessories } from "@/src/lib/match/accessory";
 import { dedupe } from "@/src/lib/match/dedupe";
 import { isBookCode, isOtherProduct } from "@/src/lib/match/category";
 import { dropBrandPriceOutliers } from "@/src/lib/match/price";
+import { markWeakMatches } from "@/src/lib/match/structure";
 import { sites as registry } from "@/src/sites/registry";
 import { rank, type SortKey } from "./rank";
 import { hasValidPrice, isExcluded, passesPriceRating, ratinglessSites } from "./filters";
@@ -152,6 +153,7 @@ export async function runSearch(input: SearchInput, opts: SearchOptions = {}): P
   if (isNum(minRating)) {
     products = products.map((p) => (p.rating === null && ratingless.has(p.site) ? { ...p, ratingUnavailable: true } : p));
   }
+  products = markWeakMatches(products, queryTokens);
   opts.onFiltered?.(products);
   products = rank(dedupe(products), input.sort);
 

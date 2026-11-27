@@ -329,3 +329,18 @@ tiers are under 2x apart (model lines: 128GB vs Pro Max), so nothing changes the
 | holdout (8) | 95.0% | 3.8% | 0% | 86.5% | 87.5% |
 | holdout2 (6) | 83.3% | 6.7% | 0% | 89.3% | 50.0% |
 | all (29) | 94.1% | 2.4% | 0.7% | 90.0% | 86.2% |
+
+## 12e round 2: weak-match tier; product noun only after "with" (kept)
+New mechanism: `Product.weakMatch` items are ranked after the rest under every sort (`rank.ts`),
+not dropped, so weaker structural evidence costs no recall. First signal (`structure.ts`
+`productOnlyAfterWith`): the query's product noun (aliases and open/closed compounds allowed)
+appears only after "with / built-in", so the item is something else that comes with or shows the
+product ("Gaming Designed Coasters Set of 10, with Pictures of ... Chair", "Karaoke Microphone
+with Built-in Speaker"). As a hard filter in 12d round 7 it cost recall on bundles; as a demotion
+it costs none.
+| set | p@10 | acc@10 | wrong@10 | recall | cheapest-first |
+|---|---|---|---|---|---|
+| tuning (15) | 98.0% | 0% | 1.3% | 92.1% | 100% |
+| holdout (8) | 95.0% | 3.8% | 0% | 86.5% | 87.5% |
+| holdout2 (6) | 85.0% | 6.7% | 0% | 89.3% | 66.7% |
+| all (29) | 94.5% | 2.4% | 0.7% | 90.0% | 89.7% |

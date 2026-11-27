@@ -13,8 +13,14 @@ export function dealScore(p: Product, minPrice: number, maxPrice: number): numbe
   return 0.4 * price + 0.3 * discount + 0.2 * rating + 0.1 * sold;
 }
 
-/** Stable (Array.prototype.sort is stable); never mutates the input. */
+/** Stable (Array.prototype.sort is stable); never mutates the input. Weak matches go after the rest, each part sorted. */
 export function rank(products: Product[], sort: SortKey): Product[] {
+  const strong = products.filter((p) => !p.weakMatch);
+  if (strong.length === products.length || !strong.length) return sortBy(products, sort);
+  return [...sortBy(strong, sort), ...sortBy(products.filter((p) => p.weakMatch), sort)];
+}
+
+function sortBy(products: Product[], sort: SortKey): Product[] {
   const out = [...products];
   if (sort === "price") return out.sort((a, b) => priceOf(a) - priceOf(b));
   if (sort === "discount") return out.sort((a, b) => (b.discountPct ?? 0) - (a.discountPct ?? 0));

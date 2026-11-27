@@ -11,6 +11,8 @@ export type Product = {
   rating: number | null;
   /** Set when a rating filter is on but this product's store gives no ratings at all (e.g. Jarir). */
   ratingUnavailable?: true;
+  /** Title-structure evidence says this may be another item that names the product; ranked after the rest. */
+  weakMatch?: true;
   soldCount: number;
   image: string;
   url: string;

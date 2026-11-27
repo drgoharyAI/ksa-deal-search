@@ -64,3 +64,15 @@ describe("dealScore", () => {
     expect(dealScore(a, 10, 40)).toBeGreaterThan(dealScore(b, 10, 40));
   });
 });
+
+describe("weak matches (12e)", () => {
+  it("rank weak matches after the rest under every sort", () => {
+    const ps = [P({ id: "w", listPrice: 1, weakMatch: true }), P({ id: "a", listPrice: 30 }), P({ id: "b", listPrice: 20 })];
+    expect(rank(ps, "price").map((p) => p.id)).toEqual(["b", "a", "w"]);
+    expect(rank(ps, "deal").map((p) => p.id).at(-1)).toBe("w");
+  });
+  it("an all-weak list is just sorted", () => {
+    const ps = [P({ id: "a", listPrice: 3, weakMatch: true }), P({ id: "b", listPrice: 2, weakMatch: true })];
+    expect(rank(ps, "price").map((p) => p.id)).toEqual(["b", "a"]);
+  });
+});
