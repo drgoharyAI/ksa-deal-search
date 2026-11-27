@@ -44,6 +44,12 @@ describe("normalizeSearchItem", () => {
     expect(normalizeSearchItem({ id: "1", price: 5, url: "https://evil.com/en-sa/x" })).toBeNull();
     expect(normalizeSearchItem(undefined)).toBeNull();
   });
+  it("a relative product path is resolved on www.extra.com, other hosts still rejected (task 18, Task 15a minor)", () => {
+    expect(normalizeSearchItem({ id: "1", price: 5, url: "/en-sa/cat/slug/p/100478407" })?.url).toBe(URL1);
+    expect(normalizeSearchItem({ id: "1", price: 5, url: "//evil.com/en-sa/x" })).toBeNull();
+    expect(normalizeSearchItem({ id: "1", price: 5, url: "/en-sa/../ar-sa/x" })).toBeNull();
+    expect(normalizeSearchItem({ id: "1", price: 5, url: "/ar-sa/x" })).toBeNull();
+  });
   it("fixture: >=10 normalize, no NaN, KSA url, SAR", () => {
     const items = (fixture as { data: unknown[] }).data;
     const ok = items.map(normalizeSearchItem).filter((p) => p !== null);

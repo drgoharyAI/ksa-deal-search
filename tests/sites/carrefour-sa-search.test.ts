@@ -33,6 +33,12 @@ describe("normalizeSearchItem", () => {
     expect(p.origPrice).toBeNull();
     expect(p.discountPct).toBeNull();
   });
+  it("reads the 'SAR 2,549' card form (task 18, Task 15a minor)", () => {
+    const p = normalizeSearchItem({ title: "Microwave", price: "SAR 2,549", orig: "SAR 2,999.00", url: U })!;
+    expect(p.listPrice).toBe(2549);
+    expect(p.origPrice).toBe(2999);
+    expect(normalizeSearchItem({ title: "x", price: "SAR", url: U })).toBeNull();
+  });
   it("orig <= price means no discount", () => {
     const p = normalizeSearchItem({ title: "x", price: "10.00", orig: "10.00", disc: "5% OFF", url: U })!;
     expect(p.origPrice).toBeNull();

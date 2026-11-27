@@ -32,9 +32,12 @@ export function normalizeSearchItem(raw: unknown): Product | null {
   const id = itemId(r.id);
   if (id === null) return null;
 
-  const discount = num(r.discount);
-  let origPrice = num(r.origPrice);
-  if (origPrice === null && discount !== null && discount > 0 && discount < 100) {
+  // A discount outside 0-100 % or a "was" price at or under the price is store noise, not a deal.
+  const rawDiscount = num(r.discount);
+  const discount = rawDiscount !== null && rawDiscount > 0 && rawDiscount < 100 ? rawDiscount : null;
+  const rawOrig = num(r.origPrice);
+  let origPrice = rawOrig !== null && rawOrig > price ? rawOrig : null;
+  if (origPrice === null && discount !== null) {
     origPrice = round2(price / (1 - discount / 100));
   }
 

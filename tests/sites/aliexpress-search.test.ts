@@ -61,6 +61,16 @@ describe("normalizeSearchItem", () => {
     expect(p.discountPct).toBeNull();
     expect(p.origPrice).toBeNull();
   });
+  it("discount outside 0-100 % or a 'was' price not above the price is dropped (task 18, Task 4 minor)", () => {
+    for (const discount of [0, -5, 100, 150]) {
+      const p = normalizeSearchItem({ id: "1", title: "X", price: 50, discount })!;
+      expect(p.discountPct).toBeNull();
+      expect(p.origPrice).toBeNull();
+    }
+    expect(normalizeSearchItem({ id: "1", title: "X", price: 50, origPrice: 50 })!.origPrice).toBeNull();
+    expect(normalizeSearchItem({ id: "1", title: "X", price: 50, origPrice: 40 })!.origPrice).toBeNull();
+    expect(normalizeSearchItem({ id: "1", title: "X", price: 50, origPrice: 80 })!.origPrice).toBe(80);
+  });
   it("fixture: >=50 normalize, no NaN, SAR, aliexpress URLs", () => {
     const items = (fixture as { data: unknown[] }).data;
     const ps = items.map(normalizeSearchItem);

@@ -11,6 +11,16 @@ const num = (v: unknown): number | null => {
 
 const URL_PREFIX = "https://www.extra.com/en-sa/";
 
+/** A product link as an absolute URL: a relative "/en-sa/..." path is resolved on www.extra.com. */
+function absoluteUrl(v: unknown): string | null {
+  if (typeof v !== "string" || !v) return null;
+  try {
+    return new URL(v, "https://www.extra.com").href;
+  } catch {
+    return null;
+  }
+}
+
 /** Compares on `price` (shelf price), never `memberPrice`. Repeats of an id are dropped by the pipeline's site+id dedupe. */
 export function normalizeSearchItem(raw: unknown): Product | null {
   if (!raw || typeof raw !== "object") return null;
@@ -19,8 +29,8 @@ export function normalizeSearchItem(raw: unknown): Product | null {
   if (price === null || price <= 0) return null;
   const id = itemId(r.id);
   if (id === null) return null;
-  const url = typeof r.url === "string" ? r.url : "";
-  if (!url.startsWith(URL_PREFIX)) return null;
+  const url = absoluteUrl(r.url);
+  if (!url?.startsWith(URL_PREFIX)) return null;
 
   const orig = num(r.origPrice);
   const origPrice = orig !== null && orig > price ? orig : null;

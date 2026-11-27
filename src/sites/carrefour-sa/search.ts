@@ -3,8 +3,10 @@ import { sanitizeQ } from "@/src/sites/amazon-sa/search";
 
 export { sanitizeQ };
 
+/** "2,549", "2549.00" or "SAR 2,549" (the card's currency prefix) -> number. */
 const num = (v: unknown): number | null => {
-  const n = typeof v === "string" && v.trim() !== "" ? Number(v.replace(/,/g, "")) : v;
+  const s = typeof v === "string" ? v.replace(/,/g, "").replace(/^\s*SAR\s*/i, "") : null;
+  const n = s !== null && s.trim() !== "" ? Number(s) : v;
   return typeof n === "number" && Number.isFinite(n) ? n : null;
 };
 
