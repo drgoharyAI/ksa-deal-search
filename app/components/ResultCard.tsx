@@ -1,14 +1,64 @@
 "use client";
 
 import { useState } from "react";
-import type { Product } from "@/src/lib/types";
+import type { DealInsight, PriceTrend, Product } from "@/src/lib/types";
 import { storeLabel } from "@/src/lib/stores";
 import { isLikelyMatch } from "@/src/lib/rank";
 import StoreLogo from "./StoreLogo";
 import WatchForm, { postWatch } from "./WatchForm";
 import { defaultTarget } from "@/src/lib/alerts/shared";
+import Sparkline from "./Sparkline";
 
 const NBSP = " ";
+
+const DEAL_EXPLAIN: Record<DealInsight["badge"], string> = {
+  "fake-deal": "The discount does not hold up against the prices we've seen",
+  "lowest-30d": "Lowest price we've seen in 30 days",
+  "below-usual": "More than 10% under its usual price over the last 30 days",
+  normal: "In line with the prices we've seen over the last 30 days",
+};
+
+/** The tooltip and screen-reader text for a deal badge; a fake deal names the rule that fired. */
+export function dealExplanation(d: DealInsight): string {
+  return d.badge === "fake-deal" && d.reason ? d.reason : DEAL_EXPLAIN[d.badge];
+}
+
+/** "↓12% vs last week" for sighted readers, "Down 12% vs last week" for screen readers. */
+export function trendChange(pct: number): { arrow: string; spoken: string; text: string } {
+  if (pct === 0) return { arrow: "", spoken: "", text: "Same as last week" };
+  const down = pct < 0;
+  return { arrow: down ? "↓" : "↑", spoken: down ? "Down " : "Up ", text: `${Math.abs(pct)}% vs last week` };
+}
+
+function DealBadge({ deal }: { deal: DealInsight }) {
+  const explain = dealExplanation(deal);
+  return (
+    <p className={`deal deal--${deal.badge}`} title={explain}>
+      {deal.label}
+      <span className="visually-hidden">. {explain}</span>
+    </p>
+  );
+}
+
+function Trend({ trend, title }: { trend: PriceTrend; title: string }) {
+  const change = trend.changePct7d === undefined ? null : trendChange(trend.changePct7d);
+  return (
+    <div className="card__trend">
+      <Sparkline
+        points={trend.points.map((price, at) => ({ at, price }))}
+        target={NaN}
+        label={`Lowest price per day for ${title}, ${trend.points.length} days`}
+      />
+      {change && (
+        <span className="card__change">
+          {change.arrow && <span aria-hidden="true">{change.arrow}</span>}
+          {change.spoken && <span className="visually-hidden">{change.spoken}</span>}
+          {change.text}
+        </span>
+      )}
+    </div>
+  );
+}
 
 export function formatMoney(n: number, currency = "SAR"): string {
   const digits = Number.isInteger(n) ? 0 : 2;
@@ -68,6 +118,8 @@ export default function ResultCard({ product: p, query }: { product: Product; qu
             </s>
           )}
         </p>
+        {p.deal && <DealBadge deal={p.deal} />}
+        {p.trend && p.trend.points.length >= 2 && <Trend trend={p.trend} title={p.title} />}
         <p className="card__ship">Shipping not included</p>
         {(p.rating !== null || p.soldCount > 0) && (
           <p className="card__meta">

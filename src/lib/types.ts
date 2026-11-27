@@ -21,9 +21,21 @@ export type Product = {
   mainOption?: string;
   shipping?: number | null;
   finalPrice?: number;
+  /** Deal badge from local price observations (src/lib/insights.ts); absent without enough data. */
+  deal?: DealInsight;
+  /** Price trend from local price observations; absent without enough data. */
+  trend?: PriceTrend;
   /** No product-detail calls: every product is "ok" and finalPrice = listPrice. */
   detailStatus: "pending" | "ok" | "failed";
 };
+
+export type DealBadge = "fake-deal" | "lowest-30d" | "below-usual" | "normal";
+
+/** `reason`: set on "fake-deal", saying which rule fired. */
+export type DealInsight = { badge: DealBadge; label: string; reason?: string };
+
+/** `points`: daily lowest price over the last 30 days, oldest first. `changePct7d`: vs about a week ago. */
+export type PriceTrend = { points: number[]; changePct7d?: number };
 
 export type ParsedQuery = {
   terms: string;

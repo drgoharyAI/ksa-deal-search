@@ -8,6 +8,7 @@ import type { Product } from "@/src/lib/types";
 import { getDb } from "@/src/lib/db";
 import { addSearch, historyEntryFor } from "@/src/lib/history";
 import { ensureChecker } from "@/src/lib/alerts/service";
+import { attachInsights, insightsFor, recordObservations } from "@/src/lib/insights";
 
 const SORTS: SortKey[] = ["price", "discount", "deal"];
 const EMPTY = { error: "Enter something to search for" };
@@ -49,7 +50,7 @@ export async function POST(req: Request) {
   };
   const result = await runSearch(input);
   recordHistory(input, result.products);
-  return NextResponse.json(result);
+  return NextResponse.json({ ...result, products: withInsights(result.products) });
 }
 
 /** Search history is a convenience: a database failure is logged and never fails the search. */
@@ -59,4 +60,24 @@ function recordHistory(input: Parameters<typeof historyEntryFor>[0], products: P
   } catch (e) {
     console.warn("[history] could not record the search", e instanceof Error ? e.message : String(e));
   }
+}
+
+/**
+ * Deal badges and trends come from observations stored before this search plus the current price;
+ * then this search's prices are recorded. A database failure is logged and never fails the search.
+ */
+function withInsights(products: Product[]): Product[] {
+  const now = Date.now();
+  let out = products;
+  try {
+    out = attachInsights(products, insightsFor(getDb(), products, now));
+  } catch (e) {
+    console.warn("[insights] could not compute deal insights", e instanceof Error ? e.message : String(e));
+  }
+  try {
+    recordObservations(getDb(), products, now);
+  } catch (e) {
+    console.warn("[insights] could not record price observations", e instanceof Error ? e.message : String(e));
+  }
+  return out;
 }

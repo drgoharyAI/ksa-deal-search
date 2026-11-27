@@ -95,6 +95,17 @@ const MIGRATIONS: string[] = [
      sent INTEGER NOT NULL DEFAULT 0,
      seen INTEGER NOT NULL DEFAULT 0
    );`,
+  // 2: price observations from every search (deal badges and trends, src/lib/insights.ts).
+  `CREATE TABLE observations (
+     id INTEGER PRIMARY KEY,
+     site TEXT NOT NULL,
+     productId TEXT NOT NULL,
+     price REAL NOT NULL,
+     origPrice REAL,
+     at INTEGER NOT NULL
+   );
+   CREATE INDEX observations_item ON observations(site, productId, at);
+   CREATE INDEX observations_at ON observations(at);`,
 ];
 
 export const SCHEMA_VERSION = MIGRATIONS.length;
@@ -130,10 +141,15 @@ export function openDb(file: string): Db {
   return db;
 }
 
-const g = globalThis as unknown as { __dealSearchDb?: Db };
+const g = globalThis as unknown as { __dealSearchDb?: Db; __dealSearchDbSchema?: number };
 
-/** The app's database, opened on first use and shared across hot reloads. */
+/**
+ * The app's database, opened on first use and shared across hot reloads. A handle opened by
+ * older code (a hot reload that added a migration) is migrated before use.
+ */
 export function getDb(): Db {
   if (!g.__dealSearchDb) g.__dealSearchDb = openDb(dbPath());
+  else if (g.__dealSearchDbSchema !== SCHEMA_VERSION) migrate(g.__dealSearchDb);
+  g.__dealSearchDbSchema = SCHEMA_VERSION;
   return g.__dealSearchDb;
 }

@@ -295,9 +295,13 @@ These move out of non-goals.
    - The group shows the best price, and each store row links to that store.
    - Ranking applies per group, using the cheapest confident member.
 2. **"Is this a real deal?" badge.** Every search records price observations (site + id → price, time) in the local DB, pruned after 180 days.
-   - Badges: "Lowest in 30 days", "Below usual price" (more than 10% under the 30-day median), "Normal price".
-   - "Inflated 'was' price" applies when the store's original price is above every price we've observed for the item and at least 15% above the 30-day median.
-   - A badge needs at least 3 observations over at least 2 days; otherwise there is no badge.
+   - Badges: "Fake deal", "Lowest in 30 days", "Below usual price" (more than 10% under the 30-day median), "Normal price".
+   - "Fake deal" (owner, 2026-11-27; replaces the earlier "Inflated 'was' price" badge) applies only when the card shows a discount (discount of 10% or more, or an original price above the price), and one of these holds. Its tooltip names the reason that fired.
+     - With history: the price is not below the 30-day median (at least 98% of it): "Discount claimed, but this is its usual price".
+     - With history: the store's original price is above every price we've observed for the item and at least 15% above the 30-day median: "The 'was' price was never charged".
+     - Without history (works on the first search): the claimed discount is at least 70%, the original price is at least 3 times the price, and the price sits in the result set's normal range (at least half the median of at least 4 confident listings): "Unrealistic 'was' price". This rule is deliberately conservative: a price far under the other listings counts as genuine clearance and is never flagged, and with enough history the history rules decide instead.
+   - Priority when several apply: Fake deal, then Lowest in 30 days, then Below usual price, then Normal price. "Lowest in 30 days" needs the price at or under every price in the window and not a flat line.
+   - The history rules need at least 3 observations over at least 2 days (Saudi time); otherwise there is no history badge. One observation per product per hour is stored; insights use the earlier observations plus the current price.
 3. **Quick filter chips.** Client-side and instant, with no new request: brand (taken from titles), a price range slider, store, minimum rating, and only discounted. Counts show per chip. Filters combine with sort and the match tiers.
 4. **Side-by-side compare.** Tick 2–4 products for a compare drawer or page showing image, title, store, price, discount, rating, the deal badge, and key specs parsed from titles (storage, RAM, wattage, capacity, size, resolution, model). Differences are highlighted.
 5. **Price trend on cards.** A tiny inline SVG sparkline and a change label ("↓12% vs last week") from the observations, shown only with enough data (same rule as the badge).
