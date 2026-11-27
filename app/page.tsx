@@ -1,7 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
-import { rank } from "@/src/lib/rank";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { Product, SiteStatus } from "@/src/lib/types";
 import { defaultSites } from "@/src/lib/stores";
 import SearchForm, { type ErrorField, type FormValues } from "./components/SearchForm";
@@ -14,14 +13,19 @@ import { valuesFromUrl } from "@/src/lib/rerun";
 import FilterChips from "./components/FilterChips";
 import { CompareDialog, CompareTray } from "./components/Compare";
 import {
-  NO_FILTERS, applyFilters, chipContext, chipParamsOnly, chipsForNewQuery, facetCounts, filtersFromSearch, isActive, priceBounds,
+  NO_FILTERS, chipContext, chipParamsOnly, chipsForNewQuery, facetCountsFor, filtersFromSearch, isActive, priceBounds,
   withChipParams, type ChipFilters,
 } from "@/src/lib/chips";
 import { toggleCompare } from "@/src/lib/compare";
 import { productKey } from "@/src/lib/specs";
+import { allMembers, buildUnits, viewItems } from "@/src/lib/view";
+import type { GroupRef } from "@/src/lib/match/group";
 
 type Results = {
   products: Product[];
+  /** The same product at several stores (ids), and members missing from `products`. */
+  groups: GroupRef[];
+  groupExtras: Product[];
   statuses: SiteStatus[];
   reason?: string;
   query: string;
@@ -41,6 +45,8 @@ const INITIAL: FormValues = {
 };
 
 const SKELETONS = 10;
+
+const NO_COMPARE: { list: Product[]; full: boolean } = { list: [], full: false };
 
 const toNum = (s: string): number | undefined => {
   const t = s.trim();
@@ -67,8 +73,10 @@ export default function Home() {
   const [chipsRead, setChipsRead] = useState(false);
   /** Chips carried over from the previous query (rating, discounted); named in a note. */
   const [keptChips, setKeptChips] = useState<("rating" | "discounted")[]>([]);
-  const [compareList, setCompareList] = useState<Product[]>([]);
-  const [compareFull, setCompareFull] = useState(false);
+  // One state, so the toggle below can be one stable function for every (memoized) card.
+  const [cmp, setCmp] = useState<{ list: Product[]; full: boolean }>(NO_COMPARE);
+  const compareList = cmp.list;
+  const compareFull = cmp.full;
   const [compareOpen, setCompareOpen] = useState(false);
 
   useEffect(() => () => abortRef.current?.abort(), []);
@@ -97,38 +105,32 @@ export default function Home() {
     if (next !== window.location.search) window.history.replaceState(null, "", window.location.pathname + next);
   }, [chips, chipsRead]);
 
-  // Chips narrow the results, then sort and the match tiers apply; no new request.
-  const all = useMemo(() => results?.products ?? [], [results]);
+  // Cards: a cross-store group is one card, every other product one card. Chips narrow the cards
+  // (a group passes when any member does), then sort and the match tiers apply; no new request.
+  const units = useMemo(() => (results ? buildUnits(results.products, results.groups, results.groupExtras) : []), [results]);
+  const all = useMemo(() => allMembers(units), [units]);
   const chipCtx = useMemo(() => chipContext(all), [all]);
-  const facets = useMemo(() => facetCounts(all, chips, chipCtx), [all, chips, chipCtx]);
+  const facets = useMemo(() => facetCountsFor(units.map((u) => u.members), chips, chipCtx), [units, chips, chipCtx]);
   const bounds = useMemo(() => priceBounds(all), [all]);
-  const products = useMemo(() => rank(applyFilters(all, chips, chipCtx), values.sort), [all, chips, chipCtx, values.sort]);
+  const items = useMemo(() => viewItems(units, chips, chipCtx, values.sort), [units, chips, chipCtx, values.sort]);
   const filtering = isActive(chips) && all.length > 0;
   const kept = keptChips.filter((k) => (k === "rating" ? chips.minRating !== undefined : chips.discounted));
   // The live region hears "N of M results" once a change settles (a dragged slider fires many).
-  const filterLive = filtering ? `${products.length} of ${all.length} results` : "";
+  const filterLive = filtering ? `${items.length} of ${units.length} results` : "";
   const [liveFilter, setLiveFilter] = useState("");
   useEffect(() => {
     const t = setTimeout(() => setLiveFilter(filterLive), 400);
     return () => clearTimeout(t);
   }, [filterLive]);
   const compareKeys = useMemo(() => new Set(compareList.map(productKey)), [compareList]);
-  const compare = useMemo(
-    () => ({
-      isChecked: (p: Product) => compareKeys.has(productKey(p)),
-      onToggle: (p: Product) => {
-        const r = toggleCompare(compareList, p);
-        setCompareList(r.list);
-        setCompareFull(r.full);
-      },
-    }),
-    [compareKeys, compareList],
-  );
+  const onToggleCompare = useCallback((p: Product) => setCmp((c) => toggleCompare(c.list, p)), []);
+  const compare = useMemo(() => ({ isChecked: (p: Product) => compareKeys.has(productKey(p)), onToggle: onToggleCompare }), [compareKeys, onToggleCompare]);
   const counts = useMemo(() => {
     const c: Record<string, number> = {};
-    for (const p of results?.products ?? []) c[p.site] = (c[p.site] ?? 0) + 1;
+    // Every listing shown, group rows included (a twin deduped out of `products` is still a result).
+    for (const p of all) c[p.site] = (c[p.site] ?? 0) + 1;
     return c;
-  }, [results]);
+  }, [all]);
 
   const fail = (msg: string) => {
     setError(msg);
@@ -176,11 +178,10 @@ export default function Home() {
       if (!res.ok || !data || !Array.isArray(data.products)) {
         return fail(data?.error ?? "The search failed; try again");
       }
-      setResults({ products: data.products, statuses: data.statuses ?? [], reason: data.reason, query: v.query.trim(), sites: v.sites, filters: { minPrice: body.minPrice, maxPrice: body.maxPrice, minRating: body.minRating } });
+      setResults({ products: data.products, groups: Array.isArray(data.groups) ? data.groups : [], groupExtras: Array.isArray(data.groupExtras) ? data.groupExtras : [], statuses: data.statuses ?? [], reason: data.reason, query: v.query.trim(), sites: v.sites, filters: { minPrice: body.minPrice, maxPrice: body.maxPrice, minRating: body.minRating } });
       setWatchOpen(false);
       setWatchSaved(false);
-      setCompareList([]);
-      setCompareFull(false);
+      setCmp(NO_COMPARE);
       setPending(null);
       setPhase("done");
     } catch (e) {
@@ -199,14 +200,14 @@ export default function Home() {
   }
 
   const loading = phase === "loading";
-  const cheapest = useMemo(() => (results ? cheapestConfident(results.products) : null), [results]);
+  const cheapest = useMemo(() => (all.length ? cheapestConfident(all) : null), [all]);
   const formError = errorField === "form" ? error : null;
 
   let live = "";
   if (loading) live = `Searching ${values.sites.length} ${values.sites.length === 1 ? "store" : "stores"}`;
   else if (phase === "error" && error) live = error;
   else if (phase === "done" && results && filtering) live = liveFilter;
-  else if (phase === "done" && results) live = products.length ? `${products.length} results` : (results.reason ?? "");
+  else if (phase === "done" && results) live = items.length ? `${items.length} results` : (results.reason ?? "");
 
   return (
     <div className="app">
@@ -238,9 +239,9 @@ export default function Home() {
         <section className="results" aria-labelledby="results-head" aria-busy={loading || undefined}>
           <div className="results__head">
             <h2 id="results-head">
-              {loading ? "Searching" : results && filtering ? `${products.length} of ${all.length} results` : results && products.length ? `${products.length} results` : "Results"}
+              {loading ? "Searching" : results && filtering ? `${items.length} of ${units.length} results` : results && items.length ? `${items.length} results` : "Results"}
             </h2>
-            {!loading && results && products.length > 0 && <p className="results__note">Prices exclude shipping</p>}
+            {!loading && results && items.length > 0 && <p className="results__note">Prices exclude shipping</p>}
             {!loading && results && cheapest && !watchOpen && !watchSaved && (
               <button type="button" className="btn btn--quiet btn--small" onClick={() => setWatchOpen(true)}>
                 Watch this search
@@ -286,8 +287,8 @@ export default function Home() {
                 </li>
               ))}
             </ul>
-          ) : results && products.length ? (
-            <ResultTiers products={products} query={results.query} compare={compare} />
+          ) : results && items.length ? (
+            <ResultTiers items={items} query={results.query} compare={compare} />
           ) : results && filtering ? (
             <div className="empty">
               <p className="empty__title">No results match these filters</p>
@@ -315,14 +316,8 @@ export default function Home() {
       <CompareTray
         items={compareList}
         full={compareFull}
-        onRemove={(p) => {
-          setCompareList(compareList.filter((x) => productKey(x) !== productKey(p)));
-          setCompareFull(false);
-        }}
-        onClear={() => {
-          setCompareList([]);
-          setCompareFull(false);
-        }}
+        onRemove={(p) => setCmp((c) => ({ list: c.list.filter((x) => productKey(x) !== productKey(p)), full: false }))}
+        onClear={() => setCmp(NO_COMPARE)}
         onOpen={() => setCompareOpen(true)}
       />
       <CompareDialog items={compareList} open={compareOpen} onClose={() => setCompareOpen(false)} />

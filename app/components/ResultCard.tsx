@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { memo, useState } from "react";
 import type { DealInsight, PriceTrend, Product } from "@/src/lib/types";
 import { storeLabel } from "@/src/lib/stores";
 import { isLikelyMatch } from "@/src/lib/rank";
@@ -34,7 +34,7 @@ export function trendChange(pct: number): { arrow: string; spoken: string; text:
  * The badge. A fake deal shows its reason as visible text under the badge (no hover needed, read
  * once); the other badges explain themselves to screen readers only.
  */
-function DealBadge({ deal }: { deal: DealInsight }) {
+export function DealBadge({ deal }: { deal: DealInsight }) {
   const explain = dealExplanation(deal);
   const visible = deal.badge === "fake-deal";
   return (
@@ -76,16 +76,74 @@ export function formatMoney(n: number, currency = "SAR"): string {
   return `${currency || "SAR"}${NBSP}${num}`;
 }
 
-/** A card's "Compare" checkbox: ticked state and the toggle (the page caps the list at 4). */
-export type CompareControl = { checked: boolean; onToggle: () => void };
+/**
+ * A card's "Compare" checkbox. `onCompare` gets the product, so one stable function serves every
+ * card and memoized cards re-render only when their own ticked state changes.
+ */
+export type CompareControl = { compareChecked?: boolean; onCompare?: (p: Product) => void };
+
+export function CardCompare({ product: p, checked, onCompare }: { product: Product; checked: boolean; onCompare: (p: Product) => void }) {
+  return (
+    <label className="card__compare">
+      <input type="checkbox" checked={checked} onChange={() => onCompare(p)} />
+      Compare
+      <span className="visually-hidden"> {p.title}</span>
+    </label>
+  );
+}
+
+/** "Watch": a price alert on this product, opened in place. */
+export function CardWatch({ product: p, query }: { product: Product; query: string }) {
+  const [watch, setWatch] = useState<"closed" | "open" | "saved">("closed");
+  const price = p.finalPrice ?? p.listPrice;
+  return (
+    <div className="card__watch">
+      {watch === "open" ? (
+        <WatchForm
+          label={`Alert me at or under, ${p.currency || "SAR"}`}
+          initial={defaultTarget(price)}
+          onCancel={() => setWatch("closed")}
+          onSave={async (target) => {
+            const err = await postWatch({
+              kind: "product",
+              site: p.site,
+              productId: p.id,
+              query,
+              target,
+              title: p.title,
+              url: p.url,
+              image: p.image || undefined,
+              price,
+              currency: p.currency || "SAR",
+            });
+            if (!err) setWatch("saved");
+            return err;
+          }}
+        />
+      ) : watch === "saved" ? null : (
+        <button type="button" className="btn btn--quiet btn--small" onClick={() => setWatch("open")}>
+          Watch
+          <span className="visually-hidden"> {p.title}</span>
+        </button>
+      )}
+      {/* Always in the page, so screen readers announce the text when it changes. */}
+      <p className={watch === "saved" ? "card__watched" : "visually-hidden"} role="status">
+        {watch === "saved" && (
+          <>
+            Watching. <a href="/alerts">See alerts</a>
+          </>
+        )}
+      </p>
+    </div>
+  );
+}
 
 /**
  * `query`: the search this card came from; with it the card offers a price alert ("Watch").
- * `compare`: with it the card offers a "Compare" checkbox.
+ * `onCompare`: with it the card offers a "Compare" checkbox (`compareChecked`: ticked).
  */
-export default function ResultCard({ product: p, query, compare }: { product: Product; query?: string; compare?: CompareControl }) {
+function ResultCard({ product: p, query, compareChecked = false, onCompare }: { product: Product; query?: string } & CompareControl) {
   const [imgFailed, setImgFailed] = useState(false);
-  const [watch, setWatch] = useState<"closed" | "open" | "saved">("closed");
   const price = p.finalPrice ?? p.listPrice;
   const showImage = !!p.image && !imgFailed;
   const discount = p.discountPct ? Math.round(p.discountPct) : 0;
@@ -144,54 +202,11 @@ export default function ResultCard({ product: p, query, compare }: { product: Pr
           </p>
         )}
         {p.ratingUnavailable && <p className="card__meta">No rating</p>}
-        {compare && (
-          <label className="card__compare">
-            <input type="checkbox" checked={compare.checked} onChange={compare.onToggle} />
-            Compare
-            <span className="visually-hidden"> {p.title}</span>
-          </label>
-        )}
-        {query && (
-          <div className="card__watch">
-            {watch === "open" ? (
-              <WatchForm
-                label={`Alert me at or under, ${p.currency || "SAR"}`}
-                initial={defaultTarget(price)}
-                onCancel={() => setWatch("closed")}
-                onSave={async (target) => {
-                  const err = await postWatch({
-                    kind: "product",
-                    site: p.site,
-                    productId: p.id,
-                    query,
-                    target,
-                    title: p.title,
-                    url: p.url,
-                    image: p.image || undefined,
-                    price,
-                    currency: p.currency || "SAR",
-                  });
-                  if (!err) setWatch("saved");
-                  return err;
-                }}
-              />
-            ) : watch === "saved" ? null : (
-              <button type="button" className="btn btn--quiet btn--small" onClick={() => setWatch("open")}>
-                Watch
-                <span className="visually-hidden"> {p.title}</span>
-              </button>
-            )}
-            {/* Always in the page, so screen readers announce the text when it changes. */}
-            <p className={watch === "saved" ? "card__watched" : "visually-hidden"} role="status">
-              {watch === "saved" && (
-                <>
-                  Watching. <a href="/alerts">See alerts</a>
-                </>
-              )}
-            </p>
-          </div>
-        )}
+        {onCompare && <CardCompare product={p} checked={compareChecked} onCompare={onCompare} />}
+        {query && <CardWatch product={p} query={query} />}
       </div>
     </article>
   );
 }
+
+export default memo(ResultCard);

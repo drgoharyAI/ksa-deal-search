@@ -81,33 +81,44 @@ export type Facets = {
 };
 
 /** Live counts: each option counts the products it would show given the other active filters. */
-export function facetCounts(products: Product[], f: ChipFilters, ctx: ChipContext): Facets {
-  const others = (d: Dim) => products.filter((p) => passes(p, f, ctx, d));
+export const facetCounts = (products: Product[], f: ChipFilters, ctx: ChipContext): Facets =>
+  facetCountsFor(products.map((p) => [p]), f, ctx);
+
+/**
+ * Live counts over units: a unit is one card (a single product, or a cross-store group's members).
+ * A unit counts once for an option when any of its members passing the other filters matches it.
+ */
+export function facetCountsFor(units: Product[][], f: ChipFilters, ctx: ChipContext): Facets {
+  // Each unit's members passing every filter except `d`; units with none drop out.
+  const others = (d?: Dim) => units.map((u) => u.filter((p) => passes(p, f, ctx, d))).filter((u) => u.length > 0);
+  const brandOf = (p: Product) => ctx.brands.get(productKey(p));
+  const each = (us: Product[][], key: (p: Product) => string | undefined) =>
+    tally(us.flatMap((u) => [...new Set(u.map(key).filter((k): k is string => !!k))]));
 
   const order = new Map<string, number>(STORES.map((s, i) => [s.id, i]));
-  const storeIds = [...new Set([...products.map((p) => p.site), ...f.stores])].sort(
+  const storeIds = [...new Set([...units.flat().map((p) => p.site), ...f.stores])].sort(
     (a, b) => (order.get(a) ?? 99) - (order.get(b) ?? 99) || a.localeCompare(b),
   );
-  const byStore = tally(others("stores").map((p) => p.site));
+  const byStore = each(others("stores"), (p) => p.site);
 
-  const overall = tally(products.map((p) => ctx.brands.get(productKey(p))).filter((b): b is string => !!b));
+  const overall = each(units, brandOf);
   const brandIds = [...new Set([...overall.keys(), ...f.brands])].sort(
     (a, b) => (overall.get(b) ?? 0) - (overall.get(a) ?? 0) || a.localeCompare(b),
   );
-  const byBrand = tally(others("brands").map((p) => ctx.brands.get(productKey(p))).filter((b): b is string => !!b));
+  const byBrand = each(others("brands"), brandOf);
 
   const forRating = others("rating");
   const ratings = [undefined, ...RATING_STEPS].map((min) => ({
     min,
-    count: min === undefined ? forRating.length : forRating.filter((p) => passes(p, { ...NO_FILTERS, minRating: min }, ctx)).length,
+    count: min === undefined ? forRating.length : forRating.filter((u) => u.some((p) => passes(p, { ...NO_FILTERS, minRating: min }, ctx))).length,
   }));
 
   return {
     stores: storeIds.map((id) => ({ id, count: byStore.get(id) ?? 0 })),
     brands: brandIds.map((id) => ({ id, count: byBrand.get(id) ?? 0 })),
     ratings,
-    discounted: others("discounted").filter(isDiscounted).length,
-    total: products.filter((p) => passes(p, f, ctx)).length,
+    discounted: others("discounted").filter((u) => u.some(isDiscounted)).length,
+    total: others().length,
   };
 }
 
