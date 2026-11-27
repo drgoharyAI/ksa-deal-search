@@ -153,3 +153,11 @@ noise reduction (ENC), labelled wrong-model 34 times and never relevant without 
 | p@10 | acc@10 | wrong@10 | recall | cheapest-first |
 |---|---|---|---|---|
 | 98% (97.3→98.0) | 0% | 1.3% | 90% | 80% |
+
+## Round 14: PRICE_RATIO 0.4 -> 0.3 (kept)
+With the structural accessory rules doing most of the work, the price test for accessory-word
+candidates can be gentler: a candidate is dropped below 0.3 x the median main-product price.
+Recovers cheap real products whose titles mention a part (0.5 was also tried: recall 88%).
+| p@10 | acc@10 | wrong@10 | recall | cheapest-first |
+|---|---|---|---|---|
+| 98% | 0% | 1.3% | 91% (90.2→90.9) | 80% |

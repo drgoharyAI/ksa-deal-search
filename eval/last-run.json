@@ -1,5 +1,5 @@
 {
-  "at": "2026-11-27T02:08:12.859Z",
+  "at": "2026-11-27T02:08:56.028Z",
   "queries": [
     {
       "query": "anc earbuds under 300",
@@ -334,7 +334,7 @@
         }
       ],
       "recordedItems": 534,
-      "results": 317,
+      "results": 326,
       "missingCalls": [],
       "labelled": true,
       "metrics": {
@@ -343,9 +343,9 @@
         "accessoryAt10": 0,
         "wrongModelAt10": 0,
         "unlabeledAt10": 0,
-        "recall": 0.8823529411764706,
+        "recall": 0.9117647058823529,
         "relevantRecorded": 374,
-        "relevantKept": 330,
+        "relevantKept": 341,
         "cheapestRelevantFirst": true
       },
       "top": [
@@ -754,7 +754,7 @@
         }
       ],
       "recordedItems": 554,
-      "results": 304,
+      "results": 307,
       "missingCalls": [],
       "labelled": true,
       "metrics": {
@@ -763,9 +763,9 @@
         "accessoryAt10": 0,
         "wrongModelAt10": 0,
         "unlabeledAt10": 0,
-        "recall": 0.8645320197044335,
+        "recall": 0.8719211822660099,
         "relevantRecorded": 406,
-        "relevantKept": 351,
+        "relevantKept": 354,
         "cheapestRelevantFirst": true
       },
       "top": [
@@ -894,7 +894,7 @@
         }
       ],
       "recordedItems": 494,
-      "results": 137,
+      "results": 141,
       "missingCalls": [],
       "labelled": true,
       "metrics": {
@@ -903,9 +903,9 @@
         "accessoryAt10": 0,
         "wrongModelAt10": 0.2,
         "unlabeledAt10": 0,
-        "recall": 0.879746835443038,
+        "recall": 0.8924050632911392,
         "relevantRecorded": 158,
-        "relevantKept": 139,
+        "relevantKept": 141,
         "cheapestRelevantFirst": true
       },
       "top": [
@@ -1034,7 +1034,7 @@
         }
       ],
       "recordedItems": 501,
-      "results": 380,
+      "results": 381,
       "missingCalls": [],
       "labelled": true,
       "metrics": {
@@ -1043,9 +1043,9 @@
         "accessoryAt10": 0,
         "wrongModelAt10": 0,
         "unlabeledAt10": 0,
-        "recall": 0.9647058823529412,
+        "recall": 0.9670588235294117,
         "relevantRecorded": 425,
-        "relevantKept": 410,
+        "relevantKept": 411,
         "cheapestRelevantFirst": true
       },
       "top": [
@@ -1314,7 +1314,7 @@
         }
       ],
       "recordedItems": 502,
-      "results": 287,
+      "results": 302,
       "missingCalls": [],
       "labelled": true,
       "metrics": {
@@ -1323,9 +1323,9 @@
         "accessoryAt10": 0,
         "wrongModelAt10": 0,
         "unlabeledAt10": 0,
-        "recall": 0.7714285714285715,
+        "recall": 0.8142857142857143,
         "relevantRecorded": 420,
-        "relevantKept": 324,
+        "relevantKept": 342,
         "cheapestRelevantFirst": true
       },
       "top": [
@@ -1372,6 +1372,20 @@
           "label": "relevant"
         },
         {
+          "key": "aliexpress:1005012968836937",
+          "store": "aliexpress",
+          "price": 30.01,
+          "title": "High Quality Nylon Versatile Backpack Large Capacity Black Grey White Red Computer Bag Waterproof Washable Travel Bag Unisex",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005012897927180",
+          "store": "aliexpress",
+          "price": 31.19,
+          "title": "High Quality Oxford Cloth Versatile Backpack Black Grey Blue Red Washable Computer Bag 15 inches Travel Bag Unisex",
+          "label": "relevant"
+        },
+        {
           "key": "aliexpress:1005012972864462",
           "store": "aliexpress",
           "price": 32.79,
@@ -1379,24 +1393,10 @@
           "label": "relevant"
         },
         {
-          "key": "noon-sa:Z1F80BEE7A5A213D0DAEDZ",
-          "store": "noon-sa",
-          "price": 33.82,
-          "title": "15-inch durable waterproof business laptop backpack Computer layer with USB charging port",
-          "label": "relevant"
-        },
-        {
-          "key": "aliexpress:1005012877308920",
+          "key": "aliexpress:1005013059989604",
           "store": "aliexpress",
-          "price": 34.59,
-          "title": "Skeleton Motorcyclist Lightweight Backpack, Large Capacity for Laptop & Books, Adjustable Straps, Perfect for Work, Travel & Col",
-          "label": "relevant"
-        },
-        {
-          "key": "noon-sa:ZBBC061E35535BFE58F88Z",
-          "store": "noon-sa",
-          "price": 35,
-          "title": "Laptop Backpack With USB Charging Port Grey",
+          "price": 33.79,
+          "title": "Universal Ergonomic Men Backpack Wear Resistant Water-repellent Laptop Shoulder Bag Fashion Oxford Cloth Computer Bag Hiking",
           "label": "relevant"
         }
       ]
@@ -1594,7 +1594,7 @@
         }
       ],
       "recordedItems": 449,
-      "results": 227,
+      "results": 229,
       "missingCalls": [],
       "labelled": true,
       "metrics": {
@@ -1603,9 +1603,9 @@
         "accessoryAt10": 0,
         "wrongModelAt10": 0,
         "unlabeledAt10": 0,
-        "recall": 0.917981072555205,
+        "recall": 0.9211356466876972,
         "relevantRecorded": 317,
-        "relevantKept": 291,
+        "relevantKept": 292,
         "cheapestRelevantFirst": false
       },
       "top": [
@@ -1734,7 +1734,7 @@
         }
       ],
       "recordedItems": 473,
-      "results": 298,
+      "results": 301,
       "missingCalls": [],
       "labelled": true,
       "metrics": {
@@ -1743,9 +1743,9 @@
         "accessoryAt10": 0,
         "wrongModelAt10": 0,
         "unlabeledAt10": 0,
-        "recall": 0.9385964912280702,
+        "recall": 0.9415204678362573,
         "relevantRecorded": 342,
-        "relevantKept": 321,
+        "relevantKept": 322,
         "cheapestRelevantFirst": true
       },
       "top": [
@@ -1874,7 +1874,7 @@
         }
       ],
       "recordedItems": 587,
-      "results": 292,
+      "results": 294,
       "missingCalls": [],
       "labelled": true,
       "metrics": {
@@ -1883,9 +1883,9 @@
         "accessoryAt10": 0,
         "wrongModelAt10": 0,
         "unlabeledAt10": 0,
-        "recall": 0.907859078590786,
+        "recall": 0.9105691056910569,
         "relevantRecorded": 369,
-        "relevantKept": 335,
+        "relevantKept": 336,
         "cheapestRelevantFirst": true
       },
       "top": [
@@ -2014,7 +2014,7 @@
         }
       ],
       "recordedItems": 471,
-      "results": 339,
+      "results": 340,
       "missingCalls": [],
       "labelled": true,
       "metrics": {
@@ -2107,7 +2107,7 @@
     "precisionAt10": 0.98,
     "accessoryAt10": 0,
     "wrongModelAt10": 0.013333333333333334,
-    "recall": 0.9020678650550249,
+    "recall": 0.9089650528543664,
     "cheapestRelevantFirst": 0.8
   }
 }

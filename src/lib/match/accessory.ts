@@ -11,7 +11,7 @@ const PART = new Set<string>(partWords);
 const CONNECTOR = /\b(?:with|includes?|including|built[-\s]?in)\b|\s[+&]\s/i; // "S24+" is a model, " + " joins items
 
 /** A candidate accessory is priced below this fraction of the median non-candidate price. */
-const PRICE_RATIO = 0.4;
+const PRICE_RATIO = 0.3;
 
 /** With no non-candidates, a jump of at least this ratio between consecutive candidate prices splits accessories from products. */
 export const GAP_RATIO = 4;
