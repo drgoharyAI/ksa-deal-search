@@ -344,3 +344,22 @@ it costs none.
 | holdout (8) | 95.0% | 3.8% | 0% | 86.5% | 87.5% |
 | holdout2 (6) | 85.0% | 6.7% | 0% | 89.3% | 66.7% |
 | all (29) | 94.5% | 2.4% | 0.7% | 90.0% | 89.7% |
+
+## 12e round 3: atypical cheap titles are weak matches (kept)
+Result-set statistics instead of word lists (`structure.ts` `typicality`): for each title, the
+mean over its descriptive words (not query words, not words with digits, not the first word,
+which is usually the brand) of min(1, df / (5% of the matching titles)). Listings of the product
+share vocabulary across stores; "Baby Stroller Shaped Party Favors", "Coffee Machine Colored
+Socks", a muslin blanket or a fly screen that names the product are made of words no other title
+uses. A title under 0.5 typicality priced under 0.3 x the median of the matches is a weak match
+(ranked last). The price condition keeps real products with short brand + model titles in place.
+Swept: typicality 0.3/0.4/0.5/0.6, common share 3/5/10%, with and without the price condition,
+digit and first-word exclusions; this was the best combined setting. Cost: hair dryer's cheapest
+relevant item ("Hair Dryer Brush Model OK 723", 16 SAR) is demoted, so tuning cheapest-first
+falls 100%→93.3% (still above target); coffee machine's rises to yes.
+| set | p@10 | acc@10 | wrong@10 | recall | cheapest-first |
+|---|---|---|---|---|---|
+| tuning (15) | 98.7% | 0% | 1.3% | 92.1% | 93.3% |
+| holdout (8) | 98.8% | 1.3% | 0% | 86.5% | 100% |
+| holdout2 (6) | 93.3% | 3.3% | 0% | 89.3% | 66.7% |
+| all (29) | 97.6% | 1.0% | 0.7% | 90.0% | 89.7% |
