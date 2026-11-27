@@ -602,3 +602,30 @@ at 0.6 (set in round 1). On the tune half 0.5 and 0.55 also reach 100% precision
 
 All 16 adversarial pairs from the review stay apart (unit tests in tests/lib/group.test.ts).
 Per-query top-10 metrics over all 40 queries and per-query result counts: identical to before 17b.
+
+## 17b review round 2 (one model word apart, length, region, speed)
+- No shared code: the titles must carry the same model words. A word on one side only is allowed
+  only if it is generic: a marketing word or product noun (static list), or in >= 2% of the result
+  set's titles (GENERIC_SHARE, min 3). Some feature words (footrest, clock, ANC, noise cancelling,
+  heated) are never generic. A single letter after a line word is a model designator ("Series X",
+  "EOS R"), glued line words split ("Fold6" -> "fold 6"), and "Digital/Disc Edition" is a variant.
+- Length (m, cm, ft) is a compared spec. Region editions (Middle East, International, Global, UAE,
+  KSA, China version) and "Renewed Premium" are variants. "256GB 12GB" without RAM reads the smaller
+  value as RAM. "MagSafe / USB-C / charging case" is the product's own case, not an accessory.
+- Speed: one combined number+unit pass replaces about 20 regex passes, ASCII titles use plain
+  splits, and no-code candidates are indexed by brand + model words + model number. 1,915 unseen
+  titles: ~165 ms (1,500: ~130 ms); 1,500 same-brand titles: 67 ms cold, 22 ms warm.
+- eval/groups-adversarial.json: 25 hand-written pairs from the reviews, each grouped inside a
+  recorded result set; scripts/eval-groups.mjs reports them. Gold gains the recorded Belkin 2 m vs
+  3 m pair.
+
+GENERIC_SHARE chosen on the tune half: 0 gives one more tune merge (29 vs 28), but 0.02 is the
+stricter of the two settings with equal precision, so 0.02 was kept to protect precision.
+
+| half | merge precision | merge recall | wrong merges |
+|---|---|---|---|
+| tune (20 queries) | 100% (28/28) | 49.1% (28/57) | 0/48 |
+| held out (20) | 100% (34/34) | 52.3% (34/65) | 0/62 |
+
+Adversarial pairs: 25/25 as expected (22 apart, 3 must-merge). Per-query top-10 metrics and result
+counts over all 40 queries: identical to before 17b.

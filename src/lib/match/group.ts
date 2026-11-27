@@ -6,7 +6,9 @@ import { normalizeTitle } from "./spec";
 /**
  * Same product across stores (spec: "Comparison and deal-insight features", item 1). Rule-based:
  * - a shared model / part code ("WH-1000XM5", "SM-S921B") with no conflict is the same product;
- * - without one: the same brand, no conflict, and a token similarity of at least GROUP_THRESHOLD.
+ * - without one: the same brand, no conflict, the same model words (every word one title has and
+ *   the other lacks must be generic: a marketing word, a product noun, or common in the result
+ *   set), and a token similarity of at least GROUP_THRESHOLD.
  * Conflicts (any one keeps two titles apart): different brands; codes that disagree (none shared,
  * a different first code, or a different model word right after the shared code); any spec both
  * state that differs (capacity, storage, RAM, wattage, size, generation, resolution, speed, model
@@ -100,6 +102,18 @@ const CONDITIONS: [string, RegExp][] = [
   ["like-new", /\blike[-\s]?new\b/],
 ];
 const GRADE = /\bgrade\s*([abc])\b/;
+/** Region editions ("Middle East Version", "International Version", "KSA Version"): kept apart. */
+const REGIONS: [string, RegExp][] = [
+  ["middle-east", /\bmiddle[\s-]*east\b/],
+  ["international", /\binternational\s+(?:version|edition)\b|\(international\)/],
+  ["global", /\bglobal\s+(?:version|edition|rom)\b/],
+  ["uae", /\buae\s+(?:version|edition)\b/],
+  ["ksa", /\bksa\s+(?:version|edition)\b/],
+  ["china", /\bchin(?:a|ese)\s+(?:version|edition|rom)\b/],
+];
+const REGION_HINT = /east|international|global|uae|ksa|chin/;
+/** Words after which a single letter names the model ("Series X", "EOS R"). */
+const LINE_WORDS = new Set("series eos galaxy model type mark class line".split(" "));
 const CONDITION_HINT = /renew|refurb|recondition|remanufactur|used|owned|hand|open|like/;
 
 /**
@@ -121,7 +135,7 @@ const ACCESSORY_NOUNS = new Set(
   "case cases cover covers protector protectors replacement skin skins sticker stickers keycap keycaps pad pads earpads cushion cushions spare parts accessory accessories sleeve".split(" "),
 );
 const ACCESSORY_HINT = /case|cover|protector|replacement|skin|sticker|keycap|pad|cushion|spare|parts|accessor|sleeve/;
-const NOT_ACCESSORY = /\b(?:aluminium|aluminum|titanium|steel|ceramic|charging|wireless\s+charging)\s+case\b/g;
+const NOT_ACCESSORY = /\b(?:aluminium|aluminum|titanium|steel|ceramic|charging|magsafe|usb[-\s]?c|lightning|wireless)\s+(?:charging\s+)?case\b/g;
 
 const STOP = new Set(
   "for with and the of in to by on new original compatible version edition model 2024 2025 2026 a an or".split(" "),
@@ -130,7 +144,7 @@ const STOP = new Set(
 /** Spec dimensions read from titles. Values are canonical strings; each dimension is a set. */
 type Dim =
   | "mah" | "storage" | "ram" | "watt" | "inch" | "mm" | "hz" | "litre" | "gen" | "res" | "net" | "bt"
-  | "count" | "in1" | "dpi" | "kg" | "mp" | "year" | "pa" | "mbs" | "gbps" | "model" | `qty:${string}`;
+  | "count" | "in1" | "dpi" | "kg" | "mp" | "year" | "pa" | "mbs" | "gbps" | "len" | "model" | `qty:${string}`;
 
 export type TitleFeatures = {
   /** Canonical brand from data/brands.json (or a product line naming it), else undefined. */
@@ -150,6 +164,10 @@ export type TitleFeatures = {
   accessory: boolean;
   /** Words (no colours, no stop words, no digits) plus canonical spec and model tokens. */
   tokens: Set<string>;
+  /** The words alone (no specs, codes or model numbers). */
+  plainWords: Set<string>;
+  /** Words that are not generic in the result set, sorted and joined (set by groupProducts). */
+  sig?: string;
   color?: string;
   /** Precomputed for fast comparison. */
   variantKey: string;
@@ -191,38 +209,53 @@ const QTY =
 const SPEC_RULES: SpecRule[] = [
   { hint: ["in"], dim: "in1", re: /(?<![\d.])(\d+)\s*-?\s*in\s*-?\s*1\b/g, val: (m) => m[1] },
   { hint: ["ram", "memory", "ddr"], dim: "ram", re: /(?<![\d.])(\d+)\s*gb\s*(?:of\s*)?(?:ram|memory|lpddr\d*x?|ddr\d*)\b/g, val: (m) => m[1] },
-  { dim: "ram", re: /\bram\s*:?\s*(\d+)\s*gb\b/g, val: (m) => m[1] },
-  { hint: ["mb"], dim: "mbs", re: /(?<![\d.])(\d+)\s*(?:mb\s*\/\s*s|mbps|mb\s*per\s*s)/g, val: (m) => m[1] },
-  { hint: ["gb"], dim: "gbps", re: /(?<![\d.])(\d+)\s*(?:gb\s*\/\s*s|gbps)/g, val: (m) => m[1] },
-  { hint: ["gb", "tb"], dim: "storage", re: /(?<![\d.])(\d+(?:\.\d+)?)\s*(gb|tb)(?![a-z])/g, val: (m) => num(String(Number(m[1]) * (m[2] === "tb" ? 1024 : 1))) },
-  { hint: ["mah"], dim: "mah", re: /(?<![\d.])(\d+(?:\.\d+)?)\s*mah\b/g, val: (m) => num(m[1]) },
-  { hint: ["w"], dim: "watt", re: /(?<![\d.])(\d+(?:\.\d+)?)\s*(?:w|watts?)(?![a-z])/g, val: (m) => num(m[1]) },
-  { hint: ['"', "in", "”", "''"], dim: "inch", re: /(?<![\d.])(\d+(?:\.\d+)?)\s*(?:"|''|”|-?\s*inch(?:es)?\b|in\b)/g, val: (m) => num(m[1]) },
-  { hint: ["mm"], dim: "mm", re: /(?<![\d.])(\d+(?:\.\d+)?)\s*mm\b/g, val: (m) => num(m[1]) },
-  { hint: ["hz"], dim: "hz", re: /(?<![\d.])(\d+)\s*hz\b/g, val: (m) => m[1] },
-  { hint: ["ml"], dim: "litre", re: /(?<![\d.])(\d+(?:\.\d+)?)\s*ml\b/g, val: (m) => num(String(Number(m[1]) / 1000)) },
-  { hint: ["l"], dim: "litre", re: /(?<![\d.])(\d+(?:\.\d+)?)\s*(?:l|lt|ltr|liters?|litres?)\b/g, val: (m) => num(m[1]) },
+  { hint: ["ram"], dim: "ram", re: /\bram\s*:?\s*(\d+)\s*gb\b/g, val: (m) => m[1] },
   { hint: ["gen"], dim: "gen", re: /(?<![\d.])(\d+)(?:st|nd|rd|th)?\s*-?\s*gen(?:eration)?\b/g, val: (m) => m[1] },
-  { dim: "gen", re: /\bgen(?:eration)?\s*-?\s*(\d+)\b/g, val: (m) => m[1] },
-  { hint: ["k"], dim: "res", re: /(?<![\d.])([248])k\b/g, val: (m) => ({ "2": "1440", "4": "2160", "8": "4320" })[m[1]]! },
-  { hint: ["p"], dim: "res", re: /(?<![\d.])(720|1080|1440|2160)p\b/g, val: (m) => m[1] },
-  { dim: "res", re: /\b(fhd|qhd|uhd)\b/g, val: (m) => ({ fhd: "1080", qhd: "1440", uhd: "2160" })[m[1]]! },
-  { hint: ["g"], dim: "net", re: /(?<![\d.])([345])g\b/g, val: (m) => m[1] },
+  { hint: ["gen"], dim: "gen", re: /\bgen(?:eration)?\s*-?\s*(\d+)\b/g, val: (m) => m[1] },
+  { hint: ["hd"], dim: "res", re: /\b(fhd|qhd|uhd)\b/g, val: (m) => ({ fhd: "1080", qhd: "1440", uhd: "2160" })[m[1]]! },
   { hint: ["bluetooth", "bt"], dim: "bt", re: /\b(?:bluetooth|bt)\s*v?\s*(\d(?:\.\d)?)\b/g, val: (m) => num(m[1]) },
-  { hint: ["pc", "piece", "pack", "pk", "count", "ct"], dim: "count", re: /(?<![\d.])(\d+)\s*(?:pcs|pieces?|pack|pk|count|ct)\b/g, val: (m) => m[1] },
-  { dim: "count", re: /\b(?:pack|set)\s*of\s*(\d+)\b/g, val: (m) => m[1] },
-  { hint: ["dpi"], dim: "dpi", re: /(?<![\d.])(\d+)\s*dpi\b/g, val: (m) => m[1] },
-  { hint: ["kg"], dim: "kg", re: /(?<![\d.])(\d+(?:\.\d+)?)\s*kg\b/g, val: (m) => num(m[1]) },
-  { hint: ["mp"], dim: "mp", re: /(?<![\d.])(\d+(?:\.\d+)?)\s*mp\b/g, val: (m) => num(m[1]) },
+  { hint: [" of"], dim: "count", re: /\b(?:pack|set)\s*of\s*(\d+)\b/g, val: (m) => m[1] },
   { hint: ["20"], dim: "year", re: /(?<![\d.])(20[12]\d)(?![\d.])/g, val: (m) => m[1] },
-  { hint: ["pa"], dim: "pa", re: /(?<![\d.])(\d+)\s*pa\b/g, val: (m) => m[1] },
-  { dim: null, re: /(?<![\d.])\d+(?:\.\d+)?\s*-?\s*(?:h|hrs?|hours?|years?|yrs?|months?|days?|mins?|minutes?)\b/g, val: () => "" },
-  { dim: null, re: /\bipx?\s*\d+\b/g, val: () => "" },
-  { dim: null, re: /(?<![\d.])\d+(?:\.\d+)?\s*(?:db|ms|d|g\/min|rpm|cm|m|kpa|v|a|°)(?![a-z])/g, val: () => "" },
-  { dim: null, re: /\b\d{2,4}\s*[x×*]\s*\d{2,4}\b/g, val: () => "" },
-  { hint: ["k"], dim: null, re: /(?<![\d.])\d+(?:\.\d+)?k\b/g, val: () => "" },
-  { dim: null, re: /\bqi\s*\d\b/g, val: () => "" },
+  { hint: ["ip"], dim: null, re: /\bipx?\s*\d+\b/g, val: () => "" },
+  { hint: ["x", "*", "×"], dim: null, re: /\b\d{2,4}\s*[x×*]\s*\d{2,4}\b/g, val: () => "" },
+  { hint: ["qi"], dim: null, re: /\bqi\s*\d\b/g, val: () => "" },
 ];
+
+/** A number with its unit ("20000mAh", "27-inch", "2 m", "6ft"), read in one pass; see unitSpec. */
+const NUM_UNIT =
+  /(?<![\d.])(\d+(?:\.\d+)?)\s*-?\s*(mb\s*\/\s*s|gb\s*\/\s*s|mbps|gbps|mah|gb|tb|watts?|w|inch(?:es)?|in|"|''|”|mm|cm|meters?|metres?|m|ft|feet|foot|hz|ml|liters?|litres?|ltr|lt|l|k|p|g|pcs|pc|pieces?|pack|pk|count|ct|dpi|kg|mp|pa|hours?|hrs?|h|years?|yrs?|months?|days?|minutes?|mins?|db|ms|d|rpm|kpa|v|a|°)(?![a-z0-9²³])/g;
+
+/** Length in metres, to 0.1 m (6 ft = 1.8 m = 180 cm). */
+const metres = (n: number) => (Math.round(n * 10) / 10).toFixed(1);
+
+/** The dimension and value of a number + unit, or null for noise (hours, dB, volts, "60g"...). */
+function unitSpec(n: string, unit: string): [Dim, string] | null {
+  const x = Number(n);
+  const u = unit.replace(/\s+/g, "");
+  if (u === "mb/s" || u === "mbps") return ["mbs", n];
+  if (u === "gb/s" || u === "gbps") return ["gbps", n];
+  if (u === "mah") return ["mah", num(n)];
+  if (u === "gb") return ["storage", num(n)];
+  if (u === "tb") return ["storage", String(x * 1024)];
+  if (u === "w" || u.startsWith("watt")) return ["watt", num(n)];
+  if (u.startsWith("inch") || u === "in" || u === '"' || u === "''" || u === "”") return ["inch", num(n)];
+  if (u === "mm") return ["mm", num(n)];
+  if (u === "cm") return ["len", metres(x / 100)];
+  if (u === "m" || u.startsWith("meter") || u.startsWith("metre")) return ["len", metres(x)];
+  if (u === "ft" || u === "feet" || u === "foot") return ["len", metres(x * 0.3048)];
+  if (u === "hz") return ["hz", n];
+  if (u === "ml") return ["litre", num(String(x / 1000))];
+  if (u === "l" || u === "lt" || u === "ltr" || u.startsWith("liter") || u.startsWith("litre")) return ["litre", num(n)];
+  if (u === "k") return n === "2" || n === "4" || n === "8" ? ["res", ({ "2": "1440", "4": "2160", "8": "4320" } as Record<string, string>)[n]] : null;
+  if (u === "p") return ["720", "1080", "1440", "2160"].includes(n) ? ["res", n] : null;
+  if (u === "g") return n === "3" || n === "4" || n === "5" ? ["net", n] : null;
+  if (u === "pcs" || u === "pc" || u.startsWith("piece") || u === "pack" || u === "pk" || u === "count" || u === "ct") return ["count", n];
+  if (u === "dpi") return ["dpi", n];
+  if (u === "kg") return ["kg", num(n)];
+  if (u === "mp") return ["mp", num(n)];
+  if (u === "pa") return ["pa", n];
+  return null;
+}
 
 /** Component codes (mouse and camera sensors) name a part many models share, not a model. */
 const COMPONENT_CODE = /^(?:paw|pmw|imx|ov)\d+/;
@@ -286,7 +319,7 @@ export function colorOf(title: string): string | undefined {
 /** Word tokens: letters and digits, dots kept inside numbers; "iphone16" -> "iphone", "16". */
 function words(t: string): string[] {
   const out: string[] = [];
-  for (let w of t.split(WORD_SPLIT)) {
+  for (let w of t.split(ASCII.test(t) ? WORD_SPLIT_ASCII : WORD_SPLIT)) {
     if (w.startsWith(".") || w.endsWith(".")) w = w.replace(/^\.+|\.+$/g, "");
     if (!w) continue;
     if (!HAS_DIGIT.test(w)) {
@@ -304,6 +337,9 @@ function words(t: string): string[] {
   return out;
 }
 const WORD_SPLIT = /[^a-z0-9.\p{L}]+/u;
+const WORD_SPLIT_ASCII = /[^a-z0-9.]+/;
+/** Plain ASCII text: the faster non-Unicode splits apply. */
+const ASCII = /^[\x00-\x7f]*$/;
 const HAS_DIGIT = /\d/;
 const GLUED_LINE = /^([a-z]{4,}|air|pro|max|mini)(\d{1,2})$/;
 
@@ -344,6 +380,20 @@ export function titleFeatures(title: string): TitleFeatures {
       return " ";
     });
   }
+  rest = rest.replace(NUM_UNIT, (_m, n: string, unit: string) => {
+    const spec = unitSpec(n, unit);
+    if (spec) add(spec[0], spec[1]);
+    return " ";
+  });
+  // "256GB 12GB" with no RAM named: the smaller is RAM.
+  const storage = specs.get("storage");
+  if (!specs.has("ram") && storage?.size === 2) {
+    const [lo, hi] = [...storage].map(Number).sort((x, y) => x - y);
+    if (lo <= 32 && hi >= 64) {
+      storage.delete(String(lo));
+      add("ram", String(lo));
+    }
+  }
   rest = rest.replace(QTY, (_m, n: string, what: string) => {
     add(`qty:${what}`, n);
     return " ";
@@ -352,12 +402,18 @@ export function titleFeatures(title: string): TitleFeatures {
   const own = ownText(rest);
   // Bare numbers and short letter+digit tokens ("16", "s24", "m3", "16e"), compatibility lists
   // left out: the model number. Decimals ("2.0") and long digit runs (SKUs) are not.
-  for (const w of words(own)) if (/\d/.test(w) && !/^\d+\.\d+$/.test(w) && !/^\d{6,}$/.test(w)) add("model", w);
+  const ownWords = words(own);
+  for (const w of ownWords) if (HAS_DIGIT.test(w) && !/^\d+\.\d+$/.test(w) && !/^\d{6,}$/.test(w)) add("model", w);
 
-  const variants = new Set(words(own.replace(VARIANT_NOISE, " ")).filter((w) => VARIANT_WORDS.has(w)));
+  const quiet = own.replace(VARIANT_NOISE, " ");
+  const variants = new Set((quiet === own ? ownWords : words(quiet)).filter((w) => VARIANT_WORDS.has(w)));
   if (BUNDLE.test(prepared)) variants.add("bundle");
   for (const m of prepared.matchAll(BAND)) variants.add(`band:${m[1]}`);
   if (CONDITION_HINT.test(prepared)) for (const [name, re] of CONDITIONS) if (re.test(prepared)) variants.add(`cond:${name}`);
+  if (/\brenewed\s+premium\b/.test(prepared)) variants.add("cond:renewed-premium");
+  const edition = prepared.match(/\b(digital|disc)\s+edition\b/);
+  if (edition) variants.add(`edition:${edition[1]}`);
+  if (REGION_HINT.test(prepared)) for (const [name, re] of REGIONS) if (re.test(prepared)) variants.add(`region:${name}`);
   const grade = prepared.match(GRADE);
   if (grade) variants.add(`cond:grade-${grade[1]}`);
 
@@ -365,18 +421,25 @@ export function titleFeatures(title: string): TitleFeatures {
   const accessory = ACCESSORY_HINT.test(core) && words(core).some((w) => ACCESSORY_NOUNS.has(w));
 
   const plain = ws.filter((w) => !/\d/.test(w));
+  // A single letter after a line word is a model designator ("Series X", "EOS R", "Galaxy Z").
+  for (let i = 1; i < ws.length; i++) if (ws[i].length === 1 && /[a-z]/.test(ws[i]) && LINE_WORDS.has(ws[i - 1])) add("model", ws[i]);
   const pair = prepared.match(COLOR_PAIR_RE);
   const color = pair ? pair[0] : ws.find((w) => COLORS.has(w));
   const colorWords = new Set(color ? color.split(" ") : []);
   const tokens = new Set<string>();
-  for (const w of plain) if (w.length > 1 && !STOP.has(w) && !COLORS.has(w) && !colorWords.has(w)) tokens.add(w);
-  for (const [d, vs] of specs) for (const v of vs) tokens.add(`${d}:${v}`);
+  const keep = (w: string) => w.length > 1 && !/\d/.test(w) && !STOP.has(w) && !COLORS.has(w) && !colorWords.has(w);
+  for (const w of plain) if (keep(w)) tokens.add(w);
+  // Model words come from the item's own text (not "for iPhone 17 Pro Max").
+  const plainWords = new Set(ownWords.filter((w) => keep(w) && !KNOWN_BRANDS.has(w)));
+  // Model number and generation share one token form ("Pro 2" = "Pro (2nd Generation)").
+  for (const [d, vs] of specs) for (const v of vs) tokens.add(`${d === "gen" ? "model" : d}:${v}`);
   for (const c of codes) tokens.add(`code:${c}`);
 
   // The item's own brand, compatibility lists left out (a PS5 controller by KISSUN).
-  const known = own.split(/[^a-z0-9\p{L}]+/u).find((w) => KNOWN_BRANDS.has(w));
+  // Raw words ("ps5" is no brand; words() would read it as "playstation").
+  const known = own.split(ASCII.test(own) ? /[^a-z0-9]+/ : /[^a-z0-9\p{L}]+/u).find((w) => KNOWN_BRANDS.has(w));
   const knownBrand = known ? (BRAND_CANON[known] ?? known) : undefined;
-  const first = title.trim().split(/[^\p{L}\p{N}&'-]+/u).find(Boolean) ?? "";
+  const first = (ASCII.test(title) ? title.trim().split(/[^A-Za-z0-9&'-]+/) : title.trim().split(/[^\p{L}\p{N}&'-]+/u)).find(Boolean) ?? "";
   const leadWord =
     /^\p{Lu}[\p{L}&'-]{2,}$/u.test(first) && !first.toLowerCase().split("-").some((w) => GENERIC_LEAD.has(w) || COLORS.has(w))
       ? first.toLowerCase()
@@ -397,6 +460,7 @@ export function titleFeatures(title: string): TitleFeatures {
     variants,
     accessory,
     tokens,
+    plainWords,
     color,
     variantKey: [...variants].sort().join(" "),
     exclusive,
@@ -504,13 +568,47 @@ function conflicts(a: TitleFeatures, b: TitleFeatures): boolean {
   return specConflict(a, b);
 }
 
-export type MatchOptions = { threshold?: number; weight?: Weight };
+export type MatchOptions = { threshold?: number; weight?: Weight; genericShare?: number };
 
 /** Two titles are the same product (see the module comment). */
 export function sameProduct(a: TitleFeatures, b: TitleFeatures, opts: MatchOptions = {}): boolean {
   if (conflicts(a, b)) return false;
   if (sharesCode(a, b)) return true;
-  return !!a.brand && a.brand === b.brand && jaccard(a.tokens, b.tokens, opts.weight) >= (opts.threshold ?? GROUP_THRESHOLD);
+  return (
+    !!a.brand &&
+    a.brand === b.brand &&
+    (a.sig ?? signature(a.plainWords, isStaticGeneric)) === (b.sig ?? signature(b.plainWords, isStaticGeneric)) &&
+    jaccard(a.tokens, b.tokens, opts.weight) >= (opts.threshold ?? GROUP_THRESHOLD)
+  );
+}
+
+/**
+ * Words that say nothing about which model it is: marketing words and product nouns. Any other word
+ * one title has and the other lacks names a different model ("Fold" / "Flip", "Detect Absolute",
+ * "Digital Edition", "Classic", "with Clock"), so without a shared code the titles must carry the
+ * same such words. Words common in the result set (GENERIC_SHARE of its titles) count as generic.
+ */
+const STATIC_GENERIC = new Set(
+  (
+    "wireless bluetooth new original genuine official authentic portable smart charging charge fast latest premium " +
+    "edition console device unit product kit system tool quality professional powerful durable lightweight " +
+    "headphones headphone headset earbuds earphones earphone buds speaker speakers camera phone smartphone mobile " +
+    "cellphone tablet laptop notebook watch smartwatch controller gamepad mouse keyboard monitor display screen cable " +
+    "cord charger adapter vacuum cleaner purifier fryer kettle blender machine maker iron dryer hairdryer chair desk " +
+    "lamp bottle backpack bag shoes sneakers stroller toothbrush electric version warranty year years generation " +
+    "black usb type genuine brand hot sale best top high super ultra-thin certified compatible sealed box"
+  ).split(/\s+/),
+);
+const isStaticGeneric = (w: string) => STATIC_GENERIC.has(w);
+
+/** Feature words that name a different model even when common in the result set (a footrest, ANC, a clock). */
+const FEATURE_WORDS = new Set("footrest footstool clock anc noise cancellation cancelling canceling heated heater".split(" "));
+
+/** Share of the result set's titles from which a word counts as generic (tuned on the eval's tune half). */
+export const GENERIC_SHARE = 0.02;
+
+function signature(words: Set<string>, generic: (w: string) => boolean): string {
+  return [...words].filter((w) => !generic(w)).sort().join(" ");
 }
 
 export type ProductGroup = {
@@ -549,7 +647,7 @@ function fit(f: TitleFeatures, c: Cluster, threshold: number, w: Weight): number
     if (conflicts(f, m.f)) return 0;
     if (!code && sharesCode(f, m.f)) code = true;
   }
-  if (!code && (!f.brand || c.brand !== f.brand || c.uniq.some((m) => m.f.brand !== f.brand))) return 0;
+  if (!code && (!f.brand || c.brand !== f.brand || c.uniq.some((m) => m.f.brand !== f.brand || m.f.sig !== f.sig))) return 0;
   const sample = c.uniq.length > SIM_SAMPLE ? c.uniq.slice(0, SIM_SAMPLE) : c.uniq;
   const mean = sample.reduce((s, m) => s + jaccard(f.tokens, m.f.tokens, w), 0) / sample.length;
   if (code) return 1 + mean;
@@ -572,12 +670,26 @@ export function groupProducts(products: Product[], opts: MatchOptions = {}): Pro
   dropSharedCodes(fs);
   const w = opts.weight ?? idfWeights(fs);
   const threshold = opts.threshold ?? GROUP_THRESHOLD;
+  const df = new Map<string, number>();
+  for (const f of fs) for (const t of f.plainWords) df.set(t, (df.get(t) ?? 0) + 1);
+  const common = Math.max(3, (opts.genericShare ?? GENERIC_SHARE) * fs.length);
+  const generic = (t: string) => STATIC_GENERIC.has(t) || (!FEATURE_WORDS.has(t) && (df.get(t) ?? 0) >= common);
+  for (const f of fs) f.sig = signature(f.plainWords, generic);
 
   const clusters: Cluster[] = [];
-  const byBrand = new Map<string, Cluster[]>();
+  // Without a shared code a match needs the same brand, the same model words and no conflicting
+  // model number: index by brand + words, then by model number ("" = none stated, fits any).
+  const byBrand = new Map<string, Map<string, Cluster[]>>();
   const byCode = new Map<string, Set<Cluster>>();
   for (const it of items) {
-    const cands = new Set<Cluster>(it.f.brand ? byBrand.get(it.f.brand) : undefined);
+    const bk = it.f.brand ? `${it.f.brand}|${it.f.sig}` : undefined;
+    const mk = modelKey(it.f);
+    const cands = new Set<Cluster>();
+    const byModel = bk ? byBrand.get(bk) : undefined;
+    if (byModel) {
+      if (mk) for (const k of [mk, ""]) for (const c of byModel.get(k) ?? []) cands.add(c);
+      else for (const cs of byModel.values()) for (const c of cs) cands.add(c);
+    }
     for (const c of it.f.codes) for (const cl of byCode.get(c) ?? []) cands.add(cl);
     let best: Cluster | null = null;
     let bestSim = 0;
@@ -597,7 +709,12 @@ export function groupProducts(products: Product[], opts: MatchOptions = {}): Pro
       best.titles.add(it.p.title);
       best.uniq.push(it);
     }
-    if (it.f.brand && !(byBrand.get(it.f.brand) ?? []).includes(best)) byBrand.set(it.f.brand, [...(byBrand.get(it.f.brand) ?? []), best]);
+    if (bk) {
+      const m = byBrand.get(bk) ?? new Map<string, Cluster[]>();
+      byBrand.set(bk, m);
+      const list = m.get(mk) ?? [];
+      if (!list.includes(best)) m.set(mk, [...list, best]);
+    }
     for (const c of it.f.codes) byCode.set(c, (byCode.get(c) ?? new Set()).add(best));
   }
 
@@ -621,8 +738,11 @@ function cachedFeatures(title: string): TitleFeatures {
     if (featureCache.size >= FEATURE_CACHE_MAX) featureCache.delete(featureCache.keys().next().value as string);
     featureCache.set(title, f);
   }
-  return { ...f, codes: new Set(f.codes), tokens: new Set(f.tokens) };
+  return { ...f, codes: new Set(f.codes), tokens: new Set(f.tokens), sig: undefined };
 }
+
+/** The model numbers as an index key; "" when none. */
+const modelKey = (f: TitleFeatures) => [...(f.specs.get("model") ?? [])].sort().join(" ");
 
 function makeGroup(items: Item[]): ProductGroup {
   const sorted = [...items].sort((x, y) => priceOf(x.p) - priceOf(y.p) || (x.k < y.k ? -1 : x.k > y.k ? 1 : 0));

@@ -1,0 +1,30 @@
+{
+  "about": "Hand-written title pairs from the 17b reviews, each grouped inside a recorded result set (pad) so result-set word frequencies apply. apart: must stay separate; merge: must group.",
+  "pairs": [
+    { "pad": "iphone 16", "expect": "apart", "a": "Samsung Galaxy Z Fold6 256GB Silver Shadow", "b": "Samsung Galaxy Z Flip6 256GB Silver Shadow" },
+    { "pad": "ps5 controller", "expect": "apart", "a": "Microsoft Xbox Series X 1TB Console", "b": "Microsoft Xbox Series S 1TB Console" },
+    { "pad": "ps5 controller", "expect": "apart", "a": "Xbox Series X 1TB Console Black", "b": "Xbox Series S 1TB Console Black" },
+    { "pad": "noise cancelling headphones", "expect": "apart", "a": "Dyson V15 Detect Cordless Vacuum Cleaner Yellow/Nickel", "b": "Dyson V15 Detect Absolute Cordless Vacuum Cleaner Yellow/Nickel" },
+    { "pad": "ps5 controller", "expect": "apart", "a": "Sony PS5 Slim Digital Edition Console", "b": "Sony PS5 Slim Console" },
+    { "pad": "ps5 controller", "expect": "apart", "a": "Sony PlayStation 5 Slim Digital Edition Console 1TB", "b": "Sony PlayStation 5 Slim Disc Edition Console 1TB" },
+    { "pad": "smart watch >4 stars", "expect": "apart", "a": "Samsung Galaxy Watch6 Classic 47mm Black", "b": "Samsung Galaxy Watch6 47mm Black" },
+    { "pad": "instant camera", "expect": "apart", "a": "Canon EOS R Mirrorless Camera Body", "b": "Canon EOS RP Mirrorless Camera Body" },
+    { "pad": "bluetooth speaker", "expect": "apart", "a": "Amazon Echo Dot 5th Gen Smart Speaker Charcoal", "b": "Amazon Echo Dot 5th Gen with Clock Smart Speaker Charcoal" },
+    { "pad": "ipad air", "expect": "apart", "a": "Apple iPad 11-inch Wi-Fi 128GB Blue", "b": "Apple iPad Air 11-inch Wi-Fi 128GB Blue" },
+    { "pad": "iphone 16", "expect": "apart", "a": "Google Pixel 9 256GB Obsidian", "b": "Google Pixel 9 Pro 256GB Obsidian" },
+    { "pad": "ipad air", "expect": "apart", "a": "Amazon Kindle 16GB Black", "b": "Amazon Kindle Paperwhite 16GB Black" },
+    { "pad": "gaming chair", "expect": "apart", "a": "GTPLAYER Ergonomic Gaming Chair with Lumbar Support Cushion, Headrest & Armrests PU Leather Black", "b": "GTPLAYER Ergonomic Gaming Chair with Lumbar Support Cushion, Footrest, Headrest & Armrests PU Leather Black" },
+    { "pad": "usb-c cable 100w", "expect": "apart", "a": "Belkin USB-C to USB-C Cable 100W 2m White", "b": "Belkin USB-C to USB-C Cable 100W 3m White" },
+    { "pad": "usb-c cable 100w", "expect": "apart", "a": "Anker USB C Cable 100W 6ft", "b": "Anker USB C Cable 100W 10ft" },
+    { "pad": "iphone 16", "expect": "apart", "a": "Samsung Galaxy S25 Ultra 5G 256GB 12GB RAM Titanium Black", "b": "Samsung Galaxy S25 Ultra 5G 256GB 12GB RAM Titanium Black (Middle East Version)" },
+    { "pad": "iphone 16", "expect": "apart", "a": "Apple iPhone 16 128GB Black KSA Version", "b": "Apple iPhone 16 128GB Black UAE Version" },
+    { "pad": "noise cancelling headphones", "expect": "apart", "a": "Sony WH-1000XM5 Wireless Headphones Black Renewed", "b": "Sony WH-1000XM5 Wireless Headphones Black Renewed Premium" },
+    { "pad": "noise cancelling headphones", "expect": "apart", "a": "Sony WH-1000XM5 Wireless Headphones for Travel and Work - Renewed", "b": "Sony WH-1000XM5 Wireless Noise Cancelling Headphones, Black" },
+    { "pad": "noise cancelling headphones", "expect": "apart", "a": "WH-1000XM5 Replacement Ear Pads Protein Leather Headphone Cushions", "b": "Sony WH-1000XM5 Wireless Noise Canceling Over-Ear Headphones, Black" },
+    { "pad": "air purifier", "expect": "apart", "a": "LEVOIT Air Purifier for Home Bedroom, Core 300S", "b": "LEVOIT Air Purifier for Home Bedroom, Core 300S Pro" },
+    { "pad": "anc earbuds under 300", "expect": "apart", "a": "Apple AirPods 4 Wireless Earbuds, USB-C Charging Case", "b": "Apple AirPods 4 Wireless Earbuds with Active Noise Cancellation, USB-C Charging Case" },
+    { "pad": "iphone 16", "expect": "merge", "a": "Samsung Galaxy S24 Ultra 5G 256GB 12GB RAM Titanium Gray", "b": "Samsung Galaxy S24 Ultra 256GB 12GB Titanium Gray 5G" },
+    { "pad": "anc earbuds under 300", "expect": "merge", "a": "Apple AirPods Pro 2 with USB-C MagSafe Charging Case", "b": "Apple AirPods Pro (2nd Generation) USB-C MagSafe Case" },
+    { "pad": "ps5 controller", "expect": "merge", "a": "Sony DualSense Wireless Controller for PS5 White", "b": "Sony PlayStation 5 DualSense Wireless Controller White" }
+  ]
+}

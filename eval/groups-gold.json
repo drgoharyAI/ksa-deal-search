@@ -1,5 +1,5 @@
 {
- "about": "Reviewed cross-store pairs for grouping (src/lib/match/group.ts). Candidates from scripts/eval-group-candidates.mjs, labelled by reading titles; ambiguous pairs left out. split: tune (even query index across queries*.json) or heldout. Review round 1 added recorded wrong merges (Core300S Pro vs Core300S, Air touch V2 vs P1, filter bundle, G502 Hero vs G502 X, M500 vs M550 Max, pack of 6, renewed grade B vs renewed) as different pairs.",
+ "about": "Reviewed cross-store pairs for grouping (src/lib/match/group.ts). Candidates from scripts/eval-group-candidates.mjs, labelled by reading titles; ambiguous pairs left out. split: tune (even query index across queries*.json) or heldout. Review round 1 added recorded wrong merges (Core300S Pro vs Core300S, Air touch V2 vs P1, filter bundle, G502 Hero vs G502 X, M500 vs M550 Max, pack of 6, renewed grade B vs renewed) as different pairs. Review round 2 added the recorded Belkin 100W 2 m vs 3 m pair; hand-written pairs live in eval/groups-adversarial.json.",
  "queries": [
   {
    "query": "anc earbuds under 300",
@@ -114,6 +114,10 @@
     [
      "noon-sa:N70185219V",
      "amazon-sa:B093GFWZZZ"
+    ],
+    [
+     "amazon-sa:B0B3GJWRNR",
+     "amazon-sa:B0B3GMVZY5"
     ]
    ]
   },

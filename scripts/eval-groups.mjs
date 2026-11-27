@@ -13,6 +13,9 @@ import { loadEval, root } from "./lib/load-ts.mjs";
 const argv = process.argv.slice(2);
 const ti = argv.indexOf("--threshold");
 const threshold = ti >= 0 ? Number(argv[ti + 1]) : undefined;
+const gi = argv.indexOf("--generic");
+const genericShare = gi >= 0 ? Number(argv[gi + 1]) : undefined;
+const gopts = { ...(threshold === undefined ? {} : { threshold }), ...(genericShare === undefined ? {} : { genericShare }) };
 const ev = await loadEval();
 const gold = JSON.parse(readFileSync(path.join(root, "eval/groups-gold.json"), "utf8")).queries;
 const goldOf = new Map(gold.map((g) => [g.query, g]));
@@ -36,7 +39,7 @@ for (const [i, query] of queries.entries()) {
   const r = await ev.runSearch({ query, sites: recordings.map((x) => x.store), sort: "price" }, { exec, onFiltered: (p) => (kept = p) });
   // The pipeline groups listings deduped within each store (src/lib/pipeline.ts); same here.
   const perStore = ev.rank(ev.dedupeByStore(kept), "price");
-  const groups = ev.groupProducts(perStore, threshold === undefined ? {} : { threshold });
+  const groups = ev.groupProducts(perStore, gopts);
   const g = goldOf.get(query);
   const split = g?.split ?? (i % 2 === 0 ? "tune" : "heldout");
   const t = tot[split];
@@ -58,8 +61,29 @@ for (const [i, query] of queries.entries()) {
     t.flat.push(ev.computeMetrics({ results: r.products, kept, recorded, labels, constraints }));
   }
 }
+// Adversarial pairs (eval/groups-adversarial.json), each grouped inside its recorded result set.
+const adv = JSON.parse(readFileSync(path.join(root, "eval/groups-adversarial.json"), "utf8")).pairs;
+const padCache = new Map();
+const advBad = [];
+for (const x of adv) {
+  if (!padCache.has(x.pad)) {
+    const slug = ev.querySlug(x.pad);
+    const recordings = storeDirs.map((s) => path.join(recDir, s, `${slug}.json`)).filter(existsSync).map((f) => JSON.parse(readFileSync(f, "utf8")));
+    const { exec } = ev.createReplayExec(recordings);
+    let kept = [];
+    await ev.runSearch({ query: x.pad, sites: recordings.map((r) => r.store), sort: "price" }, { exec, onFiltered: (p) => (kept = p) });
+    padCache.set(x.pad, ev.dedupeByStore(kept));
+  }
+  const mk = (site, id, title) => ({ site, id, title, listPrice: 100, finalPrice: 100, origPrice: null, discountPct: null, currency: "SAR", rating: null, soldCount: 0, image: "", url: "", detailStatus: "ok", matchScore: 1 });
+  const gs = ev.groupProducts([...padCache.get(x.pad), mk("amazon-sa", "adv-a", x.a), mk("noon-sa", "adv-b", x.b)], gopts);
+  const ga = gs.find((g) => g.members.some((m) => m.id === "adv-a"));
+  const merged = ga.members.some((m) => m.id === "adv-b");
+  if (merged !== (x.expect === "merge")) advBad.push(`${x.expect.toUpperCase()} expected: ${x.a} | ${x.b}`);
+}
 console.warn = warn;
-console.log(`threshold ${threshold ?? "default"}`);
+console.log(`adversarial pairs ${adv.length - advBad.length}/${adv.length} as expected`);
+for (const b of advBad) console.log(`         ${b}`);
+console.log(`threshold ${threshold ?? "default"}  generic share ${genericShare ?? "default"}`);
 for (const [split, t] of Object.entries(tot)) {
   const merged = t.sameMerged + t.differentMerged;
   const v = ev.aggregate(t.view);

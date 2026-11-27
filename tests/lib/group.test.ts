@@ -125,8 +125,8 @@ describe("sameProduct", () => {
     expect(same("Wireless Earbuds Bluetooth 5.3 ANC", "Wireless Earbuds Bluetooth 5.3 ANC Black")).toBe(false);
   });
   it("the similarity threshold decides borderline pairs", () => {
-    const a = titleFeatures("Philips Air Fryer XL 6.2L Black Digital");
-    const b = titleFeatures("Philips Air Fryer XL 6.2L Rapid Air Technology Healthy");
+    const a = titleFeatures("Philips Air Fryer XL 6.2L Black");
+    const b = titleFeatures("Philips Air Fryer XL 6.2L Black Wireless Portable Charging Fast");
     expect(sameProduct(a, b, { threshold: 0.3 })).toBe(true);
     expect(sameProduct(a, b, { threshold: 0.9 })).toBe(false);
   });
@@ -282,5 +282,56 @@ describe("groupProducts speed", () => {
     const t = performance.now();
     groupProducts(ps);
     expect(performance.now() - t).toBeLessThan(1500);
+  });
+});
+
+describe("review round 2: one model word apart, length, region, condition", () => {
+  const apart: [string, string][] = [
+    ["Samsung Galaxy Z Fold6 256GB Silver Shadow", "Samsung Galaxy Z Flip6 256GB Silver Shadow"],
+    ["Microsoft Xbox Series X 1TB Console", "Microsoft Xbox Series S 1TB Console"],
+    ["Xbox Series X 1TB Console Black", "Xbox Series S 1TB Console Black"],
+    ["Dyson V15 Detect Cordless Vacuum Cleaner Yellow/Nickel", "Dyson V15 Detect Absolute Cordless Vacuum Cleaner Yellow/Nickel"],
+    ["Sony PS5 Slim Digital Edition Console", "Sony PS5 Slim Console"],
+    ["Sony PlayStation 5 Slim Digital Edition Console 1TB", "Sony PlayStation 5 Slim Disc Edition Console 1TB"],
+    ["Samsung Galaxy Watch6 Classic 47mm Black", "Samsung Galaxy Watch6 47mm Black"],
+    ["Canon EOS R Mirrorless Camera Body", "Canon EOS RP Mirrorless Camera Body"],
+    ["Amazon Echo Dot 5th Gen Smart Speaker Charcoal", "Amazon Echo Dot 5th Gen with Clock Smart Speaker Charcoal"],
+    ["Apple iPad 11-inch Wi-Fi 128GB Blue", "Apple iPad Air 11-inch Wi-Fi 128GB Blue"],
+    ["Google Pixel 9 256GB Obsidian", "Google Pixel 9 Pro 256GB Obsidian"],
+    ["Amazon Kindle 16GB Black", "Amazon Kindle Paperwhite 16GB Black"],
+    ["GTPLAYER Ergonomic Gaming Chair with Lumbar Support Cushion, Headrest & Armrests PU Leather Black", "GTPLAYER Ergonomic Gaming Chair with Lumbar Support Cushion, Footrest, Headrest & Armrests PU Leather Black"],
+    ["Belkin USB-C to USB-C Cable 100W 2m White", "Belkin USB-C to USB-C Cable 100W 3m White"],
+    ["Anker USB C Cable 100W 6ft", "Anker USB C Cable 100W 10ft"],
+    ["Samsung Galaxy S25 Ultra 5G 256GB 12GB RAM Titanium Black", "Samsung Galaxy S25 Ultra 5G 256GB 12GB RAM Titanium Black (Middle East Version)"],
+    ["Apple iPhone 16 128GB Black International Version", "Apple iPhone 16 128GB Black Middle East Version"],
+    ["Apple iPhone 16 128GB Black KSA Version", "Apple iPhone 16 128GB Black UAE Version"],
+    ["Sony WH-1000XM5 Wireless Headphones Black Renewed", "Sony WH-1000XM5 Wireless Headphones Black Renewed Premium"],
+  ];
+  for (const [a, b] of apart) {
+    it(`apart: ${a} | ${b}`, () => {
+      expect(groupProducts([P("amazon-sa", "a", a, 100), P("noon-sa", "b", b, 100)]).every((g) => g.members.length === 1)).toBe(true);
+    });
+  }
+  const merge: [string, string][] = [
+    ["Samsung Galaxy S24 Ultra 5G 256GB 12GB RAM Titanium Gray", "Samsung Galaxy S24 Ultra 256GB 12GB Titanium Gray 5G"],
+    ["Apple AirPods Pro 2 with USB-C MagSafe Charging Case", "Apple AirPods Pro (2nd Generation) USB-C MagSafe Case"],
+    ["Sony DualSense Wireless Controller for PS5 White", "Sony PlayStation 5 DualSense Wireless Controller White"],
+  ];
+  for (const [a, b] of merge) {
+    it(`merge: ${a} | ${b}`, () => {
+      expect(groupProducts([P("amazon-sa", "a", a, 100), P("noon-sa", "b", b, 100)]).some((g) => g.members.length === 2)).toBe(true);
+    });
+  }
+  it("a storage value next to a smaller GB value without RAM: the smaller is RAM", () => {
+    expect([...titleFeatures("Galaxy S24 256GB 12GB").specs.get("ram")!]).toEqual(["12"]);
+    expect([...titleFeatures("Galaxy S24 256GB 12GB").specs.get("storage")!]).toEqual(["256"]);
+  });
+  it("cable length is a compared spec", () => {
+    expect(specConflict(titleFeatures("Cable 100W 1.2M"), titleFeatures("Cable 100W 120cm"))).toBe(false);
+    expect(specConflict(titleFeatures("Cable 100W 2m"), titleFeatures("Cable 100W 3 m"))).toBe(true);
+  });
+  it("the product's own MagSafe / charging case is not an accessory", () => {
+    expect(titleFeatures("Apple AirPods Pro 2 USB-C MagSafe Case").accessory).toBe(false);
+    expect(titleFeatures("Hard Carrying Case for AirPods Pro 2").accessory).toBe(true);
   });
 });
