@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import type { HistoryEntry } from "@/src/lib/alerts/shared";
 import { storeLabel } from "@/src/lib/stores";
 import { rerunHref } from "@/src/lib/rerun";
+import { storeLink } from "@/src/lib/store-hosts";
 import AppHeader from "../components/AppHeader";
 import AppFooter from "../components/AppFooter";
 import Button from "../components/ui/Button";
@@ -17,6 +18,21 @@ import { formatMoney } from "@/src/lib/money";
 type State = { phase: "loading" } | { phase: "error"; message: string } | { phase: "ready"; items: HistoryEntry[] };
 
 const plural = (n: number) => `${n} ${n === 1 ? "result" : "results"}`;
+
+/**
+ * A search's cheapest match: a link to its own store's page only (the store-host allowlist), plain
+ * text when the stored URL is not one.
+ */
+export function CheapestLink({ cheapest: c }: { cheapest: Pick<NonNullable<HistoryEntry["cheapest"]>, "site" | "url" | "title"> }) {
+  const href = storeLink(c.site, c.url);
+  if (!href) return <span dir="auto">{c.title}</span>;
+  return (
+    <a href={href} target="_blank" rel="noopener noreferrer" dir="auto">
+      {c.title}
+      <span className="visually-hidden"> (opens in a new tab)</span>
+    </a>
+  );
+}
 
 export default function HistoryView() {
   const [state, setState] = useState<State>({ phase: "loading" });
@@ -107,11 +123,7 @@ export default function HistoryView() {
                   </p>
                   {e.cheapest && (
                     <p className="row__detail">
-                      Cheapest match{" "}
-                      <a href={e.cheapest.url} target="_blank" rel="noopener noreferrer">
-                        {e.cheapest.title}
-                        <span className="visually-hidden"> (opens in a new tab)</span>
-                      </a>{" "}
+                      Cheapest match <CheapestLink cheapest={e.cheapest} />{" "}
                       at {storeLabel(e.cheapest.site)}, <strong className="row__price">{formatMoney(e.cheapest.price, e.cheapest.currency)}</strong>
                     </p>
                   )}

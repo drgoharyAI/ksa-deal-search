@@ -58,21 +58,70 @@ export type SavedApi = {
 
 export const SavedContext = createContext<SavedApi | null>(null);
 
+/**
+ * The saved keys the server listed, with this page's own toggles laid over them (`local`: each
+ * product's latest wish, or its state after a failed request was reverted): a list fetched while a
+ * save or unsave was on its way never undoes what the user just did.
+ */
+export function mergeSaved(server: Iterable<string>, local: ReadonlyMap<string, boolean>): Set<string> {
+  const out = new Set(server);
+  for (const [key, on] of local) {
+    if (on) out.add(key);
+    else out.delete(key);
+  }
+  return out;
+}
+
+/**
+ * Save and unsave requests, one at a time per product: a quick save then unsave reaches the server
+ * in that order (never a DELETE overtaken by its POST). `local` keeps what this page asked for, per
+ * product. A failed request is reverted only when it was the latest for its product (a later toggle
+ * already says what the user wants).
+ */
+export function createSaveQueue() {
+  const local = new Map<string, boolean>();
+  const tails = new Map<string, Promise<unknown>>();
+  const seqs = new Map<string, number>();
+  return {
+    local: local as ReadonlyMap<string, boolean>,
+    run(key: string, on: boolean, send: () => Promise<string | null>, revert: () => void): Promise<string | null> {
+      const seq = (seqs.get(key) ?? 0) + 1;
+      seqs.set(key, seq);
+      local.set(key, on);
+      const job = (tails.get(key) ?? Promise.resolve()).then(send, send);
+      tails.set(key, job.catch(() => {}));
+      const done = (err: string | null) => {
+        if (seqs.get(key) === seq) {
+          tails.delete(key);
+          if (err) {
+            local.set(key, !on);
+            revert();
+          }
+        }
+        return err;
+      };
+      return job.then(done, () => done("Could not reach the app server"));
+    },
+  };
+}
+
 /** The saved products' keys for this page, loaded once; a toggle shows at once and is undone if the server refuses it. */
 export function useFavourites(): SavedApi {
   const [keys, setKeys] = useState<ReadonlySet<string>>(() => new Set());
+  // One queue for the page's life (a lazy initial state: created once, never replaced).
+  const [saves] = useState(createSaveQueue);
   useEffect(() => {
     let live = true;
     fetch("/api/favourites", { cache: "no-store" })
       .then((r) => (r.ok ? r.json() : null))
       .then((d: { items?: SavedItem[] } | null) => {
-        if (live && Array.isArray(d?.items)) setKeys(new Set(d.items.map(savedKey)));
+        if (live && Array.isArray(d?.items)) setKeys(mergeSaved(d.items.map(savedKey), saves.local));
       })
       .catch(() => {});
     return () => {
       live = false;
     };
-  }, []);
+  }, [saves]);
   const toggle = useCallback(async (p: Product, on: boolean, query?: string) => {
     const key = savedKey(p);
     const set = (v: boolean) =>
@@ -83,10 +132,8 @@ export function useFavourites(): SavedApi {
         return next;
       });
     set(on);
-    const err = await sendSave({ ...snapshotOf(p), ...(query ? { query } : {}) }, on);
-    if (err) set(!on);
-    return err;
-  }, []);
+    return saves.run(key, on, () => sendSave({ ...snapshotOf(p), ...(query ? { query } : {}) }, on), () => set(!on));
+  }, [saves]);
   return useMemo(() => ({ isSaved: (k: string) => keys.has(k), toggle }), [keys, toggle]);
 }
 

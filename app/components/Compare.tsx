@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, type CSSProperties } from "react";
 import type { Product } from "@/src/lib/types";
 import { MAX_COMPARE, MIN_COMPARE, compareRows, onlyDifferences, type CompareRow, type CompareSlot } from "@/src/lib/compare";
 import { productKey } from "@/src/lib/specs";
+import { storeImage } from "@/src/lib/store-hosts";
 import { storeLabel } from "@/src/lib/stores";
 import { httpsUrl } from "@/src/lib/view";
 import { CardMedia, Trend, dealExplanation } from "./ResultCard";
@@ -73,7 +74,9 @@ export function CompareTray({ slots, full, waiting, searched = false, onRemove, 
       <div className="container tray__inner">
         <ul className="tray__items" role="list">
           {slots.map((s, i) => {
-            const image = s.product?.image ?? s.snap?.image ?? "";
+            // A product from the results on screen, or a snapshot from this tab's storage: that one
+            // must point at its own store's image host.
+            const image = s.product ? s.product.image : (storeImage(s.site, s.snap?.image) ?? "");
             return (
               <li key={s.key} className={s.product ? "tray__item" : "tray__item tray__item--gone"}>
                 <button

@@ -26,6 +26,11 @@ function usePanelMode(): PanelMode {
   return useSyncExternalStore(subscribe, clientMode, serverMode);
 }
 
+/** Where the filter panel is open after the window crossed from `from` to `to`: nowhere, once it changed. */
+export function openAfterModeChange(openIn: PanelMode | null, from: PanelMode, to: PanelMode): PanelMode | null {
+  return from === to ? openIn : null;
+}
+
 /**
  * The phone's bottom sheet: a modal <dialog>, so the page behind is inert. Tab stays inside it,
  * Esc and a tap on the scrim close it, and focus goes back to the button that opened it.
@@ -119,6 +124,13 @@ export default function ResultsLayout({ filters: f, onFilters, facets, bounds, c
   const mode = usePanelMode();
   // Open in the mode it was opened in only: resizing past a breakpoint never pops the sheet open.
   const [openIn, setOpenIn] = useState<PanelMode | null>(null);
+  // A mode change closes the panel for good (adjusted during render, not in an effect): the sheet
+  // unmounts without its close event, so rotating a phone back must not bring it up again.
+  const [lastMode, setLastMode] = useState(mode);
+  if (mode !== lastMode) {
+    setLastMode(mode);
+    setOpenIn((o) => openAfterModeChange(o, lastMode, mode));
+  }
   const open = openIn === mode;
   const n = activeCount(f);
   const chips = activeChips(f, currency);
