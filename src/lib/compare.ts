@@ -1,7 +1,7 @@
 import type { Product } from "@/src/lib/types";
 import { STORES, storeLabel } from "@/src/lib/stores";
 import { SPEC_ROWS, brandLabel, brandsFor, parseSpecs, productKey } from "@/src/lib/specs";
-import { verifiedDiscount, wasPrice } from "@/src/lib/discount";
+import { isFromPrice, storeDiscount, wasPrice } from "@/src/lib/discount";
 
 /**
  * Side-by-side compare (spec: "Comparison and deal-insight features", item 4; UX phase U4). Pure
@@ -31,11 +31,27 @@ export type CompareRow = {
   differs: boolean;
   /** Per cell: differs from the row's majority value (no single majority: every cell differs). */
   diff: boolean[];
-  /** Price row only: the cheapest product(s); absent when all prices match or currencies differ. */
+  /**
+   * Price row only: the cheapest fixed price(s), "from" prices left out; absent when currencies
+   * differ, fewer than two fixed prices remain, or they are all the same.
+   */
   lowest?: boolean[];
+  /** Price row only: the price is a "from" price (the store's cheapest variant). */
+  from?: boolean[];
   /** A line under the row's label, such as why no lowest price is marked. */
   note?: string;
+  /** Per cell: a short line under the value (a fake-deal "was" price), or null. */
+  cellNotes?: (string | null)[];
+  /** What an empty cell says, when "Not listed" would be wrong (no price history yet). */
+  empty?: string;
 };
+
+/** Shown in the price row when the cheapest price is a "from" price, which is never ranked. */
+export const FROM_PRICE_NOTE = 'Cheapest is a "from" price, not ranked';
+/** Under a struck "was" price our history calls a fake deal. */
+export const FAKE_WAS_NOTE = "Not backed by price history";
+/** The deal-check cell of a product we hold no price history for. */
+export const NO_HISTORY = "No price history yet";
 
 /** Shown in the price row when the products are priced in more than one currency. */
 export const MIXED_CURRENCY_NOTE = "Different currencies, not compared";
@@ -70,7 +86,7 @@ function trendCell(p: Product): string | null {
 }
 
 /**
- * The table rows, in order: store, price, original price, verified discount, rating, sold (only
+ * The table rows, in order: store, price, original price, store discount, rating, sold (only
  * when a store gave a count), brand, the title specs that any product has (aligned by spec key),
  * deal check, and price trend (only when our history has one). `brands`: each product's brand
  * over the whole result set (chips.ts), which reads lead words better than the compared few.
@@ -78,21 +94,30 @@ function trendCell(p: Product): string | null {
 export function compareRows(products: Product[], opts: { brands?: ReadonlyMap<string, string | undefined> } = {}): CompareRow[] {
   const brands = opts.brands ?? brandsFor(products);
   const prices = products.map(priceOf);
-  const price = row("price", "Price", products.map((p) => money(priceOf(p), p.currency)));
+  const from = products.map(isFromPrice);
+  const price = row("price", "Price", products.map((p, i) => `${from[i] ? "from " : ""}${money(priceOf(p), p.currency)}`));
+  if (from.some(Boolean)) price.from = from;
   if (!sameCurrency(products)) price.note = MIXED_CURRENCY_NOTE;
-  else if (new Set(prices).size > 1) {
-    const min = Math.min(...prices);
-    price.lowest = prices.map((x) => x === min);
+  else {
+    // "Lowest price" is a like-for-like claim: only fixed prices take part. A "from" price is the
+    // store's cheapest variant, so ranking it against a fixed price would overstate the saving.
+    const fixed = prices.filter((_, i) => !from[i]);
+    const minFixed = Math.min(...fixed);
+    if (fixed.length > 1 && new Set(fixed).size > 1) price.lowest = prices.map((x, i) => !from[i] && x === minFixed);
+    if (from.some(Boolean) && Math.min(...prices.filter((_, i) => from[i])) < (fixed.length ? minFixed : Infinity)) price.note = FROM_PRICE_NOTE;
   }
+  const orig = row("orig", "Original price", products.map((p) => {
+    const was = wasPrice(p);
+    return was === null ? null : money(was, p.currency);
+  }));
+  const fakeWas = products.map((p, i) => (orig.cells[i] !== null && p.deal?.badge === "fake-deal" ? FAKE_WAS_NOTE : null));
+  if (fakeWas.some((n) => n !== null)) orig.cellNotes = fakeWas;
   const rows: CompareRow[] = [
     row("store", "Store", products.map((p) => storeLabel(p.site))),
     price,
-    row("orig", "Original price", products.map((p) => {
-      const was = wasPrice(p);
-      return was === null ? null : money(was, p.currency);
-    })),
-    row("discount", "Verified discount", products.map((p) => {
-      const d = verifiedDiscount(p);
+    orig,
+    row("discount", "Store discount", products.map((p) => {
+      const d = storeDiscount(p);
       return d === null ? null : `−${Math.round(d)}%`;
     })),
     row("rating", "Rating", products.map((p) => (p.rating !== null ? `${p.rating.toFixed(1)} of 5` : null))),
@@ -112,7 +137,7 @@ export function compareRows(products: Product[], opts: { brands?: ReadonlyMap<st
     if (cells.some((c) => c !== null)) rows.push(row(s.key, s.label, cells));
   }
 
-  rows.push(row("deal", "Deal check", products.map((p) => p.deal?.label ?? null)));
+  rows.push({ ...row("deal", "Deal check", products.map((p) => p.deal?.label ?? null)), empty: NO_HISTORY });
   const trends = products.map(trendCell);
   if (trends.some((t) => t !== null)) rows.push(row("trend", "Price trend", trends));
   return rows;

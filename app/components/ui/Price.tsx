@@ -6,9 +6,13 @@ type Props = {
   currency: string;
   /** A higher earlier price in the same currency, shown struck through. */
   original?: number | null;
-  /** Percent off, shown only when `verified` (backed by the store's "was" price or our observations). */
+  /** Percent off, shown only when `discountFrom` says what backs it. */
   discountPct?: number | null;
-  verified?: boolean;
+  /**
+   * What the percent is measured against: "store", the store's own "was" price (not verified by
+   * us); "history", the highest price we observed. Without it no percent is shown.
+   */
+  discountFrom?: "store" | "history";
   /** "from" before the amount (a store that lists its lowest variant). */
   from?: boolean;
   size?: "sm" | "md" | "lg";
@@ -18,10 +22,10 @@ type Props = {
   showOriginalLabel?: boolean;
 };
 
-/** The current price set large, the struck original after it, and a verified discount. */
-export default function Price({ amount, currency, original, discountPct, verified = false, from = false, size = "md", originalLabel = "was", showOriginalLabel = false }: Props) {
+/** The current price set large, the struck original after it, and the percent off it. */
+export default function Price({ amount, currency, original, discountPct, discountFrom, from = false, size = "md", originalLabel = "was", showOriginalLabel = false }: Props) {
   const showOrig = typeof original === "number" && Number.isFinite(original) && original > amount;
-  const pct = verified && typeof discountPct === "number" && discountPct >= 1 ? Math.round(discountPct) : 0;
+  const pct = discountFrom && typeof discountPct === "number" && discountPct >= 1 ? Math.round(discountPct) : 0;
   return (
     <p className={`price price--${size}`}>
       {from && <span className="price__from">from</span>}
@@ -33,9 +37,9 @@ export default function Price({ amount, currency, original, discountPct, verifie
         </span>
       )}
       {pct > 0 && (
-        <span className="price__off">
+        <span className={discountFrom === "store" ? "price__off price__off--store" : "price__off"}>
           {`−${pct}%`}
-          <span className="visually-hidden"> off</span>
+          <span className="visually-hidden">{discountFrom === "store" ? " off the store's was price" : " below the highest price we've seen"}</span>
         </span>
       )}
     </p>

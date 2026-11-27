@@ -122,7 +122,7 @@ Media queries use rem widths (`48rem`, `64rem`, `90rem`), because CSS variables 
 | `Chip` | `checkbox` (stores, facets), `toggle` (`aria-pressed`) | A 44px target with a visible selected state (ink border and a green check mark), never colour alone. |
 | `Badge` | `neutral`, `accent`, `warn`, `count` | Words, never a dot. `count` is the Alerts number. |
 | `StoreMark` | `full` (logo and name), `compact` (logo, name for screen readers) | Uses the store's own logo from `public/stores`. |
-| `Price` | sizes `sm`, `md`, `lg` | The current price dominates. A struck original shows only when it is higher and in the same currency. A discount shows only when the caller marks it `verified`. Currency comes from the item and is never assumed. |
+| `Price` | sizes `sm`, `md`, `lg` | The current price dominates. A struck original shows only when it is higher and in the same currency. A discount shows only when the caller names what backs it (`discountFrom`): `"store"` (the store's own "was" price, drawn in ink and read as "off the store's was price", never called verified) or `"history"` (our observations, in the accent). Currency comes from the item and is never assumed. |
 | `Skeleton` | `line`, `short`, `price`, `media`, and `SkeletonCard` | It pulses, and stays still under reduced motion. |
 | `EmptyState` | title, body, optional action | |
 | `ErrorState` | message, optional retry | `role="alert"`. |

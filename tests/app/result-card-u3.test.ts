@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import ResultCard from "@/app/components/ResultCard";
-import { verifiedDiscount, wasPrice } from "@/src/lib/discount";
+import { storeDiscount, wasPrice } from "@/src/lib/discount";
 import GroupCard from "@/app/components/GroupCard";
 import FilterChips from "@/app/components/FilterChips";
 import ResultTiers from "@/app/components/ResultTiers";
@@ -50,9 +50,9 @@ describe("ResultCard variants (U3)", () => {
     expect(out).toContain("−23%");
   });
   it("a discount shows only when verifiable: a 'was' price backs it and it is not a fake deal", () => {
-    expect(verifiedDiscount(P({ discountPct: 20 }))).toBeNull();
-    expect(verifiedDiscount(P({ origPrice: 998 }))).toBe(50);
-    expect(verifiedDiscount(P({ origPrice: 649, deal: { badge: "fake-deal", label: "Fake deal" } }))).toBeNull();
+    expect(storeDiscount(P({ discountPct: 20 }))).toBeNull();
+    expect(storeDiscount(P({ origPrice: 998 }))).toBe(50);
+    expect(storeDiscount(P({ origPrice: 649, deal: { badge: "fake-deal", label: "Fake deal" } }))).toBeNull();
     expect(wasPrice(P({ origPrice: 649, finalPrice: 700 }))).toBeNull();
     const fake = card(P({ origPrice: 649, discountPct: 23, deal: { badge: "fake-deal", label: "Fake deal", reason: "Never charged" } }));
     expect(fake).not.toContain("−23%");

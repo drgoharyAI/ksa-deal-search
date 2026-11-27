@@ -5,7 +5,7 @@ import type { DealInsight, PriceTrend, Product } from "@/src/lib/types";
 import { storeLabel } from "@/src/lib/stores";
 import { isLikelyMatch } from "@/src/lib/rank";
 import { httpsUrl } from "@/src/lib/view";
-import { verifiedDiscount, wasPrice } from "@/src/lib/discount";
+import { isFromPrice, storeDiscount, wasPrice } from "@/src/lib/discount";
 import StoreLogo from "./StoreLogo";
 import WatchForm, { postWatch } from "./WatchForm";
 import { defaultTarget } from "@/src/lib/alerts/shared";
@@ -180,7 +180,7 @@ function ResultCard({ product: p, query, compareChecked = false, onCompare, vari
   const store = storeLabel(p.site);
   const likely = isLikelyMatch(p);
   const href = httpsUrl(p.url);
-  const discount = verifiedDiscount(p);
+  const discount = storeDiscount(p);
   const cls = ["card", `card--${variant}`, !likely && "card--muted", compareChecked && "card--selected"].filter(Boolean).join(" ");
 
   return (
@@ -194,7 +194,7 @@ function ResultCard({ product: p, query, compareChecked = false, onCompare, vari
         <h3 className="card__title" title={p.title}>
           {p.title}
         </h3>
-        <Price amount={price} currency={p.currency} original={wasPrice(p)} discountPct={discount} verified={discount !== null} from={p.site === "aliexpress"} size="md" />
+        <Price amount={price} currency={p.currency} original={wasPrice(p)} discountPct={discount} discountFrom={discount !== null ? "store" : undefined} from={isFromPrice(p)} size="md" />
         {(p.rating !== null || p.soldCount > 0 || p.ratingUnavailable) && (
           <p className="card__meta">
             {p.rating !== null && <span>Rated {p.rating.toFixed(1)} of 5</span>}

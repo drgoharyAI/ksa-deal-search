@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import {
-  MAX_COMPARE, MIXED_CURRENCY_NOTE, compareRows, keysFromSearch, onlyDifferences, readMemory, resolveSelection, sameCurrency, toggleKey,
+  FAKE_WAS_NOTE, FROM_PRICE_NOTE, MAX_COMPARE, MIXED_CURRENCY_NOTE, NO_HISTORY, compareRows, keysFromSearch, onlyDifferences, readMemory, resolveSelection, sameCurrency, toggleKey,
   withCompareParam, writeMemory,
 } from "@/src/lib/compare";
 import { productKey } from "@/src/lib/specs";
@@ -26,6 +26,7 @@ describe("compareRows (17c, U4)", () => {
     expect(row(rows, "price")!.cells).toEqual(["SAR 2,999", "SAR 2,799"]);
     expect(row(rows, "orig")!.cells).toEqual(["SAR 3,499", null]);
     expect(row(rows, "discount")!.cells).toEqual(["−14%", null]);
+    expect(row(rows, "discount")!.label).toBe("Store discount");
     expect(row(rows, "rating")!.cells).toEqual(["4.6 of 5", "4.6 of 5"]);
     expect(row(rows, "brand")!.cells).toEqual(["Samsung", "Samsung"]);
     expect(row(rows, "deal")!.cells).toEqual(["Lowest in 30 days", null]);
@@ -196,5 +197,47 @@ describe("this tab's memory (sessionStorage)", () => {
     expect(readMemory(s)).toBeNull();
     expect(readMemory(undefined)).toBeNull();
     expect(() => writeMemory(undefined, null)).not.toThrow();
+  });
+});
+
+describe('"from" prices (fix round 1)', () => {
+  const ali = (id: string, price: number) => P(id, { site: "aliexpress", listPrice: price });
+  it('keeps "from" in the price cell', () => {
+    const r = row(compareRows([ali("x", 72.39), P("y", { listPrice: 150 })]), "price")!;
+    expect(r.cells).toEqual(["from SAR 72.39", "SAR 150"]);
+    expect(r.from).toEqual([true, false]);
+  });
+  it('never marks a "from" price lowest against a fixed one, and says why when it is the cheapest', () => {
+    const r = row(compareRows([ali("x", 72), P("y", { listPrice: 150 }), P("z", { listPrice: 120, site: "noon-sa" })]), "price")!;
+    expect(r.lowest).toEqual([false, false, true]);
+    expect(r.note).toBe(FROM_PRICE_NOTE);
+  });
+  it('one fixed price against "from" prices: nothing is marked lowest', () => {
+    const r = row(compareRows([ali("x", 72), ali("w", 80), P("y", { listPrice: 150 })]), "price")!;
+    expect(r.lowest).toBeUndefined();
+    expect(r.note).toBe(FROM_PRICE_NOTE);
+  });
+  it('a fixed price cheaper than every "from" price is marked, with no note', () => {
+    const r = row(compareRows([ali("x", 200), P("y", { listPrice: 150 }), P("z", { listPrice: 120, site: "noon-sa" })]), "price")!;
+    expect(r.lowest).toEqual([false, false, true]);
+    expect(r.note).toBeUndefined();
+  });
+  it("mixed currencies still win: nothing is marked", () => {
+    const r = row(compareRows([ali("x", 20), P("y", { listPrice: 150 }), P("z", { listPrice: 50, currency: "USD" })]), "price")!;
+    expect(r.lowest).toBeUndefined();
+    expect(r.note).toBe(MIXED_CURRENCY_NOTE);
+  });
+});
+
+describe("deal check and fake 'was' notes (fix round 1)", () => {
+  it('no history reads "No price history yet", not "Not listed"', () => {
+    const r = row(compareRows([P("x"), P("y", { deal: { badge: "normal", label: "Usual price" } })]), "deal")!;
+    expect(r.cells).toEqual([null, "Usual price"]);
+    expect(r.empty).toBe(NO_HISTORY);
+  });
+  it("a fake-deal 'was' price carries a note; others none", () => {
+    const r = row(compareRows([P("x", { origPrice: 150, deal: { badge: "fake-deal", label: "Fake deal" } }), P("y", { origPrice: 120 })]), "orig")!;
+    expect(r.cellNotes).toEqual([FAKE_WAS_NOTE, null]);
+    expect(row(compareRows([P("x", { origPrice: 150 }), P("y")]), "orig")!.cellNotes).toBeUndefined();
   });
 });

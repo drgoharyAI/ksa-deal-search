@@ -1,4 +1,5 @@
 import type { Product } from "@/src/lib/types";
+import { storeDiscount } from "@/src/lib/discount";
 
 export type SortKey = "price" | "discount" | "deal";
 
@@ -38,7 +39,8 @@ export function rank(products: Product[], sort: SortKey): Product[] {
 function sortBy(products: Product[], sort: SortKey): Product[] {
   const out = [...products];
   if (sort === "price") return out.sort((a, b) => priceOf(a) - priceOf(b));
-  if (sort === "discount") return out.sort((a, b) => (b.discountPct ?? 0) - (a.discountPct ?? 0));
+  // The shared store-discount rule (discount.ts): a bare or contradicted store percent counts as 0.
+  if (sort === "discount") return out.sort((a, b) => (storeDiscount(b) ?? 0) - (storeDiscount(a) ?? 0));
   const prices = out.map(priceOf);
   const min = Math.min(...prices);
   const max = Math.max(...prices);

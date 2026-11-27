@@ -78,13 +78,16 @@ describe("Badge and StoreMark", () => {
 });
 
 describe("Price", () => {
-  it("shows the current price, a struck higher original, and a verified discount", () => {
-    const out = html(h(Price, { amount: 899, currency: "SAR", original: 999, discountPct: 10, verified: true }));
+  it("shows the current price, a struck higher original, and the store's discount, said to be the store's", () => {
+    const out = html(h(Price, { amount: 899, currency: "SAR", original: 999, discountPct: 10, discountFrom: "store" }));
+    expect(out).toContain("off the store&#x27;s was price");
+    expect(out).not.toMatch(/verified/i);
+    expect(html(h(Price, { amount: 899, currency: "SAR", original: 999, discountPct: 10, discountFrom: "history" }))).toContain("below the highest price we&#x27;ve seen");
     expect(out).toContain('<span class="price__amount">SAR 899</span>');
     expect(out).toContain('<span class="price__was"><span class="visually-hidden">was </span><s class="price__orig">SAR 999</s></span>');
     expect(out).toContain("−10%");
   });
-  it("hides an unverified discount and an original that is not higher", () => {
+  it("hides a discount with no source and an original that is not higher", () => {
     const out = html(h(Price, { amount: 899, currency: "SAR", original: 800, discountPct: 50 }));
     expect(out).not.toContain("price__orig");
     expect(out).not.toContain("price__off");

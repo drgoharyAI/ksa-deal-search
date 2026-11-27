@@ -209,9 +209,9 @@ describe("groupProducts", () => {
 });
 
 describe("orderGroups and groupRefs", () => {
-  const a1 = P("amazon-sa", "a1", "Sony WH-1000XM5 Headphones", 1200, { discountPct: 5 });
+  const a1 = P("amazon-sa", "a1", "Sony WH-1000XM5 Headphones", 1200, { discountPct: 5, origPrice: 1263.16 });
   const a2 = P("noon-sa", "a2", "Sony WH-1000XM5 Headphones Black", 1000, { discountPct: 0 });
-  const b = P("jarir", "b", "JBL Tune 520BT Headphones", 1100, { discountPct: 30 });
+  const b = P("jarir", "b", "JBL Tune 520BT Headphones", 1100, { discountPct: 30, origPrice: 1571.43 });
   const weak = P("noon-sa", "w", "JBL Tune 720BT Headphones", 50, { weakMatch: true });
 
   it("ranks groups by their best confident member under the active sort", () => {

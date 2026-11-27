@@ -102,6 +102,29 @@ describe("Compare UI (17c)", () => {
     expect(tray({ slots: [gone], waiting: true })).toContain("Not in results yet");
     expect(tray({ slots: [gone], rerun: { query: "airpods 4", onRun: noop } })).toContain("Search &quot;airpods 4&quot; again");
   });
+  it("a shared link opened elsewhere: no dead Compare button, and it says what to do", () => {
+    const gone: CompareSlot = { key: "jarir+x9", site: "jarir", product: null, snap: null };
+    const out = tray({ slots: [gone] });
+    expect(out).toContain("Open the original search to see these products.");
+    expect(out).not.toContain("tray__open");
+    expect(out).not.toContain("disabled");
+    expect(out).toContain(">Clear<");
+    // With this tab's memory the search is offered instead, and Compare stays.
+    const mem = tray({ slots: [gone], rerun: { query: "q", onRun: noop } });
+    expect(mem).not.toContain("Open the original search");
+    expect(mem).toContain("tray__open");
+  });
+  it("the table keeps 'from', marks a fake 'was', and says when there is no price history", () => {
+    const ali = P("x", { site: "aliexpress", title: "JBL Flip 6", listPrice: 72, origPrice: 172, deal: { badge: "fake-deal", label: "Fake deal" } });
+    const d = renderToStaticMarkup(createElement(CompareDialog, { items: [ali, P("y", { title: "JBL Flip 6 speaker", listPrice: 150 })], open: false, onClose: noop }));
+    expect(d).toContain('<span class="cmp__from">from </span><span class="cmp__amount">SAR 72</span>');
+    expect(d).not.toContain("cmp__lowest");
+    expect(d).toContain("Cheapest is a &quot;from&quot; price, not ranked");
+    expect(d).toContain("Not backed by price history");
+    expect(d).toContain("No price history yet");
+    expect(d).toContain("Store discount");
+    expect(d).not.toMatch(/verified/i);
+  });
   it("the table marks the lowest price and the rows that differ", () => {
     const d = renderToStaticMarkup(createElement(CompareDialog, { items: ps, open: false, onClose: noop }));
     expect(d).toContain('scope="row"');

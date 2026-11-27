@@ -8,7 +8,7 @@ import { productKey } from "@/src/lib/specs";
 import { httpsUrl, type GroupItem } from "@/src/lib/view";
 import StoreLogo from "./StoreLogo";
 import { CardCompare, CardMedia, CardWatch, dealExplanation, type CompareControl } from "./ResultCard";
-import { verifiedDiscount } from "@/src/lib/discount";
+import { isFromPrice, storeDiscount } from "@/src/lib/discount";
 import { formatMoney } from "@/src/lib/money";
 import Button from "./ui/Button";
 
@@ -32,7 +32,7 @@ function Row({ p, best, color, compare }: { p: Product; best: boolean; color?: s
   const price = formatMoney(priceOf(p), p.currency);
   const store = storeLabel(p.site);
   const href = httpsUrl(p.url);
-  const discount = verifiedDiscount(p) ?? 0;
+  const discount = storeDiscount(p) ?? 0;
   return (
     <li className={best ? "gcard__row gcard__row--best" : "gcard__row"}>
       <span className="gcard__store">
@@ -40,12 +40,17 @@ function Row({ p, best, color, compare }: { p: Product; best: boolean; color?: s
         <span className="gcard__storename">{store}</span>
       </span>
       <span className="gcard__price">
-        {p.site === "aliexpress" && <span className="card__from">from</span>}
+        {isFromPrice(p) && <span className="card__from">from</span>}
         <span className="gcard__amount">{price}</span>
       </span>
       <span className="gcard__tags">
         {best && <span className="gcard__tag gcard__tag--best">Best price</span>}
-        {discount > 0 && <span className="gcard__tag">{`−${discount}%`}</span>}
+        {discount > 0 && (
+          <span className="gcard__tag">
+            {`−${discount}%`}
+            <span className="visually-hidden"> off the store&apos;s was price</span>
+          </span>
+        )}
         {p.deal && (
           <span className={`deal deal--${p.deal.badge} gcard__deal`}>
             {p.deal.label}

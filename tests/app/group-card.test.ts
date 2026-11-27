@@ -38,7 +38,7 @@ describe("GroupCard (17b2)", () => {
     expect(out).toContain('<ul class="gcard__rows" role="list"');
     expect(count(out, '<li class="gcard__row')).toBe(3);
     expect(count(out, "gcard__row--best")).toBe(1);
-    expect(out).toContain("−12%");
+    expect(out).toContain("−13%"); // worked out from SAR 2,400 and 2,100; the store's 12 agrees within 2 points
     expect(out).toContain("Lowest in 30 days");
     expect(out).toContain(">black<");
   });

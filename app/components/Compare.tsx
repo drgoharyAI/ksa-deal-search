@@ -40,19 +40,42 @@ type TrayProps = {
 export function CompareTray({ slots, full, waiting, onRemove, onClear, onOpen, rerun }: TrayProps) {
   const live = slots.filter((s) => s.product).length;
   const gone = slots.length - live;
+  // Nothing ticked is on screen and no search can be offered (a shared link opened in another
+  // browser): say what to do, and offer no action that cannot work. Shareable result URLs are U5.
+  const orphaned = live === 0 && gone > 0 && !waiting && !rerun;
   let note = "";
   if (full) note = `You can compare up to ${MAX_COMPARE} products. Remove one to add another.`;
+  else if (orphaned) note = "Open the original search to see these products.";
   else if (gone > 0 && !waiting) note = gone === 1 ? "1 ticked product is no longer in the results." : `${gone} ticked products are no longer in the results.`;
   else if (live > 0 && live < MIN_COMPARE) note = "Tick one more product to compare.";
+  // After a chip removes itself, focus goes to the next chip (or the one before), else to Clear,
+  // so it never falls to the page or onto a disabled button.
+  const root = useRef<HTMLElement>(null);
+  const refocus = useRef<number | null>(null);
+  useEffect(() => {
+    const i = refocus.current;
+    if (i === null) return;
+    refocus.current = null;
+    const chips = root.current?.querySelectorAll<HTMLElement>(".tray__chip");
+    if (chips && chips.length) chips[Math.min(i, chips.length - 1)].focus();
+    else root.current?.querySelector<HTMLElement>(".tray__clear")?.focus();
+  }, [slots]);
   return (
-    <section className="tray" aria-label="Compare products" hidden={slots.length === 0}>
+    <section ref={root} className="tray" aria-label="Compare products" hidden={slots.length === 0}>
       <div className="container tray__inner">
         <ul className="tray__items" role="list">
-          {slots.map((s) => {
+          {slots.map((s, i) => {
             const image = s.product?.image ?? s.snap?.image ?? "";
             return (
               <li key={s.key} className={s.product ? "tray__item" : "tray__item tray__item--gone"}>
-                <button type="button" className="tray__chip" onClick={() => onRemove(s.key)}>
+                <button
+                  type="button"
+                  className="tray__chip"
+                  onClick={() => {
+                    refocus.current = i;
+                    onRemove(s.key);
+                  }}
+                >
                   <span className="tray__thumb">
                     {image ? (
                       // eslint-disable-next-line @next/next/no-img-element
@@ -82,12 +105,14 @@ export function CompareTray({ slots, full, waiting, onRemove, onClear, onOpen, r
               {`Search "${rerun.query}" again`}
             </Button>
           )}
-          <Button size="md" variant="ghost" onClick={onClear}>
+          <Button size="md" variant="ghost" className="tray__clear" onClick={onClear}>
             Clear
           </Button>
-          <Button size="md" variant="primary" disabled={live < MIN_COMPARE} onClick={onOpen}>
-            Compare ({live})
-          </Button>
+          {!orphaned && (
+            <Button size="md" variant="primary" className="tray__open" disabled={live < MIN_COMPARE} onClick={onOpen}>
+              Compare ({live})
+            </Button>
+          )}
         </div>
       </div>
     </section>
@@ -97,20 +122,24 @@ export function CompareTray({ slots, full, waiting, onRemove, onClear, onOpen, r
 /** One table cell: the value as the row wants it drawn, or a muted "Not listed". */
 function Cell({ r, i, p }: { r: CompareRow; i: number; p: Product }) {
   const c = r.cells[i];
-  if (c === null) return <span className="cmp__none">Not listed</span>;
+  if (c === null) return <span className="cmp__none">{r.empty ?? "Not listed"}</span>;
   if (r.key === "price") {
+    const from = !!r.from?.[i];
     return (
       <>
-        <span className="cmp__amount">{c}</span>
+        {from && <span className="cmp__from">from </span>}
+        <span className="cmp__amount">{from ? c.replace(/^from /, "") : c}</span>
         {r.lowest?.[i] && <span className="cmp__tag">Lowest price</span>}
       </>
     );
   }
   if (r.key === "orig") {
+    const note = r.cellNotes?.[i];
     return (
       <>
         <span className="visually-hidden">Was </span>
         <s className="cmp__was">{c}</s>
+        {note && <span className="cmp__why">{note}</span>}
       </>
     );
   }
@@ -148,6 +177,16 @@ export function CompareDialog({ items, missing = [], open, onClose, onRemove, br
   const ref = useRef<HTMLDialogElement>(null);
   const opener = useRef<HTMLElement | null>(null);
   const [diffOnly, setDiffOnly] = useState(false);
+  // Column index whose Remove was pressed: focus moves to the Remove now in that place (the next
+  // column, or the last one), so it never drops to the page.
+  const refocus = useRef<number | null>(null);
+  useEffect(() => {
+    const i = refocus.current;
+    if (i === null || !open) return;
+    refocus.current = null;
+    const removes = ref.current?.querySelectorAll<HTMLElement>(".cmp__remove");
+    if (removes && removes.length) removes[Math.min(i, removes.length - 1)].focus();
+  }, [items, open]);
 
   useEffect(() => {
     const d = ref.current;
@@ -169,7 +208,12 @@ export function CompareDialog({ items, missing = [], open, onClose, onRemove, br
       aria-labelledby="cmp-title"
       onClose={() => {
         onClose();
-        opener.current?.focus();
+        // Back to the opener, unless it is gone or disabled (the dialog closed because one product
+        // was left): then the tray's first product, or its Clear.
+        const o = opener.current;
+        const usable = (e: HTMLElement | null | undefined): e is HTMLElement => !!e && e.isConnected && !(e as HTMLButtonElement).disabled;
+        const back = [o, document.querySelector<HTMLElement>(".tray__chip"), document.querySelector<HTMLElement>(".tray__clear")].find(usable);
+        back?.focus();
       }}
     >
       <div className="cmp__head">
@@ -210,7 +254,14 @@ export function CompareDialog({ items, missing = [], open, onClose, onRemove, br
                     {p.title}
                   </span>
                   {onRemove && (
-                    <button type="button" className="cmp__remove" onClick={() => onRemove(productKey(p))}>
+                    <button
+                      type="button"
+                      className="cmp__remove"
+                      onClick={() => {
+                        refocus.current = items.indexOf(p);
+                        onRemove(productKey(p));
+                      }}
+                    >
                       Remove<span className="visually-hidden">{` ${p.title} from compare`}</span>
                     </button>
                   )}

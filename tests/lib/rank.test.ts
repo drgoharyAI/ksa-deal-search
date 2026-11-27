@@ -27,12 +27,15 @@ describe("rank", () => {
   });
   it("discount sorts descending, stable on ties", () => {
     const ps = [
-      P({ id: "a", discountPct: 10 }),
-      P({ id: "b", discountPct: 50 }),
-      P({ id: "c", discountPct: 10 }),
+      P({ id: "a", discountPct: 10, origPrice: 11.11 }),
+      P({ id: "b", discountPct: 50, origPrice: 20.0 }),
+      P({ id: "c", discountPct: 10, origPrice: 11.11 }),
       P({ id: "d", discountPct: null }),
+      // A store percent with no "was" price, or one the prices contradict, counts as no discount.
+      P({ id: "e", discountPct: 70 }),
+      P({ id: "f", discountPct: 70, origPrice: 12 }),
     ];
-    expect(rank(ps, "discount").map((p) => p.id)).toEqual(["b", "a", "c", "d"]);
+    expect(rank(ps, "discount").map((p) => p.id)).toEqual(["b", "a", "c", "d", "e", "f"]);
   });
   it("deal sorts descending by dealScore and does not mutate input", () => {
     const cheap = P({ id: "cheap", listPrice: 10, discountPct: 60, rating: 4.5, soldCount: 1000 });
@@ -79,10 +82,10 @@ describe("weak matches (12e)", () => {
 
 describe("confidence tiers (12f)", () => {
   const ps = [
-    P({ id: "doubt", listPrice: 1, matchScore: MATCH_THRESHOLD - 0.01, discountPct: 90 }),
-    P({ id: "weak", listPrice: 2, matchScore: 0.1, weakMatch: true, discountPct: 80 }),
-    P({ id: "sure", listPrice: 30, matchScore: 0.9, discountPct: 5 }),
-    P({ id: "edge", listPrice: 20, matchScore: MATCH_THRESHOLD, discountPct: 10 }),
+    P({ id: "doubt", listPrice: 1, matchScore: MATCH_THRESHOLD - 0.01, discountPct: 90, origPrice: 10.0 }),
+    P({ id: "weak", listPrice: 2, matchScore: 0.1, weakMatch: true, discountPct: 80, origPrice: 10.0 }),
+    P({ id: "sure", listPrice: 30, matchScore: 0.9, discountPct: 5, origPrice: 31.58 }),
+    P({ id: "edge", listPrice: 20, matchScore: MATCH_THRESHOLD, discountPct: 10, origPrice: 22.22 }),
     P({ id: "unscored", listPrice: 25 }),
   ];
   it("price: confident tier by price, then less likely, then weak", () => {

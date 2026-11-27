@@ -28,7 +28,7 @@ export function DiscoverCard({ item: d }: { item: DiscoverItem }) {
             <span className="visually-hidden"> (opens in a new tab)</span>
           </a>
         </h3>
-        <Price amount={d.price} currency={d.currency} original={d.previousPrice} discountPct={d.dropPct} verified size="sm" originalLabel="highest seen" showOriginalLabel />
+        <Price amount={d.price} currency={d.currency} original={d.previousPrice} discountPct={d.dropPct} discountFrom="history" size="sm" originalLabel="highest seen" showOriginalLabel />
         {d.deal && <Badge tone="accent">{d.deal.label}</Badge>}
         <p className="dcard__seen">
           Seen <When at={d.seenAt} />
