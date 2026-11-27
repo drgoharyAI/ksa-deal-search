@@ -5,6 +5,7 @@ import * as carrefourSa from "./carrefour-sa/search";
 import * as extraSa from "./extra-sa/search";
 import * as jarir from "./jarir/search";
 import * as noonSa from "./noon-sa/search";
+import * as sheinSa from "./shein-sa/search";
 import * as trendyolSa from "./trendyol-sa/search";
 
 export const sites: Record<string, SiteAdapter> = {
@@ -56,6 +57,14 @@ export const sites: Record<string, SiteAdapter> = {
     label: "Carrefour KSA",
     searchCalls: carrefourSa.searchCalls,
     normalizeSearchItem: carrefourSa.normalizeSearchItem,
+    fetchDetail: async (p) => p,
+  },
+  "shein-sa": {
+    id: "shein-sa",
+    label: "SHEIN KSA",
+    searchCalls: sheinSa.searchCalls,
+    normalizeSearchItem: sheinSa.normalizeSearchItem,
+    runCall: sheinSa.runCall,
     fetchDetail: async (p) => p,
   },
 };

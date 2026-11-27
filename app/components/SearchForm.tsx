@@ -95,9 +95,15 @@ export default function SearchForm({ values, onChange, onSubmit, onStop, loading
                 value={s.id}
                 checked={values.sites.includes(s.id)}
                 onChange={(e) => toggleSite(s.id, e.target.checked)}
+                aria-describedby={"note" in s ? `store-note-${s.id}` : undefined}
               />
               <StoreLogo id={s.id} size={24} />
               <span className="chip__name">{s.label}</span>
+              {"note" in s && (
+                <span id={`store-note-${s.id}`} className="chip__note">
+                  {s.note}
+                </span>
+              )}
             </label>
           ))}
         </div>

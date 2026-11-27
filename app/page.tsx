@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { rank } from "@/src/lib/rank";
 import type { Product, SiteStatus } from "@/src/lib/types";
-import { STORES } from "@/src/lib/stores";
+import { defaultSites } from "@/src/lib/stores";
 import SearchForm, { type ErrorField, type FormValues } from "./components/SearchForm";
 import StatusBar from "./components/StatusBar";
 import ResultTiers from "./components/ResultTiers";
@@ -13,7 +13,7 @@ type Phase = "idle" | "loading" | "done" | "error";
 
 const INITIAL: FormValues = {
   query: "",
-  sites: STORES.map((s) => s.id),
+  sites: defaultSites(),
   sort: "price",
   minPrice: "",
   maxPrice: "",
