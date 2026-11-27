@@ -306,3 +306,32 @@ These move out of non-goals.
 4. **Side-by-side compare.** Tick 2–4 products for a compare drawer or page showing image, title, store, price, discount, rating, the deal badge, and key specs parsed from titles (storage, RAM, wattage, capacity, size, resolution, model). Differences are highlighted.
 5. **Price trend on cards.** A tiny inline SVG sparkline and a change label ("↓12% vs last week") from the observations, shown only with enough data (same rule as the badge). Each point is the lowest price of its Saudi day, placed on its day so gaps show; today’s point is the current price. A cached store answer is recorded at the time the store gave it, so a repeat is not a new observation.
 No LLM or AI. Everything is computed locally, and the UI follows the Hallmark Floor rules.
+
+## Production deployment on a cloud VPS (owner, 2026-11-27)
+This supersedes "Runs locally only".
+- **Target:** a Linux VPS in a **Saudi region** so stores serve their KSA storefronts. Suggested: Google Cloud Dammam `me-central2`, Oracle Cloud Jeddah, or a Saudi provider. The owner provides the server and a domain.
+- **Packaging:** a Docker image (Node 24 plus Google Chrome stable plus Xvfb, so noon and SHEIN run headed on a virtual display) and docker compose with:
+  - the app
+  - a Caddy reverse proxy with automatic HTTPS
+  - a persistent volume for the DB, Chrome profiles, API Anything home, and logs.
+  The app port is not published; only Caddy is exposed.
+- **Auth (required):**
+  - Single-owner login: a password hash in env (`APP_PASSWORD_HASH`, argon2id or scrypt).
+  - Sessions in an HTTP-only, Secure, SameSite=Strict signed cookie (`SESSION_SECRET`).
+  - Login rate limit plus lockout.
+  - Every page and API route needs a session except the login route and a health check.
+  - Logout.
+- **Request guard:**
+  - Allowed hosts come from `APP_HOSTS` (the domain) instead of loopback-only.
+  - The Origin/Sec-Fetch-Site rules stay.
+  - It binds to 0.0.0.0 inside the container only.
+  - Local dev keeps the loopback behaviour.
+- **Secrets:** Telegram token and chat id, `SESSION_SECRET` and the password hash come from env only, documented in `.env.example`, never in the image or git.
+- **Ops:**
+  - `/api/health` (unauthenticated, no data) for monitoring.
+  - Structured logs.
+  - Graceful shutdown that closes the Chrome instances.
+  - The alerts checker runs in the app container.
+  - A backup script for the DB volume.
+  - An update procedure: `git pull` then `docker compose up -d --build`.
+- **Datacenter-IP risk:** noon and SHEIN may block VPS IPs. The UI already shows "blocked"; this is documented.
