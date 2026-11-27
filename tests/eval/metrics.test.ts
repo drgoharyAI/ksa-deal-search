@@ -64,14 +64,57 @@ describe("computeMetrics", () => {
       constraints: { exclude: ["wired"] },
     });
     expect(ex.cheapestRelevantFirst).toBe(true);
+    const a45 = prod("a", 10, { rating: 4.5 });
     const rated = computeMetrics({
-      results: [a],
-      kept: [a],
-      recorded: mapOf([a, prod("d", 5, { rating: 3 })]),
+      results: [a45],
+      kept: [a45],
+      recorded: mapOf([a45, prod("d", 5, { rating: 3 })]),
       labels,
       constraints: { minRating: 4, exclude: [] },
     });
     expect(rated.cheapestRelevantFirst).toBe(true);
+  });
+
+  it("recall's denominator is only relevant items eligible under the query's own filters", () => {
+    const pricey = prod("p", 899);
+    const l: Record<string, Label> = { "s:a": "relevant", "s:p": "relevant" };
+    const m = computeMetrics({ results: [a], kept: [a], recorded: mapOf([a, pricey]), labels: l, constraints: { maxPrice: 300, exclude: [] } });
+    expect(m.relevantRecorded).toBe(1);
+    expect(m.recall).toBe(1);
+    const ex = computeMetrics({
+      results: [a],
+      kept: [a],
+      recorded: mapOf([a, prod("w", 5, { title: "Wired thing" })]),
+      labels: { "s:a": "relevant", "s:w": "relevant" },
+      constraints: { exclude: ["WIRED"] },
+    });
+    expect(ex.recall).toBe(1);
+  });
+
+  it("price bounds use listPrice like the pipeline, not finalPrice", () => {
+    const shipped = prod("f", 290, { finalPrice: 310 });
+    const m = computeMetrics({ results: [shipped], kept: [shipped], recorded: mapOf([shipped]), labels: { "s:f": "relevant" }, constraints: { maxPrice: 300, exclude: [] } });
+    expect(m.relevantRecorded).toBe(1);
+  });
+
+  it("minRating: a null-rated item from a rated store is ineligible", () => {
+    const rated = prod("r", 50, { site: "amz", rating: 4.5 });
+    const unrated = prod("u", 5, { site: "amz", rating: null });
+    const l: Record<string, Label> = { "amz:r": "relevant", "amz:u": "relevant" };
+    const m = computeMetrics({ results: [rated], kept: [rated], recorded: mapOf([rated, unrated]), labels: l, constraints: { minRating: 4, exclude: [] } });
+    expect(m.relevantRecorded).toBe(1);
+    expect(m.recall).toBe(1);
+    expect(m.cheapestRelevantFirst).toBe(true);
+  });
+
+  it("minRating: a null-rated item from a ratingless store is eligible", () => {
+    const rated = prod("r", 50, { site: "amz", rating: 4.5 });
+    const jarir = prod("j", 5, { site: "jarir", rating: null });
+    const l: Record<string, Label> = { "amz:r": "relevant", "jarir:j": "relevant" };
+    const m = computeMetrics({ results: [rated], kept: [rated], recorded: mapOf([rated, jarir]), labels: l, constraints: { minRating: 4, exclude: [] } });
+    expect(m.relevantRecorded).toBe(2);
+    expect(m.recall).toBe(0.5);
+    expect(m.cheapestRelevantFirst).toBe(false);
   });
 
   it("an irrelevant #1 fails cheapest-first", () => {

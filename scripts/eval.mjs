@@ -86,7 +86,7 @@ for (const query of queries) {
   }
   if (metrics) {
     console.log(
-      `   p@10 ${pct(metrics.precisionAt10)}  acc@10 ${pct(metrics.accessoryAt10)}  wrong@10 ${pct(metrics.wrongModelAt10)}` +
+      `   results ${r.products.length} (top ${metrics.top})  p@10 ${pct(metrics.precisionAt10)}  acc@10 ${pct(metrics.accessoryAt10)}  wrong@10 ${pct(metrics.wrongModelAt10)}` +
         `  recall ${pct(metrics.recall)} (${metrics.relevantKept}/${metrics.relevantRecorded})` +
         `  cheapest-first ${metrics.cheapestRelevantFirst === null ? "n/a" : metrics.cheapestRelevantFirst ? "yes" : "NO"}` +
         (metrics.unlabeledAt10 ? `  unlabelled@10 ${metrics.unlabeledAt10}` : ""),

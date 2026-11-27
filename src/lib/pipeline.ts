@@ -8,6 +8,7 @@ import { dropAccessories } from "@/src/lib/match/accessory";
 import { dedupe } from "@/src/lib/match/dedupe";
 import { sites as registry } from "@/src/sites/registry";
 import { rank, type SortKey } from "./rank";
+import { hasValidPrice, isExcluded, passesPriceRating, ratinglessSites } from "./filters";
 
 export type SearchInput = {
   query: string;
@@ -133,32 +134,16 @@ export async function runSearch(input: SearchInput, opts: SearchOptions = {}): P
       seen.add(k);
       return true;
     })
-    .filter((p) => Number.isFinite(p.listPrice) && p.listPrice > 0);
+    .filter(hasValidPrice);
 
-  const exclude = pq.exclude.map((w) => w.toLowerCase());
-  if (exclude.length) {
-    products = products.filter((p) => {
-      const t = p.title.toLowerCase();
-      return !exclude.some((w) => t.includes(w));
-    });
-  }
+  if (pq.exclude.length) products = products.filter((p) => !isExcluded(p, pq.exclude));
   // Stores whose whole result carries no rating (Jarir never shows one): a rating filter keeps
   // their products, flagged, instead of silently removing the store.
-  const ratingless = new Set(
-    outs
-      .filter((o) => o.products.length && o.products.every((p) => p.rating === null))
-      .map((o) => o.status.site),
-  );
+  const ratingless = ratinglessSites(outs.map((o) => ({ site: o.status.site, products: o.products })));
 
   products = filterRelevant(products, queryTokens);
   products = dropAccessories(products, queryTokens.flat());
-  products = products.filter((p) => {
-    if (isNum(minPrice) && p.listPrice < minPrice) return false;
-    if (isNum(maxPrice) && p.listPrice > maxPrice) return false;
-    if (isNum(minRating) && p.rating === null) return ratingless.has(p.site);
-    if (isNum(minRating) && p.rating !== null && p.rating < minRating) return false;
-    return true;
-  });
+  products = products.filter((p) => passesPriceRating(p, { minPrice, maxPrice, minRating }, ratingless));
   if (isNum(minRating)) {
     products = products.map((p) => (p.rating === null && ratingless.has(p.site) ? { ...p, ratingUnavailable: true } : p));
   }

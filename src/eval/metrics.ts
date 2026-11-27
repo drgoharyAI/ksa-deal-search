@@ -1,4 +1,5 @@
 import type { Product } from "@/src/lib/types";
+import { hasValidPrice, isExcluded, passesPriceRating, ratinglessSites, type PriceRatingFilters } from "@/src/lib/filters";
 
 export type Label = "relevant" | "accessory" | "wrong-model" | "off-topic";
 
@@ -8,7 +9,7 @@ export type LabelsFile = { query: string; labels: Record<string, Label> };
 export const labelKey = (p: Pick<Product, "site" | "id">): string => `${p.site}:${p.id}`;
 
 /** The query's own filters (from parseQuery), used to decide which relevant items are eligible. */
-export type Constraints = { minPrice?: number; maxPrice?: number; minRating?: number; exclude: string[] };
+export type Constraints = PriceRatingFilters & { exclude: string[] };
 
 export type QueryMetrics = {
   /** Size of the top-10 window actually filled (0..10). */
@@ -18,11 +19,11 @@ export type QueryMetrics = {
   wrongModelAt10: number;
   /** Top-10 items that have no label (should be 0 once labelling is done). */
   unlabeledAt10: number;
-  /** Relevant recorded items that pass every filter (before dedupe) / relevant recorded items. */
+  /** Relevant items kept through every filter (before dedupe) / relevant recorded items eligible under the query's own filters. */
   recall: number | null;
   relevantRecorded: number;
   relevantKept: number;
-  /** #1 under the "price" sort is relevant and no eligible relevant item is cheaper. null = no eligible relevant item. */
+  /** End to end: #1 under the "price" sort is relevant and no eligible relevant recorded item is cheaper. null = none eligible. */
   cheapestRelevantFirst: boolean | null;
 };
 
@@ -36,15 +37,17 @@ export type OverallMetrics = {
 };
 
 const priceOf = (p: Product) => p.finalPrice ?? p.listPrice;
-const isNum = (n: number | undefined): n is number => typeof n === "number" && Number.isFinite(n);
 
-function eligible(p: Product, c: Constraints): boolean {
-  const price = priceOf(p);
-  if (isNum(c.minPrice) && price < c.minPrice) return false;
-  if (isNum(c.maxPrice) && price > c.maxPrice) return false;
-  if (isNum(c.minRating) && p.rating !== null && p.rating < c.minRating) return false;
-  const t = p.title.toLowerCase();
-  return !c.exclude.some((w) => t.includes(w.toLowerCase()));
+/**
+ * Eligible = would survive the query's own filters in the pipeline (valid price, -exclude words,
+ * price bounds on listPrice, minRating with the ratingless-store rule). Same predicates as
+ * src/lib/pipeline.ts; ratingless stores are judged from this query's recorded products.
+ */
+function eligibleUnder(recorded: Map<string, Product>, c: Constraints): (p: Product) => boolean {
+  const bySite = new Map<string, Product[]>();
+  for (const p of recorded.values()) bySite.set(p.site, [...(bySite.get(p.site) ?? []), p]);
+  const ratingless = ratinglessSites([...bySite].map(([site, products]) => ({ site, products })));
+  return (p) => hasValidPrice(p) && !isExcluded(p, c.exclude) && passesPriceRating(p, c, ratingless);
 }
 
 /**
@@ -66,11 +69,14 @@ export function computeMetrics(args: {
   const count = (l: Label) => top10.filter((p) => labels[labelKey(p)] === l).length;
   const share = (n: number) => (top10.length ? n / top10.length : 0);
 
-  const relevantKeys = [...recorded.keys()].filter((k) => labels[k] === "relevant");
+  const eligible = eligibleUnder(recorded, constraints);
+  const eligibleRelevant = [...recorded.entries()]
+    .filter(([k, p]) => labels[k] === "relevant" && eligible(p))
+    .map(([, p]) => p);
+  const relevantKeys = eligibleRelevant.map(labelKey);
   const keptKeys = new Set(kept.map(labelKey));
   const relevantKept = relevantKeys.filter((k) => keptKeys.has(k)).length;
 
-  const eligibleRelevant = relevantKeys.map((k) => recorded.get(k)!).filter((p) => eligible(p, constraints));
   let cheapestRelevantFirst: boolean | null = null;
   if (eligibleRelevant.length) {
     const cheapest = Math.min(...eligibleRelevant.map(priceOf));

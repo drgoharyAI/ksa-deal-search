@@ -1,0 +1,34 @@
+# Eval results
+
+Run `node scripts/eval.mjs` (replays `eval/recorded/`, no network). Each tuning round appends its
+change and metrics below.
+
+## Metric definitions
+
+Per query, from the replayed pipeline output under sort `"price"`, scored against
+`eval/labels/<slug>.json` (`{ "query": "...", "labels": { "<site>:<id>": "relevant" | "accessory" | "wrong-model" | "off-topic" } }`).
+
+- **Eligible** (shared rule, `src/lib/filters.ts`, the same predicates the pipeline uses): valid
+  price (listPrice finite and > 0), title does not contain a `-word` (case-insensitive), price
+  bounds on listPrice, and with a rating minimum a null rating counts only when that store is
+  ratingless in the query's recorded data (e.g. Jarir).
+- **precision@10, accessory@10, wrong-model@10**: share of the *filled* top window,
+  `min(10, results)` items, labelled relevant / accessory / wrong-model. A query with 3 results
+  is scored over 3 items; 0 results scores 0. Unlabelled top items are reported separately
+  (`unlabelled@10`). The printout shows `results N (top M)` per query.
+- **recall**: relevant items that survive every filter (before dedupe, so a duplicate merged
+  into a cheaper copy is not a loss) / relevant recorded items that are *eligible*. Items the
+  query's own filters correctly remove (e.g. an 899 SAR earbud for "under 300") are not in the
+  denominator.
+- **cheapest-relevant-first**: end to end. True when result #1 under sort "price" is labelled
+  relevant AND its price is <= the cheapest eligible relevant item among ALL recorded items.
+  So a cheap relevant item lost by the relevance/accessory filters also fails it. n/a when the
+  query has no eligible relevant item.
+- **overall**: macro mean over labelled queries; n/a values are skipped.
+
+Stop rule (Task 12 Step 6): precision@10 >= 0.9, accessory@10 = 0, wrong-model@10 <= 0.05,
+recall >= 0.8, cheapest-relevant-first >= 0.9.
+
+## Rounds
+
+(none yet: labels pending, Task 12 Step 3)
