@@ -4,10 +4,11 @@ import Link from "next/link";
 import { useEffect, useState, type MouseEvent } from "react";
 import Badge from "./ui/Badge";
 
-type Page = "search" | "history" | "alerts";
+type Page = "search" | "saved" | "history" | "alerts";
 
 const LINKS: { page: Page; href: string; label: string }[] = [
   { page: "search", href: "/", label: "Search" },
+  { page: "saved", href: "/saved", label: "Saved" },
   { page: "history", href: "/history", label: "History" },
   { page: "alerts", href: "/alerts", label: "Alerts" },
 ];
@@ -34,7 +35,7 @@ export function goHome(e: HomeClick, win: HomeWindow): void {
   win.dispatchEvent(new Event(GO_HOME_EVENT));
 }
 
-/** The compact top bar on every page: the wordmark, then Search, History and Alerts (with the unseen count). */
+/** The compact top bar on every page: the wordmark, then Search, Saved, History and Alerts (with the unseen count). */
 export default function AppHeader({ current }: { current: Page }) {
   const [unread, setUnread] = useState(0);
 

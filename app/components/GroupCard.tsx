@@ -11,6 +11,7 @@ import { CardCompare, CardMedia, CardWatch, dealExplanation, type CompareControl
 import { isFromPrice, storeDiscount } from "@/src/lib/discount";
 import { formatMoney } from "@/src/lib/money";
 import Button from "./ui/Button";
+import { SaveToggle, viewHandlers } from "./Saved";
 
 /**
  * Which groups show all their rows, kept by the page so it survives the results changing under
@@ -28,7 +29,7 @@ const priceOf = (p: Product) => p.finalPrice ?? p.listPrice;
 
 type RowCompare = { checked: boolean; onCompare: (p: Product) => void };
 
-function Row({ p, best, color, compare }: { p: Product; best: boolean; color?: string; compare?: RowCompare }) {
+function Row({ p, best, color, compare, query }: { p: Product; best: boolean; color?: string; compare?: RowCompare; query?: string }) {
   const price = formatMoney(priceOf(p), p.currency);
   const store = storeLabel(p.site);
   const href = httpsUrl(p.url);
@@ -61,13 +62,12 @@ function Row({ p, best, color, compare }: { p: Product; best: boolean; color?: s
         {!isLikelyMatch(p) && <span className="gcard__note">Less likely match</span>}
       </span>
       {p.deal?.badge === "fake-deal" && <span className="deal__why gcard__why">{dealExplanation(p.deal)}</span>}
-      {compare && (
-        <span className="gcard__cmp">
-          <CardCompare product={p} checked={compare.checked} onCompare={compare.onCompare} label={`${p.title} at ${store}`} />
-        </span>
-      )}
+      <span className="gcard__cmp">
+        {compare && <CardCompare product={p} checked={compare.checked} onCompare={compare.onCompare} label={`${p.title} at ${store}`} />}
+        <SaveToggle product={p} query={query} label={`${p.title} at ${store}`} />
+      </span>
       {href ? (
-        <Button size="sm" className="gcard__go" href={href} external>
+        <Button size="sm" className="gcard__go" href={href} external {...viewHandlers(p)}>
           Go to store
           <span className="visually-hidden">{`: ${p.title} at ${store}, ${price} (opens in a new tab)`}</span>
         </Button>
@@ -128,6 +128,7 @@ function GroupCard({ group: g, query, compareChecked = false, comparedRows, onCo
             best={p === g.bestPrice}
             color={g.colors[`${p.site}:${p.id}`]}
             compare={onCompare && { checked: ticked.has(productKey(p)), onCompare }}
+            query={query}
           />
         ))}
       </ul>

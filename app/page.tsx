@@ -19,6 +19,8 @@ import { cheapestConfident, defaultTarget, priceOf } from "@/src/lib/alerts/shar
 import { HOME_ENTRY, historyMove } from "@/src/lib/rerun";
 import { parseShare, runOnce, shareSearch } from "@/src/lib/share";
 import CopyLink from "./components/CopyLink";
+import RecentlyViewed from "./components/RecentlyViewed";
+import { SavedContext, useFavourites } from "./components/Saved";
 import ResultsLayout from "./components/ResultsLayout";
 import { CompareDialog, CompareTray } from "./components/Compare";
 import {
@@ -130,6 +132,8 @@ export default function Home() {
     }),
     [openRows],
   );
+  // Saved products (hearts on cards, group rows and the compare table), kept in SQLite.
+  const favourites = useFavourites();
   const stashRef = useRef<Stash | null>(null);
   const [formKey, setFormKey] = useState(0);
 
@@ -479,188 +483,191 @@ export default function Home() {
   else if (phase === "done" && results && run) live = items.length ? liveSummary(run.stream, items.length) : (results.reason ?? "");
 
   return (
-    <div className="app">
-      <AppHeader current="search" />
+    <SavedContext value={favourites}>
+      <div className="app">
+        <AppHeader current="search" />
 
-      <main className={home ? "container main main--home" : "container main"}>
-        {home ? (
-          <div className="home-intro">
-            <h1 className="home-intro__title">{`One search across ${STORES.length} Saudi stores`}</h1>
-            <p className="home-intro__lead">Listed prices side by side, with deals marked only when the price history backs them.</p>
-          </div>
-        ) : (
-          <h1 className="visually-hidden">Deal search</h1>
-        )}
-        <SearchForm
-          key={formKey}
-          values={values}
-          onChange={setValues}
-          onSubmit={(q) => void search(q)}
-          onStop={stop}
-          loading={loading}
-          error={error}
-          errorField={errorField}
-          compact={!home}
-        />
-
-        <p className="visually-hidden" role="status" aria-live="polite">
-          {live}
-        </p>
-
-        {formError && <ErrorState message={formError} onRetry={() => void search()} retryLabel="Search again" />}
-
-        <StatusBar stores={stores} stopped={!!run?.stream.stopped} />
-
-        {home && (
-          <>
-            <HomeSuggestions
-              onPick={(q) => {
-                setValues((v) => ({ ...v, query: q }));
-                void search(q);
-              }}
-            />
-            <HomeDiscover />
-          </>
-        )}
-
-        {!home && (
-          <section className="results" aria-labelledby="results-head" aria-busy={loading || undefined}>
-            <div className="results__head">
-              <div className="results__title">
-                <h2 id="results-head">
-                  {waiting ? "Searching" : results && filtering ? `${items.length} of ${units.length} results` : results && items.length ? `${items.length} ${items.length === 1 ? "result" : "results"}${loading ? " so far" : ""}` : "Results"}
-                </h2>
-                <p className="results__note">
-                  {coverage}
-                  {results && items.length > 0 && <span className="results__ship">Prices exclude shipping</span>}
-                </p>
-              </div>
-              <div className="results__actions">
-                {results && <CopyLink />}
-                {!loading && results && cheapest && !watchOpen && !watchSaved && (
-                  <Button size="sm" onClick={() => setWatchOpen(true)}>
-                    Watch this search
-                  </Button>
-                )}
-              </div>
-              {/* Always in the page, so screen readers announce the text when it changes. */}
-              <p className={!loading && watchSaved ? "results__note" : "visually-hidden"} role="status">
-                {!loading && watchSaved && (
-                  <>
-                    Watching this search. <a href="/alerts">See alerts</a>
-                  </>
-                )}
-              </p>
+        <main className={home ? "container main main--home" : "container main"}>
+          {home ? (
+            <div className="home-intro">
+              <h1 className="home-intro__title">{`One search across ${STORES.length} Saudi stores`}</h1>
+              <p className="home-intro__lead">Listed prices side by side, with deals marked only when the price history backs them.</p>
             </div>
-            {!loading && results && cheapest && watchOpen && (
-              <WatchForm
-                label={`Alert me when a match is at or under, ${cheapest.currency || "SAR"}`}
-                initial={defaultTarget(priceOf(cheapest))}
-                onCancel={() => setWatchOpen(false)}
-                onSave={async (target) => {
-                  const err = await postWatch({ kind: "search", query: results.query, sites: results.sites, target, filters: results.filters });
-                  if (!err) {
-                    setWatchOpen(false);
-                    setWatchSaved(true);
-                  }
-                  return err;
+          ) : (
+            <h1 className="visually-hidden">Deal search</h1>
+          )}
+          <SearchForm
+            key={formKey}
+            values={values}
+            onChange={setValues}
+            onSubmit={(q) => void search(q)}
+            onStop={stop}
+            loading={loading}
+            error={error}
+            errorField={errorField}
+            compact={!home}
+          />
+
+          <p className="visually-hidden" role="status" aria-live="polite">
+            {live}
+          </p>
+
+          {formError && <ErrorState message={formError} onRetry={() => void search()} retryLabel="Search again" />}
+
+          <StatusBar stores={stores} stopped={!!run?.stream.stopped} />
+
+          {home && (
+            <>
+              <HomeSuggestions
+                onPick={(q) => {
+                  setValues((v) => ({ ...v, query: q }));
+                  void search(q);
                 }}
               />
-            )}
+              <RecentlyViewed />
+              <HomeDiscover />
+            </>
+          )}
 
-            <ResultsLayout
-              filters={chips}
-              onFilters={setChips}
-              facets={facets}
-              bounds={bounds}
-              currency={currency}
-              kept={kept}
-              sort={values.sort}
-              onSort={(sort) => setValues((v) => ({ ...v, sort }))}
-              view={view}
-              onView={changeView}
-              shown={items.length}
-              ready={all.length > 0}
-            >
-              {waiting ? (
-                <ul className={view === "list" ? "grid grid--list" : "grid"} aria-hidden="true">
-                  {Array.from({ length: SKELETONS }, (_, i) => (
-                    <li key={i}>
-                      <SkeletonCard variant={view} />
-                    </li>
-                  ))}
-                </ul>
-              ) : results && items.length ? (
-                <GroupOpenContext value={groupOpen}>
-                  <ResultTiers items={items} query={results.query} compare={compare} view={view} />
-                </GroupOpenContext>
-              ) : results && filtering ? (
-                <EmptyState
-                  title="No results match these filters"
-                  body={`${units.length} ${units.length === 1 ? "result is" : "results are"} hidden by the filters. Remove one, or clear them all.`}
-                  action={
-                    <div className="empty__actions">
-                      {lastChip && (
-                        <Button size="sm" variant="secondary" onClick={() => setChips(lastChip.without)}>
-                          {`Remove "${lastChip.label}"`}
-                        </Button>
-                      )}
-                      <Button size="sm" variant="ghost" onClick={() => setChips(NO_FILTERS)}>
-                        Clear all filters
-                      </Button>
-                    </div>
-                  }
+          {!home && (
+            <section className="results" aria-labelledby="results-head" aria-busy={loading || undefined}>
+              <div className="results__head">
+                <div className="results__title">
+                  <h2 id="results-head">
+                    {waiting ? "Searching" : results && filtering ? `${items.length} of ${units.length} results` : results && items.length ? `${items.length} ${items.length === 1 ? "result" : "results"}${loading ? " so far" : ""}` : "Results"}
+                  </h2>
+                  <p className="results__note">
+                    {coverage}
+                    {results && items.length > 0 && <span className="results__ship">Prices exclude shipping</span>}
+                  </p>
+                </div>
+                <div className="results__actions">
+                  {results && <CopyLink />}
+                  {!loading && results && cheapest && !watchOpen && !watchSaved && (
+                    <Button size="sm" onClick={() => setWatchOpen(true)}>
+                      Watch this search
+                    </Button>
+                  )}
+                </div>
+                {/* Always in the page, so screen readers announce the text when it changes. */}
+                <p className={!loading && watchSaved ? "results__note" : "visually-hidden"} role="status">
+                  {!loading && watchSaved && (
+                    <>
+                      Watching this search. <a href="/alerts">See alerts</a>
+                    </>
+                  )}
+                </p>
+              </div>
+              {!loading && results && cheapest && watchOpen && (
+                <WatchForm
+                  label={`Alert me when a match is at or under, ${cheapest.currency || "SAR"}`}
+                  initial={defaultTarget(priceOf(cheapest))}
+                  onCancel={() => setWatchOpen(false)}
+                  onSave={async (target) => {
+                    const err = await postWatch({ kind: "search", query: results.query, sites: results.sites, target, filters: results.filters });
+                    if (!err) {
+                      setWatchOpen(false);
+                      setWatchSaved(true);
+                    }
+                    return err;
+                  }}
                 />
-              ) : results && !loading ? (
-                <EmptyState
-                  title={results.reason ?? "No products matched your search"}
-                  body="Try fewer words, or search more stores."
-                  action={
-                    (results.sites.length < STORES.length || formLimits) && (
+              )}
+
+              <ResultsLayout
+                filters={chips}
+                onFilters={setChips}
+                facets={facets}
+                bounds={bounds}
+                currency={currency}
+                kept={kept}
+                sort={values.sort}
+                onSort={(sort) => setValues((v) => ({ ...v, sort }))}
+                view={view}
+                onView={changeView}
+                shown={items.length}
+                ready={all.length > 0}
+              >
+                {waiting ? (
+                  <ul className={view === "list" ? "grid grid--list" : "grid"} aria-hidden="true">
+                    {Array.from({ length: SKELETONS }, (_, i) => (
+                      <li key={i}>
+                        <SkeletonCard variant={view} />
+                      </li>
+                    ))}
+                  </ul>
+                ) : results && items.length ? (
+                  <GroupOpenContext value={groupOpen}>
+                    <ResultTiers items={items} query={results.query} compare={compare} view={view} />
+                  </GroupOpenContext>
+                ) : results && filtering ? (
+                  <EmptyState
+                    title="No results match these filters"
+                    body={`${units.length} ${units.length === 1 ? "result is" : "results are"} hidden by the filters. Remove one, or clear them all.`}
+                    action={
                       <div className="empty__actions">
-                        {results.sites.length < STORES.length && (
-                          <Button size="sm" variant="secondary" onClick={() => searchWith({ sites: STORES.map((st) => st.id) })}>
-                            {`Search all ${STORES.length} stores`}
+                        {lastChip && (
+                          <Button size="sm" variant="secondary" onClick={() => setChips(lastChip.without)}>
+                            {`Remove "${lastChip.label}"`}
                           </Button>
                         )}
-                        {formLimits && (
-                          <Button size="sm" variant="ghost" onClick={() => searchWith({ minPrice: "", maxPrice: "", minRating: "" })}>
-                            Search without price and rating limits
-                          </Button>
-                        )}
+                        <Button size="sm" variant="ghost" onClick={() => setChips(NO_FILTERS)}>
+                          Clear all filters
+                        </Button>
                       </div>
-                    )
-                  }
-                />
-              ) : null}
-            </ResultsLayout>
-          </section>
-        )}
-      </main>
-      <AppFooter />
+                    }
+                  />
+                ) : results && !loading ? (
+                  <EmptyState
+                    title={results.reason ?? "No products matched your search"}
+                    body="Try fewer words, or search more stores."
+                    action={
+                      (results.sites.length < STORES.length || formLimits) && (
+                        <div className="empty__actions">
+                          {results.sites.length < STORES.length && (
+                            <Button size="sm" variant="secondary" onClick={() => searchWith({ sites: STORES.map((st) => st.id) })}>
+                              {`Search all ${STORES.length} stores`}
+                            </Button>
+                          )}
+                          {formLimits && (
+                            <Button size="sm" variant="ghost" onClick={() => searchWith({ minPrice: "", maxPrice: "", minRating: "" })}>
+                              Search without price and rating limits
+                            </Button>
+                          )}
+                        </div>
+                      )
+                    }
+                  />
+                ) : null}
+              </ResultsLayout>
+            </section>
+          )}
+        </main>
+        <AppFooter />
 
-      <CompareTray
-        slots={slots}
-        full={cmp.full}
-        waiting={loading}
-        searched={!!run}
-        onRemove={removeCompare}
-        onClear={() => setCmp(NO_COMPARE)}
-        onOpen={() => setCompareOpen(true)}
-        rerun={
-          !results && !loading && memory?.query && compareMissing.length > 0
-            ? { query: memory.query, onRun: () => searchWith({ query: memory.query, ...(memory.sites.length ? { sites: memory.sites } : {}) }) }
-            : undefined
-        }
-      />
-      <CompareDialog
-        items={compareItems}
-        missing={compareMissing}
-        open={compareOpen && compareItems.length >= MIN_COMPARE}
-        onClose={() => setCompareOpen(false)}
-        onRemove={removeCompare}
-        brands={chipCtx.brands}
-      />
-    </div>
+        <CompareTray
+          slots={slots}
+          full={cmp.full}
+          waiting={loading}
+          searched={!!run}
+          onRemove={removeCompare}
+          onClear={() => setCmp(NO_COMPARE)}
+          onOpen={() => setCompareOpen(true)}
+          rerun={
+            !results && !loading && memory?.query && compareMissing.length > 0
+              ? { query: memory.query, onRun: () => searchWith({ query: memory.query, ...(memory.sites.length ? { sites: memory.sites } : {}) }) }
+              : undefined
+          }
+        />
+        <CompareDialog
+          items={compareItems}
+          missing={compareMissing}
+          open={compareOpen && compareItems.length >= MIN_COMPARE}
+          onClose={() => setCompareOpen(false)}
+          onRemove={removeCompare}
+          brands={chipCtx.brands}
+        />
+      </div>
+    </SavedContext>
   );
 }

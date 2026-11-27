@@ -10,6 +10,7 @@ import { CardMedia, Trend, dealExplanation } from "./ResultCard";
 import StoreLogo from "./StoreLogo";
 import Button from "./ui/Button";
 import StoreMark from "./ui/StoreMark";
+import { SaveToggle, viewHandlers } from "./Saved";
 
 /** What a ticked product that is not in the current results is called. */
 const GONE = "No longer in results";
@@ -268,6 +269,7 @@ export function CompareDialog({ items, missing = [], open, onClose, onRemove, br
                   <span className="cmp__title" dir="auto">
                     {p.title}
                   </span>
+                  <SaveToggle product={p} className="cmp__save" />
                   {onRemove && (
                     <button
                       type="button"
@@ -306,7 +308,7 @@ export function CompareDialog({ items, missing = [], open, onClose, onRemove, br
                 return (
                   <td key={productKey(p)}>
                     {href ? (
-                      <Button size="md" className="cmp__go" href={href} external>
+                      <Button size="md" className="cmp__go" href={href} external {...viewHandlers(p)}>
                         View on {storeLabel(p.site)}
                         <span className="visually-hidden">{`: ${p.title} (opens in a new tab)`}</span>
                       </Button>

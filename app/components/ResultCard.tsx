@@ -1,6 +1,6 @@
 "use client";
 
-import { memo, useState } from "react";
+import { memo, useContext, useState } from "react";
 import type { DealInsight, PriceTrend, Product } from "@/src/lib/types";
 import { storeLabel } from "@/src/lib/stores";
 import { isLikelyMatch } from "@/src/lib/rank";
@@ -13,6 +13,7 @@ import Sparkline from "./Sparkline";
 import Button from "./ui/Button";
 import Price from "./ui/Price";
 import StoreMark from "./ui/StoreMark";
+import { SaveToggle, SavedContext, viewHandlers } from "./Saved";
 
 const DEAL_EXPLAIN: Record<DealInsight["badge"], string> = {
   "fake-deal": "The discount does not hold up against the prices we've seen",
@@ -143,7 +144,7 @@ export type CardVariant = "grid" | "list";
  * The picture box: the store's image at a fixed ratio, or a quiet placeholder with the store's
  * mark. `src` may list several pictures (a group's members): a broken one gives way to the next.
  */
-export function CardMedia({ src, site, className = "card__media", size = 400, href }: { src: string | string[]; site: string; className?: string; size?: number; href?: string | null }) {
+export function CardMedia({ src, site, className = "card__media", size = 400, href, onOpen }: { src: string | string[]; site: string; className?: string; size?: number; href?: string | null; onOpen?: () => void }) {
   const [failed, setFailed] = useState<ReadonlySet<string>>(() => new Set());
   const show = (Array.isArray(src) ? src : [src]).find((s) => !!s && !failed.has(s));
   const inner = show ? (
@@ -160,7 +161,18 @@ export function CardMedia({ src, site, className = "card__media", size = 400, hr
   // order and the accessibility tree: "View on <store>" is the one named link.
   if (href) {
     return (
-      <a className={`${className} card__medialink`} href={href} target="_blank" rel="noopener noreferrer" tabIndex={-1} aria-hidden="true">
+      <a
+        className={`${className} card__medialink`}
+        href={href}
+        target="_blank"
+        rel="noopener noreferrer"
+        tabIndex={-1}
+        aria-hidden="true"
+        onClick={onOpen}
+        onAuxClick={(e) => {
+          if (e.button === 1) onOpen?.();
+        }}
+      >
         {inner}
       </a>
     );
@@ -182,10 +194,12 @@ function ResultCard({ product: p, query, compareChecked = false, onCompare, vari
   const href = httpsUrl(p.url);
   const discount = storeDiscount(p);
   const cls = ["card", `card--${variant}`, !likely && "card--muted", compareChecked && "card--selected"].filter(Boolean).join(" ");
+  const view = viewHandlers(p);
+  const canSave = useContext(SavedContext) !== null;
 
   return (
     <article className={cls}>
-      <CardMedia src={p.image} site={p.site} href={href} />
+      <CardMedia src={p.image} site={p.site} href={href} onOpen={view.onClick} />
       <div className="card__body">
         <div className="card__store">
           <StoreMark id={p.site} size={18} />
@@ -206,16 +220,17 @@ function ResultCard({ product: p, query, compareChecked = false, onCompare, vari
         {p.trend && p.trend.points.length >= 2 && <Trend trend={p.trend} title={p.title} />}
         <div className="card__actions">
           {href ? (
-            <Button size="sm" className="card__go" href={href} external>
+            <Button size="sm" className="card__go" href={href} external {...view}>
               View on {store}
               <span className="visually-hidden">{`: ${p.title} (opens in a new tab)`}</span>
             </Button>
           ) : (
             <span className="card__nolink">No store link</span>
           )}
-          {(onCompare || query) && (
+          {(onCompare || query || canSave) && (
             <div className="card__more">
               {onCompare && <CardCompare product={p} checked={compareChecked} onCompare={onCompare} />}
+              <SaveToggle product={p} query={query} />
               {query && <CardWatch product={p} query={query} />}
             </div>
           )}
