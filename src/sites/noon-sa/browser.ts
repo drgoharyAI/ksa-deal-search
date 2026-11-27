@@ -4,6 +4,7 @@ import net from "node:net";
 import fs from "node:fs";
 import path from "node:path";
 import type { Browser, Page } from "playwright-core";
+import { migrateLegacyProfile, resolveProfileDir } from "./profile";
 
 /**
  * Owner's installed Google Chrome, started by us with normal flags plus a localhost-only
@@ -127,8 +128,17 @@ export type ChromeDeps = {
 
 const portFile = (profileDir: string) => path.join(profileDir, "DevToolsActivePort");
 
+let resolvedProfileDir: string | null = null;
+
 const realDeps: ChromeDeps = {
-  profileDir: path.join(process.cwd(), ".noon-profile"),
+  // Lazy: resolved (and the old in-repo profile moved) on first launch, not at import time.
+  get profileDir() {
+    if (!resolvedProfileDir) {
+      resolvedProfileDir = resolveProfileDir();
+      migrateLegacyProfile(resolvedProfileDir);
+    }
+    return resolvedProfileDir;
+  },
   findChrome,
   readActivePort(profileDir) {
     try {
@@ -190,7 +200,7 @@ async function waitForPort(d: ChromeDeps, proc: ChromeProc, port: number, timeou
 }
 
 /**
- * Launcher for the owner's Chrome on the `.noon-profile` profile. If a Chrome from an earlier
+ * Launcher for the owner's Chrome on the noon profile (see profile.ts). If a Chrome from an earlier
  * run (HMR, crashed node) still holds the profile and its debug port answers, adopt it instead
  * of spawning: a second Chrome on the same profile would only hand off to the first one.
  */

@@ -7,7 +7,7 @@ import { fileURLToPath } from "node:url";
 export const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
 
 export async function loadEval() {
-  process.chdir(root); // api-anything home (./.aa-home) and .noon-profile are relative to the repo
+  process.chdir(root); // api-anything home (./.aa-home) is relative to the repo
   const server = await createServer({
     root,
     configFile: false,

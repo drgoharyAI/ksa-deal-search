@@ -42,7 +42,7 @@ API_ANYTHING_LOCAL_ONLY=1
 ### noon and Chrome
 
 noon blocks plain HTTP clients, so the app starts your installed Google Chrome with its own
-profile (`.noon-profile/`, gitignored) and reads search results through it. The window opens
+profile (`%LOCALAPPDATA%\deal-search\noon-profile`, outside the repo; override with `NOON_PROFILE_DIR`) and reads search results through it. The window opens
 off-screen (`--window-position=-32000,-32000`). Chrome closes after 10 minutes with no noon
 searches, and the server kills it when its process exits. If Chrome is not installed, noon shows as an error and the
 other stores still work.

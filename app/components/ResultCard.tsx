@@ -44,7 +44,8 @@ export default function ResultCard({ product: p }: { product: Product }) {
       </div>
       <div className="card__body">
         <span className="card__store">
-          <StoreLogo id={p.site} size={18} alt={storeLabel(p.site)} />
+          <StoreLogo id={p.site} size={18} />
+          <span className="card__storename">{storeLabel(p.site)}</span>
           {!isLikelyMatch(p) && <span className="card__flag"> · Less likely match</span>}
         </span>
         <h3 className="card__title">

@@ -102,7 +102,7 @@ export default function SearchForm({ values, onChange, onSubmit, onStop, loading
                 onChange={(e) => toggleSite(s.id, e.target.checked)}
               />
               <StoreLogo id={s.id} size={24} />
-              <span className="visually-hidden">{s.label}</span>
+              <span className="chip__name">{s.label}</span>
             </label>
           ))}
         </div>

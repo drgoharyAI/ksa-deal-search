@@ -24,7 +24,10 @@ export default function StatusBar({ pending, statuses, counts }: Props) {
       <ul className="status" aria-label="Store status">
         {pending.map((site) => (
           <li key={site} className="status__item status__item--loading">
-            <span className="status__store"><StoreLogo id={site} size={22} alt={storeLabel(site)} /></span>
+            <span className="status__store">
+              <StoreLogo id={site} size={22} />
+              <span className="status__name">{storeLabel(site)}</span>
+            </span>
             <span className="status__text">Searching</span>
           </li>
         ))}
@@ -41,7 +44,12 @@ export default function StatusBar({ pending, statuses, counts }: Props) {
         else text = storeMessage(s.site, s.message ?? (s.status === "blocked" ? "Store blocked the request; try again later" : "Store request failed"));
         return (
           <li key={s.site} className={`status__item status__item--${s.status}`}>
-            {s.status === "ok" && <span className="status__store"><StoreLogo id={s.site} size={22} alt={storeLabel(s.site)} /></span>}
+            {s.status === "ok" && (
+              <span className="status__store">
+                <StoreLogo id={s.site} size={22} />
+                <span className="status__name">{storeLabel(s.site)}</span>
+              </span>
+            )}
             <span className="status__text">{text}</span>
           </li>
         );
