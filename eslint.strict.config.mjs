@@ -38,7 +38,11 @@ export default defineConfig([
       // route), where the worst measured case is a few ms. The quadratic "\s*-?\s*" patterns that
       // were cheap to make linear were rewritten (task 18).
       "security/detect-unsafe-regex": "off",
-      "redos/no-vulnerable": ["error", { timeout: 10000, permittableComplexities: ["polynomial"] }],
+      // ignoreErrors false: a regex recheck cannot analyse (or a timeout) fails the pass instead of
+      // being skipped silently. The timeout is per regex: group.ts FOR_BRAND (linear) needs about
+      // 7 s on its own, so 10 s timed out under lint load; 30 s leaves headroom. If a slow machine
+      // still times out, raise it rather than turning ignoreErrors back on.
+      "redos/no-vulnerable": ["error", { timeout: 30000, permittableComplexities: ["polynomial"], ignoreErrors: false }],
       // Off after a hit-by-hit review (task-18 report, 34 hits): without noUncheckedIndexedAccess
       // (trialled, not adopted) TypeScript types array/regex-group/Map reads and parsed JSON,
       // DOM and DB values as always present, so the rule asks to delete guards that protect

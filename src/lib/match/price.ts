@@ -15,19 +15,24 @@ const median = (xs: number[]): number => {
 /** True when the query names a known brand ("apple watch", "samsung galaxy s24"). */
 const namesBrand = (queryTokens: string[]) => queryTokens.some((t) => BRANDS.has(t.toLowerCase()));
 
-/** A number with a unit ("20000mah", "65w", "1tb"): a spec any model may have, not a model number. */
-const SPEC_NUMBER = /^\d+(?:\.\d+)?(?:mah|wh|ah|w|watts?|kw|tb|gb|mb|inch(?:es)?|in|hz|khz|mm|cm|m|ft|l|ml|kg|g|lbs?|oz|v|a|k|p|pcs?|pack|x)$/;
-const UNIT_WORD = /^(?:mah|wh|ah|w|watts?|kw|tb|gb|mb|inch(?:es)?|in|hz|khz|mm|cm|m|ft|l|ml|kg|g|lbs?|oz|v|a|pcs?|pack)$/;
+/**
+ * A number with a unit ("20000mah", "65w", "1tb"): a spec any model may have, not a model number.
+ * Only units that are never model suffixes: "a" (pixel 9a, nothing phone 2a) and "x" (honor 8x)
+ * are left out. Query tokens hold no decimal point (the tokenizer splits on "."), so whole
+ * numbers only.
+ */
+const SPEC_NUMBER = /^\d+(?:mah|wh|ah|w|watts?|kw|tb|gb|mb|inch(?:es)?|in|hz|khz|mm|cm|m|ft|l|ml|kg|g|lbs?|oz|v|k|p|pcs?|pack)$/;
+const UNIT_WORD = /^(?:mah|wh|ah|w|watts?|kw|tb|gb|mb|inch(?:es)?|in|hz|khz|mm|cm|m|ft|l|ml|kg|g|lbs?|oz|v|pcs?|pack)$/;
 
 /**
  * True when a query token is a model number ("16" in "iphone 16", "s24", "m3"): it has a digit,
  * is not a number with a unit, and is not a bare number followed by a unit word ("55 inch").
  */
-function hasModelNumber(queryTokens: string[]): boolean {
+export function hasModelNumber(queryTokens: string[]): boolean {
   return queryTokens.some((t, i) => {
     if (!/\d/.test(t) || SPEC_NUMBER.test(t)) return false;
     const next = queryTokens[i + 1] as string | undefined;
-    return !(/^\d+(?:\.\d+)?$/.test(t) && next !== undefined && UNIT_WORD.test(next));
+    return !(/^\d+$/.test(t) && next !== undefined && UNIT_WORD.test(next));
   });
 }
 

@@ -5,7 +5,7 @@ import { isAccessory, isStrongAccessory, dropAccessories, isForAccessory } from 
 import { dedupe } from "@/src/lib/match/dedupe";
 import { specMatches } from "@/src/lib/match/spec";
 import { isBookCode, isOtherProduct } from "@/src/lib/match/category";
-import { applyBrandPriceRules, tierCutoff } from "@/src/lib/match/price";
+import { applyBrandPriceRules, hasModelNumber, tierCutoff } from "@/src/lib/match/price";
 import type { Product } from "@/src/lib/types";
 
 const prod = (title: string, listPrice = 10, id = title): Product => ({
@@ -500,6 +500,20 @@ describe("brand + category queries keep the cheapest genuine products (final rev
     const go = out.find((p) => p.title.startsWith("JBL Go 3"));
     expect(go).toBeDefined();
     expect(out.filter((p) => p.listPrice >= 899).every((p) => !p.weakMatch)).toBe(true);
+  });
+  it("model numbers vs spec numbers (task 18 review: 'a'/'x' suffixes are model suffixes)", () => {
+    const tok = (q: string) => q.split(" ");
+    for (const q of ["google pixel 9a", "pixel 8a", "nothing phone 2a", "honor 8x", "iphone 16", "samsung galaxy s24", "macbook air m3", "sony wh-1000xm5", "xiaomi 14t", "oneplus 12r", "samsung a55", "sony ps5", "nintendo switch 2"])
+      expect(hasModelNumber(tok(q)), q).toBe(true);
+    for (const q of ["jbl 2 pack", "lg 65 inch", "anker 10000mah power bank", "anker power bank 20 w", "jbl speaker 30w", "sony 4k tv", "lg 1tb ssd"])
+      expect(hasModelNumber(tok(q)), q).toBe(false);
+  });
+  it("'google pixel 9a' still drops a far-cheaper clone", () => {
+    const pixels = at([
+      ["Pixel 9a Clone Smartphone", 120, "a"], ["Google Pixel 9a 128GB Obsidian", 1899, "b"],
+      ["Google Pixel 9a 256GB Porcelain", 2099, "c"], ["Google Pixel 9a 128GB Iris", 1899, "a"], ["Google Pixel 9a 256GB Peony", 2149, "b"],
+    ]);
+    expect(applyBrandPriceRules(pixels, ["google", "pixel", "9a"]).map((p) => p.id)).toEqual(["1", "2", "3", "4"]);
   });
   it("a model-number query still drops the far-cheaper ecosystem (clones, games)", () => {
     const watches = at([

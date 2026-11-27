@@ -4,7 +4,7 @@ import amazon from "../fixtures/amazon-sa-search.json";
 vi.mock("@/src/lib/aa", () => ({ aaCall: vi.fn() }));
 
 import { aaCall } from "@/src/lib/aa";
-import { runSearch } from "@/src/lib/pipeline";
+import { MAX_TITLE, runSearch } from "@/src/lib/pipeline";
 import { isLikelyMatch } from "@/src/lib/rank";
 import { sites } from "@/src/sites/registry";
 import { callKey, createReplayExec, plannedCalls, querySlug, recordedProducts, type Recording } from "@/src/eval/replay";
@@ -136,5 +136,9 @@ describe("helpers", () => {
     expect(m.size).toBeGreaterThan(0);
     const [k, p] = [...m.entries()][0];
     expect(k).toBe(`amazon-sa:${p.id}`);
+  });
+  it("recordedProducts cuts titles to MAX_TITLE like the pipeline (task 18 review)", () => {
+    const m = recordedProducts([recordingFor("x", "aliexpress", [{ id: "1", title: "Earbuds " + "pro ".repeat(5000), price: 50 }])], sites);
+    expect([...m.values()][0].title).toHaveLength(MAX_TITLE);
   });
 });

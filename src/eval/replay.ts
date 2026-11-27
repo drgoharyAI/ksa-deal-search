@@ -1,5 +1,5 @@
 import type { AaResult } from "@/src/lib/aa";
-import type { Call, CallExec } from "@/src/lib/pipeline";
+import { MAX_TITLE, type Call, type CallExec } from "@/src/lib/pipeline";
 import type { Product, SiteAdapter } from "@/src/lib/types";
 import { parseQuery } from "@/src/lib/query/parse";
 import { expandTerms } from "@/src/lib/query/synonyms";
@@ -88,6 +88,8 @@ export function recordedProducts(recordings: Recording[], adapters: Record<strin
         let p: Product | null = null;
         try {
           p = adapter.normalizeSearchItem(raw);
+          // The same cut as the pipeline, so labelled products carry the titles the app matches.
+          if (p && p.title.length > MAX_TITLE) p.title = p.title.slice(0, MAX_TITLE);
         } catch {
           p = null;
         }

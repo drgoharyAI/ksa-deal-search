@@ -33,6 +33,8 @@ The eval scripts rewrite `eval/last-run.json`; restore it if you did not mean to
   because their inputs are bounded: store titles are cut to `MAX_TITLE` (1,000 characters) in
   `src/lib/pipeline.ts` and queries to 200 characters by the route. Prefer linear forms anyway:
   write `\s*(?:-\s*)?`, never `\s*-?\s*` (two whitespace runs that can split the same spaces).
+  A regex recheck cannot finish within its 30 s per-regex timeout fails the pass
+  (`ignoreErrors: false`); on a slow machine raise the timeout instead of hiding the error.
 - A false positive gets an inline `// eslint-disable-next-line <rule> -- <reason>`, never a
   file- or folder-wide disable. The strict pass reports unused disable comments as errors, so a
   stale suppression has to be removed.
