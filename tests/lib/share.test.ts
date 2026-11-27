@@ -106,15 +106,15 @@ describe("auto-run once", () => {
 
 describe("Back and Forward with results URLs", () => {
   it("Back to a results entry left before any result came runs it again", () => {
-    expect(historyMove("?q=airpods&sort=price", null, { stashed: false, showingHome: true })).toBe("run");
+    expect(historyMove("?q=airpods&sort=price", null, { stash: null, showingHome: true })).toBe("run");
   });
-  it("with results stashed, the stash comes back instead (no second search)", () => {
-    expect(historyMove("?q=airpods&sort=price", null, { stashed: true, showingHome: true })).toBe("restore");
+  it("with that search's results stashed, the stash comes back instead (no second search)", () => {
+    expect(historyMove("?q=airpods&sort=price", null, { stash: "?q=airpods&sort=price", showingHome: true })).toBe("restore");
   });
   it("the go-home entry is still home, and a results page only syncs its chips", () => {
-    expect(historyMove("", { [HOME_ENTRY]: true }, { stashed: false, showingHome: false })).toBe("home");
-    expect(historyMove("?q=airpods", null, { stashed: false, showingHome: false })).toBe("sync");
-    expect(historyMove("?store=jarir", null, { stashed: false, showingHome: true })).toBe("sync");
+    expect(historyMove("", { [HOME_ENTRY]: true }, { stash: null, showingHome: false })).toBe("home");
+    expect(historyMove("?q=airpods", null, { stash: null, showingHome: false })).toBe("sync");
+    expect(historyMove("?store=jarir", null, { stash: null, showingHome: true })).toBe("sync");
   });
 });
 

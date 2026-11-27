@@ -23,8 +23,11 @@ import type { Product, SiteStatus } from "@/src/lib/types";
  * - empty: answered, nothing in the results;
  * - unavailable: refusing us (blocked, rate-limited or backing off); `retryAt` (ms) when known;
  * - failed: the request failed or the answer could not be read.
+ * A state this client does not know yet (a newer server) is kept as sent: the status row shows it
+ * from its label map, with a fallback, and counts it as not answered.
  */
-type StoreState = "searching" | "ok" | "empty" | "unavailable" | "failed";
+type KnownState = "searching" | "ok" | "empty" | "unavailable" | "failed";
+type StoreState = KnownState | (string & {});
 
 export type StoreEntry = {
   store: string;
@@ -51,7 +54,8 @@ type StoreEvent = { type: "store" } & StoreEntry;
 type ResultsEvent = { type: "results" } & SearchPayload;
 export type StreamEvent = StoreEvent | ResultsEvent | { type: "done" } | { type: "error"; error: string };
 
-const STATES = new Set<StoreState>(["searching", "ok", "empty", "unavailable", "failed"]);
+/** A state name a server may send: a short lower-case word (hyphens and underscores allowed). */
+const STATE_NAME = /^[a-z][a-z0-9_-]{0,31}$/;
 
 /** Listings per store in a payload: every card's members, group rows included. */
 export function countsOf(payload: Pick<SearchPayload, "products" | "groupExtras">): Record<string, number> {
@@ -80,7 +84,7 @@ export function parseEvent(line: string): StreamEvent | null {
   const e = v as Record<string, unknown>;
   switch (e.type) {
     case "store":
-      return typeof e.store === "string" && STATES.has(e.state as StoreState) ? (e as StoreEvent) : null;
+      return typeof e.store === "string" && typeof e.state === "string" && STATE_NAME.test(e.state) ? (e as StoreEvent) : null;
     case "results":
       return Array.isArray(e.products) && Array.isArray(e.statuses) ? (e as ResultsEvent) : null;
     case "done":
@@ -221,6 +225,19 @@ export async function readEvents(body: ReadableStream<Uint8Array>, onEvent: (e: 
   }
   take(takeLines(`${buf}${dec.decode()}\n`).lines);
   return n;
+}
+
+/**
+ * The notice over results a server error cut short (an "error" event after some stores answered):
+ * the results shown are partial, so it says so, with how many stores they came from. Null when the
+ * stream did not break, or broke before any results (the page shows the error itself then).
+ */
+export function stoppedEarlyNotice(s: StreamState): string | null {
+  if (s.error === undefined || !s.results) return null;
+  const entries = storeEntries(s);
+  const answered = entries.filter((e) => e.state === "ok" || e.state === "empty").length;
+  if (answered === 0) return "The search stopped early, before any store answered.";
+  return `The search stopped early; showing results from ${answered} of ${n(entries.length, "store", "stores")}.`;
 }
 
 /** The empty state after Stop with nothing found yet: most stores never answered, so not "no match". */

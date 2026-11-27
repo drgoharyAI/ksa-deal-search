@@ -101,7 +101,10 @@ describe("NDJSON reading", () => {
   it("parseEvent accepts the protocol and skips the rest", () => {
     expect(parseEvent('{"type":"done"}')).toEqual({ type: "done" });
     expect(parseEvent('{"type":"store","store":"a","state":"ok","count":2}')).toEqual({ type: "store", store: "a", state: "ok", count: 2 });
-    expect(parseEvent('{"type":"store","store":"a","state":"percent"}')).toBeNull();
+    // A state name this client does not know yet is kept (the status row labels it); junk is not.
+    expect(parseEvent('{"type":"store","store":"a","state":"arabic-only"}')).toEqual({ type: "store", store: "a", state: "arabic-only" });
+    expect(parseEvent('{"type":"store","store":"a","state":"<b>x</b>"}')).toBeNull();
+    expect(parseEvent('{"type":"store","store":"a","state":42}')).toBeNull();
     expect(parseEvent('{"type":"results","products":"x"}')).toBeNull();
     expect(parseEvent("not json")).toBeNull();
     expect(parseEvent('{"type":"error"}')).toEqual({ type: "error", error: "The search failed; try again" });
@@ -135,16 +138,18 @@ describe("liveSummary: milestones only", () => {
 });
 
 describe("historyMove: Back and Forward on the search page", () => {
+  const key = "?q=jbl&sites=jarir&sort=price";
   it("the marked home entry shows the home", () => {
-    expect(historyMove("", { [HOME_ENTRY]: true, __NA: true }, { stashed: true, showingHome: false })).toBe("home");
+    expect(historyMove("", { [HOME_ENTRY]: true, __NA: true }, { stash: key, showingHome: false })).toBe("home");
   });
-  it("Back to a results entry with chip params restores the stashed results", () => {
-    expect(historyMove("?store=jarir", { __NA: true }, { stashed: true, showingHome: true })).toBe("restore");
+  it("Back to the stashed search's results entry, chips and all, restores the stashed results", () => {
+    expect(historyMove(`${key}&store=jarir`, { __NA: true }, { stash: key, showingHome: true })).toBe("restore");
   });
   it("otherwise the chips follow the URL", () => {
-    expect(historyMove("?store=jarir", null, { stashed: false, showingHome: true })).toBe("sync");
-    expect(historyMove("?store=jarir", null, { stashed: true, showingHome: false })).toBe("sync");
-    expect(historyMove("", null, { stashed: true, showingHome: true })).toBe("sync");
+    expect(historyMove("?store=jarir", null, { stash: null, showingHome: true })).toBe("sync");
+    expect(historyMove("?store=jarir", null, { stash: key, showingHome: false })).toBe("sync");
+    expect(historyMove("", null, { stash: key, showingHome: true })).toBe("sync");
+    expect(historyMove("?store=jarir", null, { stash: key, showingHome: true })).toBe("sync");
   });
 });
 

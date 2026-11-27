@@ -17,7 +17,7 @@ import ErrorState from "./components/ui/ErrorState";
 import { SkeletonCard } from "./components/ui/Skeleton";
 import WatchForm, { postWatch } from "./components/WatchForm";
 import { cheapestConfident, defaultTarget, priceOf } from "@/src/lib/alerts/shared";
-import { HOME_ENTRY, historyMove, urlWrite } from "@/src/lib/rerun";
+import { HOME_ENTRY, historyMove, searchKey, urlPlan } from "@/src/lib/rerun";
 import { parseShare, runOnce, shareSearch } from "@/src/lib/share";
 import CopyLink from "./components/CopyLink";
 import RecentlyViewed from "./components/RecentlyViewed";
@@ -39,7 +39,7 @@ import { allMembers, buildUnits, viewItems } from "@/src/lib/view";
 import type { GroupRef } from "@/src/lib/match/group";
 import { GroupOpenContext, type GroupOpen } from "./components/GroupCard";
 import {
-  initStream, liveSummary, readEvents, reduceStream, settle, showStoppedEmpty, STOPPED_EMPTY, stopStream, storeEntries, streamFromPayload, type SearchPayload, type StreamEvent, type StreamState,
+  initStream, liveSummary, readEvents, reduceStream, settle, showStoppedEmpty, STOPPED_EMPTY, stopStream, stoppedEarlyNotice, storeEntries, streamFromPayload, type SearchPayload, type StreamEvent, type StreamState,
 } from "@/src/lib/search-stream";
 
 type Filters = { minPrice?: number; maxPrice?: number; minRating?: number };
@@ -59,8 +59,11 @@ type Results = {
   /** The form filters this search ran with; a "Watch this search" keeps them. */
   filters: Filters;
 };
-/** What "go home" put aside, so Back to the results entry brings them back. */
-type Stash = { run: Run; values: FormValues; chips: ChipFilters; shown: number };
+/**
+ * What "go home" put aside, so Back to the results entry brings them back. `key`: that search's
+ * searchKey, so only its own entry restores it (Back to another search's entry runs that one).
+ */
+type Stash = { run: Run; values: FormValues; chips: ChipFilters; shown: number; key: string | null };
 type Phase = "idle" | "loading" | "done" | "error";
 
 const INITIAL: FormValues = {
@@ -170,7 +173,10 @@ export default function Home() {
     abortRef.current?.abort();
     abortRef.current = null;
     // A search still running is stopped first: Back must not bring back stores "Searching" forever.
-    stashRef.current = stash && run?.stream.results ? { run: { ...run, stream: stopStream(run.stream) }, values, chips, shown } : null;
+    stashRef.current =
+      stash && run?.stream.results
+        ? { run: { ...run, stream: stopStream(run.stream) }, values, chips, shown, key: searchKey(shareSearch({ ...run.form, sort: values.sort })) }
+        : null;
     setValues(INITIAL);
     setPhase("idle");
     setRun(null);
@@ -204,13 +210,14 @@ export default function Home() {
       },
       pop: () => {
         const qs = window.location.search;
-        const move = historyMove(qs, window.history.state, { stashed: !!stashRef.current, showingHome });
+        const move = historyMove(qs, window.history.state, { stash: stashRef.current?.key ?? null, showingHome });
         if (move === "home") {
           if (!showingHome) resetHome(true);
           return;
         }
         if (move === "run") {
-          // Back to a search left before any result came: run it again, as its shared link would.
+          // Back to a results entry whose results are not stashed (left before any came, or another
+          // search's): run it again, as its shared link would.
           const shared = parseShare(qs, INITIAL);
           if (shared) {
             setChips(shared.chips);
@@ -248,6 +255,8 @@ export default function Home() {
   // the chips and the compare selection back, and run that search once. runOnce defers the run to
   // the next task, so React's Strict Mode double mount (dev) still searches once.
   const autoRan = useRef(false);
+  // A results URL waiting for its search to start (runOnce defers it): the URL is left alone till then.
+  const pendingRun = useRef(false);
   useEffect(() => {
     const qs = window.location.search;
     // Read once after hydration (the server render has no URL state); not a cascade.
@@ -264,6 +273,7 @@ export default function Home() {
     }
     // The link in its own words: unknown keys and the old "run=1" dropped.
     window.history.replaceState(window.history.state, "", window.location.pathname + shareSearch(shared.values, shared.chips, shared.cmp));
+    pendingRun.current = true;
     setValues(shared.values);
     return runOnce(autoRan, () => void search(undefined, shared.values));
     // Runs once on mount by design.
@@ -272,17 +282,19 @@ export default function Home() {
 
   // The URL follows the page in place (replaceState: no history entry, no request): with a search
   // on screen it is the whole shareable link (query, stores, sort, limits, chips, compare);
-  // without one, only the chip and compare keys.
+  // without one (or one stopped with nothing to show), the clean "/" with only the chip and
+  // compare keys, so a failed or stopped search never leaves its query behind (urlPlan).
   const runForm = run?.form;
   // The search has something to show: a first result, or it finished on its own (not stopped).
   const committed = !!payload && (payload.products.length > 0 || (!!run?.stream.done && !run.stream.stopped));
+  const settled = !!run?.stream.done;
   useEffect(() => {
     if (!chipsRead) return;
-    const next = runForm
-      ? shareSearch({ ...runForm, sort: values.sort }, chips, cmp.keys)
-      : withCompareParam(withChipParams(window.location.search, chips), cmp.keys);
+    if (!runForm && pendingRun.current) return;
+    const plan = urlPlan(window.location.search, { form: runForm ? { ...runForm, sort: values.sort } : null, committed, settled, chips, cmp: cmp.keys });
+    const next = plan.search;
     if (next === window.location.search) return;
-    const write = urlWrite(window.location.search, !!runForm, committed);
+    const write = plan.write;
     if (write === "wait") return;
     if (write === "push") {
       // A search started from the home: the home keeps its own entry (marked, so Back shows the
@@ -292,9 +304,9 @@ export default function Home() {
       return;
     }
     // A results entry is never the marked "go home" entry, even when a search replaced that entry.
-    const state = Object.entries((window.history.state as Record<string, unknown> | null) ?? {}).filter(([k]) => !runForm || k !== HOME_ENTRY);
+    const state = Object.entries((window.history.state as Record<string, unknown> | null) ?? {}).filter(([k]) => !plan.results || k !== HOME_ENTRY);
     window.history.replaceState(Object.fromEntries(state), "", window.location.pathname + next);
-  }, [chips, cmp.keys, chipsRead, runForm, values.sort, committed]);
+  }, [chips, cmp.keys, chipsRead, runForm, values.sort, committed, settled]);
 
   // Cards: a cross-store group is one card, every other product one card. Chips narrow the cards
   // (a group passes when any member does), then sort and the match tiers apply; no new request.
@@ -350,19 +362,26 @@ export default function Home() {
     setRun(null);
   };
 
+  // A form the search cannot run: the message shows at its field. The search on screen (results,
+  // or one still running) stays as it is; with none, the page is in the error phase.
+  const invalid = (msg: string) => {
+    setError(msg);
+    setErrorField(fieldFor(msg));
+    if (!run) setPhase("error");
+  };
+
   async function search(query?: string, base: FormValues = values) {
-    abortRef.current?.abort();
-    abortRef.current = null;
     // A picked suggestion (or a re-run from History) is passed in because the state update has not landed yet.
     const v = query === undefined ? base : { ...base, query };
-    if (!v.query.trim()) {
-      fail("Enter something to search for");
+    // Checked before anything stops: an invalid form never ends the search on screen.
+    const problem = !v.query.trim() ? "Enter something to search for" : !v.sites.length ? "Pick at least one store" : null;
+    if (problem) {
+      invalid(problem);
       return;
     }
-    if (!v.sites.length) {
-      fail("Pick at least one store");
-      return;
-    }
+    abortRef.current?.abort();
+    abortRef.current = null;
+    pendingRun.current = false;
 
     const ctrl = new AbortController();
     abortRef.current = ctrl;
@@ -507,12 +526,14 @@ export default function Home() {
   const withResults = stores.filter((e) => e.state === "ok").length;
   const coverage = !stores.length ? "" : loading ? `${answered} of ${stores.length} stores answered` : `Results from ${withResults} of ${stores.length} ${stores.length === 1 ? "store" : "stores"}`;
   const lastChip = activeChips(chips, currency).at(-1);
+  // A server error after some stores answered: the results stay, with a notice that they are partial.
+  const earlyNotice = !loading && run ? stoppedEarlyNotice(run.stream) : null;
   const formLimits = !!(run && (run.filters.minPrice !== undefined || run.filters.maxPrice !== undefined || run.filters.minRating !== undefined));
 
   // A short summary at milestones (start, first results, end), never a line per store.
   let live = "";
-  if (loading) live = run ? liveSummary(run.stream, items.length) : "";
-  else if (phase === "error" && error) live = error;
+  if (error) live = error;
+  else if (loading) live = run ? liveSummary(run.stream, items.length) : "";
   else if (phase === "done" && results && filtering) live = liveFilter;
   else if (phase === "done" && results && run) live = items.length || run.stream.stopped ? liveSummary(run.stream, items.length) : (results.reason ?? "");
 
@@ -606,6 +627,15 @@ export default function Home() {
                     return err;
                   }}
                 />
+              )}
+
+              {earlyNotice && (
+                <div className="notice" role="status">
+                  <p>{earlyNotice}</p>
+                  <Button size="sm" variant="secondary" onClick={() => searchWith({})}>
+                    Search again
+                  </Button>
+                </div>
               )}
 
               <ResultsLayout
