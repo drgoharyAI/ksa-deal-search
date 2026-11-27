@@ -283,9 +283,21 @@ non-goals for these three.
 - **Out-of-stock listings (owner request, 2026-11-27):** a product the store's search answer
   explicitly marks out of stock is dropped in the pipeline's filter step; unknown stock is kept, and
   stock is never guessed from a missing field. `Product.inStock` is set only from a stated field:
-  eXtra `inStockFlag`, Trendyol `tagStockBar.isSoldOut`, SHEIN `soldOutStatus`, SACO's card badge
-  ("Out of stock" with only "Click and pick" offered). AliExpress, Amazon, Jarir, noon and Carrefour
-  state nothing reliable in search results, so their products stay unknown.
+  eXtra `inStockFlag`, Trendyol `tagStockBar.isSoldOut`, SHEIN `soldOutStatus`, SACO's "In stock" /
+  "Limited stock" badge. AliExpress, Amazon, Jarir, noon and Carrefour state nothing reliable in
+  search results, so their products stay unknown. A watched product dropped as out of stock reports
+  "out of stock" on the Alerts page, not "not found".
+- **Branch pickup only (owner decision, 2026-11-27, replaces dropping SACO's "Click and pick"):**
+  SACO cards whose only option is "Click and pick" (badge "Out of stock" or none) cannot be delivered
+  from the default region but can be collected at a branch. They are kept as `Product.pickupOnly`,
+  shown with a quiet "Branch pickup only" badge on the card, the grouped card row and the compare
+  view, and ranked after the deliverable listings of their match tier, so cheapest-first starts with
+  the cheapest deliverable listing. They get no deal badge or trend, are not peers for the others'
+  badges, are not recorded as price observations, never trigger an alert (a product watch on one
+  reports "pickup only"), and are never a history entry's cheapest match. Only explicit signals count:
+  an "Out of stock" badge with no button, or with "Add to cart", is unknown.
+  Known gap: the server orders results this way, but the client's own re-sort and a group's lead row
+  use `rank()` in `src/lib/rank.ts`, which this change could not edit (another agent's file).
 
 ## Search history and price alerts (owner, 2026-11-27)
 These move out of non-goals.
