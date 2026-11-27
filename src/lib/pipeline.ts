@@ -15,7 +15,6 @@ import { markWeakMatches } from "@/src/lib/match/structure";
 import { scoreMatches } from "@/src/lib/match/confidence";
 import { sites as registry } from "@/src/sites/registry";
 import { rank, type SortKey } from "./rank";
-import { deliverableFirst } from "./availability";
 import { hasValidPrice, isExcluded, notOutOfStock, passesPriceRating, ratinglessSites } from "./filters";
 
 export type SearchInput = {
@@ -245,8 +244,8 @@ export function assembleResults(
   opts.onFiltered?.(products);
   // Groups come from listings deduped within each store only, so each store keeps its row; the
   // product list stays deduped across stores until the grouped card shows the groups.
-  const perStore = deliverableFirst(rank(dedupeByStore(products), input.sort));
-  products = deliverableFirst(rank(dedupe(products), input.sort));
+  const perStore = rank(dedupeByStore(products), input.sort);
+  products = rank(dedupe(products), input.sort);
   const groups = orderGroups(groupProducts(perStore), input.sort).filter((g) => g.members.length > 1);
   const groupOf = new Map(groups.flatMap((g) => g.members.map((p) => [p, g.key] as const)));
   const listed = new Set(products);

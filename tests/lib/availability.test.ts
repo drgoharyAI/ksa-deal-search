@@ -1,5 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { deliverableFirst } from "@/src/lib/availability";
+import { rank } from "@/src/lib/rank";
+import { groupRows } from "@/src/lib/view";
+import { orderGroups, type ProductGroup } from "@/src/lib/match/group";
 import { runSearch } from "@/src/lib/pipeline";
 import { sites } from "@/src/sites/registry";
 import { insightsFor, recordObservations } from "@/src/lib/insights";
@@ -16,14 +18,42 @@ const P = (id: string, price: number, extra: Partial<Product> = {}): Product => 
   rating: null, soldCount: 0, image: "", url: `https://a.example/${id}`, finalPrice: price, detailStatus: "ok", matchScore: 0.9, ...extra,
 });
 
-describe("deliverableFirst (ranking)", () => {
-  it("puts pickup-only listings after the deliverable ones of the same match tier, order otherwise kept", () => {
-    const ranked = [P("a", 100, { pickupOnly: true }), P("b", 150), P("c", 200), P("d", 50, { matchScore: 0.3 }), P("e", 60, { matchScore: 0.3, pickupOnly: true }), P("f", 70, { matchScore: 0.3 })];
-    expect(deliverableFirst(ranked).map((p) => p.id)).toEqual(["b", "c", "a", "d", "f", "e"]);
+describe("rank(): deliverable before branch-pickup-only within each match tier", () => {
+  const items = () => [
+    P("a", 100, { pickupOnly: true, origPrice: 400, discountPct: 75, rating: 5 }),
+    P("b", 150, { origPrice: 200, discountPct: 25 }),
+    P("c", 200),
+    P("d", 50, { matchScore: 0.3 }),
+    P("e", 60, { matchScore: 0.3, pickupOnly: true }),
+    P("f", 70, { matchScore: 0.3 }),
+    P("w", 10, { weakMatch: true, pickupOnly: true }),
+    P("x", 20, { weakMatch: true }),
+  ];
+  it.each(["price", "discount", "deal"] as const)("sort %s", (sort) => {
+    const ids = rank(items(), sort).map((p) => p.id);
+    const pos = (id: string) => ids.indexOf(id);
+    // tiers stay in order, and in each tier every deliverable listing precedes every pickup-only one
+    expect(Math.max(pos("a"), pos("b"), pos("c"))).toBeLessThan(Math.min(pos("d"), pos("e"), pos("f")));
+    expect(Math.max(pos("b"), pos("c"))).toBeLessThan(pos("a"));
+    expect(Math.max(pos("d"), pos("f"))).toBeLessThan(pos("e"));
+    expect(pos("x")).toBeLessThan(pos("w"));
   });
-  it("returns the same array when nothing is pickup-only", () => {
-    const ranked = [P("a", 1), P("b", 2)];
-    expect(deliverableFirst(ranked)).toBe(ranked);
+  it("price: the cheapest deliverable listing comes first, the cheaper pickup-only one after the deliverable ones", () => {
+    expect(rank(items(), "price").map((p) => p.id)).toEqual(["b", "c", "a", "d", "f", "e", "x", "w"]);
+  });
+  it("leaves the order alone when nothing is pickup-only", () => {
+    const ps = [P("b", 200), P("a", 100)];
+    expect(rank(ps, "price").map((p) => p.id)).toEqual(["a", "b"]);
+  });
+  it("a group's lead and its rows follow it: the deliverable member leads", () => {
+    const pickup = P("p", 100, { site: "saco-sa", pickupOnly: true });
+    const ship = P("s", 120, { site: "noon-sa" });
+    const other = P("o", 110, { site: "jarir", title: "Other Fryer" });
+    const g1 = { key: "g1", members: [pickup, ship] } as unknown as ProductGroup;
+    const g2 = { key: "g2", members: [other] } as unknown as ProductGroup;
+    expect(groupRows([pickup, ship]).map((p) => p.id)).toEqual(["s", "p"]);
+    // g1 stands at its deliverable 120, after g2's 110 (not at the pickup-only 100)
+    expect(orderGroups([g1, g2], "price").map((g) => g.key)).toEqual(["g2", "g1"]);
   });
 });
 

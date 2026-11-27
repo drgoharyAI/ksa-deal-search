@@ -28,14 +28,21 @@ export function dealScore(p: Product, minPrice: number, maxPrice: number): numbe
 /**
  * Tiered and stable (Array.prototype.sort is stable); never mutates the input. Confident matches
  * come first, then the less likely ones (low matchScore), then weak matches; each tier is sorted
- * by the chosen key. Pure and client-safe: the UI re-ranks with it when the sort changes.
+ * by the chosen key, deliverable listings before branch-pickup-only ones (so cheapest-first starts
+ * with the cheapest deliverable listing). Pure and client-safe: the UI re-ranks with it when the
+ * sort changes, and a group's lead row is its first member under it.
  */
 export function rank(products: Product[], sort: SortKey): Product[] {
   const confident = products.filter(isLikelyMatch);
   const doubtful = products.filter((p) => !isLikelyMatch(p) && !p.weakMatch);
   const weak = products.filter((p) => p.weakMatch);
-  return [confident, doubtful, weak].flatMap((tier) => (tier.length ? sortBy(tier, sort) : []));
+  return [confident, doubtful, weak].flatMap((tier) => [
+    ...sortTier(tier.filter((p) => !p.pickupOnly), sort),
+    ...sortTier(tier.filter((p) => p.pickupOnly), sort),
+  ]);
 }
+
+const sortTier = (tier: Product[], sort: SortKey): Product[] => (tier.length ? sortBy(tier, sort) : []);
 
 function sortBy(products: Product[], sort: SortKey): Product[] {
   const out = [...products];
