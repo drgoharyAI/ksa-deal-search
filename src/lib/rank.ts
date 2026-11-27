@@ -1,5 +1,5 @@
 import type { Product } from "@/src/lib/types";
-import { storeDiscount } from "@/src/lib/discount";
+import { isFromPrice, storeDiscount } from "@/src/lib/discount";
 
 export type SortKey = "price" | "discount" | "deal";
 
@@ -29,16 +29,22 @@ export function dealScore(p: Product, minPrice: number, maxPrice: number): numbe
  * Tiered and stable (Array.prototype.sort is stable); never mutates the input. Confident matches
  * come first, then the less likely ones (low matchScore), then weak matches; each tier is sorted
  * by the chosen key, deliverable listings before branch-pickup-only ones (so cheapest-first starts
- * with the cheapest deliverable listing). Pure and client-safe: the UI re-ranks with it when the
- * sort changes, and a group's lead row is its first member under it.
+ * with the cheapest deliverable listing). In the price sort, "from" prices (isFromPrice: a store's
+ * cheapest variant) come after the fixed prices of their part, so they never pass as the cheapest.
+ * Pure and client-safe: the UI re-ranks with it when the sort changes, and a group's lead row is
+ * its first member under it.
  */
 export function rank(products: Product[], sort: SortKey): Product[] {
   const confident = products.filter(isLikelyMatch);
   const doubtful = products.filter((p) => !isLikelyMatch(p) && !p.weakMatch);
   const weak = products.filter((p) => p.weakMatch);
+  const fixedFirst = (part: Product[]): Product[] =>
+    sort === "price"
+      ? [...sortTier(part.filter((p) => !isFromPrice(p)), sort), ...sortTier(part.filter(isFromPrice), sort)]
+      : sortTier(part, sort);
   return [confident, doubtful, weak].flatMap((tier) => [
-    ...sortTier(tier.filter((p) => !p.pickupOnly), sort),
-    ...sortTier(tier.filter((p) => p.pickupOnly), sort),
+    ...fixedFirst(tier.filter((p) => !p.pickupOnly)),
+    ...fixedFirst(tier.filter((p) => p.pickupOnly)),
   ]);
 }
 

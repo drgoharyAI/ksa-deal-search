@@ -1,5 +1,6 @@
 import type { Product } from "@/src/lib/types";
-import { rank, type SortKey } from "@/src/lib/rank";
+import { isLikelyMatch, rank, type SortKey } from "@/src/lib/rank";
+import { isFromPrice } from "@/src/lib/discount";
 import { passes, type ChipContext, type ChipFilters } from "@/src/lib/chips";
 import { productKey } from "@/src/lib/specs";
 import type { GroupRef } from "@/src/lib/match/group";
@@ -77,11 +78,16 @@ export function groupRows(pass: Product[]): Product[] {
   return [...ranked.filter((p) => currencyOf(p) === lead), ...ranked.filter((p) => currencyOf(p) !== lead)];
 }
 
-/** "Best price" goes to rows[0] only when no row in its currency is cheaper and one other shares it. */
+/**
+ * "Best price" goes to the first fixed-price row only when no fixed-price row in its currency is
+ * cheaper and another one shares it. A "from" price (isFromPrice: the cheapest variant, AliExpress)
+ * is never the best price and is never compared, as in the compare table.
+ */
 export function bestPriceRow(rows: Product[]): Product | null {
-  const lead = rows[0];
-  if (!lead) return null;
-  const same = rows.filter((p) => currencyOf(p) === currencyOf(lead));
+  const fixed = rows.filter((p) => !isFromPrice(p));
+  const lead = fixed[0];
+  if (!lead || !isLikelyMatch(lead)) return null;
+  const same = fixed.filter((p) => currencyOf(p) === currencyOf(lead));
   if (same.length < 2) return null;
   return same.every((p) => priceOf(p) >= priceOf(lead)) ? lead : null;
 }

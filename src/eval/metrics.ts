@@ -1,5 +1,6 @@
 import type { Product } from "@/src/lib/types";
 import { deliverable } from "@/src/lib/availability";
+import { isFromPrice } from "@/src/lib/discount";
 import { hasValidPrice, isExcluded, notOutOfStock, passesPriceRating, ratinglessSites, type PriceRatingFilters } from "@/src/lib/filters";
 
 export type Label = "relevant" | "accessory" | "wrong-model" | "off-topic";
@@ -21,7 +22,7 @@ export type QueryMetrics = {
   recall: number | null;
   relevantRecorded: number;
   relevantKept: number;
-  /** End to end: #1 under the "price" sort is relevant and no eligible, deliverable relevant recorded item is cheaper. null = none eligible. */
+  /** End to end: #1 under the "price" sort is relevant and no eligible, deliverable, fixed-price relevant recorded item is cheaper. null = none eligible. */
   cheapestRelevantFirst: boolean | null;
 };
 
@@ -76,8 +77,9 @@ export function computeMetrics(args: {
   const keptKeys = new Set(kept.map(labelKey));
   const relevantKept = relevantKeys.filter((k) => keptKeys.has(k)).length;
 
-  // Cheapest-first means the cheapest deliverable listing: branch-pickup-only ones rank after it.
-  const deliverableRelevant = eligibleRelevant.filter(deliverable);
+  // Cheapest-first means the cheapest deliverable, fixed-price listing: branch-pickup-only ones and
+  // "from" prices (isFromPrice, AliExpress's cheapest variant) rank after it.
+  const deliverableRelevant = eligibleRelevant.filter((p) => deliverable(p) && !isFromPrice(p));
   let cheapestRelevantFirst: boolean | null = null;
   if (deliverableRelevant.length) {
     const cheapest = Math.min(...deliverableRelevant.map(priceOf));

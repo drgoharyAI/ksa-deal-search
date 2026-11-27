@@ -1,5 +1,6 @@
 import type { Product } from "@/src/lib/types";
 import { isLikelyMatch } from "@/src/lib/rank";
+import { isFromPrice } from "@/src/lib/discount";
 
 /** Client-safe shapes and helpers for history and price alerts (no server imports). */
 
@@ -71,13 +72,14 @@ export const priceOf = (p: Product): number => p.finalPrice ?? p.listPrice;
 export const defaultTarget = (price: number): number => Math.round(price * 0.95 * 100) / 100;
 
 /**
- * The cheapest confident, deliverable match, or null. "Less likely" matches and branch-pickup-only
- * listings never count (no alert fires on them, history does not call them the cheapest).
+ * The cheapest confident, deliverable, fixed-price match, or null. "Less likely" matches,
+ * branch-pickup-only listings and "from" prices (isFromPrice: a store's cheapest variant) never
+ * count (no alert fires on them, history does not call them the cheapest).
  */
 export function cheapestConfident(products: Product[]): Product | null {
   let best: Product | null = null;
   for (const p of products) {
-    if (!isLikelyMatch(p) || p.pickupOnly) continue;
+    if (!isLikelyMatch(p) || p.pickupOnly || isFromPrice(p)) continue;
     if (!best || priceOf(p) < priceOf(best)) best = p;
   }
   return best;
