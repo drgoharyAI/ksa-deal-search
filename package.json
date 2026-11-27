@@ -6,7 +6,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/drgoharyAI/deal-search-ksa.git"
+    "url": "git+https://github.com/drgoharyAI/ksa-deal-search.git"
   },
   "engines": {
     "node": ">=22.13"

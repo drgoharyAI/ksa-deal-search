@@ -2,7 +2,7 @@
 
 ## Design: no authentication
 
-deal-search-ksa has **no login, no user accounts and no rate limiting, by design**. It is a
+ksa-deal-search has **no login, no user accounts and no rate limiting, by design**. It is a
 personal tool meant to run on your own machine, a trusted home network, or behind a private
 tunnel or access layer (for example a Cloudflare Tunnel protected by Cloudflare Access, or a VPN).
 
@@ -28,7 +28,7 @@ authentication layer in front of it.
 
 Please report vulnerabilities privately through GitHub:
 **Security > Advisories > Report a vulnerability** on
-<https://github.com/drgoharyAI/deal-search-ksa/security/advisories/new>.
+<https://github.com/drgoharyAI/ksa-deal-search/security/advisories/new>.
 
 Do not open a public issue for a security problem. Include the affected version or commit, the
 steps to reproduce, and the impact. You should get a reply within 7 days.

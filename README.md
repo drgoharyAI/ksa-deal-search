@@ -1,6 +1,6 @@
-# deal-search-ksa
+# KSA Deal Search
 
-[![CI](https://github.com/drgoharyAI/deal-search-ksa/actions/workflows/ci.yml/badge.svg)](https://github.com/drgoharyAI/deal-search-ksa/actions/workflows/ci.yml)
+[![CI](https://github.com/drgoharyAI/ksa-deal-search/actions/workflows/ci.yml/badge.svg)](https://github.com/drgoharyAI/ksa-deal-search/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 A self-hosted Next.js 16 + TypeScript app that searches eight Saudi online stores at once,

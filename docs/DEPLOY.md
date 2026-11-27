@@ -89,7 +89,7 @@ which makes `navigator.webdriver` true and gets noon's 403), headed, attached ov
 ## First deploy (from the PC)
 
 ```bash
-cd deal-search-ksa                # your clone
+cd ksa-deal-search                # your clone
 cp .env.example /tmp/deal.env    # then edit: APP_HOSTS, TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID
 ENV_FILE=/tmp/deal.env scripts/deploy.sh
 rm /tmp/deal.env
