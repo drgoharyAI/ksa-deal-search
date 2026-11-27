@@ -225,6 +225,25 @@ export default function QueryCombobox({ value, onChange, onSubmit, loading, inva
         aria-invalid={invalid ? true : undefined}
         aria-describedby={describedBy}
       />
+      {value !== "" && (
+        <button
+          type="button"
+          className="combo__clear"
+          aria-label="Clear search text"
+          title="Clear"
+          onMouseDown={(e) => e.preventDefault()}
+          onClick={() => {
+            onChange("");
+            setActive(-1);
+            inputRef.current?.focus();
+            setOpen(true);
+          }}
+        >
+          <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" focusable="false">
+            <path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" />
+          </svg>
+        </button>
+      )}
       <ul id={LIST_ID} role="listbox" aria-label="Suggestions" className="combo__list" hidden={!shown}>
         {shown &&
           options.map((o, i) => (

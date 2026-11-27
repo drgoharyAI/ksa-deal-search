@@ -68,6 +68,17 @@
 /* Query suggestions: a WAI-ARIA combobox; focus stays in the input, the active option is shaded */
 .combo { position: relative; flex: 1 1 16rem; min-width: 0; }
 .combo .input--query { width: 100%; }
+/* One-click clear: our own button (the native search "x" is hover-only and missing in some browsers). */
+.combo .input--query { padding-inline-end: calc(var(--target) + var(--space-2xs)); }
+.combo .input--query::-webkit-search-cancel-button { appearance: none; display: none; }
+.combo__clear {
+  position: absolute; inset-block: 0; inset-inline-end: var(--space-2xs); margin-block: auto;
+  inline-size: var(--target); block-size: var(--target);
+  display: grid; place-items: center; padding: 0; border: 0; border-radius: var(--radius-sm);
+  background: transparent; color: var(--color-ink-2); cursor: pointer;
+}
+.combo__clear:hover { color: var(--color-ink); background: var(--color-paper-2); }
+.combo__clear:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 1px; }
 .combo__list { position: absolute; inset-inline: 0; top: calc(100% + var(--space-2xs)); z-index: var(--z-dropdown); margin: 0; padding: var(--space-2xs) 0; list-style: none; border: 1px solid var(--color-rule-2); border-radius: var(--radius-sm); background: var(--color-surface); color: var(--color-ink); box-shadow: var(--shadow-2); }
 .combo__list[hidden] { display: none; }
 .combo__opt { display: flex; align-items: center; gap: var(--space-xs); min-height: var(--target); padding: var(--space-2xs) var(--space-sm); font-size: var(--text-md); cursor: pointer; }
