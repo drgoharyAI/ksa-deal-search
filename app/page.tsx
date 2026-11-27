@@ -1,68 +1,193 @@
-import Image from "next/image";
+"use client";
+
+import { useEffect, useMemo, useRef, useState } from "react";
+import { rank } from "@/src/lib/rank";
+import type { Product, SiteStatus } from "@/src/lib/types";
+import { STORES } from "@/src/lib/stores";
+import SearchForm, { type ErrorField, type FormValues } from "./components/SearchForm";
+import StatusBar from "./components/StatusBar";
+import ResultCard from "./components/ResultCard";
+
+type Results = { products: Product[]; statuses: SiteStatus[]; reason?: string };
+type Phase = "idle" | "loading" | "done" | "error";
+
+const INITIAL: FormValues = {
+  query: "",
+  sites: STORES.map((s) => s.id),
+  sort: "price",
+  minPrice: "",
+  maxPrice: "",
+  minRating: "",
+};
+
+const SKELETONS = 10;
+
+const toNum = (s: string): number | undefined => {
+  const t = s.trim();
+  if (!t) return undefined;
+  const n = Number(t);
+  return Number.isFinite(n) ? n : undefined;
+};
+
+const fieldFor = (msg: string): ErrorField =>
+  msg === "Pick at least one store" ? "sites" : msg === "Enter something to search for" || msg === "Search is too long" ? "query" : "form";
 
 export default function Home() {
+  const [values, setValues] = useState<FormValues>(INITIAL);
+  const [phase, setPhase] = useState<Phase>("idle");
+  const [results, setResults] = useState<Results | null>(null);
+  const [pending, setPending] = useState<string[] | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [errorField, setErrorField] = useState<ErrorField>(null);
+  const abortRef = useRef<AbortController | null>(null);
+
+  useEffect(() => () => abortRef.current?.abort(), []);
+
+  // Sort changes re-rank the current results in place; no new request.
+  const products = useMemo(() => (results ? rank(results.products, values.sort) : []), [results, values.sort]);
+  const counts = useMemo(() => {
+    const c: Record<string, number> = {};
+    for (const p of results?.products ?? []) c[p.site] = (c[p.site] ?? 0) + 1;
+    return c;
+  }, [results]);
+
+  const fail = (msg: string) => {
+    setError(msg);
+    setErrorField(fieldFor(msg));
+    setPhase("error");
+    setPending(null);
+  };
+
+  async function search() {
+    abortRef.current?.abort();
+    abortRef.current = null;
+    if (!values.query.trim()) return fail("Enter something to search for");
+    if (!values.sites.length) return fail("Pick at least one store");
+
+    const ctrl = new AbortController();
+    abortRef.current = ctrl;
+    setError(null);
+    setErrorField(null);
+    setPhase("loading");
+    setPending(values.sites);
+
+    const body = {
+      query: values.query,
+      sites: values.sites,
+      sort: values.sort,
+      minPrice: toNum(values.minPrice),
+      maxPrice: toNum(values.maxPrice),
+      minRating: toNum(values.minRating),
+    };
+    try {
+      const res = await fetch("/api/search", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(body),
+        signal: ctrl.signal,
+      });
+      const data = (await res.json().catch(() => null)) as (Results & { error?: string }) | null;
+      if (ctrl.signal.aborted) return;
+      if (!res.ok || !data || !Array.isArray(data.products)) {
+        return fail(data?.error ?? "The search failed; try again");
+      }
+      setResults({ products: data.products, statuses: data.statuses ?? [], reason: data.reason });
+      setPending(null);
+      setPhase("done");
+    } catch (e) {
+      if (ctrl.signal.aborted || (e instanceof DOMException && e.name === "AbortError")) return;
+      fail("Could not reach the search server; check it is running and try again");
+    } finally {
+      if (abortRef.current === ctrl) abortRef.current = null;
+    }
+  }
+
+  function stop() {
+    abortRef.current?.abort();
+    abortRef.current = null;
+    setPending(null);
+    setPhase(results ? "done" : "idle");
+  }
+
+  const loading = phase === "loading";
+  const formError = errorField === "form" ? error : null;
+
+  let live = "";
+  if (loading) live = `Searching ${values.sites.length} ${values.sites.length === 1 ? "store" : "stores"}`;
+  else if (phase === "error" && error) live = error;
+  else if (phase === "done" && results) live = products.length ? `${products.length} results` : (results.reason ?? "");
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
+    <div className="app">
+      <header className="topbar">
+        <div className="container topbar__inner">
+          <h1 className="wordmark">Deal search</h1>
+          <p className="topbar__note">Five Saudi stores, prices in SAR</p>
+        </div>
+      </header>
+
+      <main className="container main">
+        <SearchForm
+          values={values}
+          onChange={setValues}
+          onSubmit={search}
+          onStop={stop}
+          loading={loading}
+          error={error}
+          errorField={errorField}
         />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+
+        <p className="visually-hidden" role="status" aria-live="polite">
+          {live}
+        </p>
+
+        {formError && (
+          <p className="notice notice--error" role="alert">
+            {formError}
           </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
+        )}
+
+        <StatusBar pending={loading ? pending : null} statuses={results?.statuses ?? []} counts={counts} />
+
+        <section className="results" aria-labelledby="results-head" aria-busy={loading || undefined}>
+          <div className="results__head">
+            <h2 id="results-head">{loading ? "Searching" : results && products.length ? `${products.length} results` : "Results"}</h2>
+            {!loading && results && products.length > 0 && <p className="results__note">Prices exclude shipping</p>}
+          </div>
+
+          {loading ? (
+            <ul className="grid" aria-hidden="true">
+              {Array.from({ length: SKELETONS }, (_, i) => (
+                <li key={i} className="card card--skeleton">
+                  <div className="card__media skeleton" />
+                  <div className="card__body">
+                    <span className="skeleton skeleton--line" />
+                    <span className="skeleton skeleton--line skeleton--short" />
+                    <span className="skeleton skeleton--price" />
+                  </div>
+                </li>
+              ))}
+            </ul>
+          ) : results && products.length ? (
+            <ul className="grid">
+              {products.map((p) => (
+                <li key={`${p.site}+${p.id}`}>
+                  <ResultCard product={p} />
+                </li>
+              ))}
+            </ul>
+          ) : results ? (
+            <div className="empty">
+              <p className="empty__title">{results.reason ?? "No products matched your search and filters"}</p>
+              <p className="empty__body">Try fewer words, another store, or looser price and rating filters.</p>
+            </div>
+          ) : (
+            <div className="empty">
+              <p className="empty__title">Nothing searched yet</p>
+              <p className="empty__body">Type a product above and press Search to compare prices across the stores you picked.</p>
+            </div>
+          )}
+        </section>
       </main>
     </div>
   );
