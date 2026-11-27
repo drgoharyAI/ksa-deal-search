@@ -8,7 +8,7 @@ import { tokenizeKeepDigits, hasDigit } from "./tokenize";
 const ACCESSORY = new Set<string>(words);
 /** Part nouns that, right after the product noun, name a part of it ("Mouse Pad", "Watch Band"). */
 const PART = new Set<string>(partWords);
-const CONNECTOR = /\b(?:with|includes?|including)\b|[+&]/i;
+const CONNECTOR = /\b(?:with|includes?|including)\b|\s[+&]\s/i; // "S24+" is a model, " + " joins items
 
 /** A candidate accessory is priced below this fraction of the median non-candidate price. */
 const PRICE_RATIO = 0.4;

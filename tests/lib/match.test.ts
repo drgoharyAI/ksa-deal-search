@@ -278,3 +278,10 @@ describe("part nouns after the product noun (12c)", () => {
     expect(isStrongAccessory("Apple Watch Series 9 GPS Sport Band", ["apple", "watch"], [["apple", "watch"]])).toBe(false);
   });
 });
+
+describe("title core (12c)", () => {
+  it("a model '+' is not a connector: 'S24+ Case' is a case", () => {
+    expect(isAccessory("Samsung Galaxy S24+ Case, Premium Leather", ["samsung", "galaxy", "s24"])).toBe(true);
+    expect(isAccessory("Galaxy Buds + Case", ["galaxy", "buds"])).toBe(false);
+  });
+});

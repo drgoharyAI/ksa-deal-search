@@ -88,3 +88,10 @@ round and removed: it only cost recall on multi-pack cables.)
 | p@10 | acc@10 | wrong@10 | recall | cheapest-first |
 |---|---|---|---|---|
 | 85% | 3% | 4% | 90% | 60% |
+
+## Round 6: "+" splits the title core only between spaces (kept)
+The accessory check reads the title before "with / includes / + / &"; a "+" glued to a model
+("Galaxy S24+ Case") no longer hides the accessory word behind it.
+| p@10 | acc@10 | wrong@10 | recall | cheapest-first |
+|---|---|---|---|---|
+| 85% (84.7→85.3) | 3% | 4% | 90% | 60% |

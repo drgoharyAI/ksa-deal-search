@@ -1,5 +1,5 @@
 {
-  "at": "2026-11-27T02:01:10.572Z",
+  "at": "2026-11-27T02:02:13.705Z",
   "queries": [
     {
       "query": "anc earbuds under 300",
@@ -54,7 +54,7 @@
         }
       ],
       "recordedItems": 682,
-      "results": 302,
+      "results": 301,
       "missingCalls": [],
       "labelled": true,
       "metrics": {
@@ -63,9 +63,9 @@
         "accessoryAt10": 0,
         "wrongModelAt10": 0.1,
         "unlabeledAt10": 0,
-        "recall": 0.8554216867469879,
+        "recall": 0.8530120481927711,
         "relevantRecorded": 415,
-        "relevantKept": 355,
+        "relevantKept": 354,
         "cheapestRelevantFirst": true
       },
       "top": [
@@ -754,7 +754,7 @@
         }
       ],
       "recordedItems": 554,
-      "results": 290,
+      "results": 288,
       "missingCalls": [],
       "labelled": true,
       "metrics": {
@@ -763,9 +763,9 @@
         "accessoryAt10": 0,
         "wrongModelAt10": 0,
         "unlabeledAt10": 0,
-        "recall": 0.8275862068965517,
+        "recall": 0.8226600985221675,
         "relevantRecorded": 406,
-        "relevantKept": 336,
+        "relevantKept": 334,
         "cheapestRelevantFirst": false
       },
       "top": [
@@ -1174,13 +1174,13 @@
         }
       ],
       "recordedItems": 451,
-      "results": 45,
+      "results": 44,
       "missingCalls": [],
       "labelled": true,
       "metrics": {
         "top": 10,
-        "precisionAt10": 0.9,
-        "accessoryAt10": 0.1,
+        "precisionAt10": 1,
+        "accessoryAt10": 0,
         "wrongModelAt10": 0,
         "unlabeledAt10": 0,
         "recall": 0.9818181818181818,
@@ -1189,13 +1189,6 @@
         "cheapestRelevantFirst": false
       },
       "top": [
-        {
-          "key": "amazon-sa:B0DHWSFVSS",
-          "store": "amazon-sa",
-          "price": 28.13,
-          "title": "Samsung Galaxy S24+ Case, Premium Leather Case with Card Compartment, RFID Blocking, Flip Case Stand Function Flip Cover Protective Case for Samsung Galaxy S24+, Red",
-          "label": "accessory"
-        },
         {
           "key": "noon-sa:N70251433V",
           "store": "noon-sa",
@@ -1258,6 +1251,13 @@
           "price": 1773.58,
           "title": "Samsung Galaxy S24 5G S921U1 S921B S9210 S921N ROM 128GB/256GB/512GB RAM 8/12GB Original Android AI Cell Phone Virtually New",
           "label": "relevant"
+        },
+        {
+          "key": "noon-sa:N70383324V",
+          "store": "noon-sa",
+          "price": 1799,
+          "title": "Samsung Renewed - Galaxy S24 Dual SIM Cobalt Violet 8GB RAM 256GB 5G - International Version",
+          "label": "relevant"
         }
       ]
     },
@@ -1314,7 +1314,7 @@
         }
       ],
       "recordedItems": 502,
-      "results": 285,
+      "results": 287,
       "missingCalls": [],
       "labelled": true,
       "metrics": {
@@ -1323,9 +1323,9 @@
         "accessoryAt10": 0,
         "wrongModelAt10": 0,
         "unlabeledAt10": 0,
-        "recall": 0.7666666666666667,
+        "recall": 0.7714285714285715,
         "relevantRecorded": 420,
-        "relevantKept": 322,
+        "relevantKept": 324,
         "cheapestRelevantFirst": true
       },
       "top": [
@@ -2104,10 +2104,10 @@
   ],
   "overall": {
     "queries": 15,
-    "precisionAt10": 0.8466666666666668,
-    "accessoryAt10": 0.03333333333333333,
+    "precisionAt10": 0.8533333333333333,
+    "accessoryAt10": 0.02666666666666667,
     "wrongModelAt10": 0.04,
-    "recall": 0.8958468757428353,
+    "recall": 0.8956752862650555,
     "cheapestRelevantFirst": 0.6
   }
 }
