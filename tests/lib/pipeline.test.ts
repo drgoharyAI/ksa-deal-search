@@ -210,7 +210,29 @@ describe("runSearch", () => {
 
 describe("POST /api/search", () => {
   const post = (body: unknown) =>
-    POST(new Request("http://x/api/search", { method: "POST", body: JSON.stringify(body) }));
+    POST(
+      new Request("http://localhost:3000/api/search", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(body),
+      }),
+    );
+
+  it("415 for a CORS-simple text/plain body; 403 for a cross-site page (final review I2)", async () => {
+    mock.mockImplementation(okFixture);
+    const body = JSON.stringify({ query: "anc earbuds", sites: ["aliexpress"], sort: "deal" });
+    const plain = await POST(new Request("http://localhost:3000/api/search", { method: "POST", headers: { "content-type": "text/plain" }, body }));
+    expect(plain.status).toBe(415);
+    const cross = await POST(
+      new Request("http://localhost:3000/api/search", {
+        method: "POST",
+        headers: { "content-type": "application/json", origin: "https://evil.example", "sec-fetch-site": "cross-site" },
+        body,
+      }),
+    );
+    expect(cross.status).toBe(403);
+    expect(mock).not.toHaveBeenCalled();
+  });
 
   it("400 when terms empty", async () => {
     const res = await post({ query: "under 50", sites: ["aliexpress"], sort: "deal" });

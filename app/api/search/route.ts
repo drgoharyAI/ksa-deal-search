@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { rejectCrossSite } from "@/src/lib/request-guard";
 import { runSearch } from "@/src/lib/pipeline";
 import { parseQuery } from "@/src/lib/query/parse";
 import { sites } from "@/src/sites/registry";
@@ -10,6 +11,8 @@ const MAX_QUERY = 200;
 const optNum = (v: unknown) => (typeof v === "number" && Number.isFinite(v) ? v : undefined);
 
 export async function POST(req: Request) {
+  const rejected = rejectCrossSite(req, { json: true });
+  if (rejected) return rejected;
   let body: Record<string, unknown>;
   try {
     body = (await req.json()) as Record<string, unknown>;

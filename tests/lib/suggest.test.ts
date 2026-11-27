@@ -50,6 +50,13 @@ describe("mergeSuggestions", () => {
 });
 
 describe("getSuggestions / GET /api/suggest", () => {
+  it("403 for a cross-site page; no upstream call (final review I2)", async () => {
+    const f = vi.spyOn(globalThis, "fetch");
+    const res = await GET(new Request("http://localhost:3000/api/suggest?q=air", { headers: { "sec-fetch-site": "cross-site" } }));
+    expect(res.status).toBe(403);
+    expect(f).not.toHaveBeenCalled();
+    f.mockRestore();
+  });
   it("merges Amazon first then Jarir, deduped, max 8, via the route; never sends cookies", async () => {
     mockFetch(
       ok(amazon(["air fryer", "airpods", "airpods pro 3", "air purifier", "airpods 5", "apple airpods"])),
