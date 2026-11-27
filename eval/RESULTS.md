@@ -49,3 +49,13 @@ laptop/notebook/computer, controller/gamepad). Drops brand-less and qualifier-le
 | p@10 | acc@10 | wrong@10 | recall | cheapest-first |
 |---|---|---|---|---|
 | 51% | 40% | 4% | 88% | 47% |
+
+## Round 2: spec and model-number matching (kept)
+Query tokens with digits are matched on the raw title (`src/lib/match/spec.ts`): a bare number must
+follow its query word ("iPhone 16", "iphone16"; not "iPhone 6 16GB") or be a screen size ("27-inch",
+27"); number+unit tokens accept spacing and thousands separators ("20,000 mAh"); a model number
+followed by another digit or by a budget-model suffix (e / fe / lite) is a different model
+("16e", "S24 FE"). Relevance for queries under 4 tokens is decided by the all-tokens rule alone.
+| p@10 | acc@10 | wrong@10 | recall | cheapest-first |
+|---|---|---|---|---|
+| 57% | 36% | 2% | 91% | 47% |

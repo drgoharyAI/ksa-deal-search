@@ -3,6 +3,7 @@ import { tokenize } from "@/src/lib/match/tokenize";
 import { scoreRelevance, filterRelevant, matchesAllTokens } from "@/src/lib/match/relevance";
 import { isAccessory, isStrongAccessory, dropAccessories } from "@/src/lib/match/accessory";
 import { dedupe } from "@/src/lib/match/dedupe";
+import { specMatches } from "@/src/lib/match/spec";
 import type { Product } from "@/src/lib/types";
 
 const prod = (title: string, listPrice = 10, id = title): Product => ({
@@ -213,5 +214,31 @@ describe("review fixes", () => {
     const ip = (g: string) => `Apple iPhone 15 Pro Max ${g} Natural Titanium Unlocked Smartphone`;
     expect(dedupe([prod(ip("256GB"), 1, "a"), prod(ip("512GB"), 2, "b")])).toHaveLength(2);
     expect(dedupe([prod("Apple AirPods Pro 2 White", 9, "w"), prod("Apple AirPods Pro 2 Black", 5, "k")]).map((p) => p.id)).toEqual(["k"]);
+  });
+});
+
+describe("specMatches (12c)", () => {
+  it("bare model number must follow its word and not be a suffixed model", () => {
+    expect(specMatches("16", "iphone", "Apple iPhone 16 Pro (128 GB)")).toBe(true);
+    expect(specMatches("16", "iphone", "Original iPhone16 128GB")).toBe(true);
+    expect(specMatches("16", "iphone", "Apple iPhone 16e 128GB")).toBe(false);
+    expect(specMatches("16", "iphone", "Used iPhone 16 e 5G")).toBe(false);
+    expect(specMatches("16", "iphone", "Apple iPhone 6 16/32/64GB")).toBe(false);
+  });
+  it("bare number as a screen size", () => {
+    expect(specMatches("27", "monitor", "Z-Edge 27-inch Gaming Monitor 4K")).toBe(true);
+    expect(specMatches("27", "monitor", 'AOC 27" 4K Monitor')).toBe(true);
+    expect(specMatches("27", "monitor", "4K Monitor 32 inch, 2 x 27W speakers")).toBe(false);
+  });
+  it("number + unit, spaced or with thousands separator", () => {
+    expect(specMatches("20000mah", "bank", "KA35 Power Bank with 20,000mAh Capacity")).toBe(true);
+    expect(specMatches("20000mah", "bank", "Power Bank 20000 mAh")).toBe(true);
+    expect(specMatches("20000mah", "bank", "Power Bank 120000mAh")).toBe(false);
+    expect(specMatches("4k", "", "Monitor 4K170Hz")).toBe(true);
+  });
+  it("letters + digits model rejects other generations and FE", () => {
+    expect(specMatches("s24", "galaxy", "Samsung Galaxy S24+ 256GB")).toBe(true);
+    expect(specMatches("s24", "galaxy", "Samsung Galaxy S24 FE 128GB")).toBe(false);
+    expect(specMatches("s24", "galaxy", "Samsung Galaxy S245")).toBe(false);
   });
 });

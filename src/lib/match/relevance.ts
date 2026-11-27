@@ -1,6 +1,7 @@
 import type { Product } from "@/src/lib/types";
 import { tokenize, tokenizeKeepDigits, tokenForms, hasDigit } from "./tokenize";
 import { aliasPhrases } from "./aliases";
+import { specMatches } from "./spec";
 
 function withinOneEdit(a: string, b: string): boolean {
   if (Math.abs(a.length - b.length) > 1) return false;
@@ -85,8 +86,13 @@ function buildIdf(titles: string[][], queryTokens: string[][]): Map<string, numb
 }
 
 /** The token, or every word of one of its alias phrases, appears in the title. */
-function matchesWithAliases(q: string, tt: string[]): boolean {
-  return matchesAny(q, tt) || aliasPhrases(q).some((ph) => ph.every((w) => matchesAny(w, tt)));
+export function matchesWithAliases(q: string, tt: string[]): boolean {
+  return matchesAny(q, tt) || aliasMatches(q, tt);
+}
+
+/** Every word of one of the token's alias phrases appears in the title. */
+function aliasMatches(q: string, tt: string[]): boolean {
+  return aliasPhrases(q).some((ph) => ph.every((w) => matchesAny(w, tt)));
 }
 
 /** Query tokens a variant may leave unmatched: none up to 3 tokens, one non-head token from 4. */
@@ -101,7 +107,11 @@ export function matchesAllTokens(queryTokens: string[][], title: string): boolea
   const tt = tokenizeKeepDigits(title);
   return queryTokens.some((variant) => {
     if (!variant.length) return false;
-    const misses = variant.filter((q) => !matchesWithAliases(q, tt));
+    const misses = variant.filter((q, i) =>
+      hasDigit(q)
+        ? !specMatches(q, variant[i - 1], title) && !aliasMatches(q, tt)
+        : !matchesWithAliases(q, tt),
+    );
     if (misses.length > allowedMisses(variant.length)) return false;
     return !misses.includes(variant[variant.length - 1]);
   });
@@ -115,6 +125,6 @@ export function filterRelevant(
   if (!products.length) return [];
   const idf = buildIdf(products.map((p) => tokenize(p.title)), queryTokens);
   return products.filter(
-    (p) => matchesAllTokens(queryTokens, p.title) && scoreRelevance(queryTokens, p.title, idf) >= threshold,
+    (p) => matchesAllTokens(queryTokens, p.title) && (queryTokens.some((v) => v.length < 4) || scoreRelevance(queryTokens, p.title, idf) >= threshold),
   );
 }

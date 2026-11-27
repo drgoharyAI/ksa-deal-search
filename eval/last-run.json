@@ -1,5 +1,5 @@
 {
-  "at": "2026-11-27T01:51:13.947Z",
+  "at": "2026-11-27T01:54:24.923Z",
   "queries": [
     {
       "query": "anc earbuds under 300",
@@ -54,18 +54,18 @@
         }
       ],
       "recordedItems": 682,
-      "results": 285,
+      "results": 305,
       "missingCalls": [],
       "labelled": true,
       "metrics": {
         "top": 10,
-        "precisionAt10": 0.8,
+        "precisionAt10": 0.9,
         "accessoryAt10": 0,
-        "wrongModelAt10": 0.2,
+        "wrongModelAt10": 0.1,
         "unlabeledAt10": 0,
-        "recall": 0.8168674698795181,
+        "recall": 0.8626506024096385,
         "relevantRecorded": 415,
-        "relevantKept": 339,
+        "relevantKept": 358,
         "cheapestRelevantFirst": true
       },
       "top": [
@@ -112,6 +112,13 @@
           "label": "relevant"
         },
         {
+          "key": "aliexpress:1005013277923646",
+          "store": "aliexpress",
+          "price": 11.91,
+          "title": "KEBIDUMEI Bluetooth 6.0 In-Ear Earphones 6-Mic -48dB Noise Cancelling ANC Headphones HiFi Stereo True Wireless Gaming Headsets",
+          "label": "relevant"
+        },
+        {
           "key": "aliexpress:1005006237174179",
           "store": "aliexpress",
           "price": 12.2,
@@ -130,13 +137,6 @@
           "store": "aliexpress",
           "price": 13.83,
           "title": "X55 Invisible Sleep Wireless Earphone TWS Bluetooth 5.3 Headphones Hidden Earbuds IPX5 Waterproof Noise Reduction Sports Headset",
-          "label": "wrong-model"
-        },
-        {
-          "key": "aliexpress:1005008611014056",
-          "store": "aliexpress",
-          "price": 13.87,
-          "title": "Earhooks Wireless Bluetooth 5.4 Headphones Gaming Sports Headset HiFi Stereo Noise Reduction Earbuds Earphone With Microphone",
           "label": "wrong-model"
         }
       ]
@@ -194,13 +194,13 @@
         }
       ],
       "recordedItems": 488,
-      "results": 93,
+      "results": 84,
       "missingCalls": [],
       "labelled": true,
       "metrics": {
         "top": 10,
-        "precisionAt10": 0,
-        "accessoryAt10": 1,
+        "precisionAt10": 0.3,
+        "accessoryAt10": 0.7,
         "wrongModelAt10": 0,
         "unlabeledAt10": 0,
         "recall": 1,
@@ -217,17 +217,17 @@
           "label": "accessory"
         },
         {
+          "key": "trendyol-sa:984511139",
+          "store": "trendyol-sa",
+          "price": 11.78,
+          "title": "Transparent camera protection with black circles for iPhone 16Pro Max",
+          "label": "accessory"
+        },
+        {
           "key": "trendyol-sa:899387116",
           "store": "trendyol-sa",
           "price": 12.42,
           "title": "white-1pcs 3-in-1 USB-C SD TF Card Reader, High-Speed Data Transfer, Plug & Play for iPhone 16 15, f",
-          "label": "accessory"
-        },
-        {
-          "key": "trendyol-sa:1184251959",
-          "store": "trendyol-sa",
-          "price": 13.26,
-          "title": "B-1PCS Mobile Phone Speaker Charging Port Cleaning Set Dust Plug for iPhone 17 16 15 Earphones Clean",
           "label": "accessory"
         },
         {
@@ -245,27 +245,6 @@
           "label": "accessory"
         },
         {
-          "key": "trendyol-sa:1230560461",
-          "store": "trendyol-sa",
-          "price": 13.43,
-          "title": "1Pcs 1-12PCS Retractable Speaker Charging Port Cleaning Set Dust Plug for iPhone 17 16 Earphones Cle",
-          "label": "accessory"
-        },
-        {
-          "key": "trendyol-sa:1137008112",
-          "store": "trendyol-sa",
-          "price": 15.84,
-          "title": "For iPhone 7-14 For Apple iPhone 17 16 15 14 13 11 12 Pro Max Plus In-ear Lightning 3.5MM Wired Ear",
-          "label": "accessory"
-        },
-        {
-          "key": "trendyol-sa:1184167852",
-          "store": "trendyol-sa",
-          "price": 22.05,
-          "title": "iPhone17 Pro Navy With Box Luxury Tech Woven for Magsafe Magnetic Phone Case for Iphone 18 17 Air 16",
-          "label": "accessory"
-        },
-        {
           "key": "aliexpress:1005011651372808",
           "store": "aliexpress",
           "price": 32.99,
@@ -278,6 +257,27 @@
           "price": 35.9,
           "title": "Compatible with iPhone 16 Case with Stand, Multi-Functional Magnetic Vertical & Horizontal Kickstand Protective Phone Case, Candy Color Slim Cute Hybrid Cover (Black, iphone 16)",
           "label": "accessory"
+        },
+        {
+          "key": "jarir:648552",
+          "store": "jarir",
+          "price": 2099,
+          "title": "Renewed Grade B Apple iPhone 16 Plus, 128 GB, Pink, 5G",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005012921265814",
+          "store": "aliexpress",
+          "price": 2297.69,
+          "title": "6.1\" Original iPhone 16 Mobile Phone 128GB 256GB ROM Super Retina XDR OLED 48MP Cameras iOS 18 5G LTE Smartphone",
+          "label": "relevant"
+        },
+        {
+          "key": "amazon-sa:B0FSKXGNJK",
+          "store": "amazon-sa",
+          "price": 2349,
+          "title": "Apple iPhone 16 (128 GB) - Pink (Renewed)",
+          "label": "relevant"
         }
       ]
     },
@@ -334,7 +334,7 @@
         }
       ],
       "recordedItems": 534,
-      "results": 313,
+      "results": 320,
       "missingCalls": [],
       "labelled": true,
       "metrics": {
@@ -343,9 +343,9 @@
         "accessoryAt10": 0,
         "wrongModelAt10": 0,
         "unlabeledAt10": 0,
-        "recall": 0.8689839572192514,
+        "recall": 0.8877005347593583,
         "relevantRecorded": 374,
-        "relevantKept": 325,
+        "relevantKept": 332,
         "cheapestRelevantFirst": true
       },
       "top": [
@@ -754,7 +754,7 @@
         }
       ],
       "recordedItems": 554,
-      "results": 221,
+      "results": 295,
       "missingCalls": [],
       "labelled": true,
       "metrics": {
@@ -763,9 +763,9 @@
         "accessoryAt10": 0,
         "wrongModelAt10": 0,
         "unlabeledAt10": 0,
-        "recall": 0.625615763546798,
+        "recall": 0.8399014778325123,
         "relevantRecorded": 406,
-        "relevantKept": 254,
+        "relevantKept": 341,
         "cheapestRelevantFirst": false
       },
       "top": [
@@ -788,6 +788,13 @@
           "store": "aliexpress",
           "price": 23.99,
           "title": "20000mAh Fast Charging Mini Power Bank Large Capacity Supply Multiple Interfaces For IPhone 14 15 16 17 18 Samsung Huawei Xiaomi",
+          "label": "relevant"
+        },
+        {
+          "key": "trendyol-sa:1215925516",
+          "store": "trendyol-sa",
+          "price": 31.15,
+          "title": "KA35 Power Bank with 20,000mAh Capacity and Ultra-Fast Charging",
           "label": "relevant"
         },
         {
@@ -830,13 +837,6 @@
           "store": "aliexpress",
           "price": 33.29,
           "title": "20000mAh Power Bank with Makeup Mirror Portable Charger Digital Display Power Bank External Battery for iPhone 17 Samsung Xiaomi",
-          "label": "relevant"
-        },
-        {
-          "key": "noon-sa:Z85ECCB5145CAB296831EZ",
-          "store": "noon-sa",
-          "price": 43.2,
-          "title": "20000mAh 20W Power Bank with Built-in Flashlight ,  Tablets, and More | Charge Multiple Devices Simultaneously | Compact, Convenient, and Travel-Friendly",
           "label": "relevant"
         }
       ]
@@ -1174,14 +1174,14 @@
         }
       ],
       "recordedItems": 451,
-      "results": 67,
+      "results": 49,
       "missingCalls": [],
       "labelled": true,
       "metrics": {
         "top": 10,
-        "precisionAt10": 0,
-        "accessoryAt10": 0.8,
-        "wrongModelAt10": 0.2,
+        "precisionAt10": 0.5,
+        "accessoryAt10": 0.5,
+        "wrongModelAt10": 0,
         "unlabeledAt10": 0,
         "recall": 0.9818181818181818,
         "relevantRecorded": 55,
@@ -1189,13 +1189,6 @@
         "cheapestRelevantFirst": false
       },
       "top": [
-        {
-          "key": "aliexpress:1005007989235640",
-          "store": "aliexpress",
-          "price": 4.24,
-          "title": "Metal Ring+9D Tempered Glass Camera Lens Protector Cap For Samsung Galaxy S24 FE 5G Sumsung Samung S24FE S25FE S 24 FE 24FE 25FE",
-          "label": "accessory"
-        },
         {
           "key": "aliexpress:1005006890859888",
           "store": "aliexpress",
@@ -1225,20 +1218,6 @@
           "label": "accessory"
         },
         {
-          "key": "amazon-sa:B0DPDF3JDS",
-          "store": "amazon-sa",
-          "price": 31.5,
-          "title": "[4Pcs]FortuneMore Compatible with Samsung Galaxy S24 Fe Privacy Screen Protector Tempered Glass Screen Film with Camera Lens Protector Anti Scratch Anti Spy Bubble Free 9H Hardness",
-          "label": "accessory"
-        },
-        {
-          "key": "amazon-sa:B0DPMLDPH3",
-          "store": "amazon-sa",
-          "price": 33.58,
-          "title": "[3 in 1] Compatible with Galaxy S24 FE Case Built in Slide Camera Lens Cover+Screen Protector+Finger Ring Holder Kickstand,Heavy Duty Shockproof Phone Cover (Red, Samsung S24 FE)",
-          "label": "accessory"
-        },
-        {
           "key": "amazon-sa:B0G491K553",
           "store": "amazon-sa",
           "price": 53.1,
@@ -1246,18 +1225,39 @@
           "label": "accessory"
         },
         {
-          "key": "aliexpress:1005010677079809",
-          "store": "aliexpress",
-          "price": 1282.31,
-          "title": "Samsung Galaxy S24 FE 5G S721U1 S721B S7210 S721N 6.7\" AMOLED 8GB 128/256/512GB Original Android AI Mobile Phone Virtually New",
-          "label": "wrong-model"
+          "key": "noon-sa:N70251433V",
+          "store": "noon-sa",
+          "price": 1399,
+          "title": "Samsung Renewed - Galaxy S24 Dual SIM Amber Yellow 8GB RAM 128GB 5G - International Version",
+          "label": "relevant"
         },
         {
-          "key": "noon-sa:N70430462V",
+          "key": "noon-sa:N72920759V",
           "store": "noon-sa",
-          "price": 1299,
-          "title": "Samsung Renewed - Galaxy S24 FE Dual SIM Graphite 8GB RAM 128GB 5G - International version",
-          "label": "wrong-model"
+          "price": 1399,
+          "title": "Samsung Renewed - Galaxy S24 Dual SIM Cobalt Violet 8GB RAM 128GB 5G - International Version",
+          "label": "relevant"
+        },
+        {
+          "key": "noon-sa:N70251438V",
+          "store": "noon-sa",
+          "price": 1400,
+          "title": "Samsung Renewed - Galaxy S24 Dual SIM Onyx Black 8GB RAM 128GB 5G - International Version",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005012472855298",
+          "store": "aliexpress",
+          "price": 1688.31,
+          "title": "C Samsung Galaxy S24 Plus S24+ 5G S926U 6.7\" Dynamic LTPO AMOLED ROM 256/512GB RAM 12GB NFC Original AI Cell Phone",
+          "label": "relevant"
+        },
+        {
+          "key": "noon-sa:N72921594V",
+          "store": "noon-sa",
+          "price": 1699,
+          "title": "Samsung Renewed - Galaxy S24 Plus Cobalt Violet 12GB RAM 256GB 5G - International Version",
+          "label": "relevant"
         }
       ]
     },
@@ -1454,7 +1454,7 @@
         }
       ],
       "recordedItems": 408,
-      "results": 123,
+      "results": 130,
       "missingCalls": [],
       "labelled": true,
       "metrics": {
@@ -1463,9 +1463,9 @@
         "accessoryAt10": 0,
         "wrongModelAt10": 0,
         "unlabeledAt10": 0,
-        "recall": 0.7688172043010753,
+        "recall": 0.8172043010752689,
         "relevantRecorded": 186,
-        "relevantKept": 143,
+        "relevantKept": 152,
         "cheapestRelevantFirst": true
       },
       "top": [
@@ -1484,20 +1484,6 @@
           "label": "relevant"
         },
         {
-          "key": "aliexpress:1005012743967903",
-          "store": "aliexpress",
-          "price": 219.19,
-          "title": "FY 4K Curved Monitor 240Hz Ultra Wide Gaming Screen for Gamers High Refresh Rate Desktop Display 24 27 32 34 Inch",
-          "label": "relevant"
-        },
-        {
-          "key": "aliexpress:1005012887746098",
-          "store": "aliexpress",
-          "price": 302.39,
-          "title": "Suitable for E-sports Players, High Update Rate Game Monitor 144Hz 165Hz LCD Screen 2K 4K Resolution 19/21/24/27/28/32 Inches",
-          "label": "relevant"
-        },
-        {
           "key": "aliexpress:1005012784994627",
           "store": "aliexpress",
           "price": 407.79,
@@ -1512,10 +1498,17 @@
           "label": "relevant"
         },
         {
-          "key": "aliexpress:1005012332030303",
+          "key": "aliexpress:1005011879084076",
           "store": "aliexpress",
-          "price": 495.19,
-          "title": "24/27/32/34 Inch Curved Monitor | 1K/2K/4K | Height-Adjustable + Backlit | Up To 280Hz HDR400",
+          "price": 434.19,
+          "title": "27 Inch 2k4k Computer Monitor Source 165hz Full Screen IPS High Definition Large Size Gaming",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005011648747393",
+          "store": "aliexpress",
+          "price": 479.79,
+          "title": "19-inch Monitor 20 HD Office 22 Direct Ultra-thin Desktop Computer Monitor 24-inch 27-inch LCD 4K Screen",
           "label": "relevant"
         },
         {
@@ -1526,17 +1519,24 @@
           "label": "relevant"
         },
         {
-          "key": "aliexpress:1005010059310871",
-          "store": "aliexpress",
-          "price": 519.9,
-          "title": "Chinese factory New280Hz/360Hz/540Hz 600Hz 1K 4K Gaming Screen Desktop 24 27 32 Inch LedPc computer Monitor",
-          "label": "relevant"
-        },
-        {
           "key": "aliexpress:1005010131912434",
           "store": "aliexpress",
           "price": 519.9,
           "title": "600Hz 540HZ 500HZ 360hzHigh Refresh Rate Gaming Pc Monitor 24 27 Inch 5K/4K/2K FramelessLow Blue Light LED LCD DP Desktop",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005012821540950",
+          "store": "aliexpress",
+          "price": 525.39,
+          "title": "27 Inch 4K IPS Monitor, UHD 2K Computer Display Screen, 144Hz 165Hz Gaming Monitor, Desktop Monitor for Office Design",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005013483687144",
+          "store": "aliexpress",
+          "price": 583.39,
+          "title": "BK025422 Gaming Display Monitor  27 INCH 2K 4K 120HZ 165HZ 200HZ 240HZ LCD Monitors Gaming PC Computer Monitor",
           "label": "relevant"
         }
       ]
@@ -1594,7 +1594,7 @@
         }
       ],
       "recordedItems": 449,
-      "results": 256,
+      "results": 255,
       "missingCalls": [],
       "labelled": true,
       "metrics": {
@@ -1603,9 +1603,9 @@
         "accessoryAt10": 0.9,
         "wrongModelAt10": 0,
         "unlabeledAt10": 0,
-        "recall": 0.943217665615142,
+        "recall": 0.9400630914826499,
         "relevantRecorded": 317,
-        "relevantKept": 299,
+        "relevantKept": 298,
         "cheapestRelevantFirst": false
       },
       "top": [
@@ -2104,10 +2104,10 @@
   ],
   "overall": {
     "queries": 15,
-    "precisionAt10": 0.5066666666666667,
-    "accessoryAt10": 0.4,
-    "wrongModelAt10": 0.04000000000000001,
-    "recall": 0.8836352618125934,
+    "precisionAt10": 0.5666666666666668,
+    "accessoryAt10": 0.36,
+    "wrongModelAt10": 0.020000000000000004,
+    "recall": 0.9052364582791029,
     "cheapestRelevantFirst": 0.4666666666666667
   }
 }
