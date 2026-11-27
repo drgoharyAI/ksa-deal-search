@@ -5,7 +5,8 @@ import path from "node:path";
 import type { DatabaseSync as DatabaseSyncT } from "node:sqlite";
 
 /**
- * Local SQLite store for search history and price alerts (node:sqlite, no native dependency).
+ * Local SQLite store for search history, price alerts, price observations and the saved and recently
+ * viewed products (node:sqlite, no native dependency).
  * Nothing touches the file system at import time: the path is resolved and the file opened on
  * the first getDb() call. File: DEAL_SEARCH_DB, else %LOCALAPPDATA%\deal-search\data.db, else
  * ~/.local/share/deal-search/data.db (os.homedir fallback).
@@ -121,6 +122,34 @@ const MIGRATIONS: string[] = [
      PRIMARY KEY (site, productId)
    );
    CREATE INDEX seen_products_last ON seen_products(lastSeen);`,
+  // 5: discovery (UX phase U5): saved products (favourites) with their price when saved, and the
+  // products recently opened at a store. IF NOT EXISTS: re-running it on a database that already
+  // has the tables changes nothing.
+  `CREATE TABLE IF NOT EXISTS favourites (
+     site TEXT NOT NULL,
+     productId TEXT NOT NULL,
+     title TEXT NOT NULL,
+     url TEXT NOT NULL,
+     image TEXT,
+     price REAL NOT NULL,
+     currency TEXT NOT NULL DEFAULT 'SAR',
+     query TEXT,
+     savedAt INTEGER NOT NULL,
+     PRIMARY KEY (site, productId)
+   );
+   CREATE INDEX IF NOT EXISTS favourites_saved ON favourites(savedAt);
+   CREATE TABLE IF NOT EXISTS recently_viewed (
+     site TEXT NOT NULL,
+     productId TEXT NOT NULL,
+     title TEXT NOT NULL,
+     url TEXT NOT NULL,
+     image TEXT,
+     price REAL,
+     currency TEXT NOT NULL DEFAULT 'SAR',
+     viewedAt INTEGER NOT NULL,
+     PRIMARY KEY (site, productId)
+   );
+   CREATE INDEX IF NOT EXISTS recently_viewed_at ON recently_viewed(viewedAt);`,
 ];
 
 export const SCHEMA_VERSION = MIGRATIONS.length;

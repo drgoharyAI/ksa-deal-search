@@ -1,7 +1,7 @@
 import "server-only";
 import type { Db } from "@/src/lib/db";
 import type { Product } from "@/src/lib/types";
-import { cheapestConfident, priceOf, type CheapestMatch, type HistoryEntry } from "@/src/lib/alerts/shared";
+import { cheapestConfident, normQuery, priceOf, type CheapestMatch, type HistoryEntry } from "@/src/lib/alerts/shared";
 
 export const MAX_HISTORY = 500;
 
@@ -52,6 +52,27 @@ export function listSearches(db: Db, limit = 200): HistoryEntry[] {
 
 export function deleteSearch(db: Db, id: number): boolean {
   return Number(db.prepare("DELETE FROM searches WHERE id = ?").run(id).changes) > 0;
+}
+
+/**
+ * Removes every entry of one query (trimmed, single-spaced, any case: the way the home page's
+ * "Search again" lists it once). Returns how many entries went.
+ */
+export function deleteSearchesByQuery(db: Db, query: string): number {
+  const key = normQuery(query);
+  if (!key) return 0;
+  const rows = db.prepare("SELECT id, query FROM searches").all() as unknown as { id: number; query: string }[];
+  const ids = rows.filter((r) => normQuery(r.query) === key).map((r) => r.id);
+  const del = db.prepare("DELETE FROM searches WHERE id = ?");
+  db.exec("BEGIN");
+  try {
+    for (const id of ids) del.run(id);
+    db.exec("COMMIT");
+  } catch (e) {
+    db.exec("ROLLBACK");
+    throw e;
+  }
+  return ids.length;
 }
 
 export function clearSearches(db: Db): void {
