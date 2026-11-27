@@ -21,6 +21,11 @@ export type GroupItem = {
   best: Product;
   /** Members passing the filters, best first, then by price (confident ones before the rest). */
   rows: Product[];
+  /**
+   * The row that earns "Best price": `best`, only when it is the lowest price among the rows in
+   * its own currency and at least one other row shares that currency. Null otherwise.
+   */
+  bestPrice: Product | null;
   /** Stores among the rows. */
   storeCount: number;
   /** Colour named by each member's title, by "site:id". */
@@ -55,6 +60,32 @@ export const allMembers = (units: Unit[]): Product[] => units.flatMap((u) => u.m
 /** The product a card leads with: a group's best member, or the product. */
 export const leadOf = (item: ViewItem): Product => (item.kind === "group" ? item.best : item.product);
 
+const priceOf = (p: Product) => p.finalPrice ?? p.listPrice;
+const currencyOf = (p: Product) => p.currency || "SAR";
+
+/**
+ * A group's rows, best first. rank() orders by the bare number, so with more than one currency the
+ * rows in the most common currency (ties: the first ranked row's) come first; prices in different
+ * currencies are never compared.
+ */
+export function groupRows(pass: Product[]): Product[] {
+  const ranked = rank(pass, "price");
+  const tally = new Map<string, number>();
+  for (const p of ranked) tally.set(currencyOf(p), (tally.get(currencyOf(p)) ?? 0) + 1);
+  if (tally.size < 2) return ranked;
+  const lead = [...tally.entries()].reduce((a, b) => (b[1] > a[1] ? b : a))[0];
+  return [...ranked.filter((p) => currencyOf(p) === lead), ...ranked.filter((p) => currencyOf(p) !== lead)];
+}
+
+/** "Best price" goes to rows[0] only when no row in its currency is cheaper and one other shares it. */
+export function bestPriceRow(rows: Product[]): Product | null {
+  const lead = rows[0];
+  if (!lead) return null;
+  const same = rows.filter((p) => currencyOf(p) === currencyOf(lead));
+  if (same.length < 2) return null;
+  return same.every((p) => priceOf(p) >= priceOf(lead)) ? lead : null;
+}
+
 /**
  * The cards to show, in order. A unit shows when any member passes the filters; a group shows
  * only its passing members, and one left with a single member shows as a plain card. Cards are
@@ -69,8 +100,10 @@ export function viewItems(units: Unit[], f: ChipFilters, ctx: ChipContext, sort:
       byLead.set(pass[0], { kind: "product", key: productKey(pass[0]), product: pass[0] });
       continue;
     }
-    const rows = rank(pass, "price");
-    byLead.set(rows[0], { kind: "group", key: u.key, best: rows[0], rows, storeCount: new Set(rows.map((p) => p.site)).size, colors: u.colors });
+    const rows = groupRows(pass);
+    byLead.set(rows[0], {
+      kind: "group", key: u.key, best: rows[0], rows, bestPrice: bestPriceRow(rows), storeCount: new Set(rows.map((p) => p.site)).size, colors: u.colors,
+    });
   }
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- the keys passed to rank() are byLead's own keys
   return rank([...byLead.keys()], sort).map((p) => byLead.get(p)!);

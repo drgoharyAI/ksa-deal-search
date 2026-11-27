@@ -16,6 +16,8 @@ export type ChipFilters = {
   maxPrice?: number;
   minRating?: number;
   discounted: boolean;
+  /** Only listings our price history backs as a deal ("Lowest in 30 days", "Below usual"). Absent means off. */
+  deals?: boolean;
 };
 
 export const NO_FILTERS: ChipFilters = { stores: [], brands: [], discounted: false };
@@ -23,7 +25,7 @@ export const NO_FILTERS: ChipFilters = { stores: [], brands: [], discounted: fal
 /** The minimum-rating chips after "Any". */
 const RATING_STEPS = [3, 4, 4.5] as const;
 
-type Dim = "stores" | "brands" | "price" | "rating" | "discounted";
+type Dim = "stores" | "brands" | "price" | "rating" | "discounted" | "deals";
 
 /** Per result set: each product's brand, and the stores that rate none of their products. */
 export type ChipContext = { brands: Map<string, string | undefined>; ratingless: Set<string> };
@@ -34,6 +36,9 @@ const priceOf = (p: Product): number => p.finalPrice ?? p.listPrice;
 export const isDiscounted = (p: Product): boolean =>
   (p.discountPct ?? 0) >= 1 || (p.origPrice !== null && p.origPrice > priceOf(p));
 
+/** A deal our own observations back (src/lib/insights.ts); a "fake deal" or "normal" badge is not one. */
+export const isVerifiedDeal = (p: Product): boolean => p.deal?.badge === "lowest-30d" || p.deal?.badge === "below-usual";
+
 export function chipContext(products: Product[]): ChipContext {
   const rated = new Set(products.filter((p) => p.rating !== null).map((p) => p.site));
   return { brands: brandsFor(products), ratingless: new Set(products.map((p) => p.site).filter((s) => !rated.has(s))) };
@@ -41,7 +46,7 @@ export function chipContext(products: Product[]): ChipContext {
 
 export const isActive = (f: ChipFilters): boolean =>
   f.stores.length > 0 || f.brands.length > 0 || f.minPrice !== undefined || f.maxPrice !== undefined ||
-  f.minRating !== undefined || f.discounted;
+  f.minRating !== undefined || f.discounted || !!f.deals;
 
 /** The product passes every filter, except the dimension `skip` (for that dimension's counts). */
 export function passes(p: Product, f: ChipFilters, ctx: ChipContext, skip?: Dim): boolean {
@@ -61,6 +66,7 @@ export function passes(p: Product, f: ChipFilters, ctx: ChipContext, skip?: Dim)
     } else if (p.rating < f.minRating) return false;
   }
   if (skip !== "discounted" && f.discounted && !isDiscounted(p)) return false;
+  if (skip !== "deals" && f.deals && !isVerifiedDeal(p)) return false;
   return true;
 }
 
@@ -76,6 +82,10 @@ export type Facets = {
   /** "Any", then each RATING_STEPS minimum (min undefined is "Any"). */
   ratings: { min?: number; count: number }[];
   discounted: number;
+  /** Cards with a verified deal, under the other filters. */
+  deals: number;
+  /** Cards with at least one rated listing, over all results (no rating filter makes sense at 0). */
+  rated: number;
   /** Products passing every filter. */
   total: number;
 };
@@ -118,6 +128,8 @@ export function facetCountsFor(units: Product[][], f: ChipFilters, ctx: ChipCont
     brands: brandIds.map((id) => ({ id, count: byBrand.get(id) ?? 0 })),
     ratings,
     discounted: others("discounted").filter((u) => u.some(isDiscounted)).length,
+    deals: others("deals").filter((u) => u.some(isVerifiedDeal)).length,
+    rated: units.filter((u) => u.some((p) => p.rating !== null)).length,
     total: others().length,
   };
 }
@@ -136,7 +148,7 @@ export function priceBounds(products: Product[]): { min: number; max: number } |
 }
 
 /** Query-string keys the chips own; other keys (a History re-run link) are left alone. */
-const KEYS = ["store", "brand", "pmin", "pmax", "stars", "disc"] as const;
+const KEYS = ["store", "brand", "pmin", "pmax", "stars", "disc", "deal"] as const;
 const STORE_IDS = new Set<string>(STORES.map((s) => s.id));
 
 export function filtersFromSearch(search: string): ChipFilters {
@@ -158,6 +170,7 @@ export function filtersFromSearch(search: string): ChipFilters {
   if (min !== undefined) out.minPrice = min;
   if (max !== undefined) out.maxPrice = max;
   if ((RATING_STEPS as readonly number[]).includes(stars)) out.minRating = stars;
+  if (p.get("deal") === "1") out.deals = true;
   return out;
 }
 
@@ -171,6 +184,7 @@ export function withChipParams(search: string, f: ChipFilters): string {
   if (f.maxPrice !== undefined) p.set("pmax", String(f.maxPrice));
   if (f.minRating !== undefined) p.set("stars", String(f.minRating));
   if (f.discounted) p.set("disc", "1");
+  if (f.deals) p.set("deal", "1");
   const s = p.toString();
   return s ? `?${s}` : "";
 }
@@ -179,6 +193,9 @@ export function withChipParams(search: string, f: ChipFilters): string {
 export function chipParamsOnly(search: string): string {
   return withChipParams("", filtersFromSearch(search));
 }
+
+/** Query-independent filters a new query keeps (named in a note). */
+export type KeptChip = "rating" | "discounted" | "deals";
 
 /**
  * Chips for a search about to run. A different query (trimmed, any case) drops the store, brand
@@ -190,30 +207,67 @@ export function chipsForNewQuery(
   f: ChipFilters,
   prevQuery: string | undefined,
   nextQuery: string,
-): { filters: ChipFilters; kept: ("rating" | "discounted")[] } {
+): { filters: ChipFilters; kept: KeptChip[] } {
   if (prevQuery === undefined || prevQuery.trim().toLowerCase() === nextQuery.trim().toLowerCase()) return { filters: f, kept: [] };
   const filters: ChipFilters = { ...NO_FILTERS, discounted: f.discounted };
   if (f.minRating !== undefined) filters.minRating = f.minRating;
-  const kept: ("rating" | "discounted")[] = [];
+  if (f.deals) filters.deals = true;
+  const kept: KeptChip[] = [];
   if (f.minRating !== undefined) kept.push("rating");
   if (f.discounted) kept.push("discounted");
+  if (f.deals) kept.push("deals");
   return { filters, kept };
 }
 
 /** How many filters are on: each store and brand, plus price, rating and discounted. */
 export const activeCount = (f: ChipFilters): number =>
   f.stores.length + f.brands.length + (f.minPrice !== undefined || f.maxPrice !== undefined ? 1 : 0) +
-  (f.minRating !== undefined ? 1 : 0) + (f.discounted ? 1 : 0);
+  (f.minRating !== undefined ? 1 : 0) + (f.discounted ? 1 : 0) + (f.deals ? 1 : 0);
 
 const amt = (n: number) => n.toLocaleString("en-US", { maximumFractionDigits: 2 });
 
 /** The active filters in words, for the folded filter bar ("noon KSA, Apple, from SAR 500"). */
 export function activeSummary(f: ChipFilters, currency = "SAR"): string {
   const parts: string[] = [...f.stores.map(storeLabel), ...f.brands.map(brandLabel)];
-  if (f.minPrice !== undefined && f.maxPrice !== undefined) parts.push(`${currency} ${amt(f.minPrice)} to ${amt(f.maxPrice)}`);
-  else if (f.minPrice !== undefined) parts.push(`from ${currency} ${amt(f.minPrice)}`);
-  else if (f.maxPrice !== undefined) parts.push(`up to ${currency} ${amt(f.maxPrice)}`);
+  const price = priceWords(f, currency);
+  if (price) parts.push(price);
   if (f.minRating !== undefined) parts.push(`${f.minRating}+ stars`);
   if (f.discounted) parts.push("discounted");
+  if (f.deals) parts.push("verified deals");
   return parts.join(", ");
+}
+
+function priceWords(f: ChipFilters, currency: string): string | null {
+  if (f.minPrice !== undefined && f.maxPrice !== undefined) return `${currency} ${amt(f.minPrice)} to ${amt(f.maxPrice)}`;
+  if (f.minPrice !== undefined) return `from ${currency} ${amt(f.minPrice)}`;
+  if (f.maxPrice !== undefined) return `up to ${currency} ${amt(f.maxPrice)}`;
+  return null;
+}
+
+/** One removable chip per active filter: its words, and the filters with just that one taken off. */
+export type ActiveChip = { key: string; label: string; without: ChipFilters };
+
+export function activeChips(f: ChipFilters, currency = "SAR"): ActiveChip[] {
+  const out: ActiveChip[] = [];
+  for (const s of f.stores) out.push({ key: `store:${s}`, label: storeLabel(s), without: { ...f, stores: f.stores.filter((x) => x !== s) } });
+  for (const b of f.brands) out.push({ key: `brand:${b}`, label: brandLabel(b), without: { ...f, brands: f.brands.filter((x) => x !== b) } });
+  const price = priceWords(f, currency);
+  if (price) {
+    const without = { ...f };
+    delete without.minPrice;
+    delete without.maxPrice;
+    out.push({ key: "price", label: price, without });
+  }
+  if (f.minRating !== undefined) {
+    const without = { ...f };
+    delete without.minRating;
+    out.push({ key: "rating", label: `${f.minRating}+ stars`, without });
+  }
+  if (f.discounted) out.push({ key: "discounted", label: "Discounted", without: { ...f, discounted: false } });
+  if (f.deals) {
+    const without = { ...f };
+    delete without.deals;
+    out.push({ key: "deals", label: "Verified deals", without });
+  }
+  return out;
 }
