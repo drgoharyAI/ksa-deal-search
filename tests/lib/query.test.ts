@@ -1,6 +1,9 @@
 import { describe, it, expect } from "vitest";
 import { parseQuery } from "@/src/lib/query/parse";
 import { expandTerms } from "@/src/lib/query/synonyms";
+import { matchTerms } from "@/src/lib/query/filler";
+import { tokenizeKeepDigits } from "@/src/lib/match/tokenize";
+import { matchesAllTokens } from "@/src/lib/match/relevance";
 
 describe("parseQuery", () => {
   it("parses 'under N'", () => {
@@ -88,5 +91,35 @@ describe("parseQuery edge cases", () => {
 
   it("allows a price-only query", () => {
     expect(parseQuery("under 50")).toMatchObject({ terms: "", maxPrice: 50 });
+  });
+});
+
+describe("matchTerms: filler words are not required title words (final review I1)", () => {
+  it("drops intent and filler words", () => {
+    expect(matchTerms("best wireless earbuds")).toBe("wireless earbuds");
+    expect(matchTerms("cheap new jbl speaker")).toBe("jbl speaker");
+    expect(matchTerms("buy the original apple watch")).toBe("apple watch");
+    expect(matchTerms("usb-c to lightning cable")).toBe("usb-c lightning cable");
+  });
+  it("'X for Y' / 'X with Y' reads as 'Y X' so X stays the head noun", () => {
+    expect(matchTerms("earbuds for running")).toBe("running earbuds");
+    expect(matchTerms("case for iphone 16")).toBe("iphone 16 case");
+    expect(matchTerms("best earbuds with mic")).toBe("mic earbuds");
+  });
+  it("keeps model qualifiers and numbers", () => {
+    expect(matchTerms("iphone 16 pro max")).toBe("iphone 16 pro max");
+    expect(matchTerms("3 in 1 charger")).toBe("3 in 1 charger");
+    expect(matchTerms("macbook air m3")).toBe("macbook air m3");
+    expect(matchTerms("new balance running shoes")).toBe("new balance running shoes");
+  });
+  it("never empties the query", () => {
+    expect(matchTerms("the best")).toBe("the best");
+    expect(matchTerms("for")).toBe("for");
+  });
+  it("filler queries now match real titles", () => {
+    const tok = (q: string) => [tokenizeKeepDigits(matchTerms(q))];
+    expect(matchesAllTokens(tok("earbuds for running"), "Sports Wireless Earbuds Running Headphones IPX7")).toBe(true);
+    expect(matchesAllTokens(tok("best wireless earbuds"), "Wireless Earbuds Bluetooth 5.3")).toBe(true);
+    expect(matchesAllTokens(tok("best wireless earbuds"), "Wireless Mouse Bluetooth")).toBe(false);
   });
 });

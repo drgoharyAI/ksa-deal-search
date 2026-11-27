@@ -2,6 +2,7 @@ import { aaCall, type AaResult } from "@/src/lib/aa";
 import type { ParsedQuery, Product, SiteAdapter, SiteStatus } from "@/src/lib/types";
 import { parseQuery } from "@/src/lib/query/parse";
 import { expandTerms } from "@/src/lib/query/synonyms";
+import { matchTerms } from "@/src/lib/query/filler";
 import { tokenizeKeepDigits } from "@/src/lib/match/tokenize";
 import { filterRelevant } from "@/src/lib/match/relevance";
 import { dropAccessories } from "@/src/lib/match/accessory";
@@ -124,7 +125,8 @@ export async function runSearch(input: SearchInput, opts: SearchOptions = {}): P
 
   const variants = expandTerms(pq.terms);
   // Digits stay even when single ("nintendo switch 2", "airpods 4"): a model number is a hard attribute.
-  const queryTokens = [tokenizeKeepDigits(pq.terms), ...variants.map(tokenizeKeepDigits)];
+  // Filler ("best", "cheap", "for") is not a required title word; stores still get the raw words.
+  const queryTokens = [pq.terms, ...variants].map((t) => tokenizeKeepDigits(matchTerms(t)));
 
   const adapters = input.sites.map((id) => registry[id]).filter((a): a is SiteAdapter => !!a);
   const outs = await Promise.all(adapters.map((a) => runSite(a, pq, variants, opts.exec)));

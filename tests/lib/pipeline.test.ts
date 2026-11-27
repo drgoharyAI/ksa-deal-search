@@ -33,6 +33,17 @@ describe("runSearch", () => {
     expect(new Set(keys).size).toBe(keys.length);
   });
 
+  it("filler words are not required title words (final review I1)", async () => {
+    mock.mockImplementation(okFixture);
+    const plain = await runSearch({ ...base, query: "anc earbuds" });
+    const filler = await runSearch({ ...base, query: "the best cheap anc earbuds" });
+    expect(plain.products.length).toBeGreaterThan(0);
+    expect(filler.queryTokens[0]).toEqual(["anc", "earbuds"]);
+    expect(filler.products.map((p) => p.id)).toEqual(plain.products.map((p) => p.id));
+    // the store still gets the shopper's own words
+    expect(String(mock.mock.calls.at(-1)?.[2]?.q ?? JSON.stringify(mock.mock.calls.at(-1)))).toContain("best");
+  });
+
   it("explicit filters override inline ones", async () => {
     mock.mockImplementation(okFixture);
     const r = await runSearch({ ...base, query: "anc earbuds under 50", maxPrice: 20 });
