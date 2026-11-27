@@ -1,311 +1,236 @@
-# Deal Search (KSA)
+# deal-search-ksa
 
-A local Next.js app that searches five Saudi stores at once and ranks the results by price,
-discount or "deal" score:
+[![CI](https://github.com/drgoharyAI/deal-search-ksa/actions/workflows/ci.yml/badge.svg)](https://github.com/drgoharyAI/deal-search-ksa/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-| Store        | id            | How it is fetched                                         |
-| ------------ | ------------- | --------------------------------------------------------- |
-| AliExpress   | `aliexpress`  | API Anything spec (`api-specs/aliexpress.json`), KSA/SAR cookie |
-| Amazon KSA   | `amazon-sa`   | API Anything spec (`api-specs/amazon-sa.json`)            |
-| Jarir        | `jarir`       | API Anything spec (`api-specs/jarir.json`)                |
-| noon KSA     | `noon-sa`     | Your installed Google Chrome, driven over CDP             |
-| Trendyol KSA | `trendyol-sa` | API Anything spec (`api-specs/trendyol-sa.json`)          |
+A self-hosted Next.js 16 + TypeScript app that searches eight Saudi online stores at once,
+drops accessories and look-alikes, groups the same product across stores, and ranks the rest
+by price, discount or deal score. All matching and ranking is rule-based: word rules plus
+statistics of each result set. No AI or LLM is involved.
 
-The UI is at `/`; the API is `POST /api/search` (plus `GET /api/suggest` for the query box).
-Matching and ranking are rule-based: word rules plus statistics of each result set. No AI or
-LLM is involved.
+It is a personal-use tool, built to run on your own machine or a home server. See
+[Limitations and disclaimer](#limitations-and-disclaimer) before you run it.
 
-## Setup
+## Features
 
-Requirements: Node.js 22.13 or newer (`package.json` declares `"engines": { "node": ">=22.13" }`),
-and Google Chrome (only for noon).
+- **One query, eight stores.** Results from every selected store in one list, prices in SAR.
+- **Query syntax.** Price bounds (`under 300`, `50-150`), minimum rating (`>4 stars`) and
+  exclusions (`-wired`) are parsed out of the query text.
+- **Relevance filtering.** Drops accessories, parts, books and other product kinds that share
+  the query's words, and clones far below a model's usual price. Weaker matches are kept but
+  shown under a "Less likely match" divider.
+- **Cross-store grouping.** The same product at several stores becomes one card with one row
+  per store, matched by model codes, brand, specs and variant words.
+- **Deal badges.** "Lowest in 30 days", "Below usual price" and "Fake deal" (a claimed discount
+  that the app's own price history, or the result set, does not support).
+- **Price history.** Every search records prices to a local SQLite file (`node:sqlite`).
+- **Price alerts.** Watch a product or a whole search; a background checker re-runs it on a
+  schedule and notifies by Telegram (optional) and on the Alerts page.
+- **Compare.** Side-by-side table of 2 to 4 products with their parsed specs.
+- **Quick filter chips, search history, query suggestions** and a "recently seen deals" home view.
+- **Docker deploy** to a Linux VM, with optional LAN HTTPS (Caddy) or a Cloudflare Tunnel.
+
+A UX redesign ("Souq Ledger", [docs/DESIGN.md](docs/DESIGN.md)) and a streaming search
+endpoint (results per store as they arrive) are in progress.
+
+## Stores
+
+| Store         | id             | How it is fetched                                            |
+| ------------- | -------------- | ------------------------------------------------------------ |
+| AliExpress    | `aliexpress`   | API Anything spec (`api-specs/aliexpress.json`), KSA/SAR cookie |
+| Amazon KSA    | `amazon-sa`    | API Anything spec (`api-specs/amazon-sa.json`)               |
+| Jarir         | `jarir`        | API Anything spec (`api-specs/jarir.json`)                   |
+| noon KSA      | `noon-sa`      | Real Google Chrome, driven over CDP                          |
+| Trendyol KSA  | `trendyol-sa`  | API Anything spec (`api-specs/trendyol-sa.json`)             |
+| eXtra         | `extra-sa`     | API Anything spec (`api-specs/extra-sa.json`)                |
+| Carrefour KSA | `carrefour-sa` | API Anything spec (`api-specs/carrefour-sa.json`)            |
+| SHEIN KSA     | `shein-sa`     | Real Google Chrome, driven over CDP (off by default)         |
+
+- **API Anything specs**: [api-anything](https://www.npmjs.com/package/api-anything) replays
+  a learned HTTP search operation for each store. `scripts/install-specs.mjs` (run before
+  `dev` and `start`) copies `api-specs/*.json` into API Anything's local home and sets the
+  AliExpress cookie for Saudi Arabia / English / SAR. `API_ANYTHING_LOCAL_ONLY=1` keeps it off
+  the shared registry.
+- **Real Chrome over CDP**: noon and SHEIN block plain HTTP clients and headless browsers, so
+  the app starts your installed Google Chrome (headed, window off-screen, its own profile
+  outside the repo) and reads results through Playwright `connectOverCDP`. Searches are
+  serialized, spaced out and cached, and the app backs off when a store blocks. If Chrome is
+  not installed, those stores show an error and the others still work.
+
+The store list lives in `src/sites/registry.ts` (server) and `src/lib/stores.ts` (client);
+`tests/lib/stores.test.ts` keeps them in sync.
+
+## Architecture
+
+The UI is at `/`; the main API is `POST /api/search`. A search runs through
+`src/lib/pipeline.ts`:
+
+1. **Parse** the query (`src/lib/query/`): price bounds, rating, `-exclusions`, filler words,
+   synonyms from `data/synonyms.json`.
+2. **Fetch** every selected store in parallel through its adapter (`src/sites/<id>/search.ts`):
+   build the calls, run them (API Anything or Chrome), with per-store caches and back-offs.
+3. **Normalize** each raw item to a `Product` (SAR price, English title, store URL); unreadable
+   items are dropped and a store whose items are all unreadable reports `error`.
+4. **Filter**: valid price, exclusions, price and rating bounds (`src/lib/filters.ts`).
+5. **Match** (`src/lib/match/`): required title words, accessory and part detection, other
+   product kinds, brand/model price rules, title-structure and confidence scoring into
+   confident and "less likely" tiers.
+6. **Dedupe** look-alike listings, then **rank** within each tier by the chosen sort
+   (`src/lib/rank.ts`).
+7. **Group** the same product across stores (`src/lib/match/group.ts`).
+8. **Record** price observations and attach deal badges (`src/lib/insights.ts`); save the
+   search to history.
+
+Each store gets a status: `ok` (including an empty answer), `blocked` (the store refused; the
+app backs off) or `error`.
+
+Other routes: `GET /api/suggest` (Amazon and Jarir public autocomplete), `GET /api/discover`,
+`/api/history`, `/api/watches`, `/api/alerts`, `GET /api/health`. All API routes reject
+cross-site requests and hosts that are not loopback or listed in `APP_HOSTS`
+(`src/lib/request-guard.ts`).
+
+## Quick start
+
+Requirements: Node.js 22.13 or newer (CI uses 24), and Google Chrome for noon and SHEIN.
 
 ```bash
 npm i
-npm run dev                      # development, http://127.0.0.1:3000
-# or
-npm run build && npm start       # production
-npm test                         # unit and fixture tests (vitest), no network
+npm run dev        # http://127.0.0.1:3000
+npm test           # unit and fixture tests (vitest), offline
+npm run build && npm start   # production build
 ```
 
-### Local only
+`dev` and `start` listen on `127.0.0.1` only. Do not remove `-H 127.0.0.1` from the scripts
+unless you mean to expose the app.
 
-The server listens on `127.0.0.1` only (`-H 127.0.0.1` in the `dev` and `start` scripts), so
-other devices on your network cannot reach it. Every search sends store traffic from your IP,
-so the API routes also refuse requests that come from other web pages:
+### Search syntax
 
-- a `Host` that is not loopback (LAN access, DNS rebinding) gets 403;
-- a `Sec-Fetch-Site` other than `same-origin` or `none` gets 403;
-- an `Origin` other than the app's own gets 403;
-- `POST /api/search` without `Content-Type: application/json` gets 415.
+| You type                                 | Meaning                                    |
+| ---------------------------------------- | ------------------------------------------ |
+| `under 300`, `below 300`, `<300`         | max price 300 SAR                          |
+| `over 50`, `above 50`, `>50`             | min price 50 SAR                           |
+| `50-150`, `sar 50 - 150`                 | price range                                |
+| `>4 stars`, `4.5+ stars`                 | minimum rating (inclusive)                 |
+| `-wired`                                 | drop titles containing the word "wired"    |
 
-`curl` and scripts on this machine send no `Origin` header and work as before. Do not remove
-`-H 127.0.0.1` unless you mean to expose the app.
+Filler words (`best`, `cheap`, `for`, ...) need not appear in titles; the stores still get your
+exact text.
 
-### Store specs and settings
+## Configuration
 
-`npm run dev` and `npm start` first run `scripts/install-specs.mjs` (the `predev` / `prestart`
-step). It:
+Local development needs no configuration. Optional settings go in `.env.local` (development)
+or `.env` (Docker); both are gitignored. [`.env.example`](.env.example) lists the Docker keys.
 
-1. copies every `api-specs/*.json` into API Anything's sites folder (`$API_ANYTHING_HOME/sites`,
-   default `./.aa-home/sites`);
-2. sets the AliExpress `aep_usuc_f` cookie so AliExpress answers for Saudi Arabia, in English,
-   in SAR. If this fails it only prints a warning.
-
-The step is idempotent. No configuration file is needed: the install step and the app both
-default to the values below. To change them, create an optional `.env.local` (gitignored; a
-fresh clone has none):
-
-```
-API_ANYTHING_HOME=./.aa-home
-API_ANYTHING_LOCAL_ONLY=1
-NOON_PROFILE_DIR=...            # optional, see below
-```
-
-### noon and Chrome
-
-noon blocks plain HTTP clients, so the app starts your installed Google Chrome and reads search
-results through it over the Chrome DevTools Protocol (Playwright `connectOverCDP`). This works:
-in the recorded eval runs noon answered 35 of 40 searches.
-
-- Chrome gets its own profile, `%LOCALAPPDATA%\deal-search\noon-profile` (outside the repo;
-  `~/.deal-search/noon-profile` on other systems; override with `NOON_PROFILE_DIR`). An older
-  `.noon-profile/` in the repo is moved there on the first launch where it is not locked. Until
-  then Chrome keeps using the old folder.
-- The debug port is a fixed free port bound to `127.0.0.1`, never port 0. Chrome started with
-  `--remote-debugging-port=0` reports `navigator.webdriver === true`, and noon's Akamai then
-  answers "Access Denied". If a Chrome from an earlier run still holds the profile and answers,
-  the app adopts it instead of starting a second one.
-- The window opens off-screen (`--window-position=-32000,-32000`). Chrome closes after 10 minutes
-  with no noon searches, and the server kills it when its process exits.
-- noon searches run one at a time, at least 2 s apart, with a 10 minute cache. If noon blocks,
-  the app backs off for 10 minutes instead of retrying.
-- If Chrome is not installed, noon shows as an error and the other stores still work.
-
-## API
-
-```http
-POST /api/search
-Content-Type: application/json
-
-{ "query": "anc earbuds under 300",
-  "sites": ["aliexpress", "amazon-sa", "jarir", "noon-sa", "trendyol-sa"],
-  "sort": "price" }
-```
-
-`sort` is `price`, `discount` or `deal` (default). Optional `minPrice`, `maxPrice`, `minRating`
-override the values parsed from the query. The response has `products`, `statuses` (one per
-store) and `reason` when nothing matched.
-
-Store statuses:
-
-- `ok`: the store answered. A "no results" answer (such as Trendyol's 404 past the last page)
-  is an empty `ok`, not a failure.
-- `blocked`: the store refused us. The app backs off instead of retrying.
-- `error`: the request failed, or the store answered with items none of which could be read
-  (its page or payload changed).
-
-## Search syntax
-
-| You type                     | Meaning                         |
-| ---------------------------- | ------------------------------- |
-| `under 300`, `below 300`, `<300` | max price 300 SAR           |
-| `over 50`, `above 50`, `>50` | min price 50 SAR                |
-| `50-150`, `sar 50 - 150`     | price range (`300-50` is read as 50 to 300) |
-| `>4 stars`, `4.5+ stars`, `over 4 stars` | minimum rating (inclusive) |
-| `-wired`                     | drop results with the word "wired" in the title |
-
-Prices may carry `sar`, `sr` or `riyal(s)`. Everything else is the search text.
-
-`-word` matches whole title words, parts of hyphenated words and plurals: `-pro` drops
-"AirPods Pro" but keeps "Waterproof", and `-case` drops "Cases" but keeps "Showcase".
-
-Filler words do not have to be in the title. `best wireless earbuds`, `cheap jbl speaker` and
-`earbuds for running` (read as "running earbuds") match as you would expect. The filler list is
-short and lives in `src/lib/query/filler.ts` (the, best, cheap, new, original, buy, ...). Model
-words such as pro, max, plus, mini and air always count. The stores still get your exact text.
-
-## Ranking: confident and "Less likely" matches
-
-Results come in tiers, and every sort (price, discount, deal) applies inside each tier:
-
-1. **Confident matches** come first.
-2. **"Less likely matches"** follow, under a divider, each card labelled "Less likely match".
-   These items pass the filters, but the evidence that they are the product is weaker:
-   - a low match score (`src/lib/match/confidence.ts`): the title is worded unlike the listings
-     at the product's usual price, or does not name the query as a phrase when most titles do;
-   - title structure (`src/lib/match/structure.ts`): the product noun appears only after "with",
-     the query appears only in a later " - " segment, or a cheap title uses words no other
-     listing uses;
-   - a brand query without a model number (`jbl speaker`, `logitech mouse`): items far below
-     the brand's usual price (`src/lib/match/price.ts`). They may be clones, but they may also
-     be the brand's own cheap line (JBL Go, Logitech M170), so they stay visible at their price.
-
-Some evidence is strong enough to drop an item:
-
-- a query word missing from the title (from four words on, one non-head word may be missing);
-- accessories and parts for the queried product;
-- books and other product kinds that share its words;
-- for a brand query with a model number (`iphone 16`, `nintendo switch 2`), items far below
-  that model's price: clones, games and adapters.
-
-## Tuning the matching
-
-The word lists are small on purpose: most of the ranking comes from statistics of each result
-set. Each file under `data/` controls one rule:
-
-| File | Controls |
+| Key | Meaning |
 | --- | --- |
-| `data/synonyms.json` | Groups of equivalent terms (`["usb-c", "type-c", "usb c"]`). A query word in a group also searches the stores with the others. |
-| `data/match-aliases.json` | Groups of words or phrases that satisfy each other in title matching (`anc` = "noise cancelling", `earbuds` = "tws"). Matching only, no extra store calls. |
-| `data/accessory-words.json` | Words (case, cable, strap, ...) that mark a title as an accessory. Accessories are dropped unless the query asks for them (`usb-c cable` keeps cables). |
-| `data/part-words.json` | Part nouns that mark a part when they follow the product noun ("Mechanical Keyboard Switch"). |
-| `data/other-product-words.json` | Other product kinds that share a query's words (macro keypads sold as "mechanical keyboard"). |
-| `data/brands.json` | Brand and product-line words. A query that names one gets the brand price rules (see Ranking). |
+| `APP_HOSTS` | Hosts the browser may use to reach the app, comma-separated `host[:port]`, exact match. Loopback is always allowed. |
+| `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID` | Telegram price alerts (optional). The token is server-only and never logged. |
+| `ALERT_CHECK_HOURS` | Hours between price-alert checks (default 6, minimum 0.25). |
+| `NODE_ENV` | `production` in Docker. |
+| `CADDY_HOST` | With the `https` compose profile: the LAN name Caddy serves. |
+| `APP_BIND` | IPv4 address the published ports bind to (default `0.0.0.0`). |
+| `COMPOSE_PROFILES`, `TUNNEL_TOKEN` | Optional Cloudflare Tunnel (`tunnel` profile); the token goes in `.env.tunnel`. |
+| `API_ANYTHING_HOME`, `API_ANYTHING_LOCAL_ONLY` | API Anything home (default `./.aa-home`) and local-only mode (default `1`). |
+| `NOON_PROFILE_DIR`, `SHEIN_PROFILE_DIR`, `CHROME_PATH` | Chrome profile folders and Chrome binary override. |
+| `DEAL_SEARCH_DB` | SQLite file for history, prices and alerts (default under `%LOCALAPPDATA%\deal-search` or `~/.local/share/deal-search`). |
 
-Restart the server after editing a file. Then re-run the offline eval (below) and check that no
-query set got worse.
+Telegram setup: create a bot with @BotFather, send it a message, read your chat id from
+`https://api.telegram.org/bot<TOKEN>/getUpdates`, set both keys, restart, then use
+"Send test message" on the Alerts page.
 
-## Evaluating changes
+The matching word lists are in `data/` (synonyms, match aliases, accessory words, part words,
+other product kinds, brands). Restart after editing, then re-run the eval.
 
-The eval harness replays recorded store answers through the real pipeline, so you can measure a
-matching change offline, without contacting any store.
+## Docker deploy
 
-- **Queries:** `eval/queries.json` (15 tuning queries) and the holdout sets
-  `eval/queries-holdout.json`, `queries-holdout2.json`, `queries-holdout3.json` and
-  `queries-holdout4.json`.
-- **Record** (live traffic, so use it sparingly):
-  `node scripts/eval-record.mjs [--stores a,b] [--queries "q1|q2"] [--force]`. It is gentle: one
-  request at a time, at least 3 s between requests to a store and 5 s between noon loads. It is
-  resumable, and a store that blocks is dropped for the rest of the run. Raw answers land in
-  `eval/recorded/<store>/<slug>.json`. Stop the dev server first. If its noon Chrome is running,
-  the recorder's Chrome hands off to it and exits ("Chrome exited early (code 0)"), and noon
-  fails for that run.
-- **Label:** `node scripts/eval-dump.mjs [--queries "q1|q2"]` writes every recorded product to
-  `eval/dump/<slug>.tsv`. Label each one in `eval/labels/<slug>.json` as relevant, accessory,
-  wrong-model or off-topic, following `eval/LABELING.md`.
-- **Replay and score** (offline): `node scripts/eval.mjs [--queries "q1|q2"] [--top N]`. It prints
-  precision@10, accessory@10, wrong-model@10, recall and cheapest-relevant-first per query and
-  overall, and writes `eval/last-run.json`. Unlabelled queries print their top 10 instead.
-- **Metrics and history:** the definitions, targets and every tuning round are in
-  `eval/RESULTS.md`. Keep a change only when no set gets worse.
+`Dockerfile` and `docker-compose.yml` build a standalone Next.js server with Google Chrome on a
+virtual display (Xvfb) for noon and SHEIN, and a data volume for SQLite and Chrome profiles.
+Optional compose profiles add Caddy (LAN HTTPS) or `cloudflared` (Cloudflare Tunnel).
+`scripts/deploy.sh` deploys the committed tree to the VM over SSH; `scripts/backup.sh` backs up
+the data volume (database and Chrome profiles) on the VM.
+
+See [docs/DEPLOY.md](docs/DEPLOY.md) for the VM setup, Chrome sandboxing, backups and
+troubleshooting.
+
+## QA
+
+```bash
+npm run qa   # lint, strict lint (typescript-eslint, security, ReDoS), typecheck, tests, knip
+```
+
+CI ([.github/workflows/ci.yml](.github/workflows/ci.yml)) runs typecheck, lint, tests and
+build on every push and pull request to `main`. External scanners (Semgrep, gitleaks,
+osv-scanner, npm audit) and the lint policy are described in [docs/QA.md](docs/QA.md).
+
+## Eval harness
+
+The eval replays recorded store answers (`eval/recorded/<store>/<query>.json`) through the
+real pipeline, so matching changes can be measured offline.
+
+| Script | Purpose |
+| --- | --- |
+| `node scripts/eval.mjs [--queries "a\|b"] [--top N]` | Replay and score precision@10, accessory@10, wrong-model@10, recall; writes `eval/last-run.json`. Offline. |
+| `node scripts/eval-groups.mjs` | Score cross-store grouping against `eval/groups-gold.json` and `eval/groups-adversarial.json`. Offline. |
+| `node scripts/eval-record.mjs` | Record new store answers. Live traffic: slow, one request at a time; use sparingly. |
+| `node scripts/eval-dump.mjs` | Dump recorded products to TSV for labelling (`eval/LABELING.md`). |
+| `node scripts/eval-group-candidates.mjs` | List candidate pairs for grouping labels. |
+
+Query sets: `eval/queries.json` (tuning) and `eval/queries-holdout*.json` (held out). Metric
+definitions and every tuning round are in `eval/RESULTS.md`. Keep a change only when no set
+gets worse.
+
+## Project layout
+
+```
+app/            Next.js routes: pages (/, /history, /alerts) and API routes
+src/lib/        pipeline, query parsing, matching, ranking, insights, alerts, db
+src/sites/      one adapter per store, plus the shared Chrome/CDP driver
+src/eval/       replay and metrics used by the eval scripts
+api-specs/      API Anything search specs per store
+data/           matching word lists
+eval/           recorded store answers, labels, gold groups, results
+scripts/        install-specs, eval, deploy and backup scripts
+tests/          vitest unit, route and fixture tests
+docker/         entrypoint, Caddyfile, Chrome seccomp profile
+docs/           DEPLOY, QA, DESIGN and planning notes
+public/stores/  store icons (see SOURCES.md)
+```
 
 ## Adding a store
 
-1. Learn the store's search operation with API Anything (`npx api-anything learn ...`) in a
-   scratch home, and check it returns English titles and SAR prices for Saudi Arabia.
-2. Put the resulting spec in `api-specs/<id>.json`. The predev step installs it.
-3. Write the adapter in `src/sites/<id>/search.ts`: `searchCalls(pq, variants)` builds the
-   calls and `normalizeSearchItem(raw)` maps one result to a `Product` (`currency: "SAR"`,
-   `detailStatus: "ok"`), or returns null for an item it cannot read. Add fixture tests under
-   `tests/sites/`.
-4. Register it in `src/sites/registry.ts`, and add the same id and label to `src/lib/stores.ts`
-   (the client-side list; `tests/lib/stores.test.ts` checks they match).
-5. Record and label a few queries for it (see Evaluating changes).
+1. Learn the store's search operation with API Anything in a scratch home and check it returns
+   English titles and SAR prices for Saudi Arabia.
+2. Save the spec as `api-specs/<id>.json`.
+3. Write `src/sites/<id>/search.ts` (`searchCalls`, `normalizeSearchItem`) with fixture tests
+   under `tests/sites/`.
+4. Register it in `src/sites/registry.ts` and `src/lib/stores.ts`.
+5. Record and label a few eval queries for it.
 
-## Search suggestions
+## Limitations and disclaimer
 
-As you type (2 characters or more, after a 150 ms pause) the query box suggests searches,
-Google-style. The app's own route `GET /api/suggest?q=` merges, in this order, up to 8 English
-suggestions from:
-
-1. Amazon KSA's public autocomplete (`completion.amazon.sa`, the service amazon.sa's search box uses);
-2. Jarir's public Constructor.io autocomplete (`ac.cnstrc.com`, the same public key the Jarir search uses).
-
-No AI is involved. Each source gets 1.5 s; a slow or failing one is skipped, and a source that
-answers 403 or 429 is left alone for 10 minutes. Answers are cached on the server for 5 minutes.
-
-Keys: Up and Down move through the list, Enter picks and searches, Escape or Tab closes it,
-Shift+Delete removes a highlighted recent search. The highlight stays on the item you chose
-while new suggestions arrive. If that item leaves the list, nothing is highlighted, and Enter
-searches the text you typed.
-
-Privacy: what you type in the query box (2 to 80 characters, lower-cased) is sent from the app
-server to Amazon's and Jarir's suggestion services. No cookies or account details go with it.
-Your last 20 searches are kept only in your browser (`localStorage`, key
-`deal-search:recent-searches`) and are shown first, marked "recent". To clear them, remove one
-with Shift+Delete, or clear this site's data in the browser (or run
-`localStorage.removeItem("deal-search:recent-searches")` in its console).
-
-## History & price alerts
-
-Every successful search is saved to a local SQLite file (Node's built-in `node:sqlite`, no
-native dependency): `%LOCALAPPDATA%\deal-search\data.db`, or the path in `DEAL_SEARCH_DB`.
-The file is outside the repository and is never committed.
-
-- **History** (`/history`): newest first, with the stores, time, result count and the cheapest
-  confident match. Re-run opens the search page with the search filled in and runs it; you can
-  delete one entry or clear all.
-- **Watch** on a result card sets a product alert (target prefilled 5% under the current price).
-  **Watch this search** above the results alerts when any confident match (never a "less likely"
-  one) is at or under a max price (prefilled 5% under the cheapest confident match). It keeps
-  the search's min price, max price and min rating filters. The same search, stores and target
-  twice updates the one watch.
-- **Alerts** (`/alerts`): every watch with its target, current and lowest price, last check, a
-  sparkline, pause or resume, edit target and delete; the log of fired alerts; Telegram status.
-
-The checker runs inside the app's server process while the app runs: every `ALERT_CHECK_HOURS`
-hours (default 6), stores fetched one after another about 20 s apart (at least 60 s before noon
-or SHEIN), each store at most once per query per cycle, through the normal store adapters,
-caches and back-offs. SHEIN gets at most 8 searches per cycle; the rest wait for the next cycle,
-oldest checked first. A blocked store is skipped until the next cycle. A watch that fired
-notifies again only after the price rose above the target and fell back; a Telegram send that
-failed (timeout, server error) is retried next cycle. Watches on noon or SHEIN open the app's
-off-screen Chrome during checks while the app runs. In development, `POST /api/alerts/run-now` (JSON body `{}`) runs one
-cycle at once; it answers 404 in production.
-
-API (local only, same request guard as `/api/search`): `GET|DELETE /api/history` (`?id=N` or
-`?all=1`), `GET|POST|PATCH|DELETE /api/watches`, `GET /api/alerts`, `POST /api/alerts/seen`,
-`POST /api/alerts/test-telegram`.
-
-### Telegram setup
-
-1. In Telegram, talk to @BotFather → /newbot → copy the token.
-2. Send any message to your new bot.
-3. Open https://api.telegram.org/bot<TOKEN>/getUpdates and copy `"chat":{"id":…}`.
-4. Add `TELEGRAM_BOT_TOKEN=…` and `TELEGRAM_CHAT_ID=…` to `.env.local`.
-5. Restart the app.
-6. Alerts → Send test message.
-
-The token is a secret: keep it only in `.env.local` (gitignored). It is used only on the server
-and never reaches the browser or the logs. Without it, alerts still show on the Alerts page.
+- **Personal-use tool.** It sends ordinary search requests from your own IP, at a low rate.
+  Whether that is allowed by each store's terms of service is your responsibility. Do not use
+  it for bulk scraping or commercial data collection.
+- **No authentication by design.** There is no login and no rate limiting. Run it on a trusted
+  network or behind a private tunnel. See [SECURITY.md](SECURITY.md).
+- **Prices are listed prices** from search results, not checkout prices. Shipping, fees and
+  coupons are not included. "Was" prices, and so discounts, come from the stores and may be
+  inflated.
+- **Fragile by nature.** Stores change their pages and APIs and may block automated clients;
+  a store then shows `error` or `blocked` until its adapter is updated. noon and SHEIN are the
+  slowest (a cold Chrome start takes 15 to 20 s).
+- **No affiliation.** This project is not affiliated with, endorsed by or sponsored by any of
+  the stores. Store names and logos are trademarks of their respective owners; the icons in
+  `public/stores/` are used only to identify each store (sources in
+  [public/stores/SOURCES.md](public/stores/SOURCES.md)).
 
 ## Privacy
 
-`API_ANYTHING_LOCAL_ONLY=1` keeps API Anything local: specs, cookies and caches stay in
-`.aa-home/`, and it sends no request to the shared API Anything registry (no spec lookups,
-pulls or publishing). The app has no accounts. Search history and alerts stay in a SQLite file on this machine (see
-History & price alerts); recent-search suggestions stay in your browser. Requests go straight from your machine
-to the stores.
+Search history, price observations and alerts stay in a local SQLite file. Recent searches stay
+in your browser's `localStorage`. Query-box text (2 to 80 characters) is sent from the server
+to Amazon's and Jarir's public suggestion services, without cookies. Store requests go straight
+from your machine to the stores.
 
-## Verified (historical: 2026-11-27, before Tasks 9b to 14)
+## License
 
-Checked against the live stores, all five selected, sort `price` (`npm run build` succeeded).
-Raw responses are in `eval/live-2026-11-27/`.
-
-At the time noon was blocked by Akamai on every search. The cause, Chrome launched with debug
-port 0, was fixed in Task 9b (see "noon and Chrome"). The ranking has also changed since
-(Task 12), so these product counts are out of date. Current quality is measured by the eval
-harness: see `eval/RESULTS.md`.
-
-| Query (production, `npm start`) | Stores ok | Blocked / error | Products | Time |
-| --- | --- | --- | --- | --- |
-| `anc earbuds under 300` | AliExpress, Amazon, Jarir, Trendyol | noon blocked | 442 | 31.3 s |
-| `usb-c cable 100w` | AliExpress (2 of 9 calls), Amazon, Jarir, Trendyol | noon blocked | 260 | 37.8 s |
-| `mechanical keyboard >4 stars -wired` | Amazon (1 of 2 calls), Jarir (0 results after filters), Trendyol | noon blocked; AliExpress error | 40 | 12.9 s |
-| `anc earbuds under 300` again (cache) | same as first run | same | 442 | 0.46 s |
-
-- Every product had a SAR price, an English title and a URL on a KSA store domain. Price
-  filters, the `-wired` exclusion, the rating filter and price sort all held.
-- "Jarir (0 results after filters)": Jarir gives no ratings, so a rating filter then removed all
-  of it. Now a rating filter keeps Jarir's products, marked "No rating".
-- A cold `npm run dev` took about 47 s to compile the first page and serve the first search.
-
-## Known limits
-
-- noon is the slowest store. A cold search (Chrome start and warm-up) takes about 15 to 20 s,
-  and the whole result waits for it. Deselect noon for a quick search.
-- AliExpress sometimes serves an anti-bot page after a few searches; it then shows as an error
-  until it recovers.
-- Prices are the listed search-result price, not the checkout price. Shipping is not included.
-- "Was" prices (and so discounts) on Trendyol and Amazon may be inflated.
+[MIT](LICENSE)

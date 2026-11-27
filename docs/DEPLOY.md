@@ -89,7 +89,7 @@ which makes `navigator.webdriver` true and gets noon's 403), headed, attached ov
 ## First deploy (from the PC)
 
 ```bash
-cd "/c/Users/Dr Mohamed/Documents/Web Search"
+cd deal-search-ksa                # your clone
 cp .env.example /tmp/deal.env    # then edit: APP_HOSTS, TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID
 ENV_FILE=/tmp/deal.env scripts/deploy.sh
 rm /tmp/deal.env
@@ -225,10 +225,10 @@ ls -la /data`, `df -h` on the VM.
 
 **Public hostname (Cloudflare Tunnel).** `cloudflared` (compose profile `tunnel`) opens an outbound-only
 tunnel; no inbound port is needed. The tunnel `deal-search` is remotely managed in Cloudflare:
-ingress `deals.example.com -> http://app:3000`, DNS `search` CNAME `<tunnel-id>.cfargotunnel.com` (proxied).
+ingress `deals.example.com -> http://app:3000`, DNS `deals` CNAME `<tunnel-id>.cfargotunnel.com` (proxied).
 On the VM: `.env` has `COMPOSE_PROFILES=tunnel` and `deals.example.com` in `APP_HOSTS`; the token is
 in `.env.tunnel` (`TUNNEL_TOKEN=<token>`, mode 600), read only by `cloudflared`, never by the app.
-The app has no login and no limits (owner decision), so anyone with the URL can use it.
+The app has no login and no limits (owner decision), so anyone with the URL can use it: put Cloudflare Access (or another login) in front of a public hostname.
 
 **Exposure.** Ports are published on IPv4 only (`${APP_BIND:-0.0.0.0}`). The VM has a global IPv6
 address, and a bare `"3000:3000"` would also listen on `[::]` and be reachable from the internet.
