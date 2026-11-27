@@ -1,0 +1,107 @@
+{
+  "name": "saco-sa",
+  "baseUrl": "https://www.saco.sa",
+  "operations": [
+    {
+      "name": "search",
+      "request": {
+        "method": "GET",
+        "url": "https://www.saco.sa/en/products-search?q=air%20fryer&sortBy=custom-position&sortDir=DESC",
+        "headers": {
+          "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/jxl,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
+          "accept-language": "en-US,en;q=0.9",
+          "priority": "u=0, i",
+          "sec-ch-ua": "\"Chromium\";v=\"158\", \"Not.A/Brand\";v=\"24\", \"Google Chrome\";v=\"158\"",
+          "sec-ch-ua-mobile": "?0",
+          "sec-ch-ua-platform": "\"Windows\"",
+          "sec-fetch-dest": "document",
+          "sec-fetch-mode": "navigate",
+          "sec-fetch-site": "none",
+          "sec-fetch-user": "?1",
+          "upgrade-insecure-requests": "1",
+          "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/158.0.0.0 Safari/537.36"
+        }
+      },
+      "slots": [
+        {
+          "param": "q",
+          "at": [
+            "query:q"
+          ]
+        },
+        {
+          "param": "sort",
+          "at": [
+            "query:sortBy"
+          ]
+        },
+        {
+          "param": "dir",
+          "at": [
+            "query:sortDir"
+          ]
+        }
+      ],
+      "volatile": [],
+      "trigger": {
+        "url": "https://www.saco.sa/en/products-search?q={q}&sortBy={sort}&sortDir={dir}"
+      },
+      "match": {
+        "method": "GET",
+        "host": "www.saco.sa",
+        "path": "/en/products-search"
+      },
+      "response": {
+        "format": "html",
+        "contentType": "text/html; charset=utf-8",
+        "html": {
+          "items": "section:has(> div > a[href*=\"/product/\"]):has(button.add-to-cart[data-id])",
+          "fields": {
+            "id": "button.add-to-cart@data-id",
+            "title": "button.add-to-cart@data-name",
+            "price": "button.add-to-cart@data-price",
+            "currency": "button.add-to-cart@data-currency",
+            "orig": "p.line-through",
+            "url": "a[href*=\"/product/\"]@href",
+            "image": "img@src",
+            "rating": ".star-rating@style",
+            "stock": "div.md\\:hidden > span:last-child",
+            "cart": "button.add-to-cart > span"
+          }
+        }
+      },
+      "params": [
+        {
+          "name": "q",
+          "type": "string",
+          "required": true,
+          "example": "air fryer"
+        },
+        {
+          "name": "sort",
+          "type": "string",
+          "required": false,
+          "example": "custom-position",
+          "enum": [
+            "custom-position",
+            "price"
+          ]
+        },
+        {
+          "name": "dir",
+          "type": "string",
+          "required": false,
+          "example": "DESC",
+          "enum": [
+            "DESC",
+            "ASC"
+          ]
+        }
+      ],
+      "readOnly": true,
+      "minTier": 1,
+      "learnedLoggedIn": false,
+      "learnedAt": "2026-11-27T19:58:14.313Z"
+    }
+  ]
+}

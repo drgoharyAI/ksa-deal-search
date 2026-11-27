@@ -2,7 +2,7 @@
   "name": "web-search-deals",
   "version": "0.1.0",
   "private": true,
-  "description": "Search eight Saudi online stores at once, with rule-based matching, cross-store grouping, deal badges, price history and Telegram price alerts.",
+  "description": "Search nine Saudi online stores at once, with rule-based matching, cross-store grouping, deal badges, price history and Telegram price alerts.",
   "license": "MIT",
   "repository": {
     "type": "git",

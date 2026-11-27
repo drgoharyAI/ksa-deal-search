@@ -6,6 +6,7 @@ import carrefourSa from "../fixtures/carrefour-sa-search.json";
 import extraSa from "../fixtures/extra-sa-search.json";
 import jarir from "../fixtures/jarir-search.json";
 import noonSa from "../fixtures/noon-sa-search.json";
+import sacoSa from "../fixtures/saco-sa-search.json";
 import sheinSa from "../fixtures/shein-sa-search.json";
 import trendyolSa from "../fixtures/trendyol-sa-search.json";
 
@@ -43,6 +44,12 @@ describe("stock: stores with a stock field map it", () => {
     const ps = normalized("extra-sa", extraSa);
     expect(ps.length).toBeGreaterThan(0);
     for (const p of ps) expect(p.inStock).toBe(true);
+  });
+  it("SACO: badges map both ways on a real page (the fixture has out-of-stock cards)", () => {
+    const ps = normalized("saco-sa", sacoSa);
+    expect(ps.filter((p) => p.inStock === true).length).toBeGreaterThan(0);
+    expect(ps.filter((p) => p.inStock === false).length).toBeGreaterThan(0);
+    expect(ps.every((p) => typeof p.inStock === "boolean")).toBe(true);
   });
   it("Trendyol and SHEIN fixtures predate the stock field: unknown, kept", () => {
     for (const [site, f] of [["trendyol-sa", trendyolSa], ["shein-sa", sheinSa]] as const) {

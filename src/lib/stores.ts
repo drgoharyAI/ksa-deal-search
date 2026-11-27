@@ -13,6 +13,7 @@ export const STORES = [
   { id: "trendyol-sa", label: "Trendyol KSA", logo: "/stores/trendyol-sa.png", defaultSelected: true },
   { id: "extra-sa", label: "eXtra", logo: "/stores/extra-sa.ico", defaultSelected: true },
   { id: "carrefour-sa", label: "Carrefour KSA", logo: "/stores/carrefour-sa.ico", defaultSelected: true },
+  { id: "saco-sa", label: "SACO", logo: "/stores/saco-sa.ico", defaultSelected: true },
   // Off by default: real Chrome, one search per 5 s at most, and SHEIN's risk control may block it.
   {
     id: "shein-sa",
