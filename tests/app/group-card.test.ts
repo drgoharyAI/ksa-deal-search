@@ -34,7 +34,8 @@ describe("GroupCard (17b2)", () => {
     const out = html(groupOf(3, (i) => (i === 1 ? { discountPct: 12, deal: { badge: "lowest-30d", label: "Lowest in 30 days" } } : {})));
     expect(out).toMatch(/Best price <span class="card__amount">SAR\s2,000<\/span> at/);
     expect(out).toContain("Prices from 3 stores");
-    expect(out).toContain('<ul class="gcard__rows"');
+    // role="list": list-style none drops list semantics in Safari/VoiceOver (task 18, 17b minor).
+    expect(out).toContain('<ul class="gcard__rows" role="list"');
     expect(count(out, '<li class="gcard__row')).toBe(3);
     expect(count(out, "gcard__row--best")).toBe(1);
     expect(out).toContain("−12%");
@@ -70,6 +71,7 @@ describe("GroupCard (17b2)", () => {
       createElement(ResultTiers, { items: [g, { kind: "product", key: "x", product: P("jarir", "x", { title: "LG TV" }) }], compare: { isChecked: () => false, onToggle: () => {} } }),
     );
     expect(count(out, 'class="grid__wide"')).toBe(1);
+    expect(out).toContain('<ul class="grid" role="list">');
     expect(count(out, 'type="checkbox"')).toBe(2);
   });
 });

@@ -93,7 +93,7 @@ function GroupCard({ group: g, query, compareChecked = false, onCompare }: { gro
           {!isLikelyMatch(b) && <p className="card__flag">Less likely match</p>}
         </div>
       </div>
-      <ul className="gcard__rows" id={listId} aria-label={`Prices for ${b.title}`}>
+      <ul className="gcard__rows" role="list" id={listId} aria-label={`Prices for ${b.title}`}>
         {rows.map((p) => (
           <Row key={productKey(p)} p={p} best={p === b} color={g.colors[`${p.site}:${p.id}`]} />
         ))}

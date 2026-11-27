@@ -14,7 +14,7 @@ type GridProps = { items: ViewItem[]; query?: string; compare?: CompareProps };
 
 function Grid({ items, query, compare }: GridProps) {
   return (
-    <ul className="grid">
+    <ul className="grid" role="list">
       {items.map((it) => {
         const lead = leadOf(it);
         const cmp = compare && { compareChecked: compare.isChecked(lead), onCompare: compare.onToggle };
