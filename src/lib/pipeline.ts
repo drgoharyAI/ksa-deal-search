@@ -7,7 +7,8 @@ import { matchTerms } from "@/src/lib/query/filler";
 import { tokenizeKeepDigits } from "@/src/lib/match/tokenize";
 import { filterRelevant } from "@/src/lib/match/relevance";
 import { dropAccessories } from "@/src/lib/match/accessory";
-import { dedupe } from "@/src/lib/match/dedupe";
+import { dedupeByStore } from "@/src/lib/match/dedupe";
+import { groupProducts, groupRefs, orderGroups, type GroupRef } from "@/src/lib/match/group";
 import { isBookCode, isOtherProduct } from "@/src/lib/match/category";
 import { applyBrandPriceRules } from "@/src/lib/match/price";
 import { markWeakMatches } from "@/src/lib/match/structure";
@@ -29,6 +30,8 @@ export type SearchResult = {
   products: Product[];
   statuses: SiteStatus[];
   queryTokens: string[][];
+  /** The same product at several stores (src/lib/match/group.ts), in display order; ids only. */
+  groups?: GroupRef[];
   reason?: string;
 };
 
@@ -179,9 +182,13 @@ export async function runSearch(input: SearchInput, opts: SearchOptions = {}): P
   products = markWeakMatches(products, queryTokens);
   products = scoreMatches(products, queryTokens);
   opts.onFiltered?.(products);
-  products = rank(dedupe(products), input.sort);
+  // Look-alikes merge within a store; the same product at other stores is grouped instead.
+  products = rank(dedupeByStore(products), input.sort);
+  const groups = orderGroups(groupProducts(products), input.sort).filter((g) => g.members.length > 1);
+  const groupOf = new Map(groups.flatMap((g) => g.members.map((p) => [p, g.key] as const)));
+  products = products.map((p) => (groupOf.has(p) ? { ...p, groupKey: groupOf.get(p)! } : p));
 
-  const result: SearchResult = { products, statuses, queryTokens };
+  const result: SearchResult = { products, statuses, queryTokens, groups: groupRefs(groups) };
   if (!products.length) result.reason = NO_MATCH_REASON;
   return result;
 }

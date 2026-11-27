@@ -26,3 +26,14 @@ export function dedupe(products: Product[]): Product[] {
   }
   return groups.map((g) => g.best);
 }
+
+/**
+ * dedupe within each store only: the same product at two stores stays two listings, so cross-store
+ * grouping (src/lib/match/group.ts) can show a price per store. Kept items stay in input order.
+ */
+export function dedupeByStore(products: Product[]): Product[] {
+  const bySite = new Map<string, Product[]>();
+  for (const p of products) bySite.set(p.site, [...(bySite.get(p.site) ?? []), p]);
+  const kept = new Set([...bySite.values()].flatMap((ps) => dedupe(ps)));
+  return products.filter((p) => kept.has(p));
+}

@@ -386,3 +386,32 @@ describe("answer time (fetchedAt) for price observations", () => {
     expect(r.products.every((p) => p.fetchedAt === undefined)).toBe(true);
   });
 });
+
+describe("runSearch cross-store groups", () => {
+  it("keeps the same product at two stores as two listings, grouped by key", async () => {
+    const site = (id: string, title: string, price: number) => ({
+      id,
+      label: id,
+      searchCalls: () => [{ op: "search", args: {} }],
+      runCall: async () => ({ ok: true as const, tier: 1, data: [{}] }),
+      normalizeSearchItem: () => ({
+        site: id, id: "1", title, listPrice: price, origPrice: null, discountPct: null, currency: "SAR",
+        rating: null, soldCount: 0, image: "", url: `https://${id}.example/1`, detailStatus: "ok" as const,
+      }),
+      fetchDetail: async (p: never) => p,
+    });
+    sites.g1 = site("g1", "Sony WH-1000XM5 Wireless Noise Cancelling Headphones Black", 1200);
+    sites.g2 = site("g2", "Sony WH1000XM5 Wireless Noise Cancelling Headphones Silver", 1100);
+    try {
+      const r = await runSearch({ ...base, sites: ["g1", "g2"], query: "sony headphones" });
+      expect(r.products.map((p) => p.site)).toEqual(["g2", "g1"]);
+      expect(r.groups).toEqual([
+        { key: "g:g1:1", memberKeys: ["g2:1", "g1:1"], bestKey: "g2:1", colors: { "g2:1": "silver", "g1:1": "black" } },
+      ]);
+      expect(r.products.every((p) => p.groupKey === "g:g1:1")).toBe(true);
+    } finally {
+      delete sites.g1;
+      delete sites.g2;
+    }
+  });
+});

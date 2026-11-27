@@ -25,6 +25,8 @@ export type Product = {
   deal?: DealInsight;
   /** Price trend from local price observations; absent without enough data. */
   trend?: PriceTrend;
+  /** Set on members of a multi-store group (src/lib/match/group.ts): the group's key. */
+  groupKey?: string;
   /** When the store gave this answer (ms); for a cached answer, when it was cached. Set by the pipeline. */
   fetchedAt?: number;
   /** No product-detail calls: every product is "ok" and finalPrice = listPrice. */

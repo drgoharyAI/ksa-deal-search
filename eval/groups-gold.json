@@ -1,0 +1,1169 @@
+{
+ "about": "Reviewed cross-store pairs for grouping (src/lib/match/group.ts). Candidates from scripts/eval-group-candidates.mjs, labelled by reading titles; ambiguous pairs left out. split: tune (even query index across queries*.json) or heldout.",
+ "queries": [
+  {
+   "query": "anc earbuds under 300",
+   "split": "tune",
+   "sameKeys": [
+    [
+     "aliexpress:1005012594430190",
+     "trendyol-sa:1171890065"
+    ],
+    [
+     "amazon-sa:B0CQXHC5FQ",
+     "noon-sa:N70087575V"
+    ],
+    [
+     "amazon-sa:B0CRTYZG5C",
+     "noon-sa:N70109322V"
+    ],
+    [
+     "amazon-sa:B0GZYYD2LR",
+     "noon-sa:N70409318V"
+    ],
+    [
+     "amazon-sa:B0H4R6FNVZ",
+     "noon-sa:N70377512V"
+    ],
+    [
+     "noon-sa:N70203522V",
+     "amazon-sa:B0H8BLGHGT"
+    ],
+    [
+     "trendyol-sa:1104468861",
+     "aliexpress:1005010530034527"
+    ]
+   ],
+   "differentKeys": [
+    [
+     "trendyol-sa:926253024",
+     "amazon-sa:B0BZV7M23Q"
+    ],
+    [
+     "noon-sa:N53408148A",
+     "amazon-sa:B0BZV7M23Q"
+    ],
+    [
+     "noon-sa:N70109322V",
+     "amazon-sa:B0CQXHC5FQ"
+    ]
+   ]
+  },
+  {
+   "query": "iphone 16",
+   "split": "heldout",
+   "sameKeys": [
+    [
+     "noon-sa:N70105880V",
+     "amazon-sa:B0DGJLGN8K"
+    ],
+    [
+     "amazon-sa:B0DGJM5KW6",
+     "trendyol-sa:869512001"
+    ]
+   ],
+   "differentKeys": [
+    [
+     "noon-sa:N70105880V",
+     "amazon-sa:B0DGJTSY2Y"
+    ],
+    [
+     "noon-sa:N70105527V",
+     "jarir:642516"
+    ],
+    [
+     "amazon-sa:B0DGJLGN8K",
+     "trendyol-sa:1198448656"
+    ],
+    [
+     "noon-sa:N70105536V",
+     "trendyol-sa:1198517342"
+    ]
+   ]
+  },
+  {
+   "query": "usb-c cable 100w",
+   "split": "tune",
+   "sameKeys": [
+    [
+     "amazon-sa:B0GXGDDPZ4",
+     "noon-sa:ZBEDE970B1A4A60F2D301Z"
+    ]
+   ],
+   "differentKeys": [
+    [
+     "aliexpress:1005006434080534",
+     "noon-sa:N53328563A"
+    ],
+    [
+     "amazon-sa:B0FP5BHW9M",
+     "noon-sa:N47657836A"
+    ],
+    [
+     "noon-sa:N70185219V",
+     "amazon-sa:B093GFWZZZ"
+    ]
+   ]
+  },
+  {
+   "query": "air fryer",
+   "split": "heldout",
+   "sameKeys": [
+    [
+     "trendyol-sa:948720031",
+     "noon-sa:Z85C0E1653456364BDFB2Z"
+    ],
+    [
+     "amazon-sa:B0DJF77CTV",
+     "noon-sa:N70101407V"
+    ],
+    [
+     "trendyol-sa:900413348",
+     "noon-sa:N53405921A"
+    ],
+    [
+     "noon-sa:N70106574V",
+     "trendyol-sa:844942283"
+    ]
+   ],
+   "differentKeys": [
+    [
+     "noon-sa:Z1E36EAA6095AE844716AZ",
+     "amazon-sa:B0CW21FNRZ"
+    ],
+    [
+     "amazon-sa:B0DVC5FQSL",
+     "noon-sa:N53405921A"
+    ],
+    [
+     "amazon-sa:B09BZR9JFG",
+     "noon-sa:N70101485V"
+    ]
+   ]
+  },
+  {
+   "query": "apple watch",
+   "split": "tune",
+   "sameKeys": [
+    [
+     "jarir:666639",
+     "noon-sa:N70213975V"
+    ],
+    [
+     "noon-sa:N70223245V",
+     "jarir:666641"
+    ]
+   ],
+   "differentKeys": [
+    [
+     "jarir:689619",
+     "noon-sa:N70108653V"
+    ],
+    [
+     "noon-sa:N70437044V",
+     "jarir:666630"
+    ],
+    [
+     "noon-sa:N70213905V",
+     "jarir:689603"
+    ]
+   ]
+  },
+  {
+   "query": "power bank 20000mah",
+   "split": "heldout",
+   "sameKeys": [
+    [
+     "amazon-sa:B0HFWKY5JH",
+     "noon-sa:N70431164V"
+    ],
+    [
+     "amazon-sa:B0DGQJWPZX",
+     "noon-sa:N43864681A"
+    ],
+    [
+     "amazon-sa:B0GJD4NY4Z",
+     "noon-sa:N70198820V"
+    ],
+    [
+     "amazon-sa:B0D8KH4LNB",
+     "aliexpress:1005009259823424"
+    ]
+   ],
+   "differentKeys": [
+    [
+     "amazon-sa:B0DGQJWPZX",
+     "noon-sa:N53439637A"
+    ],
+    [
+     "amazon-sa:B0DQD96HZW",
+     "noon-sa:N70031186V"
+    ],
+    [
+     "amazon-sa:B0DSPVDYQ9",
+     "aliexpress:1005012284154961"
+    ],
+    [
+     "amazon-sa:B0FM3CHK3V",
+     "noon-sa:N70206470V"
+    ]
+   ]
+  },
+  {
+   "query": "mechanical keyboard -wired",
+   "split": "tune",
+   "sameKeys": [
+    [
+     "noon-sa:N53385401A",
+     "amazon-sa:B07W7HXWD6"
+    ],
+    [
+     "amazon-sa:B0GGY8G4Z7",
+     "aliexpress:1005009384271028"
+    ],
+    [
+     "amazon-sa:B0F3J45MMK",
+     "trendyol-sa:1247482722"
+    ]
+   ],
+   "differentKeys": [
+    [
+     "noon-sa:N70037122V",
+     "amazon-sa:B07W7HXWD6"
+    ],
+    [
+     "noon-sa:Z24C8CF1315FDBAF0889CZ",
+     "amazon-sa:B0CMWK8YGY"
+    ],
+    [
+     "amazon-sa:B0DZCKGDYZ",
+     "noon-sa:N70432602V"
+    ],
+    [
+     "amazon-sa:B0GGY8G4Z7",
+     "aliexpress:1005009508870737"
+    ],
+    [
+     "amazon-sa:B0DCHR635V",
+     "noon-sa:N70276780V"
+    ]
+   ]
+  },
+  {
+   "query": "gaming mouse",
+   "split": "heldout",
+   "sameKeys": [
+    [
+     "aliexpress:1005007714521230",
+     "amazon-sa:B0D3D5SSY8"
+    ],
+    [
+     "aliexpress:1005006004833074",
+     "trendyol-sa:902772398"
+    ],
+    [
+     "amazon-sa:B0G3QGG18R",
+     "noon-sa:N70406280V"
+    ],
+    [
+     "jarir:510392",
+     "trendyol-sa:42688899"
+    ],
+    [
+     "aliexpress:1005013687554273",
+     "amazon-sa:B092R5MCB3"
+    ],
+    [
+     "amazon-sa:B0D3D5SSY8",
+     "noon-sa:Z08276F7848471C6D8CEBZ"
+    ]
+   ],
+   "differentKeys": [
+    [
+     "noon-sa:N21961435A",
+     "amazon-sa:B07W6JHVG8"
+    ],
+    [
+     "amazon-sa:B079RYNX33",
+     "noon-sa:N32921844A"
+    ],
+    [
+     "amazon-sa:B07W5JKP66",
+     "noon-sa:N70265254V"
+    ],
+    [
+     "amazon-sa:B0DRJ8J218",
+     "noon-sa:N70265535V"
+    ],
+    [
+     "aliexpress:1005007714521230",
+     "amazon-sa:B0FBG2N8L6"
+    ]
+   ]
+  },
+  {
+   "query": "laptop backpack",
+   "split": "heldout",
+   "sameKeys": [
+    [
+     "amazon-sa:B0C1H3CPTD",
+     "noon-sa:ZEDFDD1815A2B9FFE7C75Z"
+    ],
+    [
+     "amazon-sa:B0BMGF2WC2",
+     "noon-sa:Z48132F1CFCC4974DD455Z"
+    ],
+    [
+     "noon-sa:N31031603A",
+     "amazon-sa:B075Y72PHZ"
+    ]
+   ],
+   "differentKeys": [
+    [
+     "amazon-sa:B0F9PTNBTK",
+     "noon-sa:N19888036A"
+    ],
+    [
+     "amazon-sa:B0FB8K6W7T",
+     "noon-sa:ZF55A4C79AD97813AD3CEZ"
+    ]
+   ]
+  },
+  {
+   "query": "4k monitor 27",
+   "split": "tune",
+   "sameKeys": [
+    [
+     "amazon-sa:B0GQBH65JS",
+     "noon-sa:Z227AF5ADE95236DAE541Z"
+    ],
+    [
+     "jarir:649461",
+     "noon-sa:N70208041V"
+    ],
+    [
+     "amazon-sa:B0H7S68RZD",
+     "noon-sa:N70396306V"
+    ],
+    [
+     "amazon-sa:B0FYQ3CYBJ",
+     "jarir:678063"
+    ]
+   ],
+   "differentKeys": [
+    [
+     "amazon-sa:B0DFB26FD8",
+     "noon-sa:N70305115V"
+    ]
+   ]
+  },
+  {
+   "query": "ps5 controller",
+   "split": "heldout",
+   "sameKeys": [
+    [
+     "trendyol-sa:1075155460",
+     "noon-sa:N70127215V"
+    ],
+    [
+     "trendyol-sa:1129528551",
+     "amazon-sa:B096S9V7N5"
+    ],
+    [
+     "trendyol-sa:660527073",
+     "amazon-sa:B0FT4XN1WD"
+    ]
+   ],
+   "differentKeys": [
+    [
+     "trendyol-sa:1178182045",
+     "jarir:621042"
+    ],
+    [
+     "jarir:621042",
+     "amazon-sa:B0FT4XN1WD"
+    ],
+    [
+     "jarir:667896",
+     "amazon-sa:B0GLHVP6G4"
+    ],
+    [
+     "jarir:688685",
+     "noon-sa:N70280188V"
+    ],
+    [
+     "jarir:693490",
+     "noon-sa:N70027752V"
+    ]
+   ]
+  },
+  {
+   "query": "robot vacuum",
+   "split": "tune",
+   "sameKeys": [
+    [
+     "noon-sa:N70313719V",
+     "trendyol-sa:977572248"
+    ],
+    [
+     "amazon-sa:B0GS5FV4LC",
+     "noon-sa:N70314440V"
+    ],
+    [
+     "amazon-sa:B0GSCNQYYV",
+     "noon-sa:N70396202V"
+    ],
+    [
+     "amazon-sa:B0H1WP5DXR",
+     "noon-sa:ZDBBFC75C00BDC0440DF4Z"
+    ],
+    [
+     "amazon-sa:B0D4MQBWNR",
+     "noon-sa:N70054532V"
+    ],
+    [
+     "amazon-sa:B0GT8WVCBS",
+     "noon-sa:Z391215FC0E26A9D68253Z"
+    ]
+   ],
+   "differentKeys": [
+    [
+     "jarir:655227",
+     "amazon-sa:B0F62Q8YLQ"
+    ],
+    [
+     "amazon-sa:B0FLQGR3MZ",
+     "noon-sa:N70246238V"
+    ]
+   ]
+  },
+  {
+   "query": "smart watch >4 stars",
+   "split": "heldout",
+   "sameKeys": [
+    [
+     "noon-sa:N70386019V",
+     "trendyol-sa:1187593398"
+    ],
+    [
+     "noon-sa:N70151076V",
+     "amazon-sa:B0DWFQCY3V"
+    ],
+    [
+     "amazon-sa:B0D9JX82RZ",
+     "noon-sa:N70107719V"
+    ],
+    [
+     "amazon-sa:B0F9YN3RWG",
+     "noon-sa:N70172420V"
+    ],
+    [
+     "amazon-sa:B0FG8H5Q1W",
+     "noon-sa:N70189408V"
+    ]
+   ],
+   "differentKeys": [
+    [
+     "noon-sa:N70369018V",
+     "amazon-sa:B08N65WJVL"
+    ],
+    [
+     "amazon-sa:B0FJS8Y7DG",
+     "noon-sa:N70395063V"
+    ]
+   ]
+  },
+  {
+   "query": "hair dryer",
+   "split": "tune",
+   "sameKeys": [
+    [
+     "noon-sa:N30677584A",
+     "trendyol-sa:835485076"
+    ],
+    [
+     "trendyol-sa:838497621",
+     "amazon-sa:B07PBXW3S9"
+    ],
+    [
+     "trendyol-sa:1233327220",
+     "noon-sa:N53418178A"
+    ],
+    [
+     "amazon-sa:B07YN5MJSB",
+     "noon-sa:N40196233A"
+    ],
+    [
+     "amazon-sa:B0CJR7P6L6",
+     "noon-sa:N70003043V"
+    ],
+    [
+     "amazon-sa:B07NVQ9M24",
+     "noon-sa:N13985104A"
+    ]
+   ],
+   "differentKeys": [
+    [
+     "noon-sa:N38712237A",
+     "trendyol-sa:1201670468"
+    ]
+   ]
+  },
+  {
+   "query": "bluetooth speaker",
+   "split": "heldout",
+   "sameKeys": [
+    [
+     "amazon-sa:B0GR1KVWFM",
+     "noon-sa:N70373255V"
+    ],
+    [
+     "amazon-sa:B0GPPRPRM5",
+     "noon-sa:N70367094V"
+    ],
+    [
+     "amazon-sa:B083X1JDH3",
+     "noon-sa:N70298154V"
+    ],
+    [
+     "noon-sa:N70304785V",
+     "amazon-sa:B01MTB55WH"
+    ]
+   ],
+   "differentKeys": [
+    [
+     "amazon-sa:B0BWXM3RRK",
+     "noon-sa:ZD94395092ECC03A2CE78Z"
+    ],
+    [
+     "noon-sa:N18794667A",
+     "jarir:669448"
+    ],
+    [
+     "noon-sa:N45958882A",
+     "jarir:662082"
+    ],
+    [
+     "noon-sa:N18794667A",
+     "jarir:633080"
+    ],
+    [
+     "noon-sa:N41872609A",
+     "jarir:681653"
+    ],
+    [
+     "jarir:688324",
+     "noon-sa:N70076208V"
+    ]
+   ]
+  },
+  {
+   "query": "wireless charger 15w",
+   "split": "tune",
+   "sameKeys": [
+    [
+     "noon-sa:N70276770V",
+     "amazon-sa:B0CPF66RTD"
+    ],
+    [
+     "amazon-sa:B0CRZH376Q",
+     "jarir:631535"
+    ]
+   ],
+   "differentKeys": [
+    [
+     "noon-sa:N70206473V",
+     "amazon-sa:B0DGXKXKLC"
+    ],
+    [
+     "noon-sa:N70287405V",
+     "jarir:629941"
+    ]
+   ]
+  },
+  {
+   "query": "electric toothbrush",
+   "split": "heldout",
+   "sameKeys": [
+    [
+     "amazon-sa:B0CGLWT38N",
+     "noon-sa:Z1AE85B587437588D0741Z"
+    ],
+    [
+     "noon-sa:ZE4DC7B41CDBD35D0450AZ",
+     "amazon-sa:B08GQHZNZX"
+    ],
+    [
+     "amazon-sa:B0BMGD4Y1N",
+     "noon-sa:Z47CAA7316C9ECD8164C8Z"
+    ],
+    [
+     "noon-sa:ZA782FBCDC672B5D418EEZ",
+     "amazon-sa:B09LD8VXLX"
+    ]
+   ],
+   "differentKeys": [
+    [
+     "noon-sa:Z1AE85B587437588D0741Z",
+     "amazon-sa:B0CDM8235P"
+    ],
+    [
+     "noon-sa:ZCE653E247BFC582C315FZ",
+     "trendyol-sa:839181473"
+    ],
+    [
+     "amazon-sa:B0F9P6FPNP",
+     "noon-sa:ZB6F89BFACD9031B4E3C7Z"
+    ],
+    [
+     "noon-sa:N49248984A",
+     "amazon-sa:B08GQHZNZX"
+    ]
+   ]
+  },
+  {
+   "query": "running shoes",
+   "split": "tune",
+   "sameKeys": [
+    [
+     "noon-sa:Z114E9E05D42E3B3701F4Z",
+     "trendyol-sa:952847389"
+    ]
+   ],
+   "differentKeys": []
+  },
+  {
+   "query": "coffee machine",
+   "split": "heldout",
+   "sameKeys": [
+    [
+     "amazon-sa:B0H4NKLHFN",
+     "noon-sa:N70374089V"
+    ],
+    [
+     "amazon-sa:B07TKKDYN3",
+     "noon-sa:N27634891A"
+    ],
+    [
+     "amazon-sa:B08B8LHLLS",
+     "noon-sa:N38849951A"
+    ],
+    [
+     "amazon-sa:B0FBRNNX37",
+     "noon-sa:N70248370V"
+    ]
+   ],
+   "differentKeys": [
+    [
+     "amazon-sa:B0BXBH3W47",
+     "noon-sa:N52786475A"
+    ],
+    [
+     "amazon-sa:B0CCF5KCBQ",
+     "noon-sa:N52786475A"
+    ],
+    [
+     "amazon-sa:B00G5YOVZA",
+     "noon-sa:N70016606V"
+    ]
+   ]
+  },
+  {
+   "query": "ipad air",
+   "split": "tune",
+   "sameKeys": [
+    [
+     "noon-sa:N70305415V",
+     "trendyol-sa:1114948938"
+    ],
+    [
+     "noon-sa:N70305459V",
+     "trendyol-sa:1114948283"
+    ]
+   ],
+   "differentKeys": [
+    [
+     "trendyol-sa:1114945686",
+     "noon-sa:N70159569V"
+    ],
+    [
+     "noon-sa:N70305442V",
+     "jarir:678787"
+    ],
+    [
+     "trendyol-sa:1114949287",
+     "noon-sa:N70305375V"
+    ]
+   ]
+  },
+  {
+   "query": "external ssd 1tb",
+   "split": "heldout",
+   "sameKeys": [
+    [
+     "amazon-sa:B0H4H1SNMY",
+     "trendyol-sa:1250481331"
+    ],
+    [
+     "amazon-sa:B0CZ4N47M6",
+     "jarir:634138"
+    ],
+    [
+     "amazon-sa:B0G3F3GPWK",
+     "noon-sa:N70296000V"
+    ],
+    [
+     "amazon-sa:B0C36F3J6V",
+     "noon-sa:ZE7688F8882D6448F8B51Z"
+    ]
+   ],
+   "differentKeys": [
+    [
+     "aliexpress:1005008084586496",
+     "amazon-sa:B0DHGG9DDB"
+    ],
+    [
+     "amazon-sa:B0DLG9559Q",
+     "noon-sa:ZFE558BB196D331467993Z"
+    ],
+    [
+     "aliexpress:1005008895764658",
+     "noon-sa:ZD6A48D1E62F3FF3582AFZ"
+    ]
+   ]
+  },
+  {
+   "query": "dash cam",
+   "split": "tune",
+   "sameKeys": [
+    [
+     "aliexpress:4001314628509",
+     "noon-sa:N70349759V"
+    ],
+    [
+     "aliexpress:1005005614747739",
+     "amazon-sa:B0811Q28N6"
+    ],
+    [
+     "aliexpress:1005011972738489",
+     "amazon-sa:B0GS5V8B2C"
+    ],
+    [
+     "noon-sa:Z95D703C2207C88B4B067Z",
+     "amazon-sa:B0H3399P28"
+    ]
+   ],
+   "differentKeys": [
+    [
+     "aliexpress:1005006067418422",
+     "noon-sa:Z95D703C2207C88B4B067Z"
+    ],
+    [
+     "noon-sa:ZA295188D4E56E8E19BCDZ",
+     "amazon-sa:B0DZ1YYJM7"
+    ],
+    [
+     "noon-sa:Z704E25D9A17151CBE46FZ",
+     "aliexpress:1005007252498827"
+    ],
+    [
+     "aliexpress:1005006335914112",
+     "amazon-sa:B0FSDD4X3B"
+    ]
+   ]
+  },
+  {
+   "query": "air purifier",
+   "split": "heldout",
+   "sameKeys": [
+    [
+     "amazon-sa:B086LDJFCN",
+     "noon-sa:N70339966V"
+    ],
+    [
+     "trendyol-sa:866716709",
+     "noon-sa:N53416584A"
+    ],
+    [
+     "amazon-sa:B08L73QL1V",
+     "noon-sa:Z4A99D4DF5269C341E1CFZ"
+    ],
+    [
+     "amazon-sa:B0DT46VTDP",
+     "noon-sa:Z1803FB0D69A91BFFB5C2Z"
+    ],
+    [
+     "noon-sa:N70106217V",
+     "trendyol-sa:889726027"
+    ]
+   ],
+   "differentKeys": [
+    [
+     "aliexpress:1005009839492393",
+     "trendyol-sa:1239442347"
+    ],
+    [
+     "noon-sa:N70339983V",
+     "amazon-sa:B08L73QL1V"
+    ],
+    [
+     "amazon-sa:B08FJ678YK",
+     "noon-sa:N70339985V"
+    ],
+    [
+     "noon-sa:ZC8341611CED5E22DC4CCZ",
+     "amazon-sa:B0CG1N11DV"
+    ]
+   ]
+  },
+  {
+   "query": "gaming chair",
+   "split": "tune",
+   "sameKeys": [],
+   "differentKeys": [
+    [
+     "amazon-sa:B0HLXS1ZK1",
+     "noon-sa:N70248092V"
+    ],
+    [
+     "noon-sa:N72053427V",
+     "amazon-sa:B0DYDHRR4W"
+    ],
+    [
+     "noon-sa:N72053427V",
+     "amazon-sa:B0GM947WC5"
+    ],
+    [
+     "amazon-sa:B0G34QGYNM",
+     "noon-sa:N70248092V"
+    ]
+   ]
+  },
+  {
+   "query": "electric kettle",
+   "split": "heldout",
+   "sameKeys": [
+    [
+     "noon-sa:N70095481V",
+     "trendyol-sa:867399014"
+    ],
+    [
+     "amazon-sa:B0764LMPDV",
+     "noon-sa:N16890736A"
+    ],
+    [
+     "noon-sa:Z67E0150AA65F62C87607Z",
+     "trendyol-sa:945557370"
+    ],
+    [
+     "noon-sa:N70132537V",
+     "amazon-sa:B087BCNH9H"
+    ]
+   ],
+   "differentKeys": [
+    [
+     "noon-sa:N44322701A",
+     "amazon-sa:B08J868N1S"
+    ],
+    [
+     "jarir:JPP-8720389033094",
+     "noon-sa:N20020209A"
+    ]
+   ]
+  },
+  {
+   "query": "nintendo switch 2",
+   "split": "tune",
+   "sameKeys": [
+    [
+     "noon-sa:N70435056V",
+     "amazon-sa:B0HK11RP6G"
+    ],
+    [
+     "amazon-sa:B0F4DL6SYJ",
+     "noon-sa:N70168806V"
+    ],
+    [
+     "noon-sa:N70168806V",
+     "amazon-sa:B0F3HFQ5SY"
+    ]
+   ],
+   "differentKeys": [
+    [
+     "amazon-sa:B0GZHM15X8",
+     "jarir:655801"
+    ],
+    [
+     "amazon-sa:B0F4DL6SYJ",
+     "noon-sa:N70186918V"
+    ],
+    [
+     "noon-sa:N70183277V",
+     "amazon-sa:B0F2TN43GH"
+    ],
+    [
+     "amazon-sa:B0F2J4SYJ2",
+     "noon-sa:N70395209V"
+    ]
+   ]
+  },
+  {
+   "query": "baby stroller",
+   "split": "heldout",
+   "sameKeys": [
+    [
+     "noon-sa:N70175337V",
+     "amazon-sa:B0DJSXC4R5"
+    ]
+   ],
+   "differentKeys": [
+    [
+     "noon-sa:Z3E604B60820B11383A64Z",
+     "amazon-sa:B0H62SC31J"
+    ]
+   ]
+  },
+  {
+   "query": "standing desk",
+   "split": "heldout",
+   "sameKeys": [
+    [
+     "amazon-sa:B0F13B1YN7",
+     "noon-sa:Z651B34328BF28F7CCFDCZ"
+    ],
+    [
+     "noon-sa:Z9AE6372C2559B8EA90BFZ",
+     "amazon-sa:B0D9BD5TSB"
+    ],
+    [
+     "amazon-sa:B0D9GJHDVJ",
+     "noon-sa:ZCAC771E6F0BB50936D99Z"
+    ]
+   ],
+   "differentKeys": [
+    [
+     "amazon-sa:B0D9GJHDVJ",
+     "noon-sa:Z9AE6372C2559B8EA90BFZ"
+    ],
+    [
+     "amazon-sa:B0D9GT2SZS",
+     "noon-sa:ZCAC771E6F0BB50936D99Z"
+    ],
+    [
+     "amazon-sa:B0CDCLNB7Z",
+     "noon-sa:ZCCFD0046C77702803399Z"
+    ]
+   ]
+  },
+  {
+   "query": "noise cancelling headphones",
+   "split": "tune",
+   "sameKeys": [
+    [
+     "jarir:649550",
+     "aliexpress:1005010536089199"
+    ],
+    [
+     "amazon-sa:B0BS1QCFHX",
+     "jarir:612302"
+    ],
+    [
+     "noon-sa:N53421147A",
+     "trendyol-sa:1205581971"
+    ],
+    [
+     "noon-sa:N70176987V",
+     "amazon-sa:B0GYNVSK3V"
+    ],
+    [
+     "amazon-sa:B0C3HCD34R",
+     "noon-sa:N53421147A"
+    ],
+    [
+     "amazon-sa:B0CCZ26B5V",
+     "noon-sa:N70110407V"
+    ],
+    [
+     "amazon-sa:B0CD1DZ6RD",
+     "noon-sa:N70382042V"
+    ],
+    [
+     "noon-sa:N70203523V",
+     "amazon-sa:B0FLWH9S3H"
+    ]
+   ],
+   "differentKeys": [
+    [
+     "amazon-sa:B0BS1QCFHX",
+     "jarir:684467"
+    ],
+    [
+     "amazon-sa:B0CCZ1HQ39",
+     "noon-sa:N70213253V"
+    ],
+    [
+     "aliexpress:1005010536089199",
+     "noon-sa:N70001662V"
+    ]
+   ]
+  },
+  {
+   "query": "car vacuum cleaner",
+   "split": "heldout",
+   "sameKeys": [
+    [
+     "amazon-sa:B08N5YC26R",
+     "noon-sa:N70285238V"
+    ]
+   ],
+   "differentKeys": [
+    [
+     "amazon-sa:B0CWS6XTJ2",
+     "jarir:603286"
+    ]
+   ]
+  },
+  {
+   "query": "blender",
+   "split": "tune",
+   "sameKeys": [
+    [
+     "amazon-sa:B07QL2K1TX",
+     "noon-sa:N21719622A"
+    ],
+    [
+     "amazon-sa:B09CNMLZS3",
+     "noon-sa:N50868347A"
+    ],
+    [
+     "amazon-sa:B0842MBKBF",
+     "noon-sa:N20979562A"
+    ],
+    [
+     "trendyol-sa:844584595",
+     "noon-sa:N70022836V"
+    ],
+    [
+     "trendyol-sa:848120883",
+     "noon-sa:N52756248A"
+    ],
+    [
+     "amazon-sa:B0C2FF4JD1",
+     "noon-sa:N70096462V"
+    ]
+   ],
+   "differentKeys": [
+    [
+     "noon-sa:N41582174A",
+     "amazon-sa:B08MFKJTVG"
+    ],
+    [
+     "noon-sa:N41645927A",
+     "amazon-sa:B08L1SB1KB"
+    ]
+   ]
+  },
+  {
+   "query": "instant camera",
+   "split": "heldout",
+   "sameKeys": [
+    [
+     "amazon-sa:B0GRH779CT",
+     "noon-sa:N70389502V"
+    ],
+    [
+     "noon-sa:N53402367A",
+     "amazon-sa:B0BX8V53KM"
+    ],
+    [
+     "amazon-sa:B0GF37VTC1",
+     "noon-sa:N70305677V"
+    ],
+    [
+     "noon-sa:N53402374A",
+     "amazon-sa:B0BWNYBRNL"
+    ]
+   ],
+   "differentKeys": [
+    [
+     "noon-sa:N70390085V",
+     "amazon-sa:B0C34B6N1P"
+    ],
+    [
+     "amazon-sa:B0C85KXCXK",
+     "noon-sa:N70171020V"
+    ],
+    [
+     "amazon-sa:B0BX8V53KM",
+     "noon-sa:N41191665A"
+    ]
+   ]
+  },
+  {
+   "query": "galaxy tab s9",
+   "split": "tune",
+   "sameKeys": [],
+   "differentKeys": [
+    [
+     "amazon-sa:B0CC9YVZPJ",
+     "noon-sa:N52549527A"
+    ],
+    [
+     "amazon-sa:B0CC9YVZPJ",
+     "noon-sa:N53421359A"
+    ]
+   ]
+  },
+  {
+   "query": "wireless mouse",
+   "split": "tune",
+   "sameKeys": [
+    [
+     "amazon-sa:B01M72LILF",
+     "aliexpress:1005010240690908"
+    ],
+    [
+     "amazon-sa:B01A9GXEOI",
+     "jarir:460350"
+    ]
+   ],
+   "differentKeys": [
+    [
+     "jarir:510392",
+     "amazon-sa:B0GXVGW6TC"
+    ],
+    [
+     "amazon-sa:B09JCQ7K5P",
+     "jarir:486474"
+    ],
+    [
+     "amazon-sa:B09JCQ7K5P",
+     "jarir:542973"
+    ]
+   ]
+  },
+  {
+   "query": "steam iron",
+   "split": "heldout",
+   "sameKeys": [
+    [
+     "amazon-sa:B09MPCHX6D",
+     "trendyol-sa:866724349"
+    ],
+    [
+     "trendyol-sa:1157156943",
+     "amazon-sa:B0FK3Q6RG2"
+    ],
+    [
+     "trendyol-sa:875925793",
+     "amazon-sa:B0B8SVG6SH"
+    ],
+    [
+     "amazon-sa:B09JWZFCCQ",
+     "trendyol-sa:875925797"
+    ]
+   ],
+   "differentKeys": []
+  }
+ ]
+}

@@ -10,3 +10,5 @@ export { createRunCall } from "@/src/sites/noon-sa/search";
 export { withNoonPage, closeNoonBrowser } from "@/src/sites/noon-sa/browser";
 export { plannedCalls, callKey, querySlug, createReplayExec, recordedProducts } from "./replay";
 export { computeMetrics, aggregate, labelKey } from "./metrics";
+export { groupProducts, orderGroups, titleFeatures, sameProduct, modelCodes } from "@/src/lib/match/group";
+export { computeGroupMetrics } from "./groups";

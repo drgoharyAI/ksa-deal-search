@@ -545,3 +545,33 @@ Match-first ranking generalizes: unseen-category p@10 went from 62% (holdout 3, 
 Per-query metrics are identical. Only result counts changed: apple watch 97 -> 105 and ipad air
 76 -> 87 (the cheap tier now listed under "Less likely matches", after the top 10). The new
 failure shapes (brand + category, filler words) still need an untuned recorded holdout.
+
+## 17b cross-store grouping (src/lib/match/group.ts)
+Same product across stores, rule-based. A shared model code (4+ characters, letters and digits,
+not a spec) with no brand, spec or variant conflict merges. Without a code, titles merge only with
+the same brand, every shared spec equal (storage, RAM, mAh, W, inch, mm, L, Hz, generation,
+resolution, year, counted features, model number), the same variant words (pro/plus/max/ultra/
+mini/lite/se/fe/air/renewed/limited/tkl/bundle/massage...), no material/connectivity/control
+conflict, and a rarity-weighted token Jaccard of at least 0.6 averaged over the group's members.
+Colours may differ. Dedupe now runs within each store, so twins at two stores stay two listings.
+
+Gold set: eval/groups-gold.json, 222 reviewed cross-store pairs (122 same, 100 tricky different:
+same brand, another model, capacity, generation or variant) over 40 queries. Candidates from
+scripts/eval-group-candidates.mjs, labelled by reading titles; ambiguous pairs left out. Split by
+query index (even = tune, odd = held out). Threshold chosen on the tune half only: the lowest with
+tune precision >= 98% (0.5: 97.2%, 0.55: 96.9%, 0.6: 100%).
+
+| half | merge precision | merge recall | wrong merges |
+|---|---|---|---|
+| tune (20 queries) | 100% (31/31) | 54.4% (31/57) | 0/45 |
+| held out (20) | 100% (42/42) | 64.6% (42/65) | 0/55 |
+
+Caveat: several rules (sensor codes such as PAW3311, number+word junk codes, brand before "for",
+material conflicts, bundles) came from reading every multi-store group of all 40 queries, so the
+held-out half is not fully unseen for those rules; only the threshold was tuned on one half.
+"Same" candidates partly come from the grouping itself, so recall is an upper-bound estimate.
+
+Per-query top-10 metrics (scripts/eval.mjs, all 40 queries): identical before and after on every
+query (p@10 95%, acc@10 1%, wrong@10 2%, recall 90%, cheapest-first 80%). Grouped view (each group
+once, at its best member, scripts/eval-groups.mjs): p@10 and cheapest-first equal to the flat list
+on both halves. 243 multi-store groups over the 40 queries.
