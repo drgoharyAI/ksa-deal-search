@@ -11,7 +11,7 @@ const F = (o: Partial<ChipFilters> = {}): ChipFilters => ({ ...NO_FILTERS, ...o 
 
 // One TV at three stores (the noon twin was deduped out of `products`), plus two lone items.
 const tvA = P("amazon-sa", "tv1", { title: "Samsung TV QA65Q60D", listPrice: 2400, rating: 4.5, groupKey: "g1" });
-const tvN = P("noon-sa", "tv2", { title: "Samsung TV QA65Q60D", listPrice: 2200, discountPct: 10, groupKey: "g1" });
+const tvN = P("noon-sa", "tv2", { title: "Samsung TV QA65Q60D", listPrice: 2200, discountPct: 10, origPrice: 2450, groupKey: "g1" });
 const tvJ = P("jarir", "tv3", { title: "Samsung QLED TV QA65Q60D", listPrice: 2300, groupKey: "g1" });
 const lgA = P("amazon-sa", "lg1", { title: "LG TV 65UR8050", listPrice: 2250, rating: 4.1 });
 const soA = P("noon-sa", "so1", { title: "Sony TV KD-65X75K", listPrice: 2600, rating: 3 });

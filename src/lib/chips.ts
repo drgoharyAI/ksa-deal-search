@@ -2,6 +2,7 @@ import type { Product } from "@/src/lib/types";
 import { STORES } from "@/src/lib/stores";
 import { brandLabel, brandsFor, productKey } from "@/src/lib/specs";
 import { storeLabel } from "@/src/lib/stores";
+import { hasVerifiedDiscount } from "@/src/lib/discount";
 
 /**
  * Quick filter chips (spec: "Comparison and deal-insight features", item 3). Client-side and
@@ -32,9 +33,11 @@ export type ChipContext = { brands: Map<string, string | undefined>; ratingless:
 
 const priceOf = (p: Product): number => p.finalPrice ?? p.listPrice;
 
-/** Shows a discount: a discount percent, or an original price above the price. */
-export const isDiscounted = (p: Product): boolean =>
-  (p.discountPct ?? 0) >= 1 || (p.origPrice !== null && p.origPrice > priceOf(p));
+/**
+ * Shows a discount we can back: the same rule the cards and the compare table use
+ * (src/lib/discount.ts): a store "was" price above the price, and no fake-deal verdict.
+ */
+export const isDiscounted = (p: Product): boolean => hasVerifiedDiscount(p);
 
 /** A deal our own observations back (src/lib/insights.ts); a "fake deal" or "normal" badge is not one. */
 export const isVerifiedDeal = (p: Product): boolean => p.deal?.badge === "lowest-30d" || p.deal?.badge === "below-usual";

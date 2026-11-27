@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import ResultCard, { verifiedDiscount, wasPrice } from "@/app/components/ResultCard";
+import ResultCard from "@/app/components/ResultCard";
+import { verifiedDiscount, wasPrice } from "@/src/lib/discount";
 import GroupCard from "@/app/components/GroupCard";
 import FilterChips from "@/app/components/FilterChips";
 import ResultTiers from "@/app/components/ResultTiers";

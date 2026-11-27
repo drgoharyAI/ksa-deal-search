@@ -5,6 +5,7 @@ import type { DealInsight, PriceTrend, Product } from "@/src/lib/types";
 import { storeLabel } from "@/src/lib/stores";
 import { isLikelyMatch } from "@/src/lib/rank";
 import { httpsUrl } from "@/src/lib/view";
+import { verifiedDiscount, wasPrice } from "@/src/lib/discount";
 import StoreLogo from "./StoreLogo";
 import WatchForm, { postWatch } from "./WatchForm";
 import { defaultTarget } from "@/src/lib/alerts/shared";
@@ -136,23 +137,6 @@ export function CardWatch({ product: p, query }: { product: Product; query: stri
 
 /** The view a card is drawn in: a grid card, or a compact list row. */
 export type CardVariant = "grid" | "list";
-
-/** The struck "was" price: only a store's own earlier price above the current one, same item, same currency. */
-export function wasPrice(p: Product): number | null {
-  const price = p.finalPrice ?? p.listPrice;
-  return p.origPrice !== null && Number.isFinite(p.origPrice) && p.origPrice > price ? p.origPrice : null;
-}
-
-/**
- * The percent off we may show: the store's "was" price backs it, and our own history has not
- * called the deal fake. The store's own percent wins; otherwise it is worked out from the "was".
- */
-export function verifiedDiscount(p: Product): number | null {
-  const was = wasPrice(p);
-  if (was === null || p.deal?.badge === "fake-deal") return null;
-  const pct = p.discountPct ?? Math.round((1 - (p.finalPrice ?? p.listPrice) / was) * 100);
-  return pct >= 1 && pct < 100 ? pct : null;
-}
 
 /**
  * The picture box: the store's image at a fixed ratio, or a quiet placeholder with the store's

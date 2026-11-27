@@ -1,6 +1,7 @@
 import type { Product } from "@/src/lib/types";
 import { storeLabel } from "@/src/lib/stores";
 import { SPEC_ROWS, parseSpecs, productKey } from "@/src/lib/specs";
+import { verifiedDiscount } from "@/src/lib/discount";
 
 /**
  * Side-by-side compare (spec: "Comparison and deal-insight features", item 4). Pure and
@@ -55,7 +56,7 @@ export function compareRows(products: Product[]): CompareRow[] {
     { key: "store", label: "Store", cell: (p) => storeLabel(p.site) },
     { key: "price", label: "Price", cell: (p) => money(priceOf(p), p.currency) },
     { key: "orig", label: "Original price", cell: (p) => (p.origPrice !== null && p.origPrice > priceOf(p) ? money(p.origPrice, p.currency) : null) },
-    { key: "discount", label: "Discount", cell: (p) => (p.discountPct && Math.round(p.discountPct) > 0 ? `−${Math.round(p.discountPct)}%` : null) },
+    { key: "discount", label: "Discount", cell: (p) => { const d = verifiedDiscount(p); return d === null ? null : `−${Math.round(d)}%`; } },
     { key: "rating", label: "Rating", cell: (p) => (p.rating !== null ? `${p.rating.toFixed(1)} of 5` : null) },
     { key: "deal", label: "Deal check", cell: (p) => p.deal?.label ?? null },
   ];

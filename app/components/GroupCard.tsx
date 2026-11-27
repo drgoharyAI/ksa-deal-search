@@ -7,7 +7,8 @@ import { isLikelyMatch } from "@/src/lib/rank";
 import { productKey } from "@/src/lib/specs";
 import { httpsUrl, type GroupItem } from "@/src/lib/view";
 import StoreLogo from "./StoreLogo";
-import { CardCompare, CardMedia, CardWatch, dealExplanation, verifiedDiscount, type CompareControl } from "./ResultCard";
+import { CardCompare, CardMedia, CardWatch, dealExplanation, type CompareControl } from "./ResultCard";
+import { verifiedDiscount } from "@/src/lib/discount";
 import { formatMoney } from "@/src/lib/money";
 import Button from "./ui/Button";
 

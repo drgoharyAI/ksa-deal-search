@@ -13,7 +13,7 @@ const P = (id: string, o: Partial<Product> = {}): Product => ({
   rating: null, soldCount: 0, image: "", url: "https://example.com", detailStatus: "ok", ...o,
 });
 const ps = [
-  P("a", { title: "Samsung Galaxy S24 256GB", listPrice: 2000, rating: 4.6, discountPct: 20 }),
+  P("a", { title: "Samsung Galaxy S24 256GB", listPrice: 2000, rating: 4.6, discountPct: 20, origPrice: 2500 }),
   P("b", { title: "Apple iPhone 15 128GB", listPrice: 3000, site: "noon-sa", rating: 4.2 }),
 ];
 const noop = () => {};

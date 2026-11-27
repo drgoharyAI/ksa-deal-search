@@ -21,7 +21,7 @@ export type FormValues = {
 export type ErrorField = "query" | "sites" | "form" | null;
 
 export const SORTS: { value: SortKey; label: string }[] = [
-  { value: "price", label: "Lowest price" },
+  { value: "price", label: "Best match, then price" },
   { value: "discount", label: "Highest discount" },
   { value: "deal", label: "Best deal" },
 ];
