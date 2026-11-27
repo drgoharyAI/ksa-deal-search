@@ -363,3 +363,18 @@ falls 100%→93.3% (still above target); coffee machine's rises to yes.
 | holdout (8) | 98.8% | 1.3% | 0% | 86.5% | 100% |
 | holdout2 (6) | 93.3% | 3.3% | 0% | 89.3% | 66.7% |
 | all (29) | 97.6% | 1.0% | 0.7% | 90.0% | 89.7% |
+
+## 12e round 4: query only in a later title segment is a weak match (kept)
+`structure.ts` `queryOnlyInLaterSegment`: the title's first " - " / " – " / " | " segment names
+the query's product noun but not the whole query, and the whole query matches only in a later
+segment: another product of the same line tagged with the queried one ("Nintendo Switch Online
+GameCube Controller (Indigo) - (NS2) Nintendo Switch 2 [Pre-Owned]", 932 SAR, above the price
+tier split). First tried without the product-noun condition: it also demoted "Samsung Renewed -
+Galaxy S24 ..." and "Apple Renewed - iPad Air ..." (a seller prefix), costing samsung galaxy s24
+and ipad air their cheapest-first; with the condition nothing else moves.
+| set | p@10 | acc@10 | wrong@10 | recall | cheapest-first |
+|---|---|---|---|---|---|
+| tuning (15) | 98.7% | 0% | 1.3% | 92.1% | 93.3% |
+| holdout (8) | 98.8% | 1.3% | 0% | 86.5% | 100% |
+| holdout2 (6) | 95.0% | 1.7% | 0% | 89.3% | 83.3% |
+| all (29) | 97.9% | 0.7% | 0.7% | 90.0% | 93.1% |

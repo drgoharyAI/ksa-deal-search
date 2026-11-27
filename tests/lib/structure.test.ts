@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { productOnlyAfterWith, markWeakMatches, typicality } from "@/src/lib/match/structure";
+import { productOnlyAfterWith, markWeakMatches, typicality, queryOnlyInLaterSegment } from "@/src/lib/match/structure";
 import type { Product } from "@/src/lib/types";
 
 const prod = (title: string, listPrice = 10): Product => ({
@@ -43,5 +43,18 @@ describe("atypical cheap titles (12e)", () => {
   });
   it("needs enough titles to judge", () => {
     expect(markWeakMatches([prod("Baby Stroller Shaped Party Favors", 1), prod("Baby Stroller", 100)], v).some((p) => p.weakMatch)).toBe(false);
+  });
+});
+
+describe("queryOnlyInLaterSegment (12e)", () => {
+  const ns2 = [["nintendo", "switch", "2"]];
+  it("another product of the line, tagged with the queried one", () => {
+    expect(queryOnlyInLaterSegment("Nintendo Switch Online GameCube Controller (Indigo) - (NS2) Nintendo Switch 2 [Pre-Owned]", ns2)).toBe(true);
+  });
+  it("not the product itself, a seller prefix, or a title without segments", () => {
+    expect(queryOnlyInLaterSegment("Nintendo Switch 2 Console - International Version", ns2)).toBe(false);
+    expect(queryOnlyInLaterSegment("Samsung Renewed - Galaxy S24 Dual SIM 128GB", [["samsung", "galaxy", "s24"]])).toBe(false);
+    expect(queryOnlyInLaterSegment("JBL Flip 6 - Portable Bluetooth Speaker", [["bluetooth", "speaker"]])).toBe(false);
+    expect(queryOnlyInLaterSegment("Nintendo Switch Online Controller for Switch 2", ns2)).toBe(false);
   });
 });

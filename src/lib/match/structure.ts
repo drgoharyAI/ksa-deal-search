@@ -31,8 +31,27 @@ export function productOnlyAfterWith(title: string, variants: string[][]): boole
   });
 }
 
+/** Separators between a title's item and its tags: " - ", " – ", " | ". */
+const SEGMENT = /\s[-–—|]\s/;
+
+/**
+ * The title's first segment names the query's product noun but not the whole query, and the whole
+ * query matches only in a later segment: the item is another product of the line, tagged with the
+ * queried one ("Nintendo Switch Online GameCube Controller - (NS2) Nintendo Switch 2"). A first
+ * segment without the product noun ("Samsung Renewed - Galaxy S24 ...") is a seller prefix.
+ */
+export function queryOnlyInLaterSegment(title: string, variants: string[][]): boolean {
+  const first = title.split(SEGMENT)[0];
+  if (first === title || matchesAllTokens(variants, first)) return false;
+  const tt = tokenizeKeepDigits(first);
+  return variants.some((v) => {
+    const head = headNoun(v);
+    return !!head && matchesWithAliases(head, tt);
+  });
+}
+
 export function isWeakMatch(title: string, variants: string[][]): boolean {
-  return productOnlyAfterWith(title, variants);
+  return productOnlyAfterWith(title, variants) || queryOnlyInLaterSegment(title, variants);
 }
 
 /** A title word is common in this search when this share of the matching titles has it. */
