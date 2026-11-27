@@ -1,4 +1,5 @@
 import type { ParsedQuery, Product } from "@/src/lib/types";
+import { itemId } from "@/src/lib/item-id";
 import { sanitizeQ } from "@/src/sites/amazon-sa/search";
 
 export { sanitizeQ };
@@ -15,7 +16,9 @@ export function normalizeSearchItem(raw: unknown): Product | null {
   if (!raw || typeof raw !== "object") return null;
   const r = raw as Record<string, unknown>;
   const price = num(r.price);
-  if (price === null || price <= 0 || r.id == null || r.id === "") return null;
+  if (price === null || price <= 0) return null;
+  const id = itemId(r.id);
+  if (id === null) return null;
   const url = typeof r.url === "string" ? r.url : "";
   if (!url.startsWith(URL_PREFIX)) return null;
 
@@ -27,7 +30,7 @@ export function normalizeSearchItem(raw: unknown): Product | null {
   const img = typeof r.image === "string" ? r.image : "";
   return {
     site: "extra-sa",
-    id: String(r.id),
+    id,
     title: typeof r.title === "string" ? r.title : "",
     listPrice: price,
     origPrice,

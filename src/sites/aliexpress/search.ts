@@ -1,4 +1,5 @@
 import type { ParsedQuery, Product } from "@/src/lib/types";
+import { itemId } from "@/src/lib/item-id";
 
 const round2 = (n: number) => Math.round(n * 100) / 100;
 
@@ -27,8 +28,9 @@ export function normalizeSearchItem(raw: unknown): Product | null {
   if (!raw || typeof raw !== "object") return null;
   const r = raw as Record<string, unknown>;
   const price = num(r.price);
-  if (price === null || r.id == null || r.id === "") return null;
-  const id = String(r.id);
+  if (price === null) return null;
+  const id = itemId(r.id);
+  if (id === null) return null;
 
   const discount = num(r.discount);
   let origPrice = num(r.origPrice);

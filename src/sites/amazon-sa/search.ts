@@ -1,4 +1,5 @@
 import type { ParsedQuery, Product } from "@/src/lib/types";
+import { itemId } from "@/src/lib/item-id";
 
 /** Keep letters, digits, spaces, hyphens; collapse spaces. "" if nothing usable. */
 export function sanitizeQ(terms: string): string {
@@ -30,8 +31,9 @@ export function normalizeSearchItem(raw: unknown): Product | null {
   if (!raw || typeof raw !== "object") return null;
   const r = raw as Record<string, unknown>;
   const price = parseMoney(r.price);
-  if (price === null || price <= 0 || r.id == null || r.id === "") return null;
-  const id = String(r.id);
+  if (price === null || price <= 0) return null;
+  const id = itemId(r.id);
+  if (id === null) return null;
 
   const orig = parseMoney(r.origPrice);
   const origPrice = orig !== null && orig > price ? orig : null;
