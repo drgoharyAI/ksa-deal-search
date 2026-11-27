@@ -15,14 +15,21 @@ function similar(a: Set<string>, b: Set<string>): boolean {
   return onlyA.length === 1 && onlyB.length === 1 && inter >= 3;
 }
 
-/** Merge near-identical titles (token-set Jaccard >= 0.85); keep the lowest listPrice per group. */
+/** `p` is the better one to keep: deliverable over branch-pickup-only, then the lower listPrice. */
+const keepOver = (p: Product, kept: Product): boolean =>
+  !p.pickupOnly !== !kept.pickupOnly ? !p.pickupOnly : p.listPrice < kept.listPrice;
+
+/**
+ * Merge near-identical titles (token-set Jaccard >= 0.85); keep one per group: a deliverable
+ * listing before a branch-pickup-only one, then the lowest listPrice.
+ */
 export function dedupe(products: Product[]): Product[] {
   const groups: { head: Set<string>; best: Product }[] = [];
   for (const p of products) {
     const set = new Set(tokenize(p.title));
     const g = groups.find((x) => similar(x.head, set));
     if (!g) groups.push({ head: set, best: p });
-    else if (p.listPrice < g.best.listPrice) g.best = p;
+    else if (keepOver(p, g.best)) g.best = p;
   }
   return groups.map((g) => g.best);
 }

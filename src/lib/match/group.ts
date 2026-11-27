@@ -1007,7 +1007,7 @@ export type ProductGroup = {
   key: string;
   /** Every member, cheapest first (so each store's cheapest listing comes before its others). */
   members: Product[];
-  /** The cheapest confident member (the cheapest member when none is confident). */
+  /** The cheapest confident deliverable member (else the cheapest confident, else the cheapest). */
   best: Product;
   /** Stores in the group, by their cheapest price. */
   stores: string[];
@@ -1142,7 +1142,7 @@ const modelKey = (f: TitleFeatures) => [...(f.specs.get("model") ?? [])].sort().
 function makeGroup(items: Item[]): ProductGroup {
   const sorted = [...items].sort((x, y) => priceOf(x.p) - priceOf(y.p) || (x.k < y.k ? -1 : x.k > y.k ? 1 : 0));
   const members = sorted.map((x) => x.p);
-  const best = members.find(isLikelyMatch) ?? members[0];
+  const best = members.find((p) => isLikelyMatch(p) && !p.pickupOnly) ?? members.find(isLikelyMatch) ?? members[0];
   const colors: Record<string, string> = {};
   for (const x of sorted) if (x.f.color) colors[x.k] = x.f.color;
   return {
