@@ -7,7 +7,7 @@ import { filterRelevant } from "@/src/lib/match/relevance";
 import { dropAccessories } from "@/src/lib/match/accessory";
 import { dedupe } from "@/src/lib/match/dedupe";
 import { isBookCode, isOtherProduct } from "@/src/lib/match/category";
-import { dropBrandPriceOutliers } from "@/src/lib/match/price";
+import { applyBrandPriceRules } from "@/src/lib/match/price";
 import { markWeakMatches } from "@/src/lib/match/structure";
 import { scoreMatches } from "@/src/lib/match/confidence";
 import { sites as registry } from "@/src/sites/registry";
@@ -149,7 +149,7 @@ export async function runSearch(input: SearchInput, opts: SearchOptions = {}): P
   products = filterRelevant(products, queryTokens);
   products = products.filter((p) => !isBookCode(p.id, queryTokens.flat()) && !isOtherProduct(p.title, queryTokens.flat()));
   products = dropAccessories(products, queryTokens.flat(), queryTokens);
-  products = dropBrandPriceOutliers(products, queryTokens[0]);
+  products = applyBrandPriceRules(products, queryTokens[0]);
   products = products.filter((p) => passesPriceRating(p, { minPrice, maxPrice, minRating }, ratingless));
   if (isNum(minRating)) {
     products = products.map((p) => (p.rating === null && ratingless.has(p.site) ? { ...p, ratingUnavailable: true } : p));

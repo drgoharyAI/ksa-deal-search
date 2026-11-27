@@ -5,7 +5,7 @@ import { isAccessory, isStrongAccessory, dropAccessories, isForAccessory } from 
 import { dedupe } from "@/src/lib/match/dedupe";
 import { specMatches } from "@/src/lib/match/spec";
 import { isBookCode, isOtherProduct } from "@/src/lib/match/category";
-import { dropBrandPriceOutliers, tierCutoff } from "@/src/lib/match/price";
+import { applyBrandPriceRules, tierCutoff } from "@/src/lib/match/price";
 import type { Product } from "@/src/lib/types";
 
 const prod = (title: string, listPrice = 10, id = title): Product => ({
@@ -321,12 +321,14 @@ describe("dropBrandPriceOutliers (12c)", () => {
     ["Apple Watch Series 10 Smart Watch Clone", 70], ["Apple Watch SE 3 GPS 40mm", 899],
     ["Apple Watch Series 11 GPS 42mm", 1599], ["Apple Watch Ultra 3", 3299], ["Apple Watch SE 3 GPS 44mm", 999],
   ]);
-  it("drops far-below-median items in a brand query", () => {
-    expect(dropBrandPriceOutliers(watches, ["apple", "watch"]).map((p) => p.id)).toEqual(["1", "2", "3", "4"]);
+  it("demotes (never drops) far-below-median items in a brand query without a model number", () => {
+    const out = applyBrandPriceRules(watches, ["apple", "watch"]);
+    expect(out.map((p) => p.id)).toEqual(["0", "1", "2", "3", "4"]);
+    expect(out.filter((p) => p.weakMatch).map((p) => p.id)).toEqual(["0"]);
   });
   it("leaves unbranded queries and small sets alone", () => {
-    expect(dropBrandPriceOutliers(watches, ["smart", "watch"])).toHaveLength(5);
-    expect(dropBrandPriceOutliers(watches.slice(0, 3), ["apple", "watch"])).toHaveLength(3);
+    expect(applyBrandPriceRules(watches, ["smart", "watch"]).some((p) => p.weakMatch)).toBe(false);
+    expect(applyBrandPriceRules(watches.slice(0, 3), ["apple", "watch"]).some((p) => p.weakMatch)).toBe(false);
   });
 });
 
@@ -384,7 +386,9 @@ describe("12d round 2: product lines name their brand", () => {
       ["2026 iPad Air Pro 11 inch Android 16 Tablet 24GB 2TB", 312], ["Apple iPad Air 11-inch M3 128GB", 2499],
       ["Apple iPad Air 13-inch M3 256GB", 3599], ["Apple iPad Air 11-inch M2 Wi-Fi", 2299], ["Apple iPad Air M3 512GB", 3999],
     ].map(([t, pr], i) => prod(t as string, pr as number, String(i)));
-    expect(dropBrandPriceOutliers(ps, ["ipad", "air"]).map((p) => p.id)).toEqual(["1", "2", "3", "4"]);
+    const out = applyBrandPriceRules(ps, ["ipad", "air"]);
+    expect(out.filter((p) => !p.weakMatch).map((p) => p.id)).toEqual(["1", "2", "3", "4"]);
+    expect(out.find((p) => p.id === "0")?.weakMatch).toBe(true);
   });
 });
 
@@ -445,7 +449,7 @@ describe("brand price tiers (12e)", () => {
     ["Nintendo Switch 2 + Mario Kart World Bundle", 2397, "c"], ["Nintendo Switch 2 Console (KSA)", 2299, "b"],
   ]);
   it("keeps only the upper price tier when the ecosystem outnumbers the product", () => {
-    expect(dropBrandPriceOutliers(switch2, ["nintendo", "switch", "2"]).map((p) => p.listPrice)).toEqual([2049, 2049, 2397, 2299]);
+    expect(applyBrandPriceRules(switch2, ["nintendo", "switch", "2"]).map((p) => p.listPrice)).toEqual([2049, 2049, 2397, 2299]);
   });
   it("no split when the tiers are close (one product line, several models)", () => {
     const phones = at([["iPhone 16 128GB", 2999, "a"], ["iPhone 16 Plus", 3499, "b"], ["iPhone 16 Pro", 4299, "a"], ["iPhone 16 Pro Max", 5199, "c"], ["iPhone 16 256GB", 3399, "b"]]);
@@ -454,6 +458,51 @@ describe("brand price tiers (12e)", () => {
   it("no split when the upper tier is one store", () => {
     const one = switch2.map((p) => (p.listPrice > 1000 ? { ...p, site: "b" } : p));
     expect(tierCutoff(one)).toBeNull();
+  });
+});
+
+describe("brand + category queries keep the cheapest genuine products (final review C1)", () => {
+  const at = (rows: [string, number, string][]) => rows.map(([t, pr, site], i) => ({ ...prod(t, pr, String(i)), site }));
+  const jbl = at([
+    ["JBL Go 3 Portable Waterproof Speaker", 119, "a"], ["JBL Go 4 Portable Bluetooth Speaker", 149, "b"],
+    ["JBL Clip 4 Portable Speaker", 199, "c"], ["JBL Clip 5 Ultra-Portable Speaker", 219, "a"],
+    ["JBL Charge 5 Portable Speaker", 899, "b"], ["JBL Charge 5 Wireless Speaker Blue", 929, "c"],
+    ["JBL Flip 6 Portable Speaker", 949, "a"], ["JBL Xtreme 4 Speaker", 1799, "b"],
+    ["JBL Boombox 3 Speaker", 2299, "c"], ["JBL PartyBox 310 Speaker", 2499, "a"],
+  ]);
+  const logi = at([
+    ["Logitech M170 Wireless Mouse", 45, "a"], ["Logitech M171 Wireless Mouse", 49, "b"],
+    ["Logitech M190 Full-Size Wireless Mouse", 59, "c"], ["Logitech Pebble M350 Wireless Mouse", 79, "a"],
+    ["Logitech M240 Silent Bluetooth Mouse", 79, "b"], ["Logitech MX Anywhere 3S Mouse", 299, "c"],
+    ["Logitech MX Master 3S Wireless Mouse", 399, "a"], ["Logitech MX Master 3S Performance Mouse", 409, "b"],
+    ["Logitech G502 X Plus Gaming Mouse", 549, "c"], ["Logitech MX Master 3S for Mac", 429, "a"],
+  ]);
+  const anker = at([
+    ["Anker 313 Power Bank 10000mAh", 69, "a"], ["Anker PowerCore 10000 Power Bank", 79, "b"],
+    ["Anker 321 Power Bank 5200mAh", 59, "c"], ["Anker 737 Power Bank 24000mAh 140W", 499, "a"],
+    ["Anker Prime Power Bank 26250mAh 300W", 699, "b"], ["Anker 733 Power Bank GaNPrime", 459, "c"],
+    ["Anker 548 Power Bank 60000mAh", 549, "a"],
+  ]);
+  it.each([
+    ["jbl speaker", jbl, ["jbl", "speaker"]],
+    ["logitech mouse", logi, ["logitech", "mouse"]],
+    ["anker power bank", anker, ["anker", "power", "bank"]],
+  ] as const)("%s: every product stays in the results", (_q, set, tokens) => {
+    const out = applyBrandPriceRules([...set], [...tokens]);
+    expect(out.map((p) => p.id).sort()).toEqual(set.map((p) => p.id).sort());
+  });
+  it("jbl speaker: the cheap tier is demoted to less likely, not removed", () => {
+    const out = applyBrandPriceRules(jbl, ["jbl", "speaker"]);
+    const go = out.find((p) => p.title.startsWith("JBL Go 3"));
+    expect(go).toBeDefined();
+    expect(out.filter((p) => p.listPrice >= 899).every((p) => !p.weakMatch)).toBe(true);
+  });
+  it("a model-number query still drops the far-cheaper ecosystem (clones, games)", () => {
+    const watches = at([
+      ["Apple Watch Series 10 Clone Smart Watch", 70, "a"], ["Apple Watch Series 10 GPS 42mm", 1599, "b"],
+      ["Apple Watch Series 10 GPS 46mm", 1699, "c"], ["Apple Watch Series 10 Cellular", 1999, "a"], ["Apple Watch Series 10 Titanium", 2999, "b"],
+    ]);
+    expect(applyBrandPriceRules(watches, ["apple", "watch", "series", "10"]).map((p) => p.id)).toEqual(["1", "2", "3", "4"]);
   });
 });
 

@@ -16,18 +16,25 @@ const median = (xs: number[]): number => {
 export const namesBrand = (queryTokens: string[]) => queryTokens.some((t) => BRANDS.has(t.toLowerCase()));
 
 /**
- * Brand queries only: drop items priced far below the median of the matching items. Unbranded
- * marketplace categories (robot vacuums, smart watches) legitimately span 5 to 5,000 SAR, but a
- * genuine branded product does not sell at a quarter of its usual price: such titles are clones
- * ("Apple Watch Series 10 Smart Watch" at 70 SAR) or parts that slipped past the word rules.
+ * Brand queries only: price evidence against items priced far below the matching items.
+ * - Below BRAND_PRICE_RATIO x the median price, or in the lower group of a TIER_RATIO price split
+ *   (tierCutoff), an item may be a clone ("Apple Watch Series 10 Smart Watch" at 70 SAR), a part
+ *   or the ecosystem around a product (games and adapters titled with the console's name).
+ * - With a model number in the query ("iphone 16", "nintendo switch 2"), every genuine listing is
+ *   that one model, so such items are dropped.
+ * - Without one ("jbl speaker", "logitech mouse"), the brand's own cheap line (JBL Go, Logitech
+ *   M170) is a real product at a real low price, so such items are only demoted (weakMatch, shown
+ *   under "Less likely matches"): never removed.
  * Needs a few items so the median means something.
  */
-export function dropBrandPriceOutliers(products: Product[], queryTokens: string[], minItems = 5): Product[] {
+export function applyBrandPriceRules(products: Product[], queryTokens: string[], minItems = 5): Product[] {
   if (!namesBrand(queryTokens) || products.length < minItems) return products;
   const cutoff = BRAND_PRICE_RATIO * median(products.map((p) => p.listPrice));
-  const kept = products.filter((p) => p.listPrice >= cutoff);
-  const tier = tierCutoff(kept);
-  return tier === null ? kept : kept.filter((p) => p.listPrice >= tier);
+  const above = products.filter((p) => p.listPrice >= cutoff);
+  const tier = tierCutoff(above);
+  const floor = tier === null ? cutoff : Math.max(cutoff, tier);
+  if (queryTokens.some((t) => /\d/.test(t))) return products.filter((p) => p.listPrice >= floor);
+  return products.map((p) => (p.listPrice < floor ? { ...p, weakMatch: true as const } : p));
 }
 
 /** Two price tiers this far apart (ratio of their geometric means) are different kinds of item. */
