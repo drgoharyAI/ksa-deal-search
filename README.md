@@ -84,6 +84,17 @@ The UI is at `/`; the main API is `POST /api/search`. A search runs through
 Each store gets a status: `ok` (including an empty answer), `blocked` (the store refused; the
 app backs off) or `error`.
 
+The page uses `POST /api/search/stream` (same body, guard and input errors) so results show as
+each store answers. It answers NDJSON, one event per line: `{"type":"store","store","state"}`
+first for every store (`searching`), then per answer the store's line (`ok` with `count`, `empty`,
+`unavailable` with `retryAt` when known, or `failed`) and a `{"type":"results",...}` event with
+the whole view over the stores answered so far, in the `/api/search` body's shape; then
+`{"type":"done"}`. The last `results` event equals the `/api/search` answer. The pipeline is split
+for this into `prepareSearch`, per-store `fetchSite` and a pure `assembleResults`. History,
+observations and seen products are recorded once, at the end; a client that goes away stops the
+search (queued store calls are skipped) and nothing is recorded. The page falls back to
+`/api/search` if the stream fails before any event. Protocol: `src/lib/search-stream.ts`.
+
 Other routes: `GET /api/suggest` (Amazon and Jarir public autocomplete), `GET /api/discover`,
 `/api/history`, `/api/watches`, `/api/alerts`, `GET /api/health`. All API routes reject
 cross-site requests and hosts that are not loopback or listed in `APP_HOSTS`

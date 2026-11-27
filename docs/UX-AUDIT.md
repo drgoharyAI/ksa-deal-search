@@ -14,7 +14,7 @@ The state of the UI before the redesign, and which phase changes what. The brief
 API routes (all behind `rejectCrossSite`): `POST /api/search`, `GET /api/suggest`,
 `GET|DELETE /api/history`, `GET|POST|PATCH|DELETE /api/watches`, `GET /api/alerts`,
 `POST /api/alerts/seen`, `POST /api/alerts/test-telegram`, `POST /api/watches/run-now`, `GET /api/health`.
-U1 adds `GET /api/discover` (read-only, observations DB).
+U1 adds `GET /api/discover` (read-only, observations DB). U2 adds `POST /api/search/stream` (NDJSON, see README).
 
 ## Components (app/components)
 
