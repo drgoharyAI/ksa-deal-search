@@ -138,14 +138,23 @@
 .notice--error { border: 1px solid var(--color-error-edge); background: var(--color-error-well); font-weight: 500; color: var(--color-error); }
 
 /* Per-store status: words, never dots */
-.status { display: flex; flex-wrap: wrap; gap: var(--space-xs); margin: 0; padding: 0; list-style: none; }
-.status__item { display: flex; flex-wrap: wrap; align-items: center; gap: 0 var(--space-xs); min-height: var(--target-sm); padding: var(--space-2xs) var(--space-sm); border: var(--border); border-radius: var(--radius-sm); background: var(--color-surface); font-size: var(--text-sm); font-variant-numeric: tabular-nums; }
-.status__text { color: var(--color-muted); }
-.status__item--blocked { border-color: var(--color-warn-edge); background: var(--color-warn-well); }
-.status__item--blocked .status__text { font-weight: 500; color: var(--color-warn-ink); }
-.status__item--error { border-color: var(--color-error-edge); background: var(--color-error-well); }
-.status__item--error .status__text { color: var(--color-error); }
-.status__item--loading .status__text { animation: pulse 1.4s var(--ease-in-out) infinite alternate; }
+/* Store status: one ledger strip, a cell per store (mark, then its state in words). Cells keep their
+ * size from "Searching" to the final state, so nothing below moves as stores answer. */
+.storestatus { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); margin: 0; padding: 0; list-style: none; border: var(--border); border-radius: var(--radius-md); background: var(--color-surface); overflow: hidden; }
+.storestatus__item { position: relative; display: flex; flex-direction: column; justify-content: center; gap: var(--space-3xs); min-width: 0; min-height: 3.75rem; padding: var(--space-xs) var(--space-sm); box-shadow: -1px -1px 0 var(--color-rule); font-variant-numeric: tabular-nums; }
+.storestatus__state { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--text-sm); color: var(--color-ink-2); }
+.storestatus__detail { color: var(--color-muted); }
+.storestatus__detail::before { content: " · "; }
+.storestatus__item--ok .storestatus__state { font-weight: 500; color: var(--color-ink); }
+.storestatus__item--empty .storestatus__state, .storestatus__item--stopped .storestatus__state, .storestatus__item--searching .storestatus__state { color: var(--color-muted); }
+.storestatus__item--unavailable .storestatus__state { font-weight: 500; color: var(--color-warn-ink); }
+.storestatus__item--failed .storestatus__state { font-weight: 500; color: var(--color-error); }
+/* Searching: a short hairline drifting along the cell's foot. Not progress: it never fills. */
+.storestatus__pulse { position: absolute; inset: auto 0 0 0; height: 2px; overflow: hidden; }
+.storestatus__pulse::after { content: ""; position: absolute; inset: 0 auto 0 0; width: 28%; background: var(--color-rule-2); animation: drift 1.6s var(--ease-in-out) infinite alternate; }
+@keyframes drift { from { transform: translateX(0); } to { transform: translateX(260%); } }
+@media (min-width: 48rem) { .storestatus { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+@media (min-width: 90rem) { .storestatus { grid-template-columns: repeat(auto-fit, minmax(9.5rem, 1fr)); } }
 
 /* Results */
 .results { display: flex; flex-direction: column; gap: var(--space-md); }
@@ -396,7 +405,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .skeleton, .status__item--loading .status__text, .btn__spinner { animation: none; }
+  .skeleton, .storestatus__pulse::after, .btn__spinner { animation: none; }
   .input, .btn, .chip, .qchip, .card, .dcard, .nav__link { transition: none; }
   .btn:active:not(:disabled), .qchip:active, .card:hover, .dcard:hover { transform: none; }
 }

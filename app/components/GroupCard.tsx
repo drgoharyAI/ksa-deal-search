@@ -1,6 +1,6 @@
 "use client";
 
-import { memo, useId, useState } from "react";
+import { createContext, memo, useContext, useId, useState } from "react";
 import type { Product } from "@/src/lib/types";
 import { storeLabel } from "@/src/lib/stores";
 import { isLikelyMatch } from "@/src/lib/rank";
@@ -10,6 +10,15 @@ import StoreLogo from "./StoreLogo";
 import { CardCompare, CardWatch, dealExplanation, type CompareControl } from "./ResultCard";
 import { formatMoney } from "@/src/lib/money";
 import Button from "./ui/Button";
+
+/**
+ * Which groups show all their rows, kept by the page so it survives the results changing under
+ * the card (a streamed search adds stores, and a group's key changes when a member joins): a
+ * group is open when any of its rows was in a group the user opened. Without a provider each
+ * card keeps its own state.
+ */
+export type GroupOpen = { isOpen: (rowKeys: string[]) => boolean; setOpen: (rowKeys: string[], open: boolean) => void };
+export const GroupOpenContext = createContext<GroupOpen | null>(null);
 
 /** Rows shown before "Show N more". */
 const VISIBLE_ROWS = 4;
@@ -63,7 +72,11 @@ function Row({ p, best, color }: { p: Product; best: boolean; color?: string }) 
  */
 function GroupCard({ group: g, query, compareChecked = false, onCompare }: { group: GroupItem; query?: string } & CompareControl) {
   const [failed, setFailed] = useState<string | null>(null);
-  const [open, setOpen] = useState(false);
+  const shared = useContext(GroupOpenContext);
+  const [localOpen, setLocalOpen] = useState(false);
+  const rowKeys = g.rows.map(productKey);
+  const open = shared ? shared.isOpen(rowKeys) : localOpen;
+  const setOpen = (v: boolean) => (shared ? shared.setOpen(rowKeys, v) : setLocalOpen(v));
   const listId = useId();
   const b = g.best;
   const image = [b, ...g.rows].map((p) => p.image).find((src) => !!src && src !== failed);

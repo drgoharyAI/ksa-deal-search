@@ -43,3 +43,19 @@ export function valuesFromUrl<V extends Values>(search: string, base: V): { valu
     run: p.get("run") === "1",
   };
 }
+
+/** history.state key the search page sets on the clean "/" entry that "go home" pushed. */
+export const HOME_ENTRY = "dealSearchHome";
+
+/**
+ * What the search page does on Back or Forward (popstate) within "/":
+ * - "home": the entry "go home" pushed: show the clean home (stashing the results shown);
+ * - "restore": an entry with chip params while the home shows and earlier results are stashed
+ *   (Back after "go home"): bring those results back, with the chips from the URL;
+ * - "sync": anything else: the chips follow the URL.
+ */
+export function historyMove(search: string, state: unknown, s: { stashed: boolean; showingHome: boolean }): "home" | "restore" | "sync" {
+  if (state && typeof state === "object" && (state as Record<string, unknown>)[HOME_ENTRY] === true) return "home";
+  if (s.showingHome && s.stashed && new URLSearchParams(search).size > 0) return "restore";
+  return "sync";
+}

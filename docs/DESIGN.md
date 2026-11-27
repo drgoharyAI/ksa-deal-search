@@ -132,6 +132,16 @@ Media queries use rem widths (`48rem`, `64rem`, `90rem`), because CSS variables 
 the card lifts 1px to `--shadow-2`. There is never a card inside a card. U3 redesigns the result
 cards on these tokens.
 
+## Store status (U2)
+
+`StatusBar` is one ledger strip with a cell per store: the `StoreMark`, then the state in words:
+Searching, "N results" (only with a count from the backend), No results, Temporarily unavailable
+(with "try after HH:MM" when the back-off end is known), Failed, or Stopped. A store still
+searching shows a short hairline drifting along the cell's foot; it never fills and is still under
+reduced motion. There is no percentage or progress bar. Cells keep their size across states, so
+nothing below moves while stores answer. The page announces one summary (aria-live polite) at the
+start, at the first results and at the end, never per store.
+
 ## States
 
 Every control has hover (`@media (hover: hover)` only), `:focus-visible` (a 2px accent ring, offset

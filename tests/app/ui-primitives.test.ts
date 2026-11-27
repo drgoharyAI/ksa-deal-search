@@ -145,3 +145,51 @@ describe("DiscoverCard", () => {
     expect(out).not.toContain("badge");
   });
 });
+
+describe("StatusBar (U2 live store row)", async () => {
+  const { default: StatusBar, storeStateText } = await import("@/app/components/StatusBar");
+  const at = Date.UTC(2026, 10, 27, 11, 30);
+  const fmt = () => "14:30";
+  it("renders each state in words, with a count only when given", () => {
+    const out = html(
+      h(StatusBar, {
+        formatTime: fmt,
+        stores: [
+          { store: "jarir", state: "searching" },
+          { store: "amazon-sa", state: "ok", count: 12 },
+          { store: "noon-sa", state: "ok", count: 1, partial: true },
+          { store: "extra-sa", state: "empty" },
+          { store: "shein-sa", state: "unavailable", retryAt: at },
+          { store: "trendyol-sa", state: "unavailable" },
+          { store: "carrefour-sa", state: "failed" },
+        ],
+      }),
+    );
+    expect(out).toContain('<ul class="storestatus" aria-label="Store status">');
+    expect(out).toContain('class="storestatus__item storestatus__item--searching"');
+    expect(out).toContain('<span class="storestatus__pulse" aria-hidden="true"></span>');
+    expect(out.match(/storestatus__pulse/g)).toHaveLength(1);
+    expect(out).toContain(">Searching<");
+    expect(out).toContain(">12 results<");
+    expect(out).toContain('1 result<span class="storestatus__detail">some pages failed</span>');
+    expect(out).toContain(">No results<");
+    expect(out).toContain('Temporarily unavailable<span class="storestatus__detail">try after 14:30</span>');
+    expect(out).toContain('class="storestatus__item storestatus__item--unavailable"><span class="storemark storemark--full">');
+    expect(out).toContain(">Failed<");
+    expect(out).not.toMatch(/%|progress/);
+    // Each store keeps its mark.
+    expect(out.match(/storemark--full/g)).toHaveLength(7);
+    // Not a live region itself: the page announces a summary.
+    expect(out).not.toContain("aria-live");
+  });
+  it("a stopped search says Stopped for stores that had not answered", () => {
+    const out = html(h(StatusBar, { stores: [{ store: "jarir", state: "searching" }], stopped: true }));
+    expect(out).toContain("storestatus__item--stopped");
+    expect(out).toContain(">Stopped<");
+    expect(out).not.toContain("storestatus__pulse");
+  });
+  it("renders nothing without stores; an ok without a count never invents one", () => {
+    expect(html(h(StatusBar, { stores: [] }))).toBe("");
+    expect(storeStateText({ store: "a", state: "ok" }).text).toBe("Answered");
+  });
+});

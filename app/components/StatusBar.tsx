@@ -1,50 +1,54 @@
-import type { SiteStatus } from "@/src/lib/types";
-import { storeLabel } from "@/src/lib/stores";
+import type { StoreEntry } from "@/src/lib/search-stream";
 import StoreMark from "./ui/StoreMark";
 
 type Props = {
-  /** Stores being searched right now (loading), or null when settled. */
-  pending: string[] | null;
-  statuses: SiteStatus[];
-  /** Result count per store id, from the current products. */
-  counts: Record<string, number>;
+  /** One entry per store asked, in the form's order (storeEntries()). */
+  stores: StoreEntry[];
+  /** The search was stopped: stores that had not answered say so instead of "Searching". */
+  stopped?: boolean;
+  /** Formats a retry time; injectable so tests do not depend on the machine's time zone. */
+  formatTime?: (ms: number) => string;
 };
 
-/** "Store blocked the request; …" from the server becomes "AliExpress blocked the request; …". */
-function storeMessage(site: string, message: string): string {
-  const label = storeLabel(site);
-  return message.startsWith("Store ") ? `${label} ${message.slice(6)}` : `${label}: ${message}`;
+const plural = (n: number) => `${n} ${n === 1 ? "result" : "results"}`;
+const clock = (ms: number) => new Date(ms).toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" });
+
+/** The words for a store's state; never a number the backend did not give. */
+export function storeStateText(e: StoreEntry, stopped = false, formatTime = clock): { text: string; detail?: string } {
+  switch (e.state) {
+    case "searching":
+      return { text: stopped ? "Stopped" : "Searching" };
+    case "ok":
+      return e.count !== undefined ? { text: plural(e.count), detail: e.partial ? "some pages failed" : undefined } : { text: "Answered" };
+    case "empty":
+      return { text: "No results", detail: e.partial ? "some pages failed" : undefined };
+    case "unavailable":
+      return { text: "Temporarily unavailable", detail: e.retryAt !== undefined ? `try after ${formatTime(e.retryAt)}` : undefined };
+    case "failed":
+      return { text: "Failed" };
+  }
 }
 
-const plural = (n: number) => `${n} ${n === 1 ? "result" : "results"}`;
-
-export default function StatusBar({ pending, statuses, counts }: Props) {
-  if (pending) {
-    return (
-      <ul className="status" aria-label="Store status">
-        {pending.map((site) => (
-          <li key={site} className="status__item status__item--loading">
-            <StoreMark id={site} size={22} />
-            <span className="status__text">Searching</span>
-          </li>
-        ))}
-      </ul>
-    );
-  }
-  if (!statuses.length) return null;
+/**
+ * The live store row: each store's mark and, in words, where its answer stands. A store still
+ * searching shows a quiet moving hairline (still under reduced motion), never a percentage. The
+ * row is a list, not a live region: the page announces one short summary at milestones instead.
+ */
+export default function StatusBar({ stores, stopped = false, formatTime = clock }: Props) {
+  if (!stores.length) return null;
   return (
-    <ul className="status" aria-label="Store status">
-      {statuses.map((s) => {
-        const n = counts[s.site] ?? 0;
-        let text: string;
-        if (s.status === "ok") text = s.message ? `${plural(n)}, ${s.message}` : plural(n);
-        else text = storeMessage(s.site, s.message ?? (s.status === "blocked" ? "Store blocked the request; try again later" : "Store request failed"));
+    <ul className="storestatus" aria-label="Store status">
+      {stores.map((e) => {
+        const { text, detail } = storeStateText(e, stopped, formatTime);
+        const state = e.state === "searching" && stopped ? "stopped" : e.state;
         return (
-          <li key={s.site} className={`status__item status__item--${s.status}`}>
-            {s.status === "ok" && (
-              <StoreMark id={s.site} size={22} />
-            )}
-            <span className="status__text">{text}</span>
+          <li key={e.store} className={`storestatus__item storestatus__item--${state}`}>
+            <StoreMark id={e.store} size={20} />
+            <span className="storestatus__state">
+              {text}
+              {detail && <span className="storestatus__detail">{detail}</span>}
+            </span>
+            {state === "searching" && <span className="storestatus__pulse" aria-hidden="true" />}
           </li>
         );
       })}

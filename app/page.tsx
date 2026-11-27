@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import type { Product, SiteStatus } from "@/src/lib/types";
+import type { Product } from "@/src/lib/types";
 import { STORES, defaultSites } from "@/src/lib/stores";
 import SearchForm, { type ErrorField, type FormValues } from "./components/SearchForm";
 import StatusBar from "./components/StatusBar";
@@ -16,7 +16,7 @@ import ErrorState from "./components/ui/ErrorState";
 import { SkeletonCard } from "./components/ui/Skeleton";
 import WatchForm, { postWatch } from "./components/WatchForm";
 import { cheapestConfident, defaultTarget, priceOf } from "@/src/lib/alerts/shared";
-import { valuesFromUrl } from "@/src/lib/rerun";
+import { HOME_ENTRY, historyMove, valuesFromUrl } from "@/src/lib/rerun";
 import FilterChips from "./components/FilterChips";
 import { CompareDialog, CompareTray } from "./components/Compare";
 import {
@@ -27,19 +27,27 @@ import { toggleCompare } from "@/src/lib/compare";
 import { productKey } from "@/src/lib/specs";
 import { allMembers, buildUnits, viewItems } from "@/src/lib/view";
 import type { GroupRef } from "@/src/lib/match/group";
+import { GroupOpenContext, type GroupOpen } from "./components/GroupCard";
+import {
+  initStream, liveSummary, readEvents, reduceStream, settle, storeEntries, streamFromPayload, type SearchPayload, type StreamEvent, type StreamState,
+} from "@/src/lib/search-stream";
 
+type Filters = { minPrice?: number; maxPrice?: number; minRating?: number };
+/** The search on screen: its store row and view model (streamed in), and what it asked for. */
+type Run = { stream: StreamState; query: string; sites: string[]; filters: Filters };
 type Results = {
   products: Product[];
   /** The same product at several stores (ids), and members missing from `products`. */
   groups: GroupRef[];
   groupExtras: Product[];
-  statuses: SiteStatus[];
   reason?: string;
   query: string;
   sites: string[];
   /** The form filters this search ran with; a "Watch this search" keeps them. */
-  filters: { minPrice?: number; maxPrice?: number; minRating?: number };
+  filters: Filters;
 };
+/** What "go home" put aside, so Back to the results entry brings them back. */
+type Stash = { run: Run; values: FormValues; chips: ChipFilters };
 type Phase = "idle" | "loading" | "done" | "error";
 
 const INITIAL: FormValues = {
@@ -68,8 +76,8 @@ const fieldFor = (msg: string): ErrorField =>
 export default function Home() {
   const [values, setValues] = useState<FormValues>(INITIAL);
   const [phase, setPhase] = useState<Phase>("idle");
-  const [results, setResults] = useState<Results | null>(null);
-  const [pending, setPending] = useState<string[] | null>(null);
+  const [run, setRun] = useState<Run | null>(null);
+  const [stopped, setStopped] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [errorField, setErrorField] = useState<ErrorField>(null);
   const abortRef = useRef<AbortController | null>(null);
@@ -85,33 +93,112 @@ export default function Home() {
   const compareList = cmp.list;
   const compareFull = cmp.full;
   const [compareOpen, setCompareOpen] = useState(false);
+  // Groups the user opened, by row key: kept while a streamed search reshapes the cards.
+  const [openRows, setOpenRows] = useState<ReadonlySet<string>>(() => new Set());
+  const groupOpen = useMemo<GroupOpen>(
+    () => ({
+      isOpen: (keys) => keys.some((k) => openRows.has(k)),
+      setOpen: (keys, open) =>
+        setOpenRows((cur) => {
+          const next = new Set(cur);
+          for (const k of keys) {
+            if (open) next.add(k);
+            else next.delete(k);
+          }
+          return next;
+        }),
+    }),
+    [openRows],
+  );
+  const stashRef = useRef<Stash | null>(null);
+  const [formKey, setFormKey] = useState(0);
 
   useEffect(() => () => abortRef.current?.abort(), []);
 
-  // The wordmark or Search link clicked on this page: back to a clean home (AppHeader already put
-  // "/" in the URL). The form remounts (key), so its query, stores and options start over.
-  const [formKey, setFormKey] = useState(0);
+  // The view model of the search on screen: the latest streamed (or plain) results. A run's
+  // query, sites and filters are fixed, so the payload is the only thing that changes.
+  const payload = run?.stream.results ?? null;
+  const results = useMemo<Results | null>(
+    () =>
+      run && payload
+        ? {
+            products: payload.products,
+            groups: Array.isArray(payload.groups) ? payload.groups : [],
+            groupExtras: Array.isArray(payload.groupExtras) ? payload.groupExtras : [],
+            reason: payload.reason,
+            query: run.query,
+            sites: run.sites,
+            filters: run.filters,
+          }
+        : null,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [payload],
+  );
+
+  // A clean home: no search, no results, a fresh form. `stash` keeps the results for Back.
+  const resetHome = (stash: boolean) => {
+    abortRef.current?.abort();
+    abortRef.current = null;
+    stashRef.current = stash && run?.stream.results ? { run, values, chips } : null;
+    setValues(INITIAL);
+    setPhase("idle");
+    setRun(null);
+    setStopped(false);
+    setError(null);
+    setErrorField(null);
+    setWatchOpen(false);
+    setWatchSaved(false);
+    setChips(NO_FILTERS);
+    setKeptChips([]);
+    setCmp(NO_COMPARE);
+    setCompareOpen(false);
+    setOpenRows(new Set());
+    setFormKey((k) => k + 1);
+    window.scrollTo(0, 0);
+  };
+
+  // Back or Forward within "/": the page follows the URL (the chips, and the results "go home"
+  // left behind). The listeners below read the latest render through this ref.
+  const showingHome = !run;
+  const onHistory = useRef<{ home: () => void; pop: () => void }>({ home: () => {}, pop: () => {} });
   useEffect(() => {
-    const reset = () => {
-      abortRef.current?.abort();
-      abortRef.current = null;
-      setValues(INITIAL);
-      setPhase("idle");
-      setResults(null);
-      setPending(null);
-      setError(null);
-      setErrorField(null);
-      setWatchOpen(false);
-      setWatchSaved(false);
-      setChips(NO_FILTERS);
-      setKeptChips([]);
-      setCmp(NO_COMPARE);
-      setCompareOpen(false);
-      setFormKey((k) => k + 1);
-      window.scrollTo(0, 0);
+    onHistory.current = {
+      // The wordmark or Search link clicked on this page: back to a clean home (AppHeader already
+      // put "/" in the URL). The form remounts (key), so its query, stores and options start
+      // over. When chips were on, AppHeader pushed a new "/" entry: it is marked, so Back and
+      // Forward can tell it from the results entry.
+      home: () => {
+        if (withChipParams("", chips) !== "") window.history.replaceState({ ...(window.history.state as object | null), [HOME_ENTRY]: true }, "", "/");
+        resetHome(true);
+      },
+      pop: () => {
+        const qs = window.location.search;
+        const move = historyMove(qs, window.history.state, { stashed: !!stashRef.current, showingHome });
+        if (move === "home") {
+          if (!showingHome) resetHome(true);
+          return;
+        }
+        const s = stashRef.current;
+        if (move === "restore" && s) {
+          stashRef.current = null;
+          setValues(s.values);
+          setRun(s.run);
+          setPhase("done");
+          setStopped(false);
+        }
+        setChips(filtersFromSearch(qs));
+      },
     };
-    window.addEventListener(GO_HOME_EVENT, reset);
-    return () => window.removeEventListener(GO_HOME_EVENT, reset);
+  });
+  useEffect(() => {
+    const home = () => onHistory.current.home();
+    const pop = () => onHistory.current.pop();
+    window.addEventListener(GO_HOME_EVENT, home);
+    window.addEventListener("popstate", pop);
+    return () => {
+      window.removeEventListener(GO_HOME_EVENT, home);
+      window.removeEventListener("popstate", pop);
+    };
   }, []);
 
   // A History "Re-run" link: fill the form from the URL, clean the URL, and search once.
@@ -135,7 +222,7 @@ export default function Home() {
   useEffect(() => {
     if (!chipsRead) return;
     const next = withChipParams(window.location.search, chips);
-    if (next !== window.location.search) window.history.replaceState(null, "", window.location.pathname + next);
+    if (next !== window.location.search) window.history.replaceState(window.history.state, "", window.location.pathname + next);
   }, [chips, chipsRead]);
 
   // Cards: a cross-store group is one card, every other product one card. Chips narrow the cards
@@ -158,18 +245,13 @@ export default function Home() {
   const compareKeys = useMemo(() => new Set(compareList.map(productKey)), [compareList]);
   const onToggleCompare = useCallback((p: Product) => setCmp((c) => toggleCompare(c.list, p)), []);
   const compare = useMemo(() => ({ isChecked: (p: Product) => compareKeys.has(productKey(p)), onToggle: onToggleCompare }), [compareKeys, onToggleCompare]);
-  const counts = useMemo(() => {
-    const c: Record<string, number> = {};
-    // Every listing shown, group rows included (a twin deduped out of `products` is still a result).
-    for (const p of all) c[p.site] = (c[p.site] ?? 0) + 1;
-    return c;
-  }, [all]);
+  const stores = useMemo(() => (run ? storeEntries(run.stream) : []), [run]);
 
   const fail = (msg: string) => {
     setError(msg);
     setErrorField(fieldFor(msg));
     setPhase("error");
-    setPending(null);
+    setRun(null);
   };
 
   async function search(query?: string, base: FormValues = values) {
@@ -191,11 +273,16 @@ export default function Home() {
     setError(null);
     setErrorField(null);
     setPhase("loading");
-    setPending(v.sites);
+    setStopped(false);
+    stashRef.current = null;
     // A new query drops the store, brand and price chips of the old results (not on a History re-run).
     const carried = chipsForNewQuery(chips, results?.query, v.query);
     if (carried.filters !== chips) setChips(carried.filters);
     setKeptChips(carried.kept);
+    setWatchOpen(false);
+    setWatchSaved(false);
+    setCmp(NO_COMPARE);
+    setOpenRows(new Set());
 
     const body = {
       query: v.query,
@@ -205,28 +292,77 @@ export default function Home() {
       maxPrice: toNum(v.maxPrice),
       minRating: toNum(v.minRating),
     };
-    try {
-      const res = await fetch("/api/search", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify(body),
-        signal: ctrl.signal,
-      });
-      const data = (await res.json().catch(() => null)) as (Omit<Results, "query" | "sites" | "filters"> & { error?: string }) | null;
+    const meta = { query: v.query.trim(), sites: v.sites, filters: { minPrice: body.minPrice, maxPrice: body.maxPrice, minRating: body.minRating } };
+    setRun({ ...meta, stream: initStream(v.sites) });
+    const request = (url: string) =>
+      fetch(url, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body), signal: ctrl.signal });
+    const aborted = (e?: unknown) => ctrl.signal.aborted || (e instanceof DOMException && e.name === "AbortError");
+
+    // The whole answer at once (POST /api/search): used when streaming is not available.
+    async function plain() {
+      try {
+        const res = await request("/api/search");
+        const data = (await res.json().catch(() => null)) as (SearchPayload & { error?: string }) | null;
+        if (ctrl.signal.aborted) return;
+        if (!res.ok || !data || !Array.isArray(data.products)) {
+          fail(data?.error ?? "The search failed; try again");
+          return;
+        }
+        setRun({ ...meta, stream: streamFromPayload(v.sites, { ...data, statuses: data.statuses ?? [] }) });
+        setPhase("done");
+      } catch (e) {
+        if (aborted(e)) return;
+        fail("Could not reach the search server; check it is running and try again");
+      }
+    }
+
+    let events = 0;
+    let gotResults = false;
+    let streamError: string | null = null;
+    const apply = (e: StreamEvent) => {
       if (ctrl.signal.aborted) return;
-      if (!res.ok || !data || !Array.isArray(data.products)) {
-        fail(data?.error ?? "The search failed; try again");
+      events++;
+      if (e.type === "results") gotResults = true;
+      if (e.type === "error") streamError = e.error;
+      setRun((r) => (r ? { ...r, stream: reduceStream(r.stream, e) } : r));
+    };
+    try {
+      let res: Response;
+      try {
+        res = await request("/api/search/stream");
+      } catch (e) {
+        if (aborted(e)) return;
+        await plain(); // the stream endpoint could not be reached: try the plain one
         return;
       }
-      setResults({ products: data.products, groups: Array.isArray(data.groups) ? data.groups : [], groupExtras: Array.isArray(data.groupExtras) ? data.groupExtras : [], statuses: data.statuses ?? [], reason: data.reason, query: v.query.trim(), sites: v.sites, filters: { minPrice: body.minPrice, maxPrice: body.maxPrice, minRating: body.minRating } });
-      setWatchOpen(false);
-      setWatchSaved(false);
-      setCmp(NO_COMPARE);
-      setPending(null);
+      if (ctrl.signal.aborted) return;
+      const type = res.headers.get("content-type") ?? "";
+      if (!res.ok || !type.includes("ndjson") || !res.body) {
+        // An input error answers JSON with a message, as /api/search would: show it.
+        const data = (await res.json().catch(() => null)) as { error?: string } | null;
+        if (ctrl.signal.aborted) return;
+        if (res.status >= 400 && res.status < 500 && typeof data?.error === "string") fail(data.error);
+        else await plain();
+        return;
+      }
+      try {
+        await readEvents(res.body, apply);
+      } catch (e) {
+        if (aborted(e)) return;
+        // Broken before any event: try the plain endpoint. Broken mid-way: keep what arrived;
+        // the stores that had not answered are settled as failed below.
+      }
+      if (ctrl.signal.aborted) return;
+      if (events === 0) {
+        await plain();
+        return;
+      }
+      if (streamError !== null && !gotResults) {
+        fail(streamError);
+        return;
+      }
+      setRun((r) => (r && !r.stream.done ? { ...r, stream: settle(r.stream) } : r));
       setPhase("done");
-    } catch (e) {
-      if (ctrl.signal.aborted || (e instanceof DOMException && e.name === "AbortError")) return;
-      fail("Could not reach the search server; check it is running and try again");
     } finally {
       if (abortRef.current === ctrl) abortRef.current = null;
     }
@@ -235,21 +371,26 @@ export default function Home() {
   function stop() {
     abortRef.current?.abort();
     abortRef.current = null;
-    setPending(null);
-    setPhase(results ? "done" : "idle");
+    setStopped(true);
+    // The results so far stay; with none yet, back to the home.
+    setRun((r) => (r?.stream.results ? r : null));
+    setPhase(run?.stream.results ? "done" : "idle");
   }
 
   const loading = phase === "loading";
   // Before the first search the page is the home: brand line, search, suggestions and discovery.
   const home = !loading && !results;
+  // Searching with nothing to show yet: the skeleton grid holds the space.
+  const waiting = loading && all.length === 0;
   const cheapest = useMemo(() => (all.length ? cheapestConfident(all) : null), [all]);
   const formError = errorField === "form" ? error : null;
 
+  // A short summary at milestones (start, first results, end), never a line per store.
   let live = "";
-  if (loading) live = `Searching ${values.sites.length} ${values.sites.length === 1 ? "store" : "stores"}`;
+  if (loading) live = run ? liveSummary(run.stream, items.length) : "";
   else if (phase === "error" && error) live = error;
   else if (phase === "done" && results && filtering) live = liveFilter;
-  else if (phase === "done" && results) live = items.length ? `${items.length} results` : (results.reason ?? "");
+  else if (phase === "done" && results && run) live = items.length ? liveSummary(run.stream, items.length) : (results.reason ?? "");
 
   return (
     <div className="app">
@@ -281,7 +422,7 @@ export default function Home() {
 
         {formError && <ErrorState message={formError} />}
 
-        <StatusBar pending={loading ? pending : null} statuses={results?.statuses ?? []} counts={counts} />
+        <StatusBar stores={stores} stopped={stopped} />
 
         {home && (
           <>
@@ -299,9 +440,9 @@ export default function Home() {
           <section className="results" aria-labelledby="results-head" aria-busy={loading || undefined}>
             <div className="results__head">
               <h2 id="results-head">
-                {loading ? "Searching" : results && filtering ? `${items.length} of ${units.length} results` : results && items.length ? `${items.length} results` : "Results"}
+                {waiting ? "Searching" : results && filtering ? `${items.length} of ${units.length} results` : results && items.length ? `${items.length} ${items.length === 1 ? "result" : "results"}${loading ? " so far" : ""}` : "Results"}
               </h2>
-              {!loading && results && items.length > 0 && <p className="results__note">Prices exclude shipping</p>}
+              {results && items.length > 0 && <p className="results__note">Prices exclude shipping</p>}
               {!loading && results && cheapest && !watchOpen && !watchSaved && (
                 <Button size="sm" onClick={() => setWatchOpen(true)}>
                   Watch this search
@@ -332,9 +473,9 @@ export default function Home() {
               />
             )}
 
-            {!loading && all.length > 0 && <FilterChips filters={chips} onChange={setChips} facets={facets} bounds={bounds} currency={all[0].currency || "SAR"} kept={kept} />}
+            {all.length > 0 && <FilterChips filters={chips} onChange={setChips} facets={facets} bounds={bounds} currency={all[0].currency || "SAR"} kept={kept} />}
 
-            {loading ? (
+            {waiting ? (
               <ul className="grid" aria-hidden="true">
                 {Array.from({ length: SKELETONS }, (_, i) => (
                   <li key={i}>
@@ -343,7 +484,9 @@ export default function Home() {
                 ))}
               </ul>
             ) : results && items.length ? (
-              <ResultTiers items={items} query={results.query} compare={compare} />
+              <GroupOpenContext value={groupOpen}>
+                <ResultTiers items={items} query={results.query} compare={compare} />
+              </GroupOpenContext>
             ) : results && filtering ? (
               <EmptyState
                 title="No results match these filters"
@@ -354,7 +497,7 @@ export default function Home() {
                   </Button>
                 }
               />
-            ) : results ? (
+            ) : results && !loading ? (
               <EmptyState title={results.reason ?? "No products matched your search and filters"} body="Try fewer words, another store, or looser price and rating filters." />
             ) : null}
           </section>
