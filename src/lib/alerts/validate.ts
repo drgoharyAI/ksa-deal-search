@@ -1,5 +1,5 @@
 import type { NewWatch } from "./repo";
-import type { WatchStatus } from "./shared";
+import type { WatchFilters, WatchStatus } from "./shared";
 
 /** Input checks for the watches API. Pure; `siteIds` is the server's store registry keys. */
 type Ok<T> = { ok: true; value: T };
@@ -47,7 +47,9 @@ export function parseNewWatch(body: unknown, siteIds: ReadonlySet<string>): Ok<N
   if (b.kind === "search") {
     const sites = Array.isArray(b.sites) ? [...new Set(b.sites.filter((s): s is string => typeof s === "string" && siteIds.has(s)))] : [];
     if (!sites.length) return { ok: false, error: "Pick at least one store" };
-    return { ok: true, value: { kind: "search", site: null, productId: null, query, sites, target: b.target, title: null, url: null, image: null, currency, price } };
+    const filters = parseFilters(b.filters);
+    if (!filters) return { ok: false, error: "Filters are a min price, a max price and a min rating, as numbers" };
+    return { ok: true, value: { kind: "search", site: null, productId: null, query, sites, target: b.target, title: null, url: null, image: null, currency, price, filters } };
   }
   return { ok: false, error: "A watch is a product or a search" };
 }
@@ -76,4 +78,19 @@ export function parseWatchUpdate(body: unknown): Ok<WatchUpdate> | Err {
 export function parseId(v: unknown): number | null {
   const n = typeof v === "number" ? v : typeof v === "string" && /^\d{1,15}$/.test(v) ? Number(v) : NaN;
   return Number.isSafeInteger(n) && n > 0 ? n : null;
+}
+
+/** { minPrice?, maxPrice?, minRating? } as finite non-negative numbers (rating 0 to 5); null when invalid. */
+export function parseFilters(v: unknown): WatchFilters | null {
+  if (v === undefined || v === null) return {};
+  if (typeof v !== "object" || Array.isArray(v)) return null;
+  const o = v as Record<string, unknown>;
+  const out: WatchFilters = {};
+  for (const k of ["minPrice", "maxPrice", "minRating"] as const) {
+    const n = o[k];
+    if (n === undefined || n === null) continue;
+    if (typeof n !== "number" || !Number.isFinite(n) || n < 0 || n > MAX_TARGET || (k === "minRating" && n > 5)) return null;
+    out[k] = n;
+  }
+  return out;
 }

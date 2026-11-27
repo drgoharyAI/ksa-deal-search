@@ -1,7 +1,7 @@
 import { rejectCrossSite } from "@/src/lib/request-guard";
 import { getDb } from "@/src/lib/db";
 import { sites } from "@/src/sites/registry";
-import { addPricePoint, createWatch, deleteWatch, findProductWatch, getWatch, listWatchViews, updateWatch } from "@/src/lib/alerts/repo";
+import { addPricePoint, createWatch, deleteWatch, findProductWatch, findSearchWatch, getWatch, listWatchViews, updateWatch } from "@/src/lib/alerts/repo";
 import { parseId, parseNewWatch, parseWatchUpdate } from "@/src/lib/alerts/validate";
 import { ensureChecker } from "@/src/lib/alerts/service";
 import { bad, dbFailure, json, readJson } from "@/src/lib/api";
@@ -20,8 +20,9 @@ export async function GET(req: Request) {
 }
 
 /**
- * Creates a watch. A second product watch on the same store product updates the first one
- * (new target, active, re-armed) instead of adding a duplicate.
+ * Creates a watch. A second product watch on the same store product updates the first one (new
+ * target, active, re-armed); a search watch with the same query (normalised), stores and target
+ * updates the existing one (its filters, active, re-armed). No duplicates either way.
  */
 export async function POST(req: Request) {
   const rejected = rejectCrossSite(req, { json: true });
@@ -33,9 +34,15 @@ export async function POST(req: Request) {
   try {
     const db = getDb();
     const now = Date.now();
-    const existing = w.kind === "product" ? findProductWatch(db, w.site as string, w.productId as string) : null;
+    const existing =
+      w.kind === "product" ? findProductWatch(db, w.site as string, w.productId as string) : findSearchWatch(db, w);
     if (existing) {
-      updateWatch(db, existing.id, { target: w.target, status: "active", lastFiredPrice: null });
+      updateWatch(db, existing.id, {
+        target: w.target,
+        status: "active",
+        lastFiredPrice: null,
+        ...(w.kind === "search" ? { filters: w.filters ?? {} } : {}),
+      });
       return json({ watch: getWatch(db, existing.id), updated: true });
     }
     const id = createWatch(db, w, now);

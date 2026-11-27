@@ -5,7 +5,8 @@ import type { Product } from "@/src/lib/types";
 import { storeLabel } from "@/src/lib/stores";
 import type { AlertMessage, SendResult } from "@/src/lib/telegram";
 import { addEvent, addPricePoint, listWatches, pendingEvent, updateEvent, updateWatch } from "./repo";
-import { cheapestConfident, priceOf, type Watch } from "./shared";
+import { passesPriceRating, ratinglessSites } from "@/src/lib/filters";
+import { cheapestConfident, normQuery, priceOf, type Watch } from "./shared";
 
 /**
  * The price-alert checker. One cycle:
@@ -43,7 +44,16 @@ export type CycleReport = { checked: number; groups: number; fired: number; retr
 
 type GroupOutcome = { ok: true; products: Product[] } | { ok: false; status: "blocked" | "error" };
 
-export const normQuery = (q: string): string => q.trim().replace(/\s+/g, " ").toLowerCase();
+export { normQuery };
+
+function filterFor(w: Watch, products: Product[]): Product[] {
+  const f = w.filters ?? {};
+  if (f.minPrice === undefined && f.maxPrice === undefined && f.minRating === undefined) return products;
+  const bySite = new Map<string, Product[]>();
+  for (const p of products) bySite.set(p.site, [...(bySite.get(p.site) ?? []), p]);
+  const ratingless = ratinglessSites([...bySite].map(([site, ps]) => ({ site, products: ps })));
+  return products.filter((p) => passesPriceRating(p, f, ratingless));
+}
 
 const storesOf = (w: Watch): string[] => (w.kind === "product" ? (w.site ? [w.site] : []) : w.sites);
 
@@ -110,7 +120,7 @@ export async function runCycle(deps: CheckerDeps): Promise<CycleReport> {
     const hit =
       w.kind === "product"
         ? (products.find((p) => p.site === w.site && p.id === w.productId) ?? null)
-        : cheapestConfident(products);
+        : cheapestConfident(filterFor(w, products)); // the search form's filters, applied to each store's answer
     if (!hit) {
       updateWatch(db, w.id, { lastCheckedAt: now, lastCheckStatus: w.kind === "product" ? "not found" : "no match" });
       continue;

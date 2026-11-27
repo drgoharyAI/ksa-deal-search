@@ -49,7 +49,8 @@ export async function POST(req: Request) {
     minRating: optNum(body.minRating),
   };
   const result = await runSearch(input);
-  recordHistory(input, result.products);
+  // A search where no store answered (all blocked or failed) is not a successful search.
+  if (result.statuses.some((s) => s.status === "ok")) recordHistory(input, result.products);
   return NextResponse.json({ ...result, products: withInsights(result.products) });
 }
 

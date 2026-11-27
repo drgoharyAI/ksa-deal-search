@@ -152,16 +152,20 @@ export default function ResultCard({ product: p, query }: { product: Product; qu
                   return err;
                 }}
               />
-            ) : watch === "saved" ? (
-              <p className="card__watched" role="status">
-                Watching. <a href="/alerts">See alerts</a>
-              </p>
-            ) : (
+            ) : watch === "saved" ? null : (
               <button type="button" className="btn btn--quiet btn--small" onClick={() => setWatch("open")}>
                 Watch
                 <span className="visually-hidden"> {p.title}</span>
               </button>
             )}
+            {/* Always in the page, so screen readers announce the text when it changes. */}
+            <p className={watch === "saved" ? "card__watched" : "visually-hidden"} role="status">
+              {watch === "saved" && (
+                <>
+                  Watching. <a href="/alerts">See alerts</a>
+                </>
+              )}
+            </p>
           </div>
         )}
       </div>

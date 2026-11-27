@@ -35,26 +35,32 @@ export default function AlertsView() {
   const [notice, setNotice] = useState<string | null>(null);
   const [test, setTest] = useState<{ busy: boolean; text: string | null; ok: boolean }>({ busy: false, text: null, ok: false });
 
-  async function load() {
+  async function load(): Promise<Data | null> {
     try {
       const [w, a] = await Promise.all([
         getJson<{ watches: WatchView[] }>("/api/watches"),
         getJson<{ events: AlertEvent[]; telegram: { configured: boolean } }>("/api/alerts"),
       ]);
-      setState({ phase: "ready", watches: w.watches, events: a.events, telegram: a.telegram });
+      const data = { watches: w.watches, events: a.events, telegram: a.telegram };
+      setState({ phase: "ready", ...data });
+      return data;
     } catch (e) {
       setState({ phase: "error", message: e instanceof Error ? e.message : "Could not reach the app server" });
+      return null;
     }
   }
 
   useEffect(() => {
-    void load().then(() =>
-      fetch("/api/alerts/seen", { method: "POST", headers: JSON_HEADERS, body: "{}" })
+    // Only the alerts this page shows are marked seen: one that fires meanwhile stays unread.
+    void load().then((data) => {
+      if (!data?.events.length) return;
+      const upTo = Math.max(...data.events.map((e) => e.id));
+      fetch("/api/alerts/seen", { method: "POST", headers: JSON_HEADERS, body: JSON.stringify({ upTo }) })
         .then((r) => {
           if (r.ok) window.dispatchEvent(new Event(ALERTS_SEEN_EVENT));
         })
-        .catch(() => {}),
-    );
+        .catch(() => {});
+    });
   }, []);
 
   async function change(method: "PATCH" | "DELETE", body: Record<string, unknown>): Promise<string | null> {

@@ -12,7 +12,15 @@ import WatchForm, { postWatch } from "./components/WatchForm";
 import { cheapestConfident, defaultTarget, priceOf } from "@/src/lib/alerts/shared";
 import { valuesFromUrl } from "@/src/lib/rerun";
 
-type Results = { products: Product[]; statuses: SiteStatus[]; reason?: string; query: string; sites: string[] };
+type Results = {
+  products: Product[];
+  statuses: SiteStatus[];
+  reason?: string;
+  query: string;
+  sites: string[];
+  /** The form filters this search ran with; a "Watch this search" keeps them. */
+  filters: { minPrice?: number; maxPrice?: number; minRating?: number };
+};
 type Phase = "idle" | "loading" | "done" | "error";
 
 const INITIAL: FormValues = {
@@ -105,12 +113,12 @@ export default function Home() {
         body: JSON.stringify(body),
         signal: ctrl.signal,
       });
-      const data = (await res.json().catch(() => null)) as (Results & { error?: string }) | null;
+      const data = (await res.json().catch(() => null)) as (Omit<Results, "query" | "sites" | "filters"> & { error?: string }) | null;
       if (ctrl.signal.aborted) return;
       if (!res.ok || !data || !Array.isArray(data.products)) {
         return fail(data?.error ?? "The search failed; try again");
       }
-      setResults({ products: data.products, statuses: data.statuses ?? [], reason: data.reason, query: v.query.trim(), sites: v.sites });
+      setResults({ products: data.products, statuses: data.statuses ?? [], reason: data.reason, query: v.query.trim(), sites: v.sites, filters: { minPrice: body.minPrice, maxPrice: body.maxPrice, minRating: body.minRating } });
       setWatchOpen(false);
       setWatchSaved(false);
       setPending(null);
@@ -175,11 +183,14 @@ export default function Home() {
                 Watch this search
               </button>
             )}
-            {!loading && watchSaved && (
-              <p className="results__note" role="status">
-                Watching this search. <a href="/alerts">See alerts</a>
-              </p>
-            )}
+            {/* Always in the page, so screen readers announce the text when it changes. */}
+            <p className={!loading && watchSaved ? "results__note" : "visually-hidden"} role="status">
+              {!loading && watchSaved && (
+                <>
+                  Watching this search. <a href="/alerts">See alerts</a>
+                </>
+              )}
+            </p>
           </div>
           {!loading && results && cheapest && watchOpen && (
             <WatchForm
@@ -187,7 +198,7 @@ export default function Home() {
               initial={defaultTarget(priceOf(cheapest))}
               onCancel={() => setWatchOpen(false)}
               onSave={async (target) => {
-                const err = await postWatch({ kind: "search", query: results.query, sites: results.sites, target });
+                const err = await postWatch({ kind: "search", query: results.query, sites: results.sites, target, filters: results.filters });
                 if (!err) {
                   setWatchOpen(false);
                   setWatchSaved(true);

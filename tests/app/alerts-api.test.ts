@@ -114,6 +114,23 @@ describe("/api/watches", () => {
     expect((await watches.DELETE(plain(`/api/watches?id=${watch.id}`, "DELETE"))).status).toBe(404);
   });
 
+  it("stores a search watch's filters and never duplicates the same search watch", async () => {
+    const body = { kind: "search", query: "AirPods 4", sites: ["jarir", "noon-sa"], target: 480, filters: { minPrice: 100, minRating: 4 } };
+    const first = await watches.POST(jsonReq("/api/watches", "POST", body));
+    expect(first.status).toBe(201);
+    const { watch } = (await first.json()) as { watch: { id: number; filters: unknown } };
+    expect(watch.filters).toEqual({ minPrice: 100, minRating: 4 });
+    const again = await watches.POST(jsonReq("/api/watches", "POST", { ...body, query: "  airpods   4 ", sites: ["noon-sa", "jarir"], filters: { maxPrice: 900 } }));
+    expect(again.status).toBe(200);
+    expect(await again.json()).toMatchObject({ updated: true, watch: { id: watch.id, filters: { maxPrice: 900 } } });
+    const other = await watches.POST(jsonReq("/api/watches", "POST", { ...body, target: 470 }));
+    expect(other.status).toBe(201);
+    const list = (await (await watches.GET(plain("/api/watches"))).json()) as { watches: unknown[] };
+    expect(list.watches).toHaveLength(2);
+    expect((await watches.POST(jsonReq("/api/watches", "POST", { ...body, filters: { minRating: 9 } }))).status).toBe(400);
+    expect((await watches.POST(jsonReq("/api/watches", "POST", { ...body, filters: { minPrice: "5" } }))).status).toBe(400);
+  });
+
   it("answers 500 with a plain message when the database fails", async () => {
     state.dbFails = true;
     const r = await watches.GET(plain("/api/watches"));
@@ -131,6 +148,13 @@ describe("/api/search records history", () => {
     expect(h.items).toEqual([
       expect.objectContaining({ query: "airpods 4", sites: ["jarir"], sort: "price", filters: { maxPrice: 900 }, resultCount: 1, cheapest: expect.objectContaining({ price: 499, site: "jarir" }) }),
     ]);
+  });
+  it("records nothing when no store answered ok", async () => {
+    const { runSearch } = await import("@/src/lib/pipeline");
+    vi.mocked(runSearch).mockResolvedValueOnce({ products: [], statuses: [{ site: "jarir", status: "blocked" }], queryTokens: [] });
+    const r = await search.POST(jsonReq("/api/search", "POST", body));
+    expect(r.status).toBe(200);
+    expect(((await (await history.GET(plain("/api/history"))).json()) as { items: unknown[] }).items).toHaveLength(0);
   });
   it("still answers the search when the database fails", async () => {
     state.dbFails = true;
@@ -165,8 +189,13 @@ describe("/api/alerts", () => {
     const text = await r.text();
     expect(text).not.toContain("SECRET");
     expect(JSON.parse(text)).toMatchObject({ unread: 1, telegram: { configured: true }, events: [{ newPrice: 400 }] });
-    await seen.POST(jsonReq("/api/alerts/seen", "POST", {}));
-    expect(((await (await alerts.GET(plain("/api/alerts"))).json()) as { unread: number }).unread).toBe(0);
+    const first = addEvent(state.db, { watchId: null, at: 1, title: "T", site: "jarir", oldPrice: 500, newPrice: 400, target: 450, currency: "SAR", url: null, sent: true }) - 1;
+    expect((await seen.POST(jsonReq("/api/alerts/seen", "POST", {}))).status).toBe(400);
+    expect((await seen.POST(jsonReq("/api/alerts/seen", "POST", { upTo: -1 }))).status).toBe(400);
+    expect((await seen.POST(jsonReq("/api/alerts/seen", "POST", { upTo: "1" }))).status).toBe(400);
+    // The page showed only the first alert; the second fired after it loaded and stays unread.
+    expect((await seen.POST(jsonReq("/api/alerts/seen", "POST", { upTo: first }))).status).toBe(200);
+    expect(((await (await alerts.GET(plain("/api/alerts"))).json()) as { unread: number }).unread).toBe(1);
   });
   it("test-telegram answers a setup hint when not configured", async () => {
     vi.stubEnv("TELEGRAM_BOT_TOKEN", "");

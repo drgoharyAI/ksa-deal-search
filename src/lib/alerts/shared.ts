@@ -17,6 +17,12 @@ export type HistoryEntry = {
 };
 
 export type WatchKind = "product" | "search";
+
+/** A search watch's price and rating filters, as on the search form. */
+export type WatchFilters = { minPrice?: number; maxPrice?: number; minRating?: number };
+
+/** Query key for grouping and duplicate checks: trimmed, single-spaced, lower case. */
+export const normQuery = (q: string): string => q.trim().replace(/\s+/g, " ").toLowerCase();
 export type WatchStatus = "active" | "paused";
 
 export type Watch = {
@@ -37,6 +43,7 @@ export type Watch = {
   lastCheckedAt: number | null;
   lastPrice: number | null;
   lastCheckStatus: string | null;
+  filters: WatchFilters;
 };
 
 export type PricePoint = { at: number; price: number };

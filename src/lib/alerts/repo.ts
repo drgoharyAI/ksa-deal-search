@@ -1,18 +1,18 @@
 import "server-only";
 import type { Db } from "@/src/lib/db";
-import type { AlertEvent, PricePoint, Watch, WatchKind, WatchStatus, WatchView } from "./shared";
+import { normQuery, type AlertEvent, type PricePoint, type Watch, type WatchFilters, type WatchKind, type WatchStatus, type WatchView } from "./shared";
 
-type WatchRow = Omit<Watch, "sites"> & { sites: string };
+type WatchRow = Omit<Watch, "sites" | "filters"> & { sites: string; filters: string | null };
 
-const toWatch = (r: WatchRow): Watch => {
-  let sites: string[] = [];
+const parseJson = <T>(s: string | null, fallback: T): T => {
   try {
-    sites = JSON.parse(r.sites) as string[];
+    return s ? (JSON.parse(s) as T) : fallback;
   } catch {
-    // keep []
+    return fallback;
   }
-  return { ...r, sites };
 };
+
+const toWatch = (r: WatchRow): Watch => ({ ...r, sites: parseJson<string[]>(r.sites, []), filters: parseJson<WatchFilters>(r.filters, {}) });
 
 export type NewWatch = {
   kind: WatchKind;
@@ -25,15 +25,16 @@ export type NewWatch = {
   url?: string | null;
   image?: string | null;
   currency?: string;
+  filters?: WatchFilters;
 };
 
 export function createWatch(db: Db, w: NewWatch, now: number): number {
   const r = db
     .prepare(
-      `INSERT INTO watches (kind, site, productId, query, sites, target, title, url, image, currency, createdAt)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      `INSERT INTO watches (kind, site, productId, query, sites, target, title, url, image, currency, createdAt, filters)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     )
-    .run(w.kind, w.site, w.productId, w.query, JSON.stringify(w.sites), w.target, w.title ?? null, w.url ?? null, w.image ?? null, w.currency || "SAR", now);
+    .run(w.kind, w.site, w.productId, w.query, JSON.stringify(w.sites), w.target, w.title ?? null, w.url ?? null, w.image ?? null, w.currency || "SAR", now, JSON.stringify(w.filters ?? {}));
   return Number(r.lastInsertRowid);
 }
 
@@ -46,6 +47,15 @@ export function getWatch(db: Db, id: number): Watch | null {
 export function findProductWatch(db: Db, site: string, productId: string): Watch | null {
   const r = db.prepare("SELECT * FROM watches WHERE kind = 'product' AND site = ? AND productId = ? ORDER BY id LIMIT 1").get(site, productId) as unknown as WatchRow | undefined;
   return r ? toWatch(r) : null;
+}
+
+const sameSet = (a: string[], b: string[]) => a.length === b.length && [...a].sort().join() === [...b].sort().join();
+
+/** An existing search watch with the same query (normalised), stores and target, if any. */
+export function findSearchWatch(db: Db, w: { query: string; sites: string[]; target: number }): Watch | null {
+  const rows = db.prepare("SELECT * FROM watches WHERE kind = 'search' AND target = ? ORDER BY id").all(w.target) as unknown as WatchRow[];
+  const q = normQuery(w.query);
+  return rows.map(toWatch).find((x) => normQuery(x.query) === q && sameSet(x.sites, w.sites)) ?? null;
 }
 
 export function listWatches(db: Db, opts: { activeOnly?: boolean } = {}): Watch[] {
@@ -62,15 +72,16 @@ export type WatchPatch = Partial<{
   lastCheckStatus: string | null;
   title: string | null;
   url: string | null;
+  filters: WatchFilters;
 }>;
 
-const PATCHABLE = new Set(["target", "status", "lastFiredPrice", "lastCheckedAt", "lastPrice", "lastCheckStatus", "title", "url"]);
+const PATCHABLE = new Set(["target", "status", "lastFiredPrice", "lastCheckedAt", "lastPrice", "lastCheckStatus", "title", "url", "filters"]);
 
 export function updateWatch(db: Db, id: number, patch: WatchPatch): boolean {
   const keys = Object.keys(patch).filter((k) => PATCHABLE.has(k));
   if (!keys.length) return false;
   const sql = `UPDATE watches SET ${keys.map((k) => `${k} = ?`).join(", ")} WHERE id = ?`;
-  const vals = keys.map((k) => (patch as Record<string, string | number | null>)[k]);
+  const vals = keys.map((k) => (k === "filters" ? JSON.stringify(patch.filters ?? {}) : (patch as Record<string, string | number | null>)[k]));
   return Number(db.prepare(sql).run(...vals, id).changes) > 0;
 }
 
@@ -115,8 +126,10 @@ export function unreadCount(db: Db): number {
   return (db.prepare("SELECT count(*) n FROM alert_events WHERE seen = 0").get() as { n: number }).n;
 }
 
-export function markEventsSeen(db: Db): void {
-  db.prepare("UPDATE alert_events SET seen = 1 WHERE seen = 0").run();
+/** Marks events up to and including id `upTo` as seen (the newest one the page showed); omitted: all. */
+export function markEventsSeen(db: Db, upTo?: number): void {
+  if (upTo === undefined) db.prepare("UPDATE alert_events SET seen = 1 WHERE seen = 0").run();
+  else db.prepare("UPDATE alert_events SET seen = 1 WHERE seen = 0 AND id <= ?").run(upTo);
 }
 
 /**

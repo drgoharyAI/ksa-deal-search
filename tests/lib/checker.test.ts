@@ -304,3 +304,20 @@ describe("runCycle: Chrome-backed stores", () => {
     expect(calls.map((c) => c.query)).toEqual(["q2", "q1"]);
   });
 });
+
+describe("runCycle: search watch filters", () => {
+  it("applies the stored min price, max price and min rating", async () => {
+    const id = createWatch(db, { kind: "search", site: null, productId: null, query: "airpods", sites: ["amazon-sa"], target: 450, filters: { minPrice: 200, maxPrice: 600, minRating: 4 } }, 0);
+    expect(getWatch(db, id)?.filters).toEqual({ minPrice: 200, maxPrice: 600, minRating: 4 });
+    answers["amazon-sa"] = {
+      products: [
+        prod("amazon-sa", "CASE", 50, { rating: 4.5 }), // under the min price
+        prod("amazon-sa", "LOW", 300, { rating: 3 }), // under the min rating
+        prod("amazon-sa", "PRO", 900, { rating: 5 }), // over the max price
+        prod("amazon-sa", "OK", 480, { rating: 4.2 }),
+      ],
+    };
+    await runCycle(deps());
+    expect(listPricePoints(db, id).map((p) => p.price)).toEqual([480]);
+  });
+});

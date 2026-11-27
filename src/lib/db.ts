@@ -106,6 +106,8 @@ const MIGRATIONS: string[] = [
    );
    CREATE INDEX observations_item ON observations(site, productId, at);
    CREATE INDEX observations_at ON observations(at);`,
+  // 3: a search watch keeps the search form's price and rating filters (JSON).
+  `ALTER TABLE watches ADD COLUMN filters TEXT NOT NULL DEFAULT '{}';`,
 ];
 
 export const SCHEMA_VERSION = MIGRATIONS.length;

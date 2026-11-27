@@ -230,7 +230,7 @@ with Shift+Delete, or clear this site's data in the browser (or run
 ## History & price alerts
 
 Every successful search is saved to a local SQLite file (Node's built-in `node:sqlite`, no
-native dependency): `%LOCALAPPDATA%deal-searchdata.db`, or the path in `DEAL_SEARCH_DB`.
+native dependency): `%LOCALAPPDATA%\deal-search\data.db`, or the path in `DEAL_SEARCH_DB`.
 The file is outside the repository and is never committed.
 
 - **History** (`/history`): newest first, with the stores, time, result count and the cheapest
@@ -238,15 +238,20 @@ The file is outside the repository and is never committed.
   delete one entry or clear all.
 - **Watch** on a result card sets a product alert (target prefilled 5% under the current price).
   **Watch this search** above the results alerts when any confident match (never a "less likely"
-  one) is at or under a max price (prefilled 5% under the cheapest confident match).
+  one) is at or under a max price (prefilled 5% under the cheapest confident match). It keeps
+  the search's min price, max price and min rating filters. The same search, stores and target
+  twice updates the one watch.
 - **Alerts** (`/alerts`): every watch with its target, current and lowest price, last check, a
   sparkline, pause or resume, edit target and delete; the log of fired alerts; Telegram status.
 
 The checker runs inside the app's server process while the app runs: every `ALERT_CHECK_HOURS`
-hours (default 6), stores fetched one after another about 20 s apart, each store at most once
-per query per cycle, through the normal store adapters, caches and back-offs. A blocked store is
-skipped until the next cycle. A watch that fired notifies again only after the price rose above
-the target and fell back. In development, `POST /api/alerts/run-now` (JSON body `{}`) runs one
+hours (default 6), stores fetched one after another about 20 s apart (at least 60 s before noon
+or SHEIN), each store at most once per query per cycle, through the normal store adapters,
+caches and back-offs. SHEIN gets at most 8 searches per cycle; the rest wait for the next cycle,
+oldest checked first. A blocked store is skipped until the next cycle. A watch that fired
+notifies again only after the price rose above the target and fell back; a Telegram send that
+failed (timeout, server error) is retried next cycle. Watches on noon or SHEIN open the app's
+off-screen Chrome during checks while the app runs. In development, `POST /api/alerts/run-now` (JSON body `{}`) runs one
 cycle at once; it answers 404 in production.
 
 API (local only, same request guard as `/api/search`): `GET|DELETE /api/history` (`?id=N` or
