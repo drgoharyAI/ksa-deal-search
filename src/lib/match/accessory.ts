@@ -53,11 +53,15 @@ export function isAccessory(title: string, queryTokens: string[]): boolean {
  * or a part noun (data/part-words.json) of them within two tokens after the query's product noun
  * ("Gaming Mouse Pad", "Hair Dryer Folding Diffuser", "Apple Watch Band").
  */
+/** A piece count ("30PCS", "2 pcs", "50 Pieces", "pack of 10"): parts are sold in multiples. */
+const PIECES = /\b\d+\s*-?\s*(?:pcs|pc|pieces?)\b|\b(?:pack|set) of \d+/i;
+
 export function isStrongAccessory(title: string, queryTokens: string[], variants: string[][] = []): boolean {
   const { tt, idx } = foreignAccessoryIdx(title, queryTokens);
   if (idx.some((i) => tt[i] === "replacement" || tt[i + 1] === "for" || tt[i + 1] === "compatible")) return true;
   const q = queryTokens.map((t) => t.toLowerCase());
   const isPart = (t: string | undefined) => !!t && PART.has(t) && !q.some((x) => formsMatch(x, t));
+  if (PIECES.test(title) && tt.some(isPart)) return true;
   return variants.some((v) => {
     const head = headNoun(v);
     const j = head ? tt.findIndex((t) => formsMatch(head, t)) : -1;

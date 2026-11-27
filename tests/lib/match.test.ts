@@ -336,3 +336,12 @@ describe("round 10 part nouns (12c)", () => {
     expect(isAccessory("Ps5 Cooling & Dual Controller Charging Station", ["ps5", "controller"])).toBe(true);
   });
 });
+
+describe("piece-count part listings (12c)", () => {
+  it("a piece count plus a part noun is an accessory", () => {
+    expect(isStrongAccessory("Dustproof 30PCS Outemu Switch Mechanical Keyboard", ["mechanical", "keyboard"], [["mechanical", "keyboard"]])).toBe(true);
+  });
+  it("a multi-pack of the product itself is not", () => {
+    expect(isStrongAccessory("3PCS 100W USB Type C Cable", ["usb-c", "cable", "100w"], [["usb-c", "cable", "100w"]])).toBe(false);
+  });
+});

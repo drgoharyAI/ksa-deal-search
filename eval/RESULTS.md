@@ -131,3 +131,11 @@ digit-free query word, so "Ps5 Cooling & Dual Controller Charging Station" is re
 | p@10 | acc@10 | wrong@10 | recall | cheapest-first |
 |---|---|---|---|---|
 | 97% (96.0→96.7) | 0.7% | 2.0% | 90% | 80% |
+
+## Round 11: piece-count listings of part nouns (kept)
+A title with a piece count ("30PCS", "2 pcs", "pack of 10") and a part noun the query does not
+name is an accessory ("Dustproof 30PCS Outemu Switch Mechanical Keyboard"). Multi-packs of the
+product itself ("3PCS 100W USB-C Cable") are unaffected because cable is not a part noun.
+| p@10 | acc@10 | wrong@10 | recall | cheapest-first |
+|---|---|---|---|---|
+| 97% (96.7→97.3) | 0% | 2.0% | 90% | 80% |

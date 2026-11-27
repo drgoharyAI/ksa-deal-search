@@ -1,5 +1,5 @@
 {
-  "at": "2026-11-27T02:06:42.572Z",
+  "at": "2026-11-27T02:07:12.167Z",
   "queries": [
     {
       "query": "anc earbuds under 300",
@@ -894,13 +894,13 @@
         }
       ],
       "recordedItems": 494,
-      "results": 138,
+      "results": 137,
       "missingCalls": [],
       "labelled": true,
       "metrics": {
         "top": 10,
-        "precisionAt10": 0.6,
-        "accessoryAt10": 0.1,
+        "precisionAt10": 0.7,
+        "accessoryAt10": 0,
         "wrongModelAt10": 0.2,
         "unlabeledAt10": 0,
         "recall": 0.879746835443038,
@@ -915,13 +915,6 @@
           "price": 4.24,
           "title": "Compact Mechanical Gaming Keyboard with RGB Backlit Computer Keyboard Hot Swappable Keyboard for Windows Laptops and PC Gamers",
           "label": "relevant"
-        },
-        {
-          "key": "trendyol-sa:1060889296",
-          "store": "trendyol-sa",
-          "price": 22.7,
-          "title": "Dustproof Black 30PCS Dustproof Outemu Switch Mechanical Keyboard Linear Tactile Clicky Silent",
-          "label": "accessory"
         },
         {
           "key": "aliexpress:1005011891367794",
@@ -978,6 +971,13 @@
           "price": 49.49,
           "title": "K98 Wireless Gaming Mechanical Feel Keyboard 2.4G+Bluetooth Dual-mode Backlight Desktop PC/Notebook Available Keyboard",
           "label": "wrong-model"
+        },
+        {
+          "key": "noon-sa:ZCC27E5074D87386784DCZ",
+          "store": "noon-sa",
+          "price": 53.01,
+          "title": "Hirospace Cable-type RGB gaming keyboard, 61-key compact mechanical keyboard",
+          "label": "relevant"
         }
       ]
     },
@@ -2104,8 +2104,8 @@
   ],
   "overall": {
     "queries": 15,
-    "precisionAt10": 0.9666666666666667,
-    "accessoryAt10": 0.006666666666666667,
+    "precisionAt10": 0.9733333333333334,
+    "accessoryAt10": 0,
     "wrongModelAt10": 0.020000000000000004,
     "recall": 0.8977667897862076,
     "cheapestRelevantFirst": 0.8
