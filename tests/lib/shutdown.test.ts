@@ -57,7 +57,14 @@ describe("createShutdown", () => {
     const order: string[] = [];
     await createShutdown({
       steps: [
-        { name: "browser", close: () => new Promise<void>((r) => setTimeout(() => (order.push("browser"), r()), 20)) },
+        { name: "browser", close: () =>
+            new Promise<void>((r) =>
+              setTimeout(() => {
+                order.push("browser");
+                r();
+              }, 20),
+            ),
+        },
         { name: "db", close: async () => void order.push("db"), after: true },
       ],
       exit: () => {},

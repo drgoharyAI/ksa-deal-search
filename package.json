@@ -10,6 +10,10 @@
     "build": "next build",
     "start": "next start -H 127.0.0.1",
     "lint": "eslint",
+    "lint:strict": "eslint -c eslint.strict.config.mjs",
+    "typecheck": "tsc --noEmit",
+    "knip": "knip",
+    "qa": "npm run lint && npm run lint:strict && npm run typecheck && npm test && npm run knip",
     "test": "vitest run",
     "predev": "node scripts/install-specs.mjs",
     "prestart": "node scripts/install-specs.mjs"
@@ -31,6 +35,7 @@
     "eslint-config-next": "16.4.6",
     "eslint-plugin-redos": "^4.6.2",
     "eslint-plugin-security": "^4.2.1",
+    "knip": "^6.48.0",
     "typescript": "^5",
     "typescript-eslint": "^8.74.0",
     "vitest": "^5.1.2"
