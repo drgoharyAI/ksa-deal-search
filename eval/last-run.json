@@ -1,5 +1,5 @@
 {
-  "at": "2026-11-27T01:56:47.227Z",
+  "at": "2026-11-27T02:01:10.572Z",
   "queries": [
     {
       "query": "anc earbuds under 300",
@@ -474,90 +474,90 @@
         }
       ],
       "recordedItems": 465,
-      "results": 360,
+      "results": 332,
       "missingCalls": [],
       "labelled": true,
       "metrics": {
         "top": 10,
-        "precisionAt10": 0.2,
-        "accessoryAt10": 0.8,
+        "precisionAt10": 0.7,
+        "accessoryAt10": 0.1,
         "wrongModelAt10": 0,
         "unlabeledAt10": 0,
-        "recall": 0.9113573407202216,
+        "recall": 0.9058171745152355,
         "relevantRecorded": 361,
-        "relevantKept": 329,
+        "relevantKept": 327,
         "cheapestRelevantFirst": false
       },
       "top": [
         {
-          "key": "trendyol-sa:924804936",
+          "key": "trendyol-sa:1235628803",
           "store": "trendyol-sa",
-          "price": 8.55,
-          "title": "50 Piece Air Fryer Round Nonstick Steamer Pads High Quality Parchment Paper for Baking",
+          "price": 17.32,
+          "title": "4PCS 4/ 8/ 16 Pcs Air Fryer Silicone Rubber Legs For 2QT For SL400 Air Fryer Toaster Oven Air Fryer",
           "label": "accessory"
         },
         {
-          "key": "trendyol-sa:982411288",
-          "store": "trendyol-sa",
-          "price": 9.08,
-          "title": "50pcs 16cm square Air Fryer Paper Airfryer Disposable Containers Airfryer Baking Paper Non-Stick Dis",
-          "label": "accessory"
+          "key": "jarir:586896",
+          "store": "jarir",
+          "price": 29,
+          "title": "The \"I Love My Air Fryer\" 5-Ingredient Recipe Book - from French Toast Sticks to Buttermilk-Fried Chicken Thighs, 175 Quick and Easy Recipes",
+          "label": "off-topic"
         },
         {
-          "key": "amazon-sa:B09PHRSWH1",
-          "store": "amazon-sa",
-          "price": 10.5,
-          "title": "Air Fryer Disposable Paper Liner, 100PCS Non-stick Disposable Liners, Baking Paper for Air Fryer Oil-proof, Water-proof, Food Grade Parchment for Baking Roasting Microwave (100Pcs-6.3 inch)",
+          "key": "jarir:586957",
+          "store": "jarir",
+          "price": 39,
+          "title": "Paleo Cooking with Your Air Fryer - 75 Recipes for Healthier Fried Food in Less Time",
+          "label": "off-topic"
+        },
+        {
+          "key": "aliexpress:1005011992429150",
+          "store": "aliexpress",
+          "price": 46.59,
+          "title": "Multifunctional Visual Air Fryer Household Large-capacity Electric Oven Smart French Fry Machine Oil-free 360° Cycle Heating",
           "label": "relevant"
         },
         {
-          "key": "amazon-sa:B0CFVLS2VT",
-          "store": "amazon-sa",
-          "price": 10.84,
-          "title": "SKY-TOUCH 100 PCS Air Fryer Disposable Paper Liner, Baking Paper for Air Fryer Oil-proof, Water-proof, Food Grade Parchment, Square Baking Paper for Air Fryer, 16cm/6.3inch",
+          "key": "jarir:583613",
+          "store": "jarir",
+          "price": 49,
+          "title": "Taste of Home: Everyday Air Fryer - 100+ Recipes for Weeknight Ease",
           "label": "relevant"
         },
         {
-          "key": "trendyol-sa:886470355",
-          "store": "trendyol-sa",
-          "price": 13.7,
-          "title": "black 1pcs Air Fryer Silicone Liners Square Airfryer Liners Reusable Air Fryer Accessories Replaceme",
-          "label": "accessory"
+          "key": "aliexpress:1005008333916698",
+          "store": "aliexpress",
+          "price": 52.75,
+          "title": "6L Electric Oil Free Fryer Air frying Oven Multifunction 360°Baking Without Oil French Fries Pizza Machine Fried Chicken Oven",
+          "label": "relevant"
         },
         {
-          "key": "trendyol-sa:956744740",
-          "store": "trendyol-sa",
-          "price": 14.66,
-          "title": "black Silicone Air Fryer Pot Tray Food Safe Reusable Square BBQ Barbecue Pad Plate Airfryer Oven Bak",
-          "label": "accessory"
+          "key": "aliexpress:1005013640467849",
+          "store": "aliexpress",
+          "price": 56.89,
+          "title": "Fully Automatic Multi-functional All-in-One Air Fryer Oil-Free Cooking Large Capacity Hot Air Fryer Oven for Household Kitchen",
+          "label": "relevant"
         },
         {
-          "key": "trendyol-sa:1235627613",
-          "store": "trendyol-sa",
-          "price": 14.78,
-          "title": "Square 10pcs 10-200pcs Disposable Air Fryer Paper Non-Stick Kitchen Baking Airfryer Mat Oilproof Mic",
-          "label": "accessory"
+          "key": "aliexpress:1005011995446845",
+          "store": "aliexpress",
+          "price": 58.25,
+          "title": "Air Fryer Home Frying, Steaming, and Cooking Integrated Smoke-free Electric Oven French Fries Machine Breakfast Machine",
+          "label": "relevant"
         },
         {
-          "key": "trendyol-sa:956745318",
-          "store": "trendyol-sa",
-          "price": 15.39,
-          "title": "only oil brush 2 in 1 Pour Spray Sprayer Kitchen Fryer Air Spray Oil Dispenser Bottle for Olive Oil",
-          "label": "accessory"
+          "key": "aliexpress:1005008605391017",
+          "store": "aliexpress",
+          "price": 58.39,
+          "title": "6L Air fryer Multi-functional intelligent touch screen oven Large capacity Electro mechanical deep fryer for home airfryer",
+          "label": "relevant"
         },
         {
-          "key": "trendyol-sa:1235628771",
-          "store": "trendyol-sa",
-          "price": 15.51,
-          "title": "Black Air Fryer Magnet Silicone Buckle High-temperature Kitchen Air Fryer Parchment Paper Liners Pre",
-          "label": "accessory"
-        },
-        {
-          "key": "trendyol-sa:929427067",
-          "store": "trendyol-sa",
-          "price": 15.7,
-          "title": "Brown 50Pcs-16cm Air fryer paper，50/100 pieces of disposable paper pads for air fryer, air fryer acc",
-          "label": "accessory"
+          "key": "aliexpress:1005008418373495",
+          "store": "aliexpress",
+          "price": 59.79,
+          "title": "Air Fryer 12L Stainless Steel Visible Large Capacity Electric Oven Touch Screen Multifunctional Electric Fryer EU/US Plug",
+          "label": "relevant"
         }
       ]
     },
@@ -754,7 +754,7 @@
         }
       ],
       "recordedItems": 554,
-      "results": 291,
+      "results": 290,
       "missingCalls": [],
       "labelled": true,
       "metrics": {
@@ -763,9 +763,9 @@
         "accessoryAt10": 0,
         "wrongModelAt10": 0,
         "unlabeledAt10": 0,
-        "recall": 0.8300492610837439,
+        "recall": 0.8275862068965517,
         "relevantRecorded": 406,
-        "relevantKept": 337,
+        "relevantKept": 336,
         "cheapestRelevantFirst": false
       },
       "top": [
@@ -795,13 +795,6 @@
           "store": "trendyol-sa",
           "price": 31.15,
           "title": "KA35 Power Bank with 20,000mAh Capacity and Ultra-Fast Charging",
-          "label": "relevant"
-        },
-        {
-          "key": "aliexpress:1005009925532791",
-          "store": "aliexpress",
-          "price": 31.49,
-          "title": "Portable Power Bank 20000mAh USB Fast Charging Powerbank for iPhone 16 15 8 pro max Samsung Huawei Xiaomi External Spare Battery",
           "label": "relevant"
         },
         {
@@ -837,6 +830,13 @@
           "store": "aliexpress",
           "price": 33.29,
           "title": "20000mAh Power Bank with Makeup Mirror Portable Charger Digital Display Power Bank External Battery for iPhone 17 Samsung Xiaomi",
+          "label": "relevant"
+        },
+        {
+          "key": "noon-sa:Z85ECCB5145CAB296831EZ",
+          "store": "noon-sa",
+          "price": 43.2,
+          "title": "20000mAh 20W Power Bank with Built-in Flashlight ,  Tablets, and More | Charge Multiple Devices Simultaneously | Compact, Convenient, and Travel-Friendly",
           "label": "relevant"
         }
       ]
@@ -894,18 +894,18 @@
         }
       ],
       "recordedItems": 494,
-      "results": 183,
+      "results": 165,
       "missingCalls": [],
       "labelled": true,
       "metrics": {
         "top": 10,
         "precisionAt10": 0.1,
-        "accessoryAt10": 0.3,
+        "accessoryAt10": 0.2,
         "wrongModelAt10": 0,
         "unlabeledAt10": 0,
-        "recall": 0.9050632911392406,
+        "recall": 0.879746835443038,
         "relevantRecorded": 158,
-        "relevantKept": 143,
+        "relevantKept": 139,
         "cheapestRelevantFirst": false
       },
       "top": [
@@ -945,20 +945,6 @@
           "label": "off-topic"
         },
         {
-          "key": "trendyol-sa:1063344358",
-          "store": "trendyol-sa",
-          "price": 14.83,
-          "title": "black Universal 2-In-1 Multi-Purpose Mechanical Keyboard Key Cap Puller Keycap Shaft Remover Button",
-          "label": "accessory"
-        },
-        {
-          "key": "trendyol-sa:893563300",
-          "store": "trendyol-sa",
-          "price": 15.1,
-          "title": "Key Cap Puller 2 In 1 Multi-Purpose Mechanical Keyboard Key Cap Puller Universal Keycap Shaft Remove",
-          "label": "accessory"
-        },
-        {
           "key": "aliexpress:1005007254591957",
           "store": "aliexpress",
           "price": 15.22,
@@ -966,18 +952,32 @@
           "label": "off-topic"
         },
         {
-          "key": "trendyol-sa:1063357777",
-          "store": "trendyol-sa",
-          "price": 15.85,
-          "title": "black 2 in 1 Key Switch Puller Keycaps Puller Unloading Wire Switch Mechanical Keyboard Removal Tool",
-          "label": "accessory"
-        },
-        {
           "key": "aliexpress:1005003299455210",
           "store": "aliexpress",
           "price": 16.99,
           "title": "2/3/4/6/7/8/9/16 Keys Black Mini Keypad Numpad Mechanical Keyboard OSU Gaming Programming Custom Keyboard For Photoshop",
           "label": "off-topic"
+        },
+        {
+          "key": "aliexpress:1005006727411297",
+          "store": "aliexpress",
+          "price": 19.91,
+          "title": "Macropad Macro Mechanical Keyboard RGB Mini Gaming Custom Programming Knob Keypads Red Switch 3 Keys For Photoshop",
+          "label": "off-topic"
+        },
+        {
+          "key": "aliexpress:1005005550328893",
+          "store": "aliexpress",
+          "price": 21.84,
+          "title": "Mechanical keyboard Switch Gateron White Yellow Silver Pro 2.0 V2 Switch 3pin RGB linear Tactile Red Brown Switchs for Hot-swappable Mechanical keyboard",
+          "label": "accessory"
+        },
+        {
+          "key": "trendyol-sa:1060889296",
+          "store": "trendyol-sa",
+          "price": 22.7,
+          "title": "Dustproof Black 30PCS Dustproof Outemu Switch Mechanical Keyboard Linear Tactile Clicky Silent",
+          "label": "accessory"
         }
       ]
     },
@@ -1034,18 +1034,18 @@
         }
       ],
       "recordedItems": 501,
-      "results": 410,
+      "results": 382,
       "missingCalls": [],
       "labelled": true,
       "metrics": {
         "top": 10,
-        "precisionAt10": 0.8,
-        "accessoryAt10": 0.2,
+        "precisionAt10": 1,
+        "accessoryAt10": 0,
         "wrongModelAt10": 0,
         "unlabeledAt10": 0,
-        "recall": 0.9858823529411764,
+        "recall": 0.9670588235294117,
         "relevantRecorded": 425,
-        "relevantKept": 419,
+        "relevantKept": 411,
         "cheapestRelevantFirst": true
       },
       "top": [
@@ -1078,32 +1078,11 @@
           "label": "relevant"
         },
         {
-          "key": "aliexpress:1005009599066007",
-          "store": "aliexpress",
-          "price": 4.24,
-          "title": "Gaming Mouse Wired M3 Colorful Glowing Electric Office Game USB Mice Laptop Accessories",
-          "label": "relevant"
-        },
-        {
-          "key": "trendyol-sa:887875144",
-          "store": "trendyol-sa",
-          "price": 4.42,
-          "title": "Textured Gaming Mouse Pad",
-          "label": "accessory"
-        },
-        {
           "key": "aliexpress:1005012355742973",
           "store": "aliexpress",
           "price": 4.51,
           "title": "Wired Gaming Mouse 7 Button Backlit 5500 DPI Adjustable Optical PC Gamer Mice Laptop Computer Ergonomic Mice Silent",
           "label": "relevant"
-        },
-        {
-          "key": "trendyol-sa:1186336328",
-          "store": "trendyol-sa",
-          "price": 4.63,
-          "title": "Gaming Mouse Pad Textured Surface Length:15.9Cm Width:8Cm",
-          "label": "accessory"
         },
         {
           "key": "aliexpress:1005010651862682",
@@ -1117,6 +1096,27 @@
           "store": "aliexpress",
           "price": 5.71,
           "title": "RGB Wired BackLight Mute USB Mice USB Wired Gaming Mouse for Desktop PC Notebook Computer Home Office LED Luminous 1600DPI",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005012440908264",
+          "store": "aliexpress",
+          "price": 7.91,
+          "title": "Ergonomic Wired Gaming Mouse USB Mouse Gaming RGB Mause Gamer Mouse Button LED Silent Mice for PC Laptop Computer",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005008699712996",
+          "store": "aliexpress",
+          "price": 9.57,
+          "title": "MINGCVIL Rechargeable Wireless Mouse Gaming Computer Bluetooth Mouse USB Mechanical E-Sports Backlight PC Mouse For Computer",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005006904646242",
+          "store": "aliexpress",
+          "price": 9.91,
+          "title": "Ergonomic Wireless Gaming Mouse RGB Backlight USB Compatible Rechargeable Silent Backlit Mouse for Laptop PC - Silent Gaming Mic",
           "label": "relevant"
         }
       ]
@@ -1594,49 +1594,21 @@
         }
       ],
       "recordedItems": 449,
-      "results": 237,
+      "results": 228,
       "missingCalls": [],
       "labelled": true,
       "metrics": {
         "top": 10,
-        "precisionAt10": 0.5,
-        "accessoryAt10": 0.5,
+        "precisionAt10": 0.9,
+        "accessoryAt10": 0.1,
         "wrongModelAt10": 0,
         "unlabeledAt10": 0,
-        "recall": 0.9274447949526814,
+        "recall": 0.917981072555205,
         "relevantRecorded": 317,
-        "relevantKept": 294,
+        "relevantKept": 291,
         "cheapestRelevantFirst": false
       },
       "top": [
-        {
-          "key": "trendyol-sa:1123172683",
-          "store": "trendyol-sa",
-          "price": 13.61,
-          "title": "Silicone Analog Wireless Controller Thumb Grips Set for Playstation PS5 (4 Pieces)",
-          "label": "relevant"
-        },
-        {
-          "key": "jarir:625252",
-          "store": "jarir",
-          "price": 25,
-          "title": "GT-COUPE 6-in-1 Controller Thumb Grips, for PlayStation 5, Black",
-          "label": "accessory"
-        },
-        {
-          "key": "jarir:556061",
-          "store": "jarir",
-          "price": 25,
-          "title": "GT-COUPE 8-in-1 Controller Thumb Grips, for PlayStation 5",
-          "label": "accessory"
-        },
-        {
-          "key": "amazon-sa:B0CFLGXJZH",
-          "store": "amazon-sa",
-          "price": 44.9,
-          "title": "SCIENISH PS5 Controller Charging Station with RGB Light Fast Charging Dock for PS5 Controller,LED Indicator Safe Intelligent Protection for PS5 Controller Game Accessories",
-          "label": "accessory"
-        },
         {
           "key": "aliexpress:1005013661868883",
           "store": "aliexpress",
@@ -1652,20 +1624,6 @@
           "label": "accessory"
         },
         {
-          "key": "trendyol-sa:1151552036",
-          "store": "trendyol-sa",
-          "price": 53.04,
-          "title": "Controller Charging Station with RGB Headphone Stand for PS5 Controller,Charger Holder with 2 USB Charging Ports, Headset Stand for Playstation 5 Controller Charging Dock, Black",
-          "label": "accessory"
-        },
-        {
-          "key": "jarir:568821",
-          "store": "jarir",
-          "price": 59,
-          "title": "KontrolFreek Performance Grips Controller Grip, for PlayStation 5/PlayStation 4, Black",
-          "label": "relevant"
-        },
-        {
           "key": "aliexpress:1005013426044828",
           "store": "aliexpress",
           "price": 59.45,
@@ -1677,6 +1635,48 @@
           "store": "aliexpress",
           "price": 63.61,
           "title": "Controller For Playstation 5 PS5/PS5 Pro/Slim/PC Gamepads W/Hall Effect RGB Wireless Game Control Joystick Marco/Turbo Program",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005007764442591",
+          "store": "aliexpress",
+          "price": 66.19,
+          "title": "Controller For Playstation 5 PS5/PS4/PC/Steam Wired Gamepad Turbo Dual Vibrate Hall Effect Linear Trigger Game Control Joystick",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005013558533563",
+          "store": "aliexpress",
+          "price": 68.29,
+          "title": "XB09 Wireless Gaming Controller Bluetooth 5.4 Gamepad for PC Switch PS3 for PS4 PS5 Android iOS, Turbo for Macro Back Key, White",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005011749742132",
+          "store": "aliexpress",
+          "price": 81.09,
+          "title": "RGB Light Controller For PlayStation 5/PS5 Pro/Slim/PC Wireless Gamepad Marco/Turbo NO Drift Hall Effect Gaming Control Joystick",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005013513987946",
+          "store": "aliexpress",
+          "price": 85.79,
+          "title": "For PS5/PS5 Slim/PS5 Pro PS5 Controller Gaming Controller Macro/Turbo Vibration Hall Trigger Dual Sense Joystick Gamepad",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005013462475999",
+          "store": "aliexpress",
+          "price": 85.79,
+          "title": "For PS5 Controller PS5 Pro/ PS5 Slim Console Turbo Vibration Function Bluetooth RGB Wireless 3D Hall Trigger Gaming Gamepad",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005012311540618",
+          "store": "aliexpress",
+          "price": 86.08,
+          "title": "RGB Wireless Gamepad,For Playstation 5/PS5 Controller,With Turbo Dual Sense Vibrate Programming 3D Gaming Controller Console",
           "label": "relevant"
         }
       ]
@@ -1734,18 +1734,18 @@
         }
       ],
       "recordedItems": 473,
-      "results": 309,
+      "results": 298,
       "missingCalls": [],
       "labelled": true,
       "metrics": {
         "top": 10,
-        "precisionAt10": 0.7,
-        "accessoryAt10": 0.3,
+        "precisionAt10": 1,
+        "accessoryAt10": 0,
         "wrongModelAt10": 0,
         "unlabeledAt10": 0,
-        "recall": 0.9532163742690059,
+        "recall": 0.9385964912280702,
         "relevantRecorded": 342,
-        "relevantKept": 326,
+        "relevantKept": 321,
         "cheapestRelevantFirst": true
       },
       "top": [
@@ -1762,27 +1762,6 @@
           "price": 4.77,
           "title": "3 In 1 Compact Car Robot Vacuum Lightweight Smart Cleaning Machine Automatic Obstacle Avoidance for Pet Hair&Hard Floor&Carpet",
           "label": "relevant"
-        },
-        {
-          "key": "trendyol-sa:1164079313",
-          "store": "trendyol-sa",
-          "price": 15.64,
-          "title": "2pcs black Universal Robot Vacuum Cleaner Brush Cleaning Tool for Xiaomi for Roborock for Dreame Hai",
-          "label": "accessory"
-        },
-        {
-          "key": "trendyol-sa:326796790",
-          "store": "trendyol-sa",
-          "price": 16.32,
-          "title": "Robot Vacuum Cleaner Furniture Leg and Cabinet Riser Feet Anti-Slip and 3.5cm Riser Set of 4",
-          "label": "accessory"
-        },
-        {
-          "key": "trendyol-sa:873680387",
-          "store": "trendyol-sa",
-          "price": 17.73,
-          "title": "Mi Robot Vacuum Mop Hepa Filter 2 Pack / X10Plus / X20 Plus / S10 Plus / X10 Compatible",
-          "label": "accessory"
         },
         {
           "key": "trendyol-sa:1116234577",
@@ -1817,6 +1796,27 @@
           "store": "trendyol-sa",
           "price": 27.81,
           "title": "Mini Cartoon Robot Vacuum Cleaner,2.4W Strong Suction Sweeper,Black/Silver",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005012906675131",
+          "store": "aliexpress",
+          "price": 28.95,
+          "title": "3 in 1 Sweeping Robot Rechargeable Robot Vacuum Strong Suction Compact Cleaning Machine for Pet Hair Stubborn Dirt",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005007506567516",
+          "store": "aliexpress",
+          "price": 30.52,
+          "title": "2024 Automatic Portable Mini Home Floor Robotic Vacuum Cleaner USB Rechargeable Wet Dry Three-In-One Sweeping Machine for Home",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005009735014553",
+          "store": "aliexpress",
+          "price": 32.44,
+          "title": "Sweeper Robot 75 Min Runtime Robotic Vacuum and Mop Combo USB Rechargeable 1000Pa Suction for Home Floor Washing Carpet Pet Hair",
           "label": "relevant"
         }
       ]
@@ -2014,48 +2014,27 @@
         }
       ],
       "recordedItems": 471,
-      "results": 351,
+      "results": 339,
       "missingCalls": [],
       "labelled": true,
       "metrics": {
         "top": 10,
-        "precisionAt10": 0.4,
-        "accessoryAt10": 0.6,
+        "precisionAt10": 1,
+        "accessoryAt10": 0,
         "wrongModelAt10": 0,
         "unlabeledAt10": 0,
-        "recall": 0.9421052631578948,
+        "recall": 0.9342105263157895,
         "relevantRecorded": 380,
-        "relevantKept": 358,
-        "cheapestRelevantFirst": false
+        "relevantKept": 355,
+        "cheapestRelevantFirst": true
       },
       "top": [
-        {
-          "key": "aliexpress:1005012818177291",
-          "store": "aliexpress",
-          "price": 8.55,
-          "title": "Hair Blow Dryer Comb Attachment With Curling Interface Hair Styling Curly Dryer For Salon Home Styling Dressing",
-          "label": "accessory"
-        },
-        {
-          "key": "trendyol-sa:1095529897",
-          "store": "trendyol-sa",
-          "price": 14.83,
-          "title": "1pc Hair Nozzle Dryer Air Blow Collecting Wind Nozzle Comb Universal Hair Diffuser Dryer Comb Hair S",
-          "label": "accessory"
-        },
         {
           "key": "trendyol-sa:1193565502",
           "store": "trendyol-sa",
           "price": 16.45,
           "title": "Hair Dryer Brush Model OK 723",
           "label": "relevant"
-        },
-        {
-          "key": "amazon-sa:B0H2LRPJFT",
-          "store": "amazon-sa",
-          "price": 18.01,
-          "title": "Safety Portable Hair Dryer Bonnet Attachment for Hair Styling,Adjustable Soft Hooded Hair Drying Cap for Deep Conditioning (Black)",
-          "label": "accessory"
         },
         {
           "key": "trendyol-sa:1194781843",
@@ -2072,31 +2051,52 @@
           "label": "relevant"
         },
         {
-          "key": "trendyol-sa:1236172283",
-          "store": "trendyol-sa",
-          "price": 18.5,
-          "title": "1pc Universal Barbershop Special Curling Dryer Large Head Professional Hair Diffuser Adaptable for B",
-          "label": "accessory"
-        },
-        {
-          "key": "trendyol-sa:1095533326",
-          "store": "trendyol-sa",
-          "price": 18.89,
-          "title": "one size 1pc Hair Diffuser Professional Hair Styling Curl Dryer Diffuser Universal Hairdressing Blow",
-          "label": "accessory"
-        },
-        {
-          "key": "trendyol-sa:1095523328",
-          "store": "trendyol-sa",
-          "price": 19.61,
-          "title": "1pc Hair Diffuser Professional Hair Styling Curl Dryer 1pc Universal Hairdressing Blower Styling Sal",
-          "label": "accessory"
-        },
-        {
           "key": "trendyol-sa:1240459766",
           "store": "trendyol-sa",
           "price": 21.39,
           "title": "Ruay R0233 Hair Dryer – Black, Modern Design with Turbine Airflow Technology, Quick Drying & Low Noise",
+          "label": "relevant"
+        },
+        {
+          "key": "trendyol-sa:1240456999",
+          "store": "trendyol-sa",
+          "price": 21.39,
+          "title": "Ruay R0233 Black Hair Blow Dryer – Fast Drying, Turbine Air Duct, Quiet Operation & Ergonomic Design",
+          "label": "relevant"
+        },
+        {
+          "key": "trendyol-sa:994920220",
+          "store": "trendyol-sa",
+          "price": 21.6,
+          "title": "Mini Hair dryer - Travel",
+          "label": "relevant"
+        },
+        {
+          "key": "trendyol-sa:1194709064",
+          "store": "trendyol-sa",
+          "price": 22.28,
+          "title": "Advanced Ionic Hair Dryer for Super-Fast Drying, Professional Styling, and Ultimate Hair",
+          "label": "relevant"
+        },
+        {
+          "key": "trendyol-sa:1151271047",
+          "store": "trendyol-sa",
+          "price": 22.54,
+          "title": "DX1348 Professional Hair Dryer | High-Speed Negative Ionic Blow Dryer | Lightweight Quiet Styling Blowdryer with Adjustable Speed for Home and Salon Travel.",
+          "label": "relevant"
+        },
+        {
+          "key": "amazon-sa:B078YCFT6F",
+          "store": "amazon-sa",
+          "price": 25,
+          "title": "Impex Hair Dryer 800-1000W, Foldable Handle, Cool Shot, Lightweight & Travel-Friendly Design, 2-Year Warranty - HD 1K2",
+          "label": "relevant"
+        },
+        {
+          "key": "trendyol-sa:897681578",
+          "store": "trendyol-sa",
+          "price": 26.33,
+          "title": "Low Noise Quick Dry Hair Dryer",
           "label": "relevant"
         }
       ]
@@ -2104,10 +2104,10 @@
   ],
   "overall": {
     "queries": 15,
-    "precisionAt10": 0.7133333333333334,
-    "accessoryAt10": 0.18666666666666668,
+    "precisionAt10": 0.8466666666666668,
+    "accessoryAt10": 0.03333333333333333,
     "wrongModelAt10": 0.04,
-    "recall": 0.9014549789282128,
-    "cheapestRelevantFirst": 0.5333333333333333
+    "recall": 0.8958468757428353,
+    "cheapestRelevantFirst": 0.6
   }
 }

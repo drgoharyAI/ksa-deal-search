@@ -76,3 +76,15 @@ Edit-distance-1 matching now requires the same first letter, so "iphone" no long
 | p@10 | acc@10 | wrong@10 | recall | cheapest-first |
 |---|---|---|---|---|
 | 71% | 19% | 4% | 90% | 53% |
+
+## Round 5: accessory vocabulary + part nouns after the product noun (kept)
+`data/accessory-words.json` gains part/consumable words (pad, mat, liner, paper, tray, keycap,
+switches, puller, grip, dock, station, filter, nozzle, diffuser, comb, bonnet, glass, lens, tool,
+parts, accessories, ...). New strong rule: a part noun from `data/part-words.json` within two tokens
+after the query's product noun ("Gaming Mouse Pad", "Hair Dryer Folding Diffuser") is an accessory
+whatever its price; category words (bag, charger, cable, case) are not part nouns, so "Backpack
+Laptop Bag" and "Power Bank Charger" stay. (A piece-count rule, "30PCS ...", was tried in this
+round and removed: it only cost recall on multi-pack cables.)
+| p@10 | acc@10 | wrong@10 | recall | cheapest-first |
+|---|---|---|---|---|
+| 85% | 3% | 4% | 90% | 60% |

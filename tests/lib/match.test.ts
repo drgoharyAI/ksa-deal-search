@@ -266,3 +266,15 @@ describe("isForAccessory (12c)", () => {
     expect(dropAccessories(ps, ["iphone", "16"], [["iphone", "16"]]).map((p) => p.id)).toEqual(["a"]);
   });
 });
+
+describe("part nouns after the product noun (12c)", () => {
+  it("is strong when a part noun follows the product noun", () => {
+    expect(isStrongAccessory("Textured Gaming Mouse Pad", ["gaming", "mouse"], [["gaming", "mouse"]])).toBe(true);
+    expect(isStrongAccessory("Hair Dryer Folding Diffuser Blue", ["hair", "dryer"], [["hair", "dryer"]])).toBe(true);
+  });
+  it("is not strong for a category word (bag, charger) or a far part noun", () => {
+    expect(isStrongAccessory("Backpack Laptop Bag 15.6 Inch", ["laptop", "backpack"], [["laptop", "backpack"]])).toBe(false);
+    expect(isStrongAccessory("RAVPower Power Bank Charger 20000 mAh", ["power", "bank"], [["power", "bank"]])).toBe(false);
+    expect(isStrongAccessory("Apple Watch Series 9 GPS Sport Band", ["apple", "watch"], [["apple", "watch"]])).toBe(false);
+  });
+});

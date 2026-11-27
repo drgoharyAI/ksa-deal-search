@@ -1,10 +1,13 @@
 import words from "@/data/accessory-words.json";
+import partWords from "@/data/part-words.json";
 import type { Product } from "@/src/lib/types";
 import { tokenize } from "./tokenize";
 import { formsMatch, matchesWithAliases } from "./relevance";
 import { tokenizeKeepDigits, hasDigit } from "./tokenize";
 
 const ACCESSORY = new Set<string>(words);
+/** Part nouns that, right after the product noun, name a part of it ("Mouse Pad", "Watch Band"). */
+const PART = new Set<string>(partWords);
 const CONNECTOR = /\b(?:with|includes?|including)\b|[+&]/i;
 
 /** A candidate accessory is priced below this fraction of the median non-candidate price. */
@@ -37,10 +40,21 @@ export function isAccessory(title: string, queryTokens: string[]): boolean {
   return foreignAccessoryIdx(title, queryTokens).idx.length > 0;
 }
 
-/** Strong: such a word directly followed by "for"/"compatible", or "replacement" (not in the query). */
-export function isStrongAccessory(title: string, queryTokens: string[]): boolean {
+/**
+ * Strong: such a word directly followed by "for"/"compatible", or "replacement" (not in the
+ * query);
+ * or a part noun (data/part-words.json) of them within two tokens after the query's product noun
+ * ("Gaming Mouse Pad", "Hair Dryer Folding Diffuser", "Apple Watch Band").
+ */
+export function isStrongAccessory(title: string, queryTokens: string[], variants: string[][] = []): boolean {
   const { tt, idx } = foreignAccessoryIdx(title, queryTokens);
-  return idx.some((i) => tt[i] === "replacement" || tt[i + 1] === "for" || tt[i + 1] === "compatible");
+  if (!idx.length) return false;
+  if (idx.some((i) => tt[i] === "replacement" || tt[i + 1] === "for" || tt[i + 1] === "compatible")) return true;
+  return variants.some((v) => {
+    const head = headNoun(v);
+    const j = head ? tt.findIndex((t) => formsMatch(head, t)) : -1;
+    return j >= 0 && idx.some((i) => (i === j + 1 || i === j + 2) && PART.has(tt[i]));
+  });
 }
 
 const FOR_WORDS = new Set(["for", "compatible", "fits", "fit"]);
@@ -96,7 +110,9 @@ function gapCutoff(prices: number[]): number | null {
  * With no non-candidates, drop only the candidates below a >= GAP_RATIO price gap, if one exists.
  */
 export function dropAccessories(products: Product[], queryTokens: string[], variants: string[][] = [queryTokens]): Product[] {
-  const live = products.filter((p) => !isStrongAccessory(p.title, queryTokens) && !isForAccessory(p.title, variants));
+  const live = products.filter(
+    (p) => !isStrongAccessory(p.title, queryTokens, variants) && !isForAccessory(p.title, variants),
+  );
   const mains = live.filter((p) => !isAccessory(p.title, queryTokens));
   if (!live.length) return live;
   if (mains.length) {
