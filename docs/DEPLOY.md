@@ -57,12 +57,31 @@ Operation not permitted" and "Zygote process exited". That was checked on this V
 The setuid helper does not help either, because the container has no `CAP_SYS_ADMIN`.
 
 `docker/seccomp-chrome.json` is Docker's default profile (moby/profiles `seccomp/default.json`)
-with one added rule that allows `clone`, `unshare` and `setns`. `docker-compose.yml` applies it
-with `security_opt: seccomp=./docker/seccomp-chrome.json`. This keeps the container non-root with
-no added capabilities, and Chrome runs fully sandboxed. The alternatives were weaker:
-`--no-sandbox` turns off Chrome's renderer isolation, and `seccomp=unconfined` or
-`cap_add: SYS_ADMIN` widen the whole container. If a Docker upgrade changes the default profile,
-regenerate the file: take the new `default.json` and append the same rule (see its `comment`).
+with three rules appended, each marked with a `comment` starting `deal-search:`:
+
+| Rule | Why |
+|---|---|
+| `clone` with arg0 `& 0x0E020000 == 0` | New user, PID and network namespaces only. `CLONE_NEWNS`, `CLONE_NEWCGROUP`, `CLONE_NEWUTS` and `CLONE_NEWIPC` stay denied. |
+| `unshare` with the same mask | The same namespaces only. |
+| `chroot` | Chrome's sandbox chroots to `/proc/self/fdinfo/` *inside its own user namespace*. Docker allows `chroot` only with `CAP_SYS_CHROOT`, which `cap_drop: ALL` removes. The kernel still requires that capability in the caller's namespace, so this does not let the container chroot. Without this rule Chrome dies with `Check failed: sys_chroot("/proc/self/fdinfo/") == 0`. |
+
+`setns` is not allowed, because Chrome does not need it. `clone3` keeps Docker's ENOSYS, and
+glibc falls back to `clone`.
+
+`docker-compose.yml` also sets `no-new-privileges:true` and `cap_drop: [ALL]`. The process runs
+as `node` (uid 1000) with `CapEff: 0` and `NoNewPrivs: 1`, and no capability is added back.
+Checked on this VM on 2026-11-27:
+
+- with `unshare -U`, `-U -p -f` and `-U -n` allowed, and `-U -m`, `-U -i`, `-U -u` and `-U -C`
+  denied, Chrome starts sandboxed on Xvfb;
+- a live noon search returns results.
+
+The alternatives were weaker. `--no-sandbox` turns off Chrome's renderer isolation.
+`seccomp=unconfined` or `cap_add: SYS_ADMIN` widen the whole container. Unrestricted
+`clone`/`unshare`/`setns` also allows mount, IPC, UTS and cgroup namespaces.
+
+If a Docker upgrade changes the default profile, regenerate the file: take the new
+`default.json` and append the same three rules.
 
 Chrome is started exactly as on the PC: the fixed free debug port on 127.0.0.1 (never port 0,
 which makes `navigator.webdriver` true and gets noon's 403), headed, attached over CDP.
@@ -186,8 +205,8 @@ search once. Check the VM's public IP is the home connection (no VPN on the VM).
 - `docker compose exec app google-chrome-stable --version` must print a version.
 - Try it by hand on the virtual display:
   `docker compose exec app google-chrome-stable --user-data-dir=/tmp/t --no-first-run about:blank`
-  and read the error. "Failed to move to new namespace" or "Zygote process exited": the seccomp
-  profile is not applied. Check `docker inspect deal-search --format '{{.HostConfig.SecurityOpt}}'`
+  and read the error. "Failed to move to new namespace", "sys_chroot" or "Zygote process exited":
+  the seccomp profile is not applied or is missing a rule. Check `docker inspect deal-search --format '{{.HostConfig.SecurityOpt}}'`
   and that `docker/seccomp-chrome.json` exists next to `docker-compose.yml`.
 - "Chrome exited early (code 21)": Chrome believes the profile is used by another machine (a
   stale `SingletonLock`). The entrypoint deletes these locks at every start, and the compose file

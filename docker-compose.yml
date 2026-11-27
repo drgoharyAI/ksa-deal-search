@@ -22,10 +22,15 @@ services:
     volumes:
       - deal-data:/data
     # Chrome's sandbox needs user/PID/network namespaces, which Docker's default seccomp profile
-    # blocks without CAP_SYS_ADMIN. This profile is Docker's default plus clone/unshare/setns, so
-    # Chrome runs sandboxed as non-root (no --no-sandbox, no extra capabilities).
+    # blocks without CAP_SYS_ADMIN. docker/seccomp-chrome.json is Docker's default plus clone and
+    # unshare restricted to those three namespace types (mount/IPC/UTS/cgroup stay denied) and
+    # chroot (Chrome chroots inside its own user namespace). Non-root, no capabilities, no setuid:
+    # Chrome runs fully sandboxed without --no-sandbox. See docs/DEPLOY.md.
     security_opt:
       - seccomp=./docker/seccomp-chrome.json
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
     # Chrome uses /dev/shm heavily; Docker's 64 MB default crashes tabs.
     shm_size: 1gb
     # SIGTERM: Chrome gets Browser.close (20 s cap), then the DB closes.
