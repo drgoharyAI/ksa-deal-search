@@ -376,3 +376,13 @@ describe("12d round 1: accessory-category queries, 'replacement' position", () =
     expect(isStrongAccessory("Seago Electric Toothbrush USB Rechargeable 4 Replacement Heads", t[0], t)).toBe(false);
   });
 });
+
+describe("12d round 2: product lines name their brand", () => {
+  it("an iPad query gets the brand price check (Android clones titled 'iPad Air Pro')", () => {
+    const ps = [
+      ["2026 iPad Air Pro 11 inch Android 16 Tablet 24GB 2TB", 312], ["Apple iPad Air 11-inch M3 128GB", 2499],
+      ["Apple iPad Air 13-inch M3 256GB", 3599], ["Apple iPad Air 11-inch M2 Wi-Fi", 2299], ["Apple iPad Air M3 512GB", 3999],
+    ].map(([t, pr], i) => prod(t as string, pr as number, String(i)));
+    expect(dropBrandPriceOutliers(ps, ["ipad", "air"]).map((p) => p.id)).toEqual(["1", "2", "3", "4"]);
+  });
+});

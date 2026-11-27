@@ -208,3 +208,15 @@ name ("For MagSafe Charger ..." for a charger query).
 | tuning (15) | 98.0% | 0% | 1.3% | 91.5% | 100% |
 | holdout (8) | 76.3% | 12.5% | 10.0% | 82.6% | 62.5% |
 | all (23) | 90.4% | 4.3% | 4.3% | 88.4% | 87.0% |
+
+## 12d round 2: trademark product lines count as brands (kept)
+Root cause of ipad air (wrong@10 80%): not the "air" qualifier. The top 10 were Android tablets
+titled "iPad Air Pro 11 inch ... Android 16" at ~300 SAR. They contain both query words, and the
+brand price check did not fire because "ipad" was not in `data/brands.json`. A trademark product
+line names its brand as surely as the maker's name does, so `iphone, ipad, macbook, imac, airpods,
+thinkpad, kindle, dualsense` join the list (like the existing pixel / playstation / xbox).
+| set | p@10 | acc@10 | wrong@10 | recall | cheapest-first |
+|---|---|---|---|---|---|
+| tuning (15) | 98.0% | 0% | 1.3% | 91.5% | 100% |
+| holdout (8) | 88.8% | 10.0% | 0% | 82.6% | 75.0% |
+| all (23) | 94.8% | 3.5% | 0.9% | 88.4% | 91.3% |
