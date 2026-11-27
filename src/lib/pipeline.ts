@@ -142,7 +142,7 @@ export async function runSearch(input: SearchInput, opts: SearchOptions = {}): P
   const ratingless = ratinglessSites(outs.map((o) => ({ site: o.status.site, products: o.products })));
 
   products = filterRelevant(products, queryTokens);
-  products = dropAccessories(products, queryTokens.flat());
+  products = dropAccessories(products, queryTokens.flat(), queryTokens);
   products = products.filter((p) => passesPriceRating(p, { minPrice, maxPrice, minRating }, ratingless));
   if (isNum(minRating)) {
     products = products.map((p) => (p.rating === null && ratingless.has(p.site) ? { ...p, ratingUnavailable: true } : p));

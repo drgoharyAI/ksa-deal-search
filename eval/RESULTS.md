@@ -59,3 +59,13 @@ followed by another digit or by a budget-model suffix (e / fe / lite) is a diffe
 | p@10 | acc@10 | wrong@10 | recall | cheapest-first |
 |---|---|---|---|---|
 | 57% | 36% | 2% | 91% | 47% |
+
+## Round 3: "made for the product" accessories (kept)
+A title whose query product noun (last digit-free query token, aliases allowed) appears only after
+"for"/"compatible"/"fit(s)" is an item made for that product ("Tempered glass for iPhone 16",
+"Compatible with Galaxy S24 Ultra Case", "Thumb grips for PS5 controller") and is dropped whatever
+its price. "suitable/ideal/perfect/great/good/best for" is a use phrase and ignored; a title that
+opens with "For" (a seller habit) also needs an accessory word.
+| p@10 | acc@10 | wrong@10 | recall | cheapest-first |
+|---|---|---|---|---|
+| 71% | 19% | 4% | 90% | 47% |

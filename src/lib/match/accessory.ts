@@ -1,7 +1,8 @@
 import words from "@/data/accessory-words.json";
 import type { Product } from "@/src/lib/types";
 import { tokenize } from "./tokenize";
-import { formsMatch } from "./relevance";
+import { formsMatch, matchesWithAliases } from "./relevance";
+import { tokenizeKeepDigits, hasDigit } from "./tokenize";
 
 const ACCESSORY = new Set<string>(words);
 const CONNECTOR = /\b(?:with|includes?|including)\b|[+&]/i;
@@ -42,6 +43,33 @@ export function isStrongAccessory(title: string, queryTokens: string[]): boolean
   return idx.some((i) => tt[i] === "replacement" || tt[i + 1] === "for" || tt[i + 1] === "compatible");
 }
 
+const FOR_WORDS = new Set(["for", "compatible", "fits", "fit"]);
+/** "suitable for school" describes use, not the product the item is made for. */
+const USE_WORDS = new Set(["suitable", "ideal", "perfect", "great", "good", "best"]);
+
+/** The product noun of a query variant: its last token without digits (else its last token). */
+export function headNoun(variant: string[]): string | undefined {
+  return [...variant].reverse().find((t) => !hasDigit(t)) ?? variant[variant.length - 1];
+}
+
+/**
+ * "Tempered glass for iPhone 16", "Compatible with Galaxy S24 Case", "Thumb grips for PS5
+ * controller": the query's product noun first appears after "for"/"compatible", so the item is
+ * made for the queried product rather than being it. Checked against every query variant.
+ */
+export function isForAccessory(title: string, variants: string[][]): boolean {
+  const tt = tokenizeKeepDigits(title);
+  const f = tt.findIndex((t, i) => FOR_WORDS.has(t) && !USE_WORDS.has(tt[i - 1]));
+  if (f < 0) return false;
+  // Some sellers open every title with "For ...": then it takes an accessory word as well.
+  if (f === 0 && !tt.some((t) => isAccessoryWord(t))) return false;
+  const before = tt.slice(0, f);
+  return variants.every((v) => {
+    const head = headNoun(v);
+    return !!head && !matchesWithAliases(head, before);
+  });
+}
+
 function median(xs: number[]): number {
   const s = [...xs].sort((a, b) => a - b);
   const m = s.length >> 1;
@@ -67,8 +95,8 @@ function gapCutoff(prices: number[]): number | null {
  * Drop strong accessories. Then drop candidates priced far below the non-candidates' median.
  * With no non-candidates, drop only the candidates below a >= GAP_RATIO price gap, if one exists.
  */
-export function dropAccessories(products: Product[], queryTokens: string[]): Product[] {
-  const live = products.filter((p) => !isStrongAccessory(p.title, queryTokens));
+export function dropAccessories(products: Product[], queryTokens: string[], variants: string[][] = [queryTokens]): Product[] {
+  const live = products.filter((p) => !isStrongAccessory(p.title, queryTokens) && !isForAccessory(p.title, variants));
   const mains = live.filter((p) => !isAccessory(p.title, queryTokens));
   if (!live.length) return live;
   if (mains.length) {

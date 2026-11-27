@@ -1,5 +1,5 @@
 {
-  "at": "2026-11-27T01:54:24.923Z",
+  "at": "2026-11-27T01:55:08.935Z",
   "queries": [
     {
       "query": "anc earbuds under 300",
@@ -54,7 +54,7 @@
         }
       ],
       "recordedItems": 682,
-      "results": 305,
+      "results": 302,
       "missingCalls": [],
       "labelled": true,
       "metrics": {
@@ -63,9 +63,9 @@
         "accessoryAt10": 0,
         "wrongModelAt10": 0.1,
         "unlabeledAt10": 0,
-        "recall": 0.8626506024096385,
+        "recall": 0.8554216867469879,
         "relevantRecorded": 415,
-        "relevantKept": 358,
+        "relevantKept": 355,
         "cheapestRelevantFirst": true
       },
       "top": [
@@ -194,13 +194,13 @@
         }
       ],
       "recordedItems": 488,
-      "results": 84,
+      "results": 78,
       "missingCalls": [],
       "labelled": true,
       "metrics": {
         "top": 10,
-        "precisionAt10": 0.3,
-        "accessoryAt10": 0.7,
+        "precisionAt10": 0.9,
+        "accessoryAt10": 0.1,
         "wrongModelAt10": 0,
         "unlabeledAt10": 0,
         "recall": 1,
@@ -210,52 +210,10 @@
       },
       "top": [
         {
-          "key": "trendyol-sa:984511278",
-          "store": "trendyol-sa",
-          "price": 10.89,
-          "title": "Tempered glass camera protection for iPhone 16 plus",
-          "label": "accessory"
-        },
-        {
-          "key": "trendyol-sa:984511139",
-          "store": "trendyol-sa",
-          "price": 11.78,
-          "title": "Transparent camera protection with black circles for iPhone 16Pro Max",
-          "label": "accessory"
-        },
-        {
-          "key": "trendyol-sa:899387116",
-          "store": "trendyol-sa",
-          "price": 12.42,
-          "title": "white-1pcs 3-in-1 USB-C SD TF Card Reader, High-Speed Data Transfer, Plug & Play for iPhone 16 15, f",
-          "label": "accessory"
-        },
-        {
           "key": "trendyol-sa:1243548956",
           "store": "trendyol-sa",
           "price": 13.37,
           "title": "B-1PCS Mobile Phone Speaker Charging Port Cleaning Set Dust Plug for iPhone 16 15 14 Earphones Clean",
-          "label": "accessory"
-        },
-        {
-          "key": "trendyol-sa:1243514291",
-          "store": "trendyol-sa",
-          "price": 13.42,
-          "title": "B-1PCS Metal USB C Dust Plug for IPhone 16 15 Pro 14 17 Samsung Xiaomi Android Charging Port Protect",
-          "label": "accessory"
-        },
-        {
-          "key": "aliexpress:1005011651372808",
-          "store": "aliexpress",
-          "price": 32.99,
-          "title": "WYLIE for IPhone 16 Built-in (MEP) Integrated Card Slot Finished Product Dual Card+eSIM OTA Upgrade 5G Signal US Version Only",
-          "label": "accessory"
-        },
-        {
-          "key": "amazon-sa:B0DHG4X5JB",
-          "store": "amazon-sa",
-          "price": 35.9,
-          "title": "Compatible with iPhone 16 Case with Stand, Multi-Functional Magnetic Vertical & Horizontal Kickstand Protective Phone Case, Candy Color Slim Cute Hybrid Cover (Black, iphone 16)",
           "label": "accessory"
         },
         {
@@ -277,6 +235,48 @@
           "store": "amazon-sa",
           "price": 2349,
           "title": "Apple iPhone 16 (128 GB) - Pink (Renewed)",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005010257833190",
+          "store": "aliexpress",
+          "price": 2440.19,
+          "title": "Apple iPhone 16 128GB/256GBGB 6.1inch Super Retina XDR OLED A18 Chip Original Unlocked Cellphone iphone16",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005010710620938",
+          "store": "aliexpress",
+          "price": 2479.3,
+          "title": "Original iPhone 16 128GB/256GB/512GB ROM 8GB RAM Unlocked 5G Cell Phone iPhone16 Battery Health Above 90% Looks Like New",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005010800866410",
+          "store": "aliexpress",
+          "price": 2487.96,
+          "title": "iPhone 16 Genuine 6.1\" eSIM/Physical SIM Genuine XDR OLED Face ID NFC A18 ROM 128/256/512GB RAM 8GB 5G AI Cell Phone 98% New",
+          "label": "relevant"
+        },
+        {
+          "key": "amazon-sa:B0FSKVZR88",
+          "store": "amazon-sa",
+          "price": 2499,
+          "title": "Apple iPhone 16 (256 GB) - Pink (Renewed)",
+          "label": "relevant"
+        },
+        {
+          "key": "jarir:650565",
+          "store": "jarir",
+          "price": 2499,
+          "title": "Renewed Grade B Apple iPhone 16 Pro, 128 GB, Natural Titanium, 5G",
+          "label": "relevant"
+        },
+        {
+          "key": "jarir:656237",
+          "store": "jarir",
+          "price": 2499,
+          "title": "Renewed Grade B Apple iPhone 16 Plus, 256 GB, Teal, 5G",
           "label": "relevant"
         }
       ]
@@ -334,7 +334,7 @@
         }
       ],
       "recordedItems": 534,
-      "results": 320,
+      "results": 317,
       "missingCalls": [],
       "labelled": true,
       "metrics": {
@@ -343,9 +343,9 @@
         "accessoryAt10": 0,
         "wrongModelAt10": 0,
         "unlabeledAt10": 0,
-        "recall": 0.8877005347593583,
+        "recall": 0.8823529411764706,
         "relevantRecorded": 374,
-        "relevantKept": 332,
+        "relevantKept": 330,
         "cheapestRelevantFirst": true
       },
       "top": [
@@ -474,7 +474,7 @@
         }
       ],
       "recordedItems": 465,
-      "results": 366,
+      "results": 360,
       "missingCalls": [],
       "labelled": true,
       "metrics": {
@@ -483,9 +483,9 @@
         "accessoryAt10": 0.8,
         "wrongModelAt10": 0,
         "unlabeledAt10": 0,
-        "recall": 0.9141274238227147,
+        "recall": 0.9113573407202216,
         "relevantRecorded": 361,
-        "relevantKept": 330,
+        "relevantKept": 329,
         "cheapestRelevantFirst": false
       },
       "top": [
@@ -539,13 +539,6 @@
           "label": "accessory"
         },
         {
-          "key": "trendyol-sa:1102633221",
-          "store": "trendyol-sa",
-          "price": 15.3,
-          "title": "1PCS For Air Fryer Accessories KL50-G3 Timer Switch Knob Button D Type Timer Semi-circular Shaft Swi",
-          "label": "accessory"
-        },
-        {
           "key": "trendyol-sa:956745318",
           "store": "trendyol-sa",
           "price": 15.39,
@@ -557,6 +550,13 @@
           "store": "trendyol-sa",
           "price": 15.51,
           "title": "Black Air Fryer Magnet Silicone Buckle High-temperature Kitchen Air Fryer Parchment Paper Liners Pre",
+          "label": "accessory"
+        },
+        {
+          "key": "trendyol-sa:929427067",
+          "store": "trendyol-sa",
+          "price": 15.7,
+          "title": "Brown 50Pcs-16cm Air fryer paper，50/100 pieces of disposable paper pads for air fryer, air fryer acc",
           "label": "accessory"
         }
       ]
@@ -614,14 +614,14 @@
         }
       ],
       "recordedItems": 475,
-      "results": 112,
+      "results": 105,
       "missingCalls": [],
       "labelled": true,
       "metrics": {
         "top": 10,
-        "precisionAt10": 0,
-        "accessoryAt10": 0.6,
-        "wrongModelAt10": 0.2,
+        "precisionAt10": 0.2,
+        "accessoryAt10": 0,
+        "wrongModelAt10": 0.5,
         "unlabeledAt10": 0,
         "recall": 0.8607594936708861,
         "relevantRecorded": 158,
@@ -630,53 +630,11 @@
       },
       "top": [
         {
-          "key": "trendyol-sa:1197657083",
-          "store": "trendyol-sa",
-          "price": 5.3,
-          "title": "Premium Braided Leather Solo Loop for Apple Watch (44/42mm, S) - Red",
-          "label": "accessory"
-        },
-        {
-          "key": "amazon-sa:B0G9264Q6M",
-          "store": "amazon-sa",
-          "price": 7.41,
-          "title": "Braided Solo Loop Compatible with Apple Watch 38mm 40mm 41mm 42mm 44mm 45mm 46mm Ultra/2 49mm Men/Women,Stretchy Nylon Sport wristband Strap for iWatch Bands series 11/10/9/8/7/6 5/4/3/SE",
-          "label": "accessory"
-        },
-        {
-          "key": "amazon-sa:B0GDXVMLZD",
-          "store": "amazon-sa",
-          "price": 8.79,
-          "title": "Mesh Loop Compatible with Apple Watch Bands 40mm 41mm 38mm 42mm 46mm Women Men, Stainless Steel Metal Magnetic Strap for iWatch Series 10 9 8 7 6 5 4 3 2 1 Ultra SE",
-          "label": "accessory"
-        },
-        {
-          "key": "amazon-sa:B0C78K3VJW",
-          "store": "amazon-sa",
-          "price": 19.95,
-          "title": "Compatible with Apple Watch Band 49mm 46mm 45mm 44mm 42mm 41mm 40mm 38mm for Women Men Air Holes Design Sport Silicone Wristband Bands Strap for iWatch Ultra Series 11/10/9/8/7/6/5/4/3/SE Multi Color",
-          "label": "accessory"
-        },
-        {
-          "key": "amazon-sa:B0C2H1ZSPM",
-          "store": "amazon-sa",
-          "price": 26.99,
-          "title": "Compatible with Apple Watch Band 49mm 46mm 44mm 42mm 41mm 40mm 38mm for Women Men,Magnetic Metal Stainless Steel Strap for Ultra 3/2/1 Series 11 10 9 8 7 6 5 4 3 2 SE",
-          "label": "accessory"
-        },
-        {
           "key": "jarir:531617",
           "store": "jarir",
           "price": 29,
           "title": "Apple Watch for Dummies, 2nd Edition - Computer/Tech",
           "label": "off-topic"
-        },
-        {
-          "key": "amazon-sa:B0DLKBDTYQ",
-          "store": "amazon-sa",
-          "price": 42,
-          "title": "Compatible with Apple Watch Strap 49mm 46mm 45mm 44mm 42mm 41mm 40mm, Elasticated Magnetic Nylon Strap Band for IWatch Series 11/10/9/8/7/6/5/4/SE 3/SE 2/Ultra 3/2 Men Women",
-          "label": "accessory"
         },
         {
           "key": "aliexpress:1005009657036132",
@@ -698,6 +656,48 @@
           "price": 72.82,
           "title": "Apple Watch Smart For GPS Smart Watch Men For Apple Watch 10 Series Always On Display Body Temperature BT Call NFC Women DT Smartwatch For IOS Android",
           "label": "wrong-model"
+        },
+        {
+          "key": "aliexpress:1005013463365715",
+          "store": "aliexpress",
+          "price": 72.82,
+          "title": "Apple Watch GPS Watch 10 Series Smart Bracelet Woman HD AMOLED Screen Music Bluetooth Call NFC Sport Waterproof Smartwatch For Apple Android",
+          "label": "wrong-model"
+        },
+        {
+          "key": "aliexpress:1005013542812839",
+          "store": "aliexpress",
+          "price": 74.15,
+          "title": "Apple Watch 2026 New For Apple GPS Watch 10 Smart Watch Men HD AMOLED Memory Music 3D Surround Bluetooth Call Waterproof Smartwatch Woman",
+          "label": "wrong-model"
+        },
+        {
+          "key": "aliexpress:1005013339777841",
+          "store": "aliexpress",
+          "price": 81.85,
+          "title": "Apple Watch New 2026 Original For Apple Watch 10 Smart Watch Men Body Temperature Bluetooth Call NFC GPS Sports Women SmartWatch for Apple",
+          "label": "wrong-model"
+        },
+        {
+          "key": "aliexpress:1005013701554317",
+          "store": "aliexpress",
+          "price": 95.45,
+          "title": "2026 New GPS Outdoor Smart Watch Men Women Bluetooth Call Health Monitoring Compass Altimeter Sports Fitness Tracker For Apple",
+          "label": "off-topic"
+        },
+        {
+          "key": "aliexpress:1005006631563482",
+          "store": "aliexpress",
+          "price": 599.79,
+          "title": "100% Original Apple Watch Series 4 Smartwatch 40MM/44MM GPS Aluminum with Sport Band (Renewed)",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005007906509143",
+          "store": "aliexpress",
+          "price": 897.39,
+          "title": "100% Original Apple Watch Series 6 40mm 44mm GPS Apple Watch S6 Aluminum Case with Sport Band iOS SmartWatch",
+          "label": "relevant"
         }
       ]
     },
@@ -754,7 +754,7 @@
         }
       ],
       "recordedItems": 554,
-      "results": 295,
+      "results": 291,
       "missingCalls": [],
       "labelled": true,
       "metrics": {
@@ -763,9 +763,9 @@
         "accessoryAt10": 0,
         "wrongModelAt10": 0,
         "unlabeledAt10": 0,
-        "recall": 0.8399014778325123,
+        "recall": 0.8300492610837439,
         "relevantRecorded": 406,
-        "relevantKept": 341,
+        "relevantKept": 337,
         "cheapestRelevantFirst": false
       },
       "top": [
@@ -894,7 +894,7 @@
         }
       ],
       "recordedItems": 494,
-      "results": 192,
+      "results": 183,
       "missingCalls": [],
       "labelled": true,
       "metrics": {
@@ -1174,13 +1174,13 @@
         }
       ],
       "recordedItems": 451,
-      "results": 49,
+      "results": 45,
       "missingCalls": [],
       "labelled": true,
       "metrics": {
         "top": 10,
-        "precisionAt10": 0.5,
-        "accessoryAt10": 0.5,
+        "precisionAt10": 0.9,
+        "accessoryAt10": 0.1,
         "wrongModelAt10": 0,
         "unlabeledAt10": 0,
         "recall": 0.9818181818181818,
@@ -1190,38 +1190,10 @@
       },
       "top": [
         {
-          "key": "aliexpress:1005006890859888",
-          "store": "aliexpress",
-          "price": 5.9,
-          "title": "SIM1 + SIM2 Card Tray For Samsung Galaxy S24 Ultra 5G SM-S928B Phone Dual SIM Card Tray Spare Part",
-          "label": "accessory"
-        },
-        {
-          "key": "amazon-sa:B0DWWH8Q1L",
-          "store": "amazon-sa",
-          "price": 9.09,
-          "title": "Compatible with Samsung Galaxy S24 Ultra Case Silicone Phone Case Ultra Slim Shockproof Phone Case with Soft Anti-Scratch Microfiber Lining Enhanced Camera Protection 6.8 inch Light Green",
-          "label": "accessory"
-        },
-        {
           "key": "amazon-sa:B0DHWSFVSS",
           "store": "amazon-sa",
           "price": 28.13,
           "title": "Samsung Galaxy S24+ Case, Premium Leather Case with Card Compartment, RFID Blocking, Flip Case Stand Function Flip Cover Protective Case for Samsung Galaxy S24+, Red",
-          "label": "accessory"
-        },
-        {
-          "key": "jarir:630137",
-          "store": "jarir",
-          "price": 29,
-          "title": "Raptic Raptic Glass 2-in-1 Bundle: Tempered Glass + Camera Lens Protector Smartphone Display Protection, for Samsung Galaxy S24 Ultra, Clear",
-          "label": "accessory"
-        },
-        {
-          "key": "amazon-sa:B0G491K553",
-          "store": "amazon-sa",
-          "price": 53.1,
-          "title": "Compatible with Samsung Galaxy S24 Ultra Wallet Cover Clear Back Magnetic",
           "label": "accessory"
         },
         {
@@ -1257,6 +1229,34 @@
           "store": "noon-sa",
           "price": 1699,
           "title": "Samsung Renewed - Galaxy S24 Plus Cobalt Violet 12GB RAM 256GB 5G - International Version",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005007998182446",
+          "store": "aliexpress",
+          "price": 1725.67,
+          "title": "Samsung Galaxy S24 5G S921U1 S921B S921N S9210 6.2\" Dynamic LTPO AMOLED 128/256/512GB 8/12GB NFC Original Android AI Cell Phone",
+          "label": "relevant"
+        },
+        {
+          "key": "noon-sa:N70179352V",
+          "store": "noon-sa",
+          "price": 1750,
+          "title": "Samsung Renewed - Galaxy S24 Plus Dual SIM Cobalt Violet 256GB 5G - International Version",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005010677312305",
+          "store": "aliexpress",
+          "price": 1759.17,
+          "title": "Origimal Samsung Galaxy S24+ S24 Plus 5G S926U1 S926N S9260 S926B 12GB+256/512GB ROM Sim Free Android Cell Phone Virtually New",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005010677268315",
+          "store": "aliexpress",
+          "price": 1773.58,
+          "title": "Samsung Galaxy S24 5G S921U1 S921B S9210 S921N ROM 128GB/256GB/512GB RAM 8/12GB Original Android AI Cell Phone Virtually New",
           "label": "relevant"
         }
       ]
@@ -1454,7 +1454,7 @@
         }
       ],
       "recordedItems": 408,
-      "results": 130,
+      "results": 129,
       "missingCalls": [],
       "labelled": true,
       "metrics": {
@@ -1463,9 +1463,9 @@
         "accessoryAt10": 0,
         "wrongModelAt10": 0,
         "unlabeledAt10": 0,
-        "recall": 0.8172043010752689,
+        "recall": 0.8118279569892473,
         "relevantRecorded": 186,
-        "relevantKept": 152,
+        "relevantKept": 151,
         "cheapestRelevantFirst": true
       },
       "top": [
@@ -1594,18 +1594,18 @@
         }
       ],
       "recordedItems": 449,
-      "results": 255,
+      "results": 237,
       "missingCalls": [],
       "labelled": true,
       "metrics": {
         "top": 10,
-        "precisionAt10": 0.1,
-        "accessoryAt10": 0.9,
+        "precisionAt10": 0.5,
+        "accessoryAt10": 0.5,
         "wrongModelAt10": 0,
         "unlabeledAt10": 0,
-        "recall": 0.9400630914826499,
+        "recall": 0.9274447949526814,
         "relevantRecorded": 317,
-        "relevantKept": 298,
+        "relevantKept": 294,
         "cheapestRelevantFirst": false
       },
       "top": [
@@ -1617,67 +1617,67 @@
           "label": "relevant"
         },
         {
-          "key": "trendyol-sa:1241602892",
-          "store": "trendyol-sa",
-          "price": 13.71,
-          "title": "Black 4PCS for PS5/PS4/PS3/Switchpro Game Controller Accessory Non-slip Silicone Game Joystick Thumb",
+          "key": "jarir:625252",
+          "store": "jarir",
+          "price": 25,
+          "title": "GT-COUPE 6-in-1 Controller Thumb Grips, for PlayStation 5, Black",
           "label": "accessory"
         },
         {
-          "key": "trendyol-sa:1024642267",
-          "store": "trendyol-sa",
-          "price": 13.71,
-          "title": "NO 06 2pcs For PS3 PS4 PS5 Xbox One/360/Series S/X Switch Pro Game Controllers Thumb Silicone St",
+          "key": "jarir:556061",
+          "store": "jarir",
+          "price": 25,
+          "title": "GT-COUPE 8-in-1 Controller Thumb Grips, for PlayStation 5",
           "label": "accessory"
         },
         {
-          "key": "trendyol-sa:1024642446",
-          "store": "trendyol-sa",
-          "price": 13.71,
-          "title": "NO 07 2pcs For PS3 PS4 PS5 Xbox One/360/Series S/X Switch Pro Game Controllers Thumb Silicone St",
+          "key": "amazon-sa:B0CFLGXJZH",
+          "store": "amazon-sa",
+          "price": 44.9,
+          "title": "SCIENISH PS5 Controller Charging Station with RGB Light Fast Charging Dock for PS5 Controller,LED Indicator Safe Intelligent Protection for PS5 Controller Game Accessories",
           "label": "accessory"
         },
         {
-          "key": "trendyol-sa:1241602816",
+          "key": "aliexpress:1005013661868883",
+          "store": "aliexpress",
+          "price": 47.69,
+          "title": "Wireless Gaming Controller Bluetooth 5.4 Gamepad For PC PS3 PS4 PS5 Android IOS For Switch Turbo Macro Back Key",
+          "label": "relevant"
+        },
+        {
+          "key": "trendyol-sa:1133886630",
           "store": "trendyol-sa",
-          "price": 13.75,
-          "title": "D 4PCS for PS5/PS4/PS3/Switchpro Game Controller Accessory Non-slip Silicone Game Joystick Thumbstic",
+          "price": 51.25,
+          "title": "Ps5 Cooling & Dual Controller Charging Station with 3 USB & 14 Disc Storage Vertical Stand |   Medina Shop",
           "label": "accessory"
         },
         {
-          "key": "trendyol-sa:1241603997",
+          "key": "trendyol-sa:1151552036",
           "store": "trendyol-sa",
-          "price": 13.8,
-          "title": "red 4PCS for PS5/PS4/PS3/Switchpro Game Controller Accessory Non-slip Silicone Game Joystick Thumbst",
+          "price": 53.04,
+          "title": "Controller Charging Station with RGB Headphone Stand for PS5 Controller,Charger Holder with 2 USB Charging Ports, Headset Stand for Playstation 5 Controller Charging Dock, Black",
           "label": "accessory"
         },
         {
-          "key": "trendyol-sa:1024496923",
-          "store": "trendyol-sa",
-          "price": 14,
-          "title": "NO 04 2pcs For PS3 PS4 PS5 Xbox One/360/Series S/X Switch Pro Game Controllers Thumb Silicone St",
-          "label": "accessory"
+          "key": "jarir:568821",
+          "store": "jarir",
+          "price": 59,
+          "title": "KontrolFreek Performance Grips Controller Grip, for PlayStation 5/PlayStation 4, Black",
+          "label": "relevant"
         },
         {
-          "key": "trendyol-sa:1024513381",
-          "store": "trendyol-sa",
-          "price": 14.35,
-          "title": "black DATA FROG L2 R2 Buttons Trigger Extensions Thumb Stick For PS5 Gamepad Controller Anti-Slip Th",
-          "label": "accessory"
+          "key": "aliexpress:1005013426044828",
+          "store": "aliexpress",
+          "price": 59.45,
+          "title": "A53M-Wireless Gaming Controller Bluetooth 5.4 Gamepad For PC PS3 PS4 PS5 Android IOS For Switch Turbo Macro Back Key",
+          "label": "relevant"
         },
         {
-          "key": "trendyol-sa:1241601044",
-          "store": "trendyol-sa",
-          "price": 14.35,
-          "title": "2 Pieces Black Color Silicone Thumb Grips For PS4/PS5/Xbox Controller, Non-Slip Joystick Caps Thumbs",
-          "label": "accessory"
-        },
-        {
-          "key": "trendyol-sa:1024538723",
-          "store": "trendyol-sa",
-          "price": 14.41,
-          "title": "01 2pcs For PS3 PS4 PS5 Xbox one/360/Series S X Switch Pro Game Controllers Thumb Silicone Stick Gri",
-          "label": "accessory"
+          "key": "aliexpress:1005011756916694",
+          "store": "aliexpress",
+          "price": 63.61,
+          "title": "Controller For Playstation 5 PS5/PS5 Pro/Slim/PC Gamepads W/Hall Effect RGB Wireless Game Control Joystick Marco/Turbo Program",
+          "label": "relevant"
         }
       ]
     },
@@ -1734,18 +1734,18 @@
         }
       ],
       "recordedItems": 473,
-      "results": 333,
+      "results": 309,
       "missingCalls": [],
       "labelled": true,
       "metrics": {
         "top": 10,
-        "precisionAt10": 0.2,
-        "accessoryAt10": 0.8,
+        "precisionAt10": 0.7,
+        "accessoryAt10": 0.3,
         "wrongModelAt10": 0,
         "unlabeledAt10": 0,
-        "recall": 0.956140350877193,
+        "recall": 0.9532163742690059,
         "relevantRecorded": 342,
-        "relevantKept": 327,
+        "relevantKept": 326,
         "cheapestRelevantFirst": true
       },
       "top": [
@@ -1764,41 +1764,6 @@
           "label": "relevant"
         },
         {
-          "key": "trendyol-sa:1024463685",
-          "store": "trendyol-sa",
-          "price": 14.82,
-          "title": "grey Convenient Button Lock Power Button Lock For Dyson V6 V7 V8 V10 V11 V12 V15 Robot Vacuum Cleane",
-          "label": "accessory"
-        },
-        {
-          "key": "trendyol-sa:1024466525",
-          "store": "trendyol-sa",
-          "price": 15.03,
-          "title": "red Convenient Button Lock Power Button Lock For Dyson V6 V7 V8 V10 V11 V12 V15 Robot Vacuum Cleaner",
-          "label": "accessory"
-        },
-        {
-          "key": "trendyol-sa:1164080918",
-          "store": "trendyol-sa",
-          "price": 15.45,
-          "title": "3PCS Dust Bin Baffle Dust Box Suction Flap For Xiaomi Mi Robot Vacuum-Mop All-In-One X10+ X20+ B101C",
-          "label": "accessory"
-        },
-        {
-          "key": "trendyol-sa:1024462087",
-          "store": "trendyol-sa",
-          "price": 15.58,
-          "title": "2 pcs Side Brushes For Xiaomi MI 1s 2s Roborock S50 S51 S55 S6 T6 1 / 2 Generation Robot Vacuum Clea",
-          "label": "accessory"
-        },
-        {
-          "key": "trendyol-sa:1164078458",
-          "store": "trendyol-sa",
-          "price": 15.59,
-          "title": "2pcs brush For Xiaomi Side Brush 3C Plus S20 D106 E10C E12 E10 B112 C103 Sweeping Robot Vacuum Clean",
-          "label": "accessory"
-        },
-        {
           "key": "trendyol-sa:1164079313",
           "store": "trendyol-sa",
           "price": 15.64,
@@ -1806,18 +1771,53 @@
           "label": "accessory"
         },
         {
-          "key": "trendyol-sa:1164080679",
+          "key": "trendyol-sa:326796790",
           "store": "trendyol-sa",
-          "price": 15.68,
-          "title": "3PCS Dust Box Suction Flap For Xiaomi Mi Robot Vacuum Mop X10 Plus X20 Plus B101CN Omni Cleaner Dust",
+          "price": 16.32,
+          "title": "Robot Vacuum Cleaner Furniture Leg and Cabinet Riser Feet Anti-Slip and 3.5cm Riser Set of 4",
           "label": "accessory"
         },
         {
-          "key": "trendyol-sa:1164080143",
+          "key": "trendyol-sa:873680387",
           "store": "trendyol-sa",
-          "price": 16.16,
-          "title": "2pcs Side Brush for Xiaomi Robot Vacuum Accessories S40 / OV81 /S40 Pro / OV71GL ，For Mijia 5C/ 5/ 5",
+          "price": 17.73,
+          "title": "Mi Robot Vacuum Mop Hepa Filter 2 Pack / X10Plus / X20 Plus / S10 Plus / X10 Compatible",
           "label": "accessory"
+        },
+        {
+          "key": "trendyol-sa:1116234577",
+          "store": "trendyol-sa",
+          "price": 18.83,
+          "title": "Robotic Vacuum Cleaner, Black",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005008883946169",
+          "store": "aliexpress",
+          "price": 23.19,
+          "title": "220v Electric Broom Robot Vacuum Cleaner Mop For Washing Floors Carpets Smart Kitchen Sweeper Home Machine Magic Handle Dropshi",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005010007484745",
+          "store": "aliexpress",
+          "price": 25.52,
+          "title": "NEW USB Sweeping Robot Vacuum Cleaner Mopping 3 In 1 Smart Wireless 1500Pa Dragging Cleaning Sweep Floor for Home Office",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005013622444947",
+          "store": "aliexpress",
+          "price": 26.39,
+          "title": "3 in 1 Mini Car Robot Vacuum Cleaner Powerful Suction Intelligent Sweeping Robot Removable Dust Collection Box for Home Office",
+          "label": "relevant"
+        },
+        {
+          "key": "trendyol-sa:1220073663",
+          "store": "trendyol-sa",
+          "price": 27.81,
+          "title": "Mini Cartoon Robot Vacuum Cleaner,2.4W Strong Suction Sweeper,Black/Silver",
+          "label": "relevant"
         }
       ]
     },
@@ -1874,7 +1874,7 @@
         }
       ],
       "recordedItems": 587,
-      "results": 295,
+      "results": 292,
       "missingCalls": [],
       "labelled": true,
       "metrics": {
@@ -1883,9 +1883,9 @@
         "accessoryAt10": 0,
         "wrongModelAt10": 0,
         "unlabeledAt10": 0,
-        "recall": 0.9105691056910569,
+        "recall": 0.907859078590786,
         "relevantRecorded": 369,
-        "relevantKept": 336,
+        "relevantKept": 335,
         "cheapestRelevantFirst": true
       },
       "top": [
@@ -2014,7 +2014,7 @@
         }
       ],
       "recordedItems": 471,
-      "results": 354,
+      "results": 351,
       "missingCalls": [],
       "labelled": true,
       "metrics": {
@@ -2023,9 +2023,9 @@
         "accessoryAt10": 0.6,
         "wrongModelAt10": 0,
         "unlabeledAt10": 0,
-        "recall": 0.95,
+        "recall": 0.9421052631578948,
         "relevantRecorded": 380,
-        "relevantKept": 361,
+        "relevantKept": 358,
         "cheapestRelevantFirst": false
       },
       "top": [
@@ -2104,10 +2104,10 @@
   ],
   "overall": {
     "queries": 15,
-    "precisionAt10": 0.5666666666666668,
-    "accessoryAt10": 0.36,
-    "wrongModelAt10": 0.020000000000000004,
-    "recall": 0.9052364582791029,
+    "precisionAt10": 0.7066666666666667,
+    "accessoryAt10": 0.19333333333333333,
+    "wrongModelAt10": 0.04,
+    "recall": 0.9014549789282128,
     "cheapestRelevantFirst": 0.4666666666666667
   }
 }

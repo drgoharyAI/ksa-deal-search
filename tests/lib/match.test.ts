@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { tokenize } from "@/src/lib/match/tokenize";
 import { scoreRelevance, filterRelevant, matchesAllTokens } from "@/src/lib/match/relevance";
-import { isAccessory, isStrongAccessory, dropAccessories } from "@/src/lib/match/accessory";
+import { isAccessory, isStrongAccessory, dropAccessories, isForAccessory } from "@/src/lib/match/accessory";
 import { dedupe } from "@/src/lib/match/dedupe";
 import { specMatches } from "@/src/lib/match/spec";
 import type { Product } from "@/src/lib/types";
@@ -240,5 +240,25 @@ describe("specMatches (12c)", () => {
     expect(specMatches("s24", "galaxy", "Samsung Galaxy S24+ 256GB")).toBe(true);
     expect(specMatches("s24", "galaxy", "Samsung Galaxy S24 FE 128GB")).toBe(false);
     expect(specMatches("s24", "galaxy", "Samsung Galaxy S245")).toBe(false);
+  });
+});
+
+describe("isForAccessory (12c)", () => {
+  const v = (...xs: string[][]) => xs;
+  it("flags items made for the queried product", () => {
+    expect(isForAccessory("Tempered glass camera protection for iPhone 16 plus", v(["iphone", "16"]))).toBe(true);
+    expect(isForAccessory("Compatible with Samsung Galaxy S24 Ultra Case", v(["samsung", "galaxy", "s24"]))).toBe(true);
+    expect(isForAccessory("2pcs For PS3 PS4 PS5 Game Controllers Thumb Silicone Grips", v(["ps5", "controller"]))).toBe(true);
+  });
+  it("keeps the product itself, use phrases and 'For'-prefixed seller titles", () => {
+    expect(isForAccessory("Sony DualSense Controller, Wireless, for PlayStation 5", v(["ps5", "controller"]))).toBe(false);
+    expect(isForAccessory("Game Monitor 144Hz Suitable for E-sports, 4K", v(["4k", "monitor"]))).toBe(false);
+    expect(isForAccessory("Suitable for E-sports Players, Game Monitor 4K", v(["4k", "monitor"]))).toBe(false);
+    expect(isForAccessory("For Wet Dry Robot Vacuum Cleaner Auto Recharge", v(["robot", "vacuum"]))).toBe(false);
+    expect(isForAccessory("Apple iPhone 16 128GB", v(["iphone", "16"]))).toBe(false);
+  });
+  it("dropAccessories removes them whatever their price", () => {
+    const ps = [prod("Apple iPhone 16 128GB", 3299, "a"), prod("Silicone grip for iPhone 16", 3000, "b")];
+    expect(dropAccessories(ps, ["iphone", "16"], [["iphone", "16"]]).map((p) => p.id)).toEqual(["a"]);
   });
 });
