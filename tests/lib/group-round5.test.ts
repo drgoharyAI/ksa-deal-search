@@ -31,6 +31,9 @@ const apart: [string, string][] = [
   ["Varta Car Battery 12V 70Ah", "Varta Car Battery 12V 70Ah Charger"],
   ["Samsung 65 Inch QLED TV QA65Q60D", "Samsung 65 Inch QLED TV QA65Q60D Wall Mount"],
   ["Samsung 65 Inch QLED TV QA65Q60D", "Samsung 65 Inch QLED TV QA65Q60D Remote"],
+  // A part after a separator, right after the shared code that ends the name.
+  ["Samsung TV QA65Q60D", "Samsung TV QA65Q60D - Wall Mount"],
+  ["Samsung 65 Inch QLED TV QA65Q60D", "Samsung 65 Inch QLED TV QA65Q60D, Remote Control"],
   ["Dyson V15 Detect Absolute Cordless Vacuum SV47", "Dyson V15 Detect Absolute Wall Dock SV47"],
   ["Ninja Foodi Dual Zone Air Fryer AF300", "Ninja Foodi Dual Zone Air Fryer AF300 Basket"],
   ["Ninja Foodi Dual Zone Air Fryer AF300", "Ninja AF300 Air Fryer Silicone Liners"],
@@ -80,6 +83,12 @@ describe("round 5: features", () => {
     expect([...titleFeatures("LG Refrigerator GR-B247SLUV Water Filter").parts]).toEqual(["filter"]);
     expect([...titleFeatures("Oscar Air Fryer 3L | Detachable Basket | Cool-Touch Handle").parts]).toEqual([]);
     expect([...titleFeatures("Ninja Blender BN495 with 2 Cups and Lid").parts]).toEqual([]);
+  });
+  it("reads the first words after a separator when a code ends the name", () => {
+    expect([...titleFeatures("Samsung TV QA65Q60D - Wall Mount").parts]).toEqual(["mount"]);
+    expect([...titleFeatures("Samsung TV QA65Q60D | Black, Wall Mount Included").parts]).toEqual([]);
+    expect([...titleFeatures("Philips Air Fryer NA150/00 | Dual Basket").parts]).toEqual([]);
+    expect([...titleFeatures("Oscar Air Fryer 3L | Detachable Basket").parts]).toEqual([]);
   });
   it("reads oil viscosity as a spec, not a code", () => {
     const f = titleFeatures("Mobil 1 5W30 Engine Oil");

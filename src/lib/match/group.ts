@@ -632,8 +632,17 @@ export function titleFeatures(title: string): TitleFeatures {
 
   const parts = new Set<string>();
   if (PART_HINT.test(prepared)) {
-    const name = (prepared.includes("case") ? prepared.replace(NOT_ACCESSORY, " ") : prepared).replace(OWN_PRODUCT, " ").split(NAME_END)[0];
+    const text = (prepared.includes("case") ? prepared.replace(NOT_ACCESSORY, " ") : prepared).replace(OWN_PRODUCT, " ");
+    const end = NAME_END.exec(text);
+    const name = end ? text.slice(0, end.index) : text;
     const nameWords = words(name);
+    // A code ending the name, then a separator ("TV QA65Q60D - Wall Mount"): the next segment's
+    // first words still name the item. Not after a "with / for / +" clause (add-ons, see addons).
+    if (end && !/[a-z+&]/.test(end[0])) {
+      const last = name.trim().split(/[^a-z0-9.\-/]+/).pop() ?? "";
+      const code = last.split("/")[0].replace(/^[.\-]+|[.\-]+$/g, "").replace(/[-.]/g, "").toUpperCase();
+      if (code && codes.has(code)) nameWords.push(...words(text.slice(end.index + end[0].length).split(NAME_END)[0]).slice(0, 3));
+    }
     // A counted part describes the product ("Dual Basket Airfryer", "2 Drawer", "3 Heads").
     for (let i = 0; i < nameWords.length; i++)
       if (PART_NOUNS.has(nameWords[i]) && !(i > 0 && (COUNT_WORDS.has(nameWords[i - 1]) || /^\d+$/.test(nameWords[i - 1])))) parts.add(singular(nameWords[i]));

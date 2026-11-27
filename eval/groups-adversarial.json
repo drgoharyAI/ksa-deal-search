@@ -1807,6 +1807,20 @@
       "a": "Hisense 55 Inch 4K Smart TV 55A6N",
       "b": "Hisense 55A6N TV Stand Legs",
       "source": "review round 5"
+    },
+    {
+      "pad": "electric kettle",
+      "expect": "apart",
+      "a": "Samsung TV QA65Q60D",
+      "b": "Samsung TV QA65Q60D - Wall Mount",
+      "source": "review 17b phase 2 (part after a separator)"
+    },
+    {
+      "pad": "instant camera",
+      "expect": "apart",
+      "a": "Samsung 65 Inch QLED TV QA65Q60D",
+      "b": "Samsung 65 Inch QLED TV QA65Q60D, Remote Control",
+      "source": "review 17b phase 2 (part after a separator)"
     }
   ]
 }
