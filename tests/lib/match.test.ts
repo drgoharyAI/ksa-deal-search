@@ -4,6 +4,7 @@ import { scoreRelevance, filterRelevant, matchesAllTokens } from "@/src/lib/matc
 import { isAccessory, isStrongAccessory, dropAccessories, isForAccessory } from "@/src/lib/match/accessory";
 import { dedupe } from "@/src/lib/match/dedupe";
 import { specMatches } from "@/src/lib/match/spec";
+import { isOtherProduct } from "@/src/lib/match/category";
 import type { Product } from "@/src/lib/types";
 
 const prod = (title: string, listPrice = 10, id = title): Product => ({
@@ -283,5 +284,20 @@ describe("title core (12c)", () => {
   it("a model '+' is not a connector: 'S24+ Case' is a case", () => {
     expect(isAccessory("Samsung Galaxy S24+ Case, Premium Leather", ["samsung", "galaxy", "s24"])).toBe(true);
     expect(isAccessory("Galaxy Buds + Case", ["galaxy", "buds"])).toBe(false);
+  });
+});
+
+describe("isOtherProduct (12c)", () => {
+  it("drops books about the product and macro keypads", () => {
+    expect(isOtherProduct("Apple Watch for Dummies, 2nd Edition", ["apple", "watch"])).toBe(true);
+    expect(isOtherProduct('The "I Love My Air Fryer" 5-Ingredient Recipe Book', ["air", "fryer"])).toBe(true);
+    expect(isOtherProduct("Paleo Cooking with Your Air Fryer - 75 Recipes", ["air", "fryer"])).toBe(true);
+    expect(isOtherProduct("OSU Mini Keypad 2 Key Mechanical Keyboard", ["mechanical", "keyboard"])).toBe(true);
+    expect(isOtherProduct("RGB 3 Keys Macro Mechanical Keyboard", ["mechanical", "keyboard"])).toBe(true);
+  });
+  it("keeps the product itself", () => {
+    expect(isOtherProduct("Kenwood Air Fryer 7L with Max Crisp, Recipe Book", ["air", "fryer"])).toBe(false);
+    expect(isOtherProduct("AJAZZ NK61 Mechanical Keyboard 61 Keys", ["mechanical", "keyboard"])).toBe(false);
+    expect(isOtherProduct("Wireless Gaming Mouse 6 Keys", ["gaming", "mouse"])).toBe(false);
   });
 });

@@ -95,3 +95,12 @@ The accessory check reads the title before "with / includes / + / &"; a "+" glue
 | p@10 | acc@10 | wrong@10 | recall | cheapest-first |
 |---|---|---|---|---|
 | 85% (84.7→85.3) | 3% | 4% | 90% | 60% |
+
+## Round 7: different-category items sharing the query words (kept)
+`src/lib/match/category.ts` + `data/other-product-words.json`: books about the product
+("... for Dummies", "Recipe Book", "75 Recipes", paperback/hardcover) and macro keypads
+("keypad", "macropad", a "keyboard" with under ten keys) are dropped. Checked on the title core
+(before "with"), so "Air Fryer with ... Recipe Book" stays.
+| p@10 | acc@10 | wrong@10 | recall | cheapest-first |
+|---|---|---|---|---|
+| 91% | 3% | 4.7% | 90% | 67% |

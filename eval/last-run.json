@@ -1,5 +1,5 @@
 {
-  "at": "2026-11-27T02:02:13.705Z",
+  "at": "2026-11-27T02:03:40.217Z",
   "queries": [
     {
       "query": "anc earbuds under 300",
@@ -474,18 +474,18 @@
         }
       ],
       "recordedItems": 465,
-      "results": 332,
+      "results": 329,
       "missingCalls": [],
       "labelled": true,
       "metrics": {
         "top": 10,
-        "precisionAt10": 0.7,
+        "precisionAt10": 0.9,
         "accessoryAt10": 0.1,
         "wrongModelAt10": 0,
         "unlabeledAt10": 0,
-        "recall": 0.9058171745152355,
+        "recall": 0.9030470914127424,
         "relevantRecorded": 361,
-        "relevantKept": 327,
+        "relevantKept": 326,
         "cheapestRelevantFirst": false
       },
       "top": [
@@ -497,31 +497,10 @@
           "label": "accessory"
         },
         {
-          "key": "jarir:586896",
-          "store": "jarir",
-          "price": 29,
-          "title": "The \"I Love My Air Fryer\" 5-Ingredient Recipe Book - from French Toast Sticks to Buttermilk-Fried Chicken Thighs, 175 Quick and Easy Recipes",
-          "label": "off-topic"
-        },
-        {
-          "key": "jarir:586957",
-          "store": "jarir",
-          "price": 39,
-          "title": "Paleo Cooking with Your Air Fryer - 75 Recipes for Healthier Fried Food in Less Time",
-          "label": "off-topic"
-        },
-        {
           "key": "aliexpress:1005011992429150",
           "store": "aliexpress",
           "price": 46.59,
           "title": "Multifunctional Visual Air Fryer Household Large-capacity Electric Oven Smart French Fry Machine Oil-free 360° Cycle Heating",
-          "label": "relevant"
-        },
-        {
-          "key": "jarir:583613",
-          "store": "jarir",
-          "price": 49,
-          "title": "Taste of Home: Everyday Air Fryer - 100+ Recipes for Weeknight Ease",
           "label": "relevant"
         },
         {
@@ -557,6 +536,27 @@
           "store": "aliexpress",
           "price": 59.79,
           "title": "Air Fryer 12L Stainless Steel Visible Large Capacity Electric Oven Touch Screen Multifunctional Electric Fryer EU/US Plug",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005013402181174",
+          "store": "aliexpress",
+          "price": 69.89,
+          "title": "4.5L Air Fryer Oven LCD Control Oil-Free Multifunctional Electric Fryer for Chicken Fries Household Kitchen Appliance",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005012649041875",
+          "store": "aliexpress",
+          "price": 70.22,
+          "title": "Window Design 1600W 6L Digital Control Electric S/S Air Fryer With Touch Screen Panel",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005012876252717",
+          "store": "aliexpress",
+          "price": 70.95,
+          "title": "15L Air Fryer Oven Combo 220V Multifunctional Oil-Free Electric Fryer EU UK Plug Household Toaster Oven",
           "label": "relevant"
         }
       ]
@@ -614,12 +614,12 @@
         }
       ],
       "recordedItems": 475,
-      "results": 105,
+      "results": 104,
       "missingCalls": [],
       "labelled": true,
       "metrics": {
         "top": 10,
-        "precisionAt10": 0.2,
+        "precisionAt10": 0.3,
         "accessoryAt10": 0,
         "wrongModelAt10": 0.5,
         "unlabeledAt10": 0,
@@ -629,13 +629,6 @@
         "cheapestRelevantFirst": false
       },
       "top": [
-        {
-          "key": "jarir:531617",
-          "store": "jarir",
-          "price": 29,
-          "title": "Apple Watch for Dummies, 2nd Edition - Computer/Tech",
-          "label": "off-topic"
-        },
         {
           "key": "aliexpress:1005009657036132",
           "store": "aliexpress",
@@ -697,6 +690,13 @@
           "store": "aliexpress",
           "price": 897.39,
           "title": "100% Original Apple Watch Series 6 40mm 44mm GPS Apple Watch S6 Aluminum Case with Sport Band iOS SmartWatch",
+          "label": "relevant"
+        },
+        {
+          "key": "noon-sa:N70223264V",
+          "store": "noon-sa",
+          "price": 899,
+          "title": "Apple Watch SE 3 GPS 40mm (International Version) Aluminium Case, Starlight Sport Band - S/M",
           "label": "relevant"
         }
       ]
@@ -894,76 +894,27 @@
         }
       ],
       "recordedItems": 494,
-      "results": 165,
+      "results": 140,
       "missingCalls": [],
       "labelled": true,
       "metrics": {
         "top": 10,
-        "precisionAt10": 0.1,
+        "precisionAt10": 0.6,
         "accessoryAt10": 0.2,
-        "wrongModelAt10": 0,
+        "wrongModelAt10": 0.1,
         "unlabeledAt10": 0,
         "recall": 0.879746835443038,
         "relevantRecorded": 158,
         "relevantKept": 139,
-        "cheapestRelevantFirst": false
+        "cheapestRelevantFirst": true
       },
       "top": [
-        {
-          "key": "aliexpress:1005007096723667",
-          "store": "aliexpress",
-          "price": 4.24,
-          "title": "Mini USB Custom Mechanical Keyboard 2/4/6/7/8/9/12/16/24 Keys Gaming Keyboard Sayo Device Shortcut Programmable Keypad Keys New",
-          "label": "off-topic"
-        },
         {
           "key": "aliexpress:1005006589231888",
           "store": "aliexpress",
           "price": 4.24,
           "title": "Compact Mechanical Gaming Keyboard with RGB Backlit Computer Keyboard Hot Swappable Keyboard for Windows Laptops and PC Gamers",
           "label": "relevant"
-        },
-        {
-          "key": "aliexpress:1005006812527527",
-          "store": "aliexpress",
-          "price": 6.53,
-          "title": "1/2keys Mini Programable Keyboard RGB Gaming Keyboard Programming Keypad Mechanical Keyboard Red Shaft",
-          "label": "off-topic"
-        },
-        {
-          "key": "aliexpress:1005008393094549",
-          "store": "aliexpress",
-          "price": 7.53,
-          "title": "OSU Custom Mini Keypad 2 Key Keyboard Programming Macro Keyboard Copy Paste Cut HID Mechanical Keyboard DIY Keyboard",
-          "label": "off-topic"
-        },
-        {
-          "key": "aliexpress:1005007088963540",
-          "store": "aliexpress",
-          "price": 13.99,
-          "title": "One-key Shortcut Keyboard USB Custom Programmable Macro Mechanical Keyboard Hot Key Mouse One Key Button Mini Keypad",
-          "label": "off-topic"
-        },
-        {
-          "key": "aliexpress:1005007254591957",
-          "store": "aliexpress",
-          "price": 15.22,
-          "title": "1/2/3/4 Keys OUTEMU Red OSU Keypad Mini Macro Mechanical Keyboard Gaming Programmable Multimedia Control DIY Keyboard For CAD PS",
-          "label": "off-topic"
-        },
-        {
-          "key": "aliexpress:1005003299455210",
-          "store": "aliexpress",
-          "price": 16.99,
-          "title": "2/3/4/6/7/8/9/16 Keys Black Mini Keypad Numpad Mechanical Keyboard OSU Gaming Programming Custom Keyboard For Photoshop",
-          "label": "off-topic"
-        },
-        {
-          "key": "aliexpress:1005006727411297",
-          "store": "aliexpress",
-          "price": 19.91,
-          "title": "Macropad Macro Mechanical Keyboard RGB Mini Gaming Custom Programming Knob Keypads Red Switch 3 Keys For Photoshop",
-          "label": "off-topic"
         },
         {
           "key": "aliexpress:1005005550328893",
@@ -978,6 +929,55 @@
           "price": 22.7,
           "title": "Dustproof Black 30PCS Dustproof Outemu Switch Mechanical Keyboard Linear Tactile Clicky Silent",
           "label": "accessory"
+        },
+        {
+          "key": "aliexpress:1005011891367794",
+          "store": "aliexpress",
+          "price": 27.29,
+          "title": "Mechanical Gaming Keyboard Anti-ghosting for Gaming Typing Floating Compact",
+          "label": "relevant"
+        },
+        {
+          "key": "amazon-sa:B08CF2W4Z1",
+          "store": "amazon-sa",
+          "price": 29.9,
+          "title": "SKY-TOUCH G2 Computer Gaming Keyboard and Mouse Combo :Keyboard with Flexible Polychromatic LED Lights Mechanical Feel - Black and white",
+          "label": "wrong-model"
+        },
+        {
+          "key": "aliexpress:1005013305181258",
+          "store": "aliexpress",
+          "price": 32.19,
+          "title": " Portable 60% Mechanical Gaming Keyboard for Desk Typing and Laptop Use Daily",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005013037927286",
+          "store": "aliexpress",
+          "price": 35.39,
+          "title": "Mini 61-Key USB Mechanical Keyboard with Raised Profile, Small 60% for Laptop Typing, Office Desks, Study Areas, and Play",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005011871310018",
+          "store": "aliexpress",
+          "price": 36.59,
+          "title": "60% Gaming Keyboard RGB Backlit 68 Key Ultra-Compact Keyboard TS91 Ergonomic Waterproof Mechanical Feeling Office",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005009018840089",
+          "store": "aliexpress",
+          "price": 36.99,
+          "title": "USB Single Hand Keyboard Luminous Ultra-slim One Handedly Keyboard 3 Color Backlight Mini Gaming Mechanical Keyboard Desktop PC",
+          "label": "off-topic"
+        },
+        {
+          "key": "aliexpress:1005007573605623",
+          "store": "aliexpress",
+          "price": 37.39,
+          "title": "Gaming Keyboard White Mechanical Game USB Keyboards 60% Mini Teclado Spanish Keyborad Teclado PC Key Board Laptop Computer",
+          "label": "relevant"
         }
       ]
     },
@@ -2104,10 +2104,10 @@
   ],
   "overall": {
     "queries": 15,
-    "precisionAt10": 0.8533333333333333,
+    "precisionAt10": 0.9066666666666666,
     "accessoryAt10": 0.02666666666666667,
-    "wrongModelAt10": 0.04,
-    "recall": 0.8956752862650555,
-    "cheapestRelevantFirst": 0.6
+    "wrongModelAt10": 0.04666666666666666,
+    "recall": 0.8954906140582227,
+    "cheapestRelevantFirst": 0.6666666666666666
   }
 }
