@@ -22,6 +22,12 @@ const SORTS: { value: SortKey; label: string }[] = [
   { value: "deal", label: "Best deal" },
 ];
 
+/** Helper line for the real-browser stores (each loads pages in Chrome). */
+function slowNote(sites: string[]): string {
+  const slow = [sites.includes("noon-sa") && "noon", sites.includes("shein-sa") && "SHEIN"].filter(Boolean);
+  return slow.length ? `With ${slow.join(" and ")} a search takes 10 to 25 seconds.` : "";
+}
+
 type Props = {
   values: FormValues;
   onChange: (next: FormValues) => void;
@@ -108,7 +114,7 @@ export default function SearchForm({ values, onChange, onSubmit, onStop, loading
           ))}
         </div>
         <p id="stores-help" className={sitesError ? "helper helper--error" : "helper"}>
-          {sitesError ?? (values.sites.includes("noon-sa") ? "With noon a search takes 10 to 25 seconds." : "")}
+          {sitesError ?? slowNote(values.sites)}
         </p>
       </fieldset>
 

@@ -110,7 +110,10 @@ export function findChrome(): string | null {
   return null;
 }
 
-type ChromeProc = { exitCode: number | null; kill(): boolean };
+type ChromeProc = { pid?: number; exitCode: number | null; kill(): boolean };
+
+/** `<profile>/deal-search-port.json`: written by us once a spawned Chrome's debug port answers. */
+export type OwnPortFile = { port: number; pid: number; startedAt: number };
 
 /** Side effects of the launcher, injectable so tests never spawn Chrome or touch the network. */
 export type ChromeDeps = {
@@ -119,6 +122,16 @@ export type ChromeDeps = {
   /** Port from `<profile>/DevToolsActivePort` (written by Chrome), or null. */
   readActivePort(profileDir: string): number | null;
   removeActivePort(profileDir: string): void;
+  /**
+   * Our own record of the Chrome on this profile. Chrome does not write DevToolsActivePort when it
+   * is started with a fixed --remote-debugging-port, so this file is what lets a restarted node
+   * process adopt an orphan Chrome instead of spawning a second one (which hands off and exits).
+   */
+  readOwnPortFile?(profileDir: string): OwnPortFile | null;
+  writeOwnPortFile?(profileDir: string, f: OwnPortFile): void;
+  removeOwnPortFile?(profileDir: string): void;
+  /** True if a process with this pid exists. */
+  pidAlive?(pid: number): boolean;
   /** A currently free TCP port on 127.0.0.1 for Chrome's debug endpoint. */
   freePort(): Promise<number>;
   /** True if `http://127.0.0.1:<port>/json/version` answers. */
@@ -128,21 +141,59 @@ export type ChromeDeps = {
   sleep(ms: number): Promise<void>;
 };
 
-const portFile = (profileDir: string) => path.join(profileDir, "DevToolsActivePort");
+type Deps = Required<ChromeDeps>;
 
-const realDeps: Omit<ChromeDeps, "profileDir"> = {
+const portFile = (profileDir: string) => path.join(profileDir, "DevToolsActivePort");
+const ownPortFile = (profileDir: string) => path.join(profileDir, "deal-search-port.json");
+const validPort = (n: unknown): n is number => Number.isInteger(n) && (n as number) > 0 && (n as number) < 65536;
+
+const realDeps: Omit<Deps, "profileDir"> = {
   findChrome,
   readActivePort(profileDir) {
     try {
       // First line of DevToolsActivePort is the port; parseInt stops at the line break.
       const port = parseInt(fs.readFileSync(portFile(profileDir), "utf8"), 10);
-      return Number.isInteger(port) && port > 0 && port < 65536 ? port : null;
+      return validPort(port) ? port : null;
     } catch {
       return null;
     }
   },
   removeActivePort(profileDir) {
     fs.rmSync(portFile(profileDir), { force: true });
+  },
+  readOwnPortFile(profileDir) {
+    try {
+      const f = JSON.parse(fs.readFileSync(ownPortFile(profileDir), "utf8")) as Partial<OwnPortFile>;
+      const pid = f.pid;
+      return validPort(f.port) && typeof pid === "number" && Number.isInteger(pid) && pid > 0
+        ? { port: f.port, pid, startedAt: Number(f.startedAt) || 0 }
+        : null;
+    } catch {
+      return null;
+    }
+  },
+  writeOwnPortFile(profileDir, f) {
+    try {
+      fs.writeFileSync(ownPortFile(profileDir), JSON.stringify(f));
+    } catch {
+      // best effort: without it a later run spawns instead of adopting
+    }
+  },
+  removeOwnPortFile(profileDir) {
+    try {
+      fs.rmSync(ownPortFile(profileDir), { force: true });
+    } catch {
+      // best effort
+    }
+  },
+  pidAlive(pid) {
+    try {
+      process.kill(pid, 0);
+      return true;
+    } catch (e) {
+      // EPERM: the process exists but belongs to another user.
+      return (e as NodeJS.ErrnoException).code === "EPERM";
+    }
   },
   freePort() {
     return new Promise((resolve, reject) => {
@@ -176,12 +227,23 @@ const realDeps: Omit<ChromeDeps, "profileDir"> = {
   sleep: (ms) => new Promise((r) => setTimeout(r, ms)),
 };
 
-async function existingPort(d: ChromeDeps): Promise<number | null> {
+type Existing = { port: number; pid: number | null };
+
+/**
+ * A Chrome already running on this profile: our own port file first (the port answers AND the pid
+ * is alive), then Chrome's DevToolsActivePort. A stale own file is deleted.
+ */
+async function existingChrome(d: Deps): Promise<Existing | null> {
+  const own = d.readOwnPortFile(d.profileDir);
+  if (own) {
+    if (d.pidAlive(own.pid) && (await d.probe(own.port))) return { port: own.port, pid: own.pid };
+    d.removeOwnPortFile(d.profileDir);
+  }
   const port = d.readActivePort(d.profileDir);
-  return port !== null && (await d.probe(port)) ? port : null;
+  return port !== null && (await d.probe(port)) ? { port, pid: null } : null;
 }
 
-async function waitForPort(d: ChromeDeps, proc: ChromeProc, port: number, timeoutMs = 15_000): Promise<void> {
+async function waitForPort(d: Deps, proc: ChromeProc, port: number, timeoutMs = 15_000): Promise<void> {
   const deadline = Date.now() + timeoutMs;
   while (Date.now() < deadline) {
     if (proc.exitCode !== null) throw new Error(`Chrome exited early (code ${proc.exitCode})`);
@@ -191,11 +253,20 @@ async function waitForPort(d: ChromeDeps, proc: ChromeProc, port: number, timeou
   throw new Error("Chrome debug port did not open");
 }
 
+/** One launch at a time across all stores: no race on free ports or on a profile being started. */
+let launchLock: Promise<unknown> = Promise.resolve();
+function serialized<T>(job: () => Promise<T>): Promise<T> {
+  const run = launchLock.then(job);
+  launchLock = run.catch(() => {});
+  return run;
+}
+
 /**
  * Launcher for the owner's Chrome on one store's profile. `profileDir` is called at launch time
  * (never at import), so a store can choose or migrate its profile lazily. If a Chrome from an
- * earlier run (HMR, crashed node) still holds the profile and its debug port answers, adopt it
- * instead of spawning: a second Chrome on the same profile would only hand off to the first one.
+ * earlier run (HMR, crashed or killed node) still holds the profile and its debug port answers,
+ * adopt it instead of spawning: a second Chrome on the same profile would only hand off to it.
+ * Launches of all stores are serialized.
  */
 export function createCdpLauncher(opts: {
   profileDir: () => string;
@@ -203,64 +274,98 @@ export function createCdpLauncher(opts: {
   overrides?: Partial<ChromeDeps>;
 }): Launcher {
   const overrides = opts.overrides ?? {};
-  return async () => {
-    const d: ChromeDeps = { ...realDeps, ...overrides, profileDir: overrides.profileDir ?? opts.profileDir() };
-    let proc: ChromeProc | null = null;
-    let port = await existingPort(d);
-    if (port === null) {
-      const chromePath = d.findChrome();
-      if (!chromePath) throw new Error("Chrome not found");
-      d.removeActivePort(d.profileDir); // stale file from a dead Chrome
-      // An explicit port, never 0: Chrome 158 started with --remote-debugging-port=0 reports
-      // navigator.webdriver === true (checked 2026-11-27), and noon's Akamai then answers 403
-      // "Access Denied". With a fixed port it is false, as with a normal launch.
-      port = await d.freePort();
-      proc = d.spawnChrome(chromePath, [
-        `--remote-debugging-port=${port}`,
-        "--remote-debugging-address=127.0.0.1",
-        `--user-data-dir=${d.profileDir}`,
-        "--window-position=-32000,-32000",
-        "--no-first-run",
-        "--no-default-browser-check",
-        ...(opts.extraArgs ?? []),
-        "about:blank",
-      ]);
-    }
-    const p = proc;
-    const killProc = () => {
-      if (p && p.exitCode === null) p.kill();
-    };
-
-    let browser: Browser | null = null;
-    try {
-      if (p) await waitForPort(d, p, port!);
-      browser = await d.connect(port!);
-      const context = browser.contexts()[0] ?? (await browser.newContext());
-      const page = context.pages()[0] ?? (await context.newPage());
-      let connected = true;
-      browser.on("disconnected", () => (connected = false));
-      const b = browser;
-      return {
-        page,
-        isAlive: () => connected && (!p || p.exitCode === null) && !page.isClosed(),
-        close: async () => {
+  return () =>
+    serialized(async () => {
+      const d = { ...realDeps, ...overrides, profileDir: overrides.profileDir ?? opts.profileDir() } as Deps;
+      let proc: ChromeProc | null = null;
+      let existing = await existingChrome(d);
+      let port: number;
+      if (existing) {
+        port = existing.port;
+      } else {
+        const chromePath = d.findChrome();
+        if (!chromePath) throw new Error("Chrome not found");
+        d.removeActivePort(d.profileDir); // stale file from a dead Chrome
+        // An explicit port, never 0: Chrome 158 started with --remote-debugging-port=0 reports
+        // navigator.webdriver === true (checked 2026-11-27), and noon's Akamai then answers 403
+        // "Access Denied". With a fixed port it is false, as with a normal launch.
+        port = await d.freePort();
+        proc = d.spawnChrome(chromePath, [
+          `--remote-debugging-port=${port}`,
+          "--remote-debugging-address=127.0.0.1",
+          `--user-data-dir=${d.profileDir}`,
+          "--window-position=-32000,-32000",
+          "--no-first-run",
+          "--no-default-browser-check",
+          ...(opts.extraArgs ?? []),
+          "about:blank",
+        ]);
+        try {
+          await waitForPort(d, proc, port);
+          if (proc.pid) d.writeOwnPortFile(d.profileDir, { port, pid: proc.pid, startedAt: Date.now() });
+        } catch (e) {
+          // Exit code 0 right after spawn: another Chrome already holds this profile and took the
+          // hand-off. Adopt it if it answers now, else fail.
+          if (proc.exitCode !== 0) {
+            if (proc.exitCode === null) proc.kill();
+            throw e;
+          }
+          existing = await existingChrome(d);
+          if (!existing) throw e;
+          proc = null;
+          port = existing.port;
+        }
+      }
+      const p = proc;
+      const adoptedPid = existing?.pid ?? null;
+      const stopChild = () => {
+        if (p && p.exitCode === null) p.kill();
+      };
+      /** Synchronous hard stop: our child, or the adopted Chrome by its recorded pid. */
+      const killNow = () => {
+        if (p) stopChild();
+        else if (adoptedPid !== null) {
           try {
-            // connectOverCDP's browser.close() only disconnects; ask Chrome itself to quit.
-            const cdp = await b.newBrowserCDPSession();
-            await cdp.send("Browser.close");
+            process.kill(adoptedPid);
           } catch {
             // already gone
           }
-          await b.close().catch(() => {});
-          killProc();
-        },
-        // An adopted Chrome has no child process here; the next start adopts it again.
-        kill: killProc,
+        }
+        d.removeOwnPortFile(d.profileDir);
       };
-    } catch (e) {
-      await browser?.close().catch(() => {});
-      killProc();
-      throw e;
-    }
-  };
+
+      let browser: Browser | null = null;
+      try {
+        browser = await d.connect(port);
+        const context = browser.contexts()[0] ?? (await browser.newContext());
+        const page = context.pages()[0] ?? (await context.newPage());
+        let connected = true;
+        browser.on("disconnected", () => (connected = false));
+        const b = browser;
+        return {
+          page,
+          isAlive: () => connected && (!p || p.exitCode === null) && !page.isClosed(),
+          close: async () => {
+            try {
+              // connectOverCDP's browser.close() only disconnects; ask Chrome itself to quit.
+              const cdp = await b.newBrowserCDPSession();
+              await cdp.send("Browser.close");
+            } catch {
+              // already gone
+            }
+            await b.close().catch(() => {});
+            stopChild();
+            d.removeOwnPortFile(d.profileDir);
+          },
+          kill: killNow,
+        };
+      } catch (e) {
+        await browser?.close().catch(() => {});
+        if (p) {
+          stopChild();
+          d.removeOwnPortFile(d.profileDir);
+        }
+        throw e;
+      }
+    });
 }

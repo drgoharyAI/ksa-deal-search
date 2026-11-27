@@ -154,7 +154,7 @@ function fakePage(o: FakeOpts) {
   return page as typeof page & SheinPage;
 }
 
-const freshState = (): SheinState => ({ blockedUntil: 0, lastLoad: 0 });
+const freshState = (): SheinState => ({ blockedUntil: 0, strikes: 0, lastLoad: 0 });
 const okBody = { code: "0", info: { products: [goods("1"), goods("2")], num: 2 } };
 const call = { op: "search", args: { q: "summer dress", page: "1", sort: "" } };
 
@@ -284,7 +284,7 @@ describe("runCall cache and spacing", () => {
 describe("runCall back-off", () => {
   afterEach(() => vi.useRealTimers());
 
-  it("after a challenge, calls (even queued ones) make no load for 30 min", async () => {
+  it("after a challenge, calls (even queued ones) make no load for 2 h", async () => {
     vi.useFakeTimers();
     const page = fakePage({ finalUrl: "https://ar.shein.com/risk/challenge?captcha_type=909" });
     let tail: Promise<unknown> = Promise.resolve();
@@ -300,13 +300,77 @@ describe("runCall back-off", () => {
     expect(r2).toEqual({ ok: false, class: "blocked", reason: "SHEIN blocked recently" });
     expect(page.visited).toHaveLength(1);
 
-    await vi.advanceTimersByTimeAsync(29 * 60_000);
+    await vi.advanceTimersByTimeAsync(119 * 60_000);
     expect(await run(other)).toMatchObject({ class: "blocked", reason: "SHEIN blocked recently" });
     expect(page.visited).toHaveLength(1);
 
     await vi.advanceTimersByTimeAsync(60_000 + 10);
     await run(other);
     expect(page.visited).toHaveLength(2);
+  });
+
+  it("back-off doubles per consecutive strike (2 h, 4 h, 8 h), caps at 12 h, resets on the first ok", async () => {
+    vi.useFakeTimers();
+    const H = 3_600_000;
+    const o: FakeOpts = { finalUrl: "https://ar.shein.com/risk/challenge?captcha_type=909", xhr: okBody };
+    const page = fakePage(o);
+    const state = freshState();
+    const saved: { blockedUntil: number; strikes: number }[] = [];
+    const run = createRunCall({
+      withPage: (fn) => fn(page),
+      minGapMs: 0,
+      state,
+      persist: { load: () => null, save: (v) => saved.push({ ...v }) },
+    });
+    const q = (n: number) => ({ ...call, args: { ...call.args, q: `dress ${n}` } });
+    const strike = async (n: number) => {
+      const t0 = Date.now();
+      expect(await run(q(n))).toMatchObject({ class: "blocked" });
+      return state.blockedUntil - t0;
+    };
+    expect(await strike(1)).toBe(2 * H);
+    await vi.advanceTimersByTimeAsync(2 * H);
+    expect(await strike(2)).toBe(4 * H);
+    await vi.advanceTimersByTimeAsync(4 * H);
+    expect(await strike(3)).toBe(8 * H);
+    await vi.advanceTimersByTimeAsync(8 * H);
+    expect(await strike(4)).toBe(12 * H);
+    await vi.advanceTimersByTimeAsync(12 * H);
+    expect(await strike(5)).toBe(12 * H);
+    expect(saved.at(-1)).toEqual({ blockedUntil: state.blockedUntil, strikes: 5 });
+
+    await vi.advanceTimersByTimeAsync(12 * H);
+    o.finalUrl = undefined;
+    expect(await run(q(6))).toMatchObject({ ok: true });
+    expect(state.strikes).toBe(0);
+    expect(saved.at(-1)).toMatchObject({ strikes: 0 });
+    o.finalUrl = "https://ar.shein.com/risk/challenge?captcha_type=909";
+    expect(await strike(7)).toBe(2 * H);
+  });
+
+  it("a persisted back-off is honored by a fresh state (module reload / dev restart)", async () => {
+    const store: { v: { blockedUntil: number; strikes: number } | null } = { v: null };
+    const persist = { load: () => store.v, save: (v: { blockedUntil: number; strikes: number }) => (store.v = { ...v }) };
+    const blockedPage = fakePage({ finalUrl: "https://ar.shein.com/risk/challenge?captcha_type=909" });
+    await createRunCall({ withPage: (fn) => fn(blockedPage), minGapMs: 0, state: freshState(), persist })(call);
+    expect(store.v).toMatchObject({ strikes: 1 });
+
+    const page = fakePage({ xhr: okBody });
+    const state = freshState(); // as after a restart: nothing in memory
+    const r = await createRunCall({ withPage: (fn) => fn(page), minGapMs: 0, state, persist })(call);
+    expect(r).toMatchObject({ class: "blocked", reason: "SHEIN blocked recently" });
+    expect(page.visited).toEqual([]);
+    expect(state.strikes).toBe(1);
+  });
+
+  it("the default persistence file lives in the SHEIN profile dir", async () => {
+    const { backoffFile } = await import("@/src/sites/shein-sa/search");
+    vi.stubEnv("SHEIN_PROFILE_DIR", "C:/x/shein");
+    try {
+      expect(backoffFile().replace(/\\/g, "/")).toMatch(/x\/shein\/deal-search-backoff\.json$/);
+    } finally {
+      vi.unstubAllEnvs();
+    }
   });
 
   it("back-off lives in the injected state object (globalThis in the app), not the closure", async () => {

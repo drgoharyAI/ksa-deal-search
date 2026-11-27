@@ -1,8 +1,11 @@
 import type { AaResult } from "@/src/lib/aa";
 import type { ParsedQuery, Product } from "@/src/lib/types";
 import type { Page } from "playwright-core";
+import fs from "node:fs";
+import path from "node:path";
 import { TtlCache } from "@/src/lib/cache";
 import { withSheinPage } from "./browser";
+import { resolveSheinProfileDir } from "./profile";
 
 /**
  * SHEIN KSA (ar.shein.com, SAR) via the owner's real Chrome on its own profile (see ./browser.ts).
@@ -13,7 +16,9 @@ import { withSheinPage } from "./browser";
  *
  * Call budget: SHEIN's risk control redirected to /risk/challenge after about 13 searches in
  * 10 minutes, so each search is ONE page load (main term, page 1, relevance), loads are at least
- * 5 s apart, ok results are cached for 60 min, and a challenge stops all loads for 30 min.
+ * 5 s apart, ok results are cached for 60 min, and a challenge stops all loads for 2 h, doubling
+ * per consecutive block up to 12 h (reset by the first ok search). The back-off is kept on
+ * globalThis and in <shein-profile>/deal-search-backoff.json, so a dev restart does not lift it.
  * Captchas are never solved.
  */
 
@@ -22,7 +27,8 @@ const LOAD_TIMEOUT_MS = 45_000;
 const XHR_TIMEOUT_MS = 20_000;
 const MIN_GAP_MS = 5_000;
 const CACHE_TTL_MS = 60 * 60_000;
-const BLOCK_BACKOFF_MS = 30 * 60_000;
+const BACKOFF_START_MS = 2 * 3_600_000;
+const BACKOFF_CAP_MS = 12 * 3_600_000;
 const PRODUCT_PATH_RE = /^\/([^/]+)-p-(\d+)\.html$/;
 const CHALLENGE_RE = /\/risk\/challenge|captcha_type=/i;
 const XHR_PATH = "/bff-api/product/get_products_by_keywords";
@@ -236,10 +242,46 @@ export async function loadSearch(page: SheinPage, url: string): Promise<RawShein
 }
 
 /** Rate-limit and back-off state. Kept on globalThis in the app so HMR never resets a back-off. */
-export type SheinState = { blockedUntil: number; lastLoad: number };
+export type SheinState = { blockedUntil: number; strikes: number; lastLoad: number };
+
+/** The persisted part of the back-off. */
+export type Backoff = { blockedUntil: number; strikes: number };
+export type BackoffStore = { load(): Backoff | null; save(v: Backoff): void };
+
+/** Path of the persisted back-off (resolved on use, never at import). */
+export const backoffFile = (): string => path.join(resolveSheinProfileDir(), "deal-search-backoff.json");
+
+const fileStore: BackoffStore = {
+  load() {
+    try {
+      const v = JSON.parse(fs.readFileSync(backoffFile(), "utf8")) as Partial<Backoff>;
+      const blockedUntil = Number(v.blockedUntil);
+      const strikes = Number(v.strikes);
+      return Number.isFinite(blockedUntil) && Number.isInteger(strikes) && strikes >= 0 ? { blockedUntil, strikes } : null;
+    } catch {
+      return null;
+    }
+  },
+  save(v) {
+    try {
+      fs.mkdirSync(path.dirname(backoffFile()), { recursive: true });
+      fs.writeFileSync(backoffFile(), JSON.stringify(v));
+    } catch {
+      // best effort: the in-memory back-off still applies
+    }
+  },
+};
+const noStore: BackoffStore = { load: () => null, save: () => {} };
 
 const g = globalThis as typeof globalThis & { __sheinSaState?: SheinState; __sheinSaCache?: TtlCache<AaResult> };
-export const sheinState = (): SheinState => (g.__sheinSaState ??= { blockedUntil: 0, lastLoad: 0 });
+export function sheinState(): SheinState {
+  const s = (g.__sheinSaState ??= { blockedUntil: 0, strikes: 0, lastLoad: 0 });
+  // An object left on globalThis by an older module version (HMR) may lack `strikes`.
+  if (!Number.isInteger(s.strikes)) s.strikes = 0;
+  return s;
+}
+/** States that already merged the persisted back-off (once each, on first call). */
+const loadedStates = new WeakSet<SheinState>();
 const sheinCache = (): TtlCache<AaResult> => (g.__sheinSaCache ??= new TtlCache<AaResult>(CACHE_TTL_MS));
 
 type WithPage = <T>(fn: (page: SheinPage) => Promise<T>) => Promise<T>;
@@ -247,17 +289,31 @@ type WithPage = <T>(fn: (page: SheinPage) => Promise<T>) => Promise<T>;
 /**
  * Build a runCall over a page provider. Loads are serialized by the provider and spaced at least
  * `minGapMs` apart (warm-up included). Ok results are cached for 60 min (keyed q|page). After a
- * block (challenge, 403/429), every call fails fast for 30 min without loading. Never throws.
+ * block (challenge, 403/429), every call fails fast without loading: 2 h, doubling per consecutive
+ * block, capped at 12 h; the first ok search resets it. Never throws.
+ * `persist` defaults to the file in the SHEIN profile when `state` is the global one, else to none.
  */
 export function createRunCall(deps: {
   withPage: WithPage;
   minGapMs?: number;
   cache?: TtlCache<AaResult>;
   state?: SheinState;
+  persist?: BackoffStore;
 }) {
   const minGap = deps.minGapMs ?? MIN_GAP_MS;
   const cache = deps.cache ?? new TtlCache<AaResult>(CACHE_TTL_MS);
   const state = deps.state ?? sheinState();
+  const store = deps.persist ?? (deps.state ? noStore : fileStore);
+  const save = () => store.save({ blockedUntil: state.blockedUntil, strikes: state.strikes });
+  function loadPersisted() {
+    if (loadedStates.has(state)) return;
+    loadedStates.add(state);
+    const v = store.load();
+    if (v && v.blockedUntil > state.blockedUntil) {
+      state.blockedUntil = v.blockedUntil;
+      state.strikes = Math.max(state.strikes, v.strikes);
+    }
+  }
   const warmed = new WeakSet<object>();
   const recentlyBlocked = () => Date.now() < state.blockedUntil;
   const BLOCKED_RECENTLY: AaResult = { ok: false, class: "blocked", reason: "SHEIN blocked recently" };
@@ -277,6 +333,7 @@ export function createRunCall(deps: {
     const key = `${q}|${pageNo}`;
     const hit = cache.get(key);
     if (hit) return hit;
+    loadPersisted();
     if (recentlyBlocked()) return BLOCKED_RECENTLY;
     const url = `${ORIGIN}/pdsearch/${encodeURIComponent(q)}/`;
     try {
@@ -292,12 +349,18 @@ export function createRunCall(deps: {
       });
       const ok: AaResult = { ok: true, tier: 3, data: items };
       cache.set(key, ok);
+      if (state.strikes) {
+        state.strikes = 0;
+        save();
+      }
       return ok;
     } catch (e) {
       if (e instanceof BlockedRecently) return BLOCKED_RECENTLY;
       const reason = e instanceof Error ? e.message : String(e);
       if (e instanceof Blocked) {
-        state.blockedUntil = Date.now() + BLOCK_BACKOFF_MS;
+        state.strikes++;
+        state.blockedUntil = Date.now() + Math.min(BACKOFF_START_MS * 2 ** (state.strikes - 1), BACKOFF_CAP_MS);
+        save();
         return { ok: false, class: "blocked", reason };
       }
       return { ok: false, class: e instanceof Drift ? "drift" : "error", reason };
