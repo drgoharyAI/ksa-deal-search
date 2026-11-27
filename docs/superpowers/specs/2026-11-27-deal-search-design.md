@@ -296,8 +296,8 @@ non-goals for these three.
   badges, are not recorded as price observations, never trigger an alert (a product watch on one
   reports "pickup only"), and are never a history entry's cheapest match. Only explicit signals count:
   an "Out of stock" badge with no button, or with "Add to cart", is unknown.
-  Known gap: the server orders results this way, but the client's own re-sort and a group's lead row
-  use `rank()` in `src/lib/rank.ts`, which this change could not edit (another agent's file).
+  The order lives in `rank()` (`src/lib/rank.ts`), so the client's re-sort and a group's lead row
+  follow it too.
 
 ## Search history and price alerts (owner, 2026-11-27)
 These move out of non-goals.
