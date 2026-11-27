@@ -5,6 +5,7 @@ import { addPricePoint, createWatch, deleteWatch, findProductWatch, findSearchWa
 import { parseId, parseNewWatch, parseWatchUpdate } from "@/src/lib/alerts/validate";
 import { ensureChecker } from "@/src/lib/alerts/service";
 import { bad, dbFailure, json, readJson } from "@/src/lib/api";
+import { isPickupOnly } from "@/src/lib/saved";
 
 const SITE_IDS = new Set(Object.keys(sites));
 
@@ -34,6 +35,9 @@ export async function POST(req: Request) {
   ensureChecker();
   try {
     const db = getDb();
+    // Branch pickup only, by the latest search or the saved snapshot: the checker never records
+    // such a price, so the watch could never fire.
+    if (w.kind === "product" && isPickupOnly(db, w.site as string, w.productId as string)) return bad("A branch-pickup-only listing cannot be watched");
     const now = Date.now();
     const existing =
       w.kind === "product" ? findProductWatch(db, w.site as string, w.productId as string) : findSearchWatch(db, w);

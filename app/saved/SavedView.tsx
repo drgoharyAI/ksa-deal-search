@@ -16,6 +16,7 @@ import EmptyState from "../components/ui/EmptyState";
 import ErrorState from "../components/ui/ErrorState";
 import SectionHeader from "../components/ui/SectionHeader";
 import StoreMark from "../components/ui/StoreMark";
+import Badge from "../components/ui/Badge";
 import When from "../components/When";
 
 type State = { phase: "loading" } | { phase: "error"; message: string } | { phase: "ready"; items: SavedItem[] };
@@ -48,7 +49,11 @@ function SavedRow({ item: f, onRemove }: { item: SavedItem; onRemove: (f: SavedI
         )}
       </div>
       <div className="saved__main">
-        <StoreMark id={f.site} size={18} />
+        <div className="card__store">
+          <StoreMark id={f.site} size={18} />
+          {/* No delivered price, so no "Watch price" (the checker never records a pickup-only price). */}
+          {f.pickupOnly && <Badge>Branch pickup only</Badge>}
+        </div>
         <p className="saved__title" dir="auto">
           {f.title}
         </p>
@@ -104,7 +109,7 @@ function SavedRow({ item: f, onRemove }: { item: SavedItem; onRemove: (f: SavedI
         ) : (
           <span className="card__nolink">No store link</span>
         )}
-        {watch === "closed" && (
+        {watch === "closed" && !f.pickupOnly && (
           <Button size="sm" variant="ghost" onClick={() => setWatch("open")}>
             Watch price<span className="visually-hidden"> {f.title}</span>
           </Button>

@@ -42,8 +42,17 @@ function loadSqlite(): SqliteModule {
   }
 }
 
-/** Ordered schema migrations; each runs once, in a transaction, and bumps schema_version. */
-const MIGRATIONS: string[] = [
+/** Adds a column unless the table already has it (SQLite has no ADD COLUMN IF NOT EXISTS). */
+function addColumn(db: Db, table: string, column: string, decl: string): void {
+  const cols = db.prepare(`PRAGMA table_info(${table})`).all() as { name: string }[];
+  if (!cols.some((c) => c.name === column)) db.exec(`ALTER TABLE ${table} ADD COLUMN ${column} ${decl}`);
+}
+
+/**
+ * Ordered schema migrations; each runs once, in a transaction, and bumps schema_version. An entry
+ * is SQL, or a function for a step that must look at the schema first.
+ */
+const MIGRATIONS: (string | ((db: Db) => void))[] = [
   `CREATE TABLE searches (
      id INTEGER PRIMARY KEY,
      at INTEGER NOT NULL,
@@ -150,6 +159,12 @@ const MIGRATIONS: string[] = [
      PRIMARY KEY (site, productId)
    );
    CREATE INDEX IF NOT EXISTS recently_viewed_at ON recently_viewed(viewedAt);`,
+  // 6: branch pickup only (SACO), as last seen in a search and as saved, so a price watch is
+  // refused on a listing that cannot be delivered. Idempotent: a column already there stays.
+  (db) => {
+    addColumn(db, "seen_products", "pickupOnly", "INTEGER NOT NULL DEFAULT 0");
+    addColumn(db, "favourites", "pickupOnly", "INTEGER NOT NULL DEFAULT 0");
+  },
 ];
 
 export const SCHEMA_VERSION = MIGRATIONS.length;
@@ -162,7 +177,9 @@ export function migrate(db: Db): void {
   while (version < MIGRATIONS.length) {
     db.exec("BEGIN");
     try {
-      db.exec(MIGRATIONS[version]);
+      const step = MIGRATIONS[version];
+      if (typeof step === "string") db.exec(step);
+      else step(db);
       version += 1;
       db.prepare("UPDATE schema_version SET version = ?").run(version);
       db.exec("COMMIT");

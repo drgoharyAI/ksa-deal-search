@@ -38,7 +38,7 @@ describe("migration 5 (favourites, recently_viewed)", () => {
 
     db = openDb(file);
     expect(version(db)).toBe(SCHEMA_VERSION);
-    expect(SCHEMA_VERSION).toBe(5);
+    expect(SCHEMA_VERSION).toBe(6);
     expect(tables(db)).toEqual(expect.arrayContaining(["favourites", "recently_viewed", "searches", "observations", "seen_products"]));
     expect(listSearches(db)).toHaveLength(1);
     expect((db.prepare("SELECT count(*) n FROM observations").get() as { n: number }).n).toBe(1);
@@ -142,5 +142,34 @@ describe("history: delete one query", () => {
     expect(deleteSearchesByQuery(db, "jbl flip 6")).toBe(2);
     expect(listSearches(db).map((e) => e.query)).toEqual(["airpods"]);
     expect(deleteSearchesByQuery(db, "   ")).toBe(0);
+  });
+});
+
+describe("migration 6 (pickupOnly on seen_products and favourites)", () => {
+  const cols = (d: Db, t: string) => (d.prepare(`PRAGMA table_info(${t})`).all() as { name: string }[]).map((c) => c.name);
+  it("adds the column to both tables, and re-running it changes nothing", () => {
+    expect(cols(db, "seen_products")).toContain("pickupOnly");
+    expect(cols(db, "favourites")).toContain("pickupOnly");
+    db.exec("UPDATE schema_version SET version = 5");
+    migrate(db);
+    expect(version(db)).toBe(SCHEMA_VERSION);
+    expect(cols(db, "favourites").filter((c) => c === "pickupOnly")).toHaveLength(1);
+  });
+  it("upgrades a version-5 database, keeping its rows (pickupOnly 0)", () => {
+    addFavourite(db, snap);
+    db.exec("ALTER TABLE favourites DROP COLUMN pickupOnly; ALTER TABLE seen_products DROP COLUMN pickupOnly; UPDATE schema_version SET version = 5");
+    migrate(db);
+    expect(listFavourites(db)).toMatchObject([{ id: "N1" }]);
+    expect(listFavourites(db)[0].pickupOnly).toBeUndefined();
+  });
+  it("a saved pickup-only product keeps the flag; a later search's state wins", () => {
+    const p: Product = { site: "saco-sa", id: "S1", title: "Air fryer", listPrice: 229, origPrice: null, discountPct: null, currency: "SAR", rating: null, soldCount: 0, image: "", url: "https://www.saco.sa/en/product/x-p-000000000000000001", detailStatus: "ok", pickupOnly: true };
+    const parsed = parseSnapshot({ ...snapshotOf(p), query: "air fryer" }, new Set(["saco-sa"]), { needPrice: true });
+    expect(parsed).toMatchObject({ ok: true, value: { pickupOnly: true } });
+    if (!parsed.ok || parsed.value.price === null) throw new Error("parse");
+    addFavourite(db, { ...parsed.value, price: parsed.value.price });
+    expect(listFavourites(db)[0].pickupOnly).toBe(true);
+    recordSeen(db, [{ ...p, pickupOnly: undefined }], Date.now());
+    expect(listFavourites(db)[0].pickupOnly).toBeUndefined();
   });
 });

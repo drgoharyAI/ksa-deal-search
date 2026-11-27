@@ -15,6 +15,8 @@ export type ProductSnapshot = {
   image: string | null;
   price: number;
   currency: string;
+  /** Branch pickup only (SACO): no delivered price, so no price watch. */
+  pickupOnly?: true;
 };
 
 /** A saved product, with the latest price our observations hold for it. */
@@ -38,7 +40,7 @@ const priceOf = (p: Product) => p.finalPrice ?? p.listPrice;
 
 /** The snapshot of a listed product (the page's side of a save or a view). */
 export function snapshotOf(p: Product): ProductSnapshot {
-  return { site: p.site, id: p.id, title: p.title, url: p.url, image: p.image || null, price: priceOf(p), currency: p.currency || "SAR" };
+  return { site: p.site, id: p.id, title: p.title, url: p.url, image: p.image || null, price: priceOf(p), currency: p.currency || "SAR", ...(p.pickupOnly && { pickupOnly: true as const }) };
 }
 
 /** The key a saved or viewed product goes by, the same as the compare key ("noon-sa+N123"). */

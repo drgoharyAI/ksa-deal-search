@@ -45,9 +45,11 @@ const valid = (n: unknown): n is number => typeof n === "number" && Number.isFin
 /** Upserts the title, https link and picture of each product a search returned. */
 export function recordSeen(db: Db, products: Product[], now = Date.now()): number {
   const upsert = db.prepare(
-    `INSERT INTO seen_products (site, productId, title, url, image, currency, lastSeen) VALUES (?, ?, ?, ?, ?, ?, ?)
+    `INSERT INTO seen_products (site, productId, title, url, image, currency, lastSeen, pickupOnly) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
      ON CONFLICT (site, productId) DO UPDATE SET title = excluded.title, url = excluded.url, image = excluded.image,
-       currency = excluded.currency, lastSeen = MAX(lastSeen, excluded.lastSeen)`,
+       currency = excluded.currency,
+       pickupOnly = CASE WHEN excluded.lastSeen >= lastSeen THEN excluded.pickupOnly ELSE pickupOnly END,
+       lastSeen = MAX(lastSeen, excluded.lastSeen)`,
   );
   let n = 0;
   db.exec("BEGIN");
@@ -58,7 +60,7 @@ export function recordSeen(db: Db, products: Product[], now = Date.now()): numbe
       if (!p.id || !url || !title) continue;
       const image = p.image ? httpsUrl(p.image) : null;
       const at = valid(p.fetchedAt) ? Math.min(p.fetchedAt, now) : now;
-      n += Number(upsert.run(p.site, p.id, title.slice(0, 300), url, image, p.currency || "SAR", at).changes);
+      n += Number(upsert.run(p.site, p.id, title.slice(0, 300), url, image, p.currency || "SAR", at, p.pickupOnly ? 1 : 0).changes);
     }
     db.exec("COMMIT");
   } catch (e) {

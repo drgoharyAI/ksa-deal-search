@@ -44,6 +44,8 @@ const seen = await import("@/app/api/alerts/seen/route");
 const testTelegram = await import("@/app/api/alerts/test-telegram/route");
 const search = await import("@/app/api/search/route");
 const { addEvent } = await import("@/src/lib/alerts/repo");
+const { recordSeen } = await import("@/src/lib/discover");
+const { addFavourite } = await import("@/src/lib/saved");
 
 const BASE = "http://127.0.0.1:3000";
 const jsonReq = (path: string, method: string, body: unknown, headers: Record<string, string> = {}) =>
@@ -203,5 +205,35 @@ describe("/api/alerts", () => {
     const r = await testTelegram.POST(jsonReq("/api/alerts/test-telegram", "POST", {}));
     expect(r.status).toBe(400);
     expect(((await r.json()) as { error: string }).error).toContain("TELEGRAM_BOT_TOKEN");
+  });
+});
+
+describe("product watches on branch-pickup-only listings (SACO)", () => {
+  const sacoUrl = "https://www.saco.sa/en/product/x-p-000000000000103346";
+  const saco: Product = { ...product, site: "saco-sa", id: "103346", title: "Air fryer 4L", url: sacoUrl, pickupOnly: true };
+  const body = { kind: "product", site: "saco-sa", productId: "103346", query: "air fryer", target: 200, title: "Air fryer 4L", url: sacoUrl, price: 229 };
+
+  it("refuses one the latest search listed as pickup only, even when the page does not say so", async () => {
+    recordSeen(state.db, [saco], 10);
+    const r = await watches.POST(jsonReq("/api/watches", "POST", body));
+    expect(r.status).toBe(400);
+    expect(((await r.json()) as { error: string }).error).toContain("pickup");
+  });
+  it("accepts it once a later search lists it as deliverable", async () => {
+    recordSeen(state.db, [saco], 10);
+    recordSeen(state.db, [{ ...saco, pickupOnly: undefined }], 20);
+    expect((await watches.POST(jsonReq("/api/watches", "POST", body))).status).toBe(201);
+  });
+  it("an older search does not overwrite a newer state", async () => {
+    recordSeen(state.db, [saco], 20);
+    recordSeen(state.db, [{ ...saco, pickupOnly: undefined }], 10);
+    expect((await watches.POST(jsonReq("/api/watches", "POST", body))).status).toBe(400);
+  });
+  it("falls back to the saved snapshot when no search has listed it", async () => {
+    addFavourite(state.db, { site: "saco-sa", id: "103346", title: "Air fryer 4L", url: sacoUrl, image: null, price: 229, currency: "SAR", query: "air fryer", pickupOnly: true });
+    expect((await watches.POST(jsonReq("/api/watches", "POST", body))).status).toBe(400);
+  });
+  it("an unknown product is still accepted (nothing says it is pickup only)", async () => {
+    expect((await watches.POST(jsonReq("/api/watches", "POST", body))).status).toBe(201);
   });
 });

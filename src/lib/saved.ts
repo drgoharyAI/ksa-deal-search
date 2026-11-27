@@ -53,12 +53,13 @@ export function parseSnapshot(body: unknown, siteIds: ReadonlySet<string>, opts:
   if (opts.needPrice && price === null) return { ok: false, error: "A saved product needs its price" };
   const currency = typeof b.currency === "string" && /^[A-Z]{3}$/.test(b.currency) ? b.currency : "SAR";
   const query = typeof b.query === "string" && b.query.trim() && b.query.length <= MAX_QUERY ? b.query.trim() : null;
-  return { ok: true, value: { site, id, title: title.slice(0, MAX_TITLE), url, image, price, currency, query } };
+  const pickup = b.pickupOnly === true ? { pickupOnly: true as const } : {};
+  return { ok: true, value: { site, id, title: title.slice(0, MAX_TITLE), url, image, price, currency, query, ...pickup } };
 }
 
 /* ---------- Favourites ---------- */
 
-type SavedRow = { site: string; productId: string; title: string; url: string; image: string | null; price: number; currency: string; query: string | null; savedAt: number };
+type SavedRow = { site: string; productId: string; title: string; url: string; image: string | null; price: number; currency: string; query: string | null; savedAt: number; pickupOnly: number };
 
 /**
  * Saves a product. Saving one already saved changes nothing (its saved price and time stay, so the
@@ -69,8 +70,8 @@ export function addFavourite(db: Db, s: SavedInput, now = Date.now()): "created"
   if (has) return "exists";
   const n = (db.prepare("SELECT count(*) n FROM favourites").get() as { n: number }).n;
   if (n >= MAX_SAVED) return "full";
-  db.prepare("INSERT INTO favourites (site, productId, title, url, image, price, currency, query, savedAt) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)")
-    .run(s.site, s.id, s.title, s.url, s.image, s.price, s.currency, s.query, now);
+  db.prepare("INSERT INTO favourites (site, productId, title, url, image, price, currency, query, savedAt, pickupOnly) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
+    .run(s.site, s.id, s.title, s.url, s.image, s.price, s.currency, s.query, now, s.pickupOnly ? 1 : 0);
   return "created";
 }
 
@@ -83,8 +84,9 @@ export function listFavourites(db: Db): SavedItem[] {
   // One query: each saved product with its newest observation (a window over its observations).
   const rows = db
     .prepare(
-      `SELECT f.*, o.price AS obsPrice, o.at AS obsAt
+      `SELECT f.*, o.price AS obsPrice, o.at AS obsAt, s.pickupOnly AS seenPickup
        FROM favourites f
+       LEFT JOIN seen_products s ON s.site = f.site AND s.productId = f.productId
        LEFT JOIN (
          SELECT site, productId, price, at,
                 ROW_NUMBER() OVER (PARTITION BY site, productId ORDER BY at DESC, id DESC) AS n
@@ -93,12 +95,12 @@ export function listFavourites(db: Db): SavedItem[] {
        ) o ON o.site = f.site AND o.productId = f.productId AND o.n = 1
        ORDER BY f.savedAt DESC, f.rowid DESC`,
     )
-    .all() as unknown as (SavedRow & { obsPrice: number | null; obsAt: number | null })[];
+    .all() as unknown as (SavedRow & { obsPrice: number | null; obsAt: number | null; seenPickup: number | null })[];
   return rows.map((r) => {
     const obs = r.obsPrice !== null && r.obsAt !== null && Number.isFinite(r.obsPrice) && r.obsPrice > 0 ? { price: r.obsPrice, at: r.obsAt } : null;
     // A change only from a price observed after saving, so the figure means "since you saved it".
     const change = obs && obs.at > r.savedAt ? Math.round((obs.price - r.price) * 100) / 100 : null;
-    return { site: r.site, id: r.productId, title: r.title, url: r.url, image: r.image, price: r.price, currency: r.currency, query: r.query, savedAt: r.savedAt, latest: obs, change };
+    return { site: r.site, id: r.productId, title: r.title, url: r.url, image: r.image, price: r.price, currency: r.currency, query: r.query, savedAt: r.savedAt, latest: obs, change, ...pickupOf(r.seenPickup ?? r.pickupOnly) };
   });
 }
 
@@ -133,4 +135,18 @@ export function listViewed(db: Db, limit = MAX_VIEWED): ViewedItem[] {
 
 export function clearViewed(db: Db): void {
   db.prepare("DELETE FROM recently_viewed").run();
+}
+
+/** `{ pickupOnly: true }` for a stored 1, else nothing (the flag is absent, never false). */
+const pickupOf = (flag: number): { pickupOnly?: true } => (flag === 1 ? { pickupOnly: true } : {});
+
+/**
+ * Whether a product is branch pickup only as far as this app knows: the latest search that listed
+ * it (seen_products), else its saved snapshot. False when neither knows the product.
+ */
+export function isPickupOnly(db: Db, site: string, id: string): boolean {
+  const seen = db.prepare("SELECT pickupOnly FROM seen_products WHERE site = ? AND productId = ?").get(site, id) as { pickupOnly: number } | undefined;
+  if (seen) return seen.pickupOnly === 1;
+  const saved = db.prepare("SELECT pickupOnly FROM favourites WHERE site = ? AND productId = ?").get(site, id) as { pickupOnly: number } | undefined;
+  return saved?.pickupOnly === 1;
 }
