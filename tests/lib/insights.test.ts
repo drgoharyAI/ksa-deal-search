@@ -204,6 +204,18 @@ describe("migration", () => {
     expect(idx.map((i) => i.name)).toContain("observations_item");
     db.close();
   });
+  it("upgrades a database at version 2 (observations, no later columns) and keeps its observations", () => {
+    const db = v1Db();
+    db.exec(`CREATE TABLE observations (id INTEGER PRIMARY KEY, site TEXT NOT NULL, productId TEXT NOT NULL, price REAL NOT NULL, origPrice REAL, at INTEGER NOT NULL);
+      CREATE INDEX observations_item ON observations(site, productId, at);
+      CREATE INDEX observations_at ON observations(at);`);
+    db.prepare("UPDATE schema_version SET version = 2").run();
+    db.prepare("INSERT INTO observations (site, productId, price, origPrice, at) VALUES ('s', 'p', 9, NULL, 1)").run();
+    migrate(db);
+    expect((db.prepare("SELECT version FROM schema_version").get() as { version: number }).version).toBe(SCHEMA_VERSION);
+    expect((db.prepare("SELECT count(*) n FROM observations").get() as { n: number }).n).toBe(1);
+    db.close();
+  });
   it("migrates a shared handle opened before the upgrade (dev hot reload)", () => {
     const db = v1Db();
     const g = globalThis as unknown as { __dealSearchDb?: Db; __dealSearchDbSchema?: number };
