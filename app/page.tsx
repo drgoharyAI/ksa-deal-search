@@ -21,6 +21,8 @@ import { parseShare, runOnce, shareSearch } from "@/src/lib/share";
 import CopyLink from "./components/CopyLink";
 import RecentlyViewed from "./components/RecentlyViewed";
 import { SavedContext, useFavourites } from "./components/Saved";
+import { DetailsContext, type DetailsSource } from "./components/CardDetails";
+import { relatedListings } from "@/src/lib/match/related";
 import ResultsLayout from "./components/ResultsLayout";
 import { CompareDialog, CompareTray } from "./components/Compare";
 import {
@@ -282,6 +284,14 @@ export default function Home() {
   const chipCtx = useMemo(() => chipContext(all), [all]);
   const facets = useMemo(() => facetCountsFor(units.map((u) => u.members), chips, chipCtx), [units, chips, chipCtx]);
   const bounds = useMemo(() => priceBounds(all), [all]);
+  // An expanded card's "Other listings like this" and brand, from the results on screen only.
+  const details = useMemo<DetailsSource>(
+    () => ({
+      related: (p, exclude) => relatedListings(p, all, { exclude: new Set(exclude) }),
+      brand: (p) => chipCtx.brands.get(productKey(p)),
+    }),
+    [all, chipCtx],
+  );
   const items = useMemo(() => viewItems(units, chips, chipCtx, values.sort), [units, chips, chipCtx, values.sort]);
   const filtering = isActive(chips) && all.length > 0;
   const kept = keptChips.filter((k) => (k === "rating" ? chips.minRating !== undefined : k === "deals" ? !!chips.deals : chips.discounted));
@@ -598,7 +608,9 @@ export default function Home() {
                   </ul>
                 ) : results && items.length ? (
                   <GroupOpenContext value={groupOpen}>
-                    <ResultTiers items={items} query={results.query} compare={compare} view={view} />
+                    <DetailsContext value={details}>
+                      <ResultTiers items={items} query={results.query} compare={compare} view={view} />
+                    </DetailsContext>
                   </GroupOpenContext>
                 ) : results && filtering ? (
                   <EmptyState

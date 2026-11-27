@@ -14,6 +14,7 @@ import Button from "./ui/Button";
 import Price from "./ui/Price";
 import StoreMark from "./ui/StoreMark";
 import { SaveToggle, SavedContext, viewHandlers } from "./Saved";
+import CardDetails from "./CardDetails";
 
 const DEAL_EXPLAIN: Record<DealInsight["badge"], string> = {
   "fake-deal": "The discount does not hold up against the prices we've seen",
@@ -234,6 +235,7 @@ function ResultCard({ product: p, query, compareChecked = false, onCompare, vari
               {query && <CardWatch product={p} query={query} />}
             </div>
           )}
+          <CardDetails product={p} />
         </div>
       </div>
     </article>

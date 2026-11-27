@@ -57,7 +57,11 @@ describe("GroupCard (17b2)", () => {
     expect(count(out, '<li class="gcard__row')).toBe(4);
     expect(out).toContain('aria-expanded="false"');
     expect(out).toContain("+2 more");
-    expect(html(groupOf(4))).not.toContain("aria-expanded");
+    // Four rows need no "+N more"; the one disclosure left is the card's "Details" (U5).
+    const four = html(groupOf(4));
+    expect(four).not.toMatch(/\+\d+ more/);
+    expect(count(four, "aria-expanded")).toBe(1);
+    expect(four).toContain('class="details__toggle" aria-expanded="false"');
   });
   it("Watch acts on the best member; every store row has its own Compare", () => {
     const out = html(groupOf(2), { query: "tv", compareChecked: true, onCompare: () => {} });

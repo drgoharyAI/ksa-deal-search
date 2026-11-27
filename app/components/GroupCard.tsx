@@ -12,6 +12,7 @@ import { isFromPrice, storeDiscount } from "@/src/lib/discount";
 import { formatMoney } from "@/src/lib/money";
 import Button from "./ui/Button";
 import { SaveToggle, viewHandlers } from "./Saved";
+import CardDetails from "./CardDetails";
 
 /**
  * Which groups show all their rows, kept by the page so it survives the results changing under
@@ -140,6 +141,7 @@ function GroupCard({ group: g, query, compareChecked = false, comparedRows, onCo
           </Button>
         )}
         {query && <CardWatch key={productKey(b)} product={b} query={query} />}
+        <CardDetails key={`d-${productKey(b)}`} product={b} exclude={rowKeys} />
       </div>
     </article>
   );

@@ -849,6 +849,9 @@ function jaccard(a: Set<string>, b: Set<string>, w: Weight = () => 1): number {
   return union ? inter / union : 0;
 }
 
+/** Plain token similarity of two titles (Jaccard over their words, spec and model tokens), 0..1. */
+export const tokenSimilarity = (a: TitleFeatures, b: TitleFeatures): number => jaccard(a.tokens, b.tokens);
+
 /** Inverse document frequency over the result set's titles: log(1 + N / df), precomputed. */
 function idfWeights(fs: TitleFeatures[]): Weight {
   const df = new Map<string, number>();
