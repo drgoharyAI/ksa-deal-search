@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { MAX_SHARE_LENGTH, MAX_SHARE_QUERY, parseShare, runOnce, shareSearch } from "@/src/lib/share";
 import { NO_FILTERS, filtersFromSearch } from "@/src/lib/chips";
-import { historyMove, HOME_ENTRY } from "@/src/lib/rerun";
+import { historyMove, HOME_ENTRY, urlWrite } from "@/src/lib/rerun";
 import { copyText } from "@/app/components/CopyLink";
 
 const base = { query: "", sites: ["jarir", "noon-sa"], sort: "price" as const, minPrice: "", maxPrice: "", minRating: "" };
@@ -150,5 +150,18 @@ describe("Copy link", () => {
     expect(await copyText("u", undefined, doc(false).d)).toBe(false);
     expect(await copyText("u", undefined, doc("throws").d)).toBe(false);
     expect(await copyText("u", undefined, undefined)).toBe(false);
+  });
+});
+
+describe("urlWrite: a search from the home gets its own history entry", () => {
+  it("pushes when results replace the home (no query in the URL yet)", () => {
+    expect(urlWrite("", true)).toBe("push");
+    expect(urlWrite("?store=jarir", true)).toBe("push");
+    expect(urlWrite("?q=%20", true)).toBe("push");
+  });
+  it("replaces on a results URL, and with no results on screen", () => {
+    expect(urlWrite("?q=airpods&sort=price", true)).toBe("replace");
+    expect(urlWrite("", false)).toBe("replace");
+    expect(urlWrite("?store=jarir", false)).toBe("replace");
   });
 });

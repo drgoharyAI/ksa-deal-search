@@ -18,9 +18,20 @@ export const metadata: Metadata = {
   description: `Search ${storeList.slice(0, -1).join(", ")} and ${storeList.at(-1)} at once and rank the results by price, discount or deal.`,
 };
 
+/**
+ * Before first paint: a results URL (a shared link, a reload, a History re-run) marks <html>, so the
+ * prerendered home stays hidden instead of showing and then collapsing into the results layout (a
+ * large layout shift). The search page removes the mark once it shows results or finds no query.
+ */
+const RESULTS_URL_MARK = "try{if((new URLSearchParams(location.search).get('q')||'').trim())document.documentElement.setAttribute('data-results-url','')}catch(e){}";
+
 export default function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
   return (
-    <html lang="en" className={`${display.variable} ${plex.variable} ${plexArabic.variable} ${plexMono.variable}`}>
+    // suppressHydrationWarning: the inline script may add data-results-url to <html> before React hydrates.
+    <html lang="en" className={`${display.variable} ${plex.variable} ${plexArabic.variable} ${plexMono.variable}`} suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: RESULTS_URL_MARK }} />
+      </head>
       <body>{children}</body>
     </html>
   );

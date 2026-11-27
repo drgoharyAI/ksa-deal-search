@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import ResultTiers from "@/app/components/ResultTiers";
+import ResultTiers, { RESULTS_STEP } from "@/app/components/ResultTiers";
 import type { Product } from "@/src/lib/types";
 
 const P = (id: string, o: Partial<Product> = {}): Product => ({
@@ -25,5 +25,20 @@ describe("ResultTiers (12f)", () => {
     const out = html([P("a", { matchScore: 0.9 }), P("b")]);
     expect(out).not.toContain("Less likely");
     expect(count(out, 'class="grid"')).toBe(1);
+  });
+  it("draws the first RESULTS_STEP cards, then offers the rest (scroll or a button)", () => {
+    const many = Array.from({ length: RESULTS_STEP + 5 }, (_, i) => P(`m${i}`, { matchScore: 0.9 }));
+    const out = html(many);
+    expect(count(out, "<article")).toBe(RESULTS_STEP);
+    expect(out).toContain("Show more results");
+    expect(out).toContain(", 5 not shown yet");
+    const few = html(many.slice(0, RESULTS_STEP));
+    expect(few).not.toContain("Show more results");
+  });
+  it("the less likely divider waits until its tier is drawn", () => {
+    const many = [...Array.from({ length: RESULTS_STEP }, (_, i) => P(`m${i}`, { matchScore: 0.9 })), P("doubt", { weakMatch: true })];
+    const out = html(many);
+    expect(out).not.toContain("Less likely matches");
+    expect(out).toContain(", 1 not shown yet");
   });
 });

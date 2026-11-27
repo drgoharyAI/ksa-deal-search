@@ -45,3 +45,12 @@ export function historyMove(search: string, state: unknown, s: { stashed: boolea
   if (s.showingHome && !s.stashed && params.get("q")?.trim()) return "run";
   return "sync";
 }
+
+/**
+ * How the search page writes its URL: a search shown over the home (the URL has no query yet)
+ * gets a new entry, so Back returns to the home; anything else (chips, sort, compare, a new query
+ * on a results URL) replaces the current entry.
+ */
+export function urlWrite(current: string, showingResults: boolean): "push" | "replace" {
+  return showingResults && !new URLSearchParams(current).get("q")?.trim() ? "push" : "replace";
+}

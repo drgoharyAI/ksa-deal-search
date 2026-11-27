@@ -16,7 +16,7 @@ import ErrorState from "./components/ui/ErrorState";
 import { SkeletonCard } from "./components/ui/Skeleton";
 import WatchForm, { postWatch } from "./components/WatchForm";
 import { cheapestConfident, defaultTarget, priceOf } from "@/src/lib/alerts/shared";
-import { HOME_ENTRY, historyMove } from "@/src/lib/rerun";
+import { HOME_ENTRY, historyMove, urlWrite } from "@/src/lib/rerun";
 import { parseShare, runOnce, shareSearch } from "@/src/lib/share";
 import CopyLink from "./components/CopyLink";
 import RecentlyViewed from "./components/RecentlyViewed";
@@ -89,6 +89,11 @@ const toNum = (s: string): number | undefined => {
 
 const fieldFor = (msg: string): ErrorField =>
   msg === "Pick at least one store" ? "sites" : msg === "Enter something to search for" || msg === "Search is too long" ? "query" : "form";
+
+/** Drops the pre-paint mark app/layout.tsx sets on a results URL (it hides the prerendered home). */
+function clearResultsUrlMark() {
+  document.documentElement.removeAttribute("data-results-url");
+}
 
 export default function Home() {
   const [values, setValues] = useState<FormValues>(INITIAL);
@@ -253,7 +258,10 @@ export default function Home() {
     setMemory(keys.length ? readMemory(sessionStore()) : null);
     setChipsRead(true);
     const shared = parseShare(qs, INITIAL);
-    if (!shared) return;
+    if (!shared) {
+      clearResultsUrlMark();
+      return;
+    }
     // The link in its own words: unknown keys and the old "run=1" dropped.
     window.history.replaceState(window.history.state, "", window.location.pathname + shareSearch(shared.values, shared.chips, shared.cmp));
     setValues(shared.values);
@@ -272,6 +280,13 @@ export default function Home() {
       ? shareSearch({ ...runForm, sort: values.sort }, chips, cmp.keys)
       : withCompareParam(withChipParams(window.location.search, chips), cmp.keys);
     if (next === window.location.search) return;
+    if (urlWrite(window.location.search, !!runForm) === "push") {
+      // A search started from the home: the home keeps its own entry (marked, so Back shows the
+      // clean home and stashes these results for Forward), and the results get a new one.
+      window.history.replaceState({ ...(window.history.state as object | null), [HOME_ENTRY]: true }, "", window.location.href);
+      window.history.pushState(null, "", window.location.pathname + next);
+      return;
+    }
     // A results entry is never the marked "go home" entry, even when a search replaced that entry.
     const state = Object.entries((window.history.state as Record<string, unknown> | null) ?? {}).filter(([k]) => !runForm || k !== HOME_ENTRY);
     window.history.replaceState(Object.fromEntries(state), "", window.location.pathname + next);
@@ -473,6 +488,10 @@ export default function Home() {
   const loading = phase === "loading";
   // Before the first search the page is the home: brand line, search, suggestions and discovery.
   const home = !loading && !results;
+  // A results URL kept the home hidden until now (app/layout.tsx); from here the page shows itself.
+  useEffect(() => {
+    if (phase !== "idle" || !home) clearResultsUrlMark();
+  }, [phase, home]);
   // Searching with nothing to show yet: the skeleton grid holds the space.
   const waiting = loading && all.length === 0;
   const cheapest = useMemo(() => (all.length ? cheapestConfident(all) : null), [all]);
@@ -490,7 +509,7 @@ export default function Home() {
   if (loading) live = run ? liveSummary(run.stream, items.length) : "";
   else if (phase === "error" && error) live = error;
   else if (phase === "done" && results && filtering) live = liveFilter;
-  else if (phase === "done" && results && run) live = items.length ? liveSummary(run.stream, items.length) : (results.reason ?? "");
+  else if (phase === "done" && results && run) live = items.length || run.stream.stopped ? liveSummary(run.stream, items.length) : (results.reason ?? "");
 
   return (
     <SavedContext value={favourites}>
@@ -609,7 +628,7 @@ export default function Home() {
                 ) : results && items.length ? (
                   <GroupOpenContext value={groupOpen}>
                     <DetailsContext value={details}>
-                      <ResultTiers items={items} query={results.query} compare={compare} view={view} />
+                      <ResultTiers key={results.query} items={items} query={results.query} compare={compare} view={view} />
                     </DetailsContext>
                   </GroupOpenContext>
                 ) : results && filtering ? (
@@ -627,6 +646,17 @@ export default function Home() {
                           Clear all filters
                         </Button>
                       </div>
+                    }
+                  />
+                ) : results && !loading && run?.stream.stopped ? (
+                  // Stopped before any store found something: not a "no match" (most stores never answered).
+                  <EmptyState
+                    title="The search was stopped before any results came"
+                    body="Search again to see what the stores have."
+                    action={
+                      <Button size="sm" variant="secondary" onClick={() => searchWith({})}>
+                        Search again
+                      </Button>
                     }
                   />
                 ) : results && !loading ? (
