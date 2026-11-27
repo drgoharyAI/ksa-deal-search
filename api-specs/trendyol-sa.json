@@ -1,0 +1,104 @@
+{
+  "name": "trendyol-sa",
+  "baseUrl": "https://www.trendyol.sa",
+  "operations": [
+    {
+      "name": "search",
+      "request": {
+        "method": "GET",
+        "url": "https://www.trendyol.sa/en/sr?q=laptop&pi=1&sst=SCORE",
+        "headers": {
+          "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/jxl,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
+          "accept-language": "en-US,en;q=0.9",
+          "priority": "u=0, i",
+          "sec-ch-ua": "\"Chromium\";v=\"158\", \"Not.A/Brand\";v=\"24\", \"Google Chrome\";v=\"158\"",
+          "sec-ch-ua-mobile": "?0",
+          "sec-ch-ua-platform": "\"Windows\"",
+          "sec-fetch-dest": "document",
+          "sec-fetch-mode": "navigate",
+          "sec-fetch-site": "none",
+          "sec-fetch-user": "?1",
+          "upgrade-insecure-requests": "1",
+          "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/158.0.0.0 Safari/537.36"
+        }
+      },
+      "slots": [
+        {
+          "param": "q",
+          "at": [
+            "query:q"
+          ]
+        },
+        {
+          "param": "page",
+          "at": [
+            "query:pi"
+          ]
+        },
+        {
+          "param": "sort",
+          "at": [
+            "query:sst"
+          ]
+        }
+      ],
+      "volatile": [],
+      "trigger": {
+        "url": "https://www.trendyol.sa/en/sr?q={q}&pi={page}&sst={sort}"
+      },
+      "match": {
+        "method": "GET",
+        "host": "www.trendyol.sa",
+        "path": "/en/sr"
+      },
+      "response": {
+        "format": "embedded",
+        "contentType": "text/html; charset=utf-8",
+        "extract": "data.products",
+        "pick": [
+          "id=id",
+          "title=name",
+          "brand=brand",
+          "price=binaryPrice.salePriceWihoutCurrency",
+          "origPrice=binaryPrice.strikethroughPrice",
+          "discount=binaryPrice.discountPercentage",
+          "priceNum=price.discountedPrice",
+          "listPrice=price.current",
+          "rating=ratingScore.averageRating",
+          "reviews=ratingScore.totalCount",
+          "image=image",
+          "path=url",
+          "freeShipping=freeCargo",
+          "merchantId=merchantId"
+        ],
+        "embedded": {
+          "regex": "window\\[\"__single-search-result__PROPS\"\\]=(\\{)"
+        }
+      },
+      "params": [
+        {
+          "name": "q",
+          "type": "string",
+          "required": true,
+          "example": "laptop"
+        },
+        {
+          "name": "page",
+          "type": "string",
+          "required": true,
+          "example": "1"
+        },
+        {
+          "name": "sort",
+          "type": "string",
+          "required": true,
+          "example": "SCORE"
+        }
+      ],
+      "readOnly": true,
+      "minTier": 1,
+      "learnedLoggedIn": true,
+      "learnedAt": "2026-11-27T00:19:49.410Z"
+    }
+  ]
+}
