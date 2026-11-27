@@ -127,7 +127,8 @@ export function scoreMatches(products: Product[], variants: string[][]): Product
   const phrase = phraseCredit(products, variants);
   return products.map((p, i) => {
     const score = RESEMBLANCE_WEIGHT * (res ? res[i] : 1) + PHRASE_WEIGHT * phrase[i];
-    const matchScore = Math.round((p.weakMatch ? Math.min(score, WEAK_CAP) : score) * 1000) / 1000;
+    // Not rounded: a score just under MATCH_THRESHOLD must stay under it.
+    const matchScore = p.weakMatch ? Math.min(score, WEAK_CAP) : score;
     return { ...p, matchScore };
   });
 }

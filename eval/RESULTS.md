@@ -486,3 +486,38 @@ cheapest-first 100%->87.5%, still >= 85%). Tier: 88% of results.
 | holdout2 (6) | 100% | 0% | 0% | 89.8% | 66.7% |
 | holdout3 (6) | 81.7% | 3.3% | 5.0% | 89.9% | 66.7% |
 | all (35) | 96.3% | 1.1% | 0.9% | 90.2% | 82.9% |
+(The round 2 commit rounded matchScore to 3 decimals, which lifted one 0.5996 keyboard combo over
+the threshold: tuning p@10 98.7%, wrong@10 0.7% in that commit. Fixed with the final results: the
+score is no longer rounded, and the pipeline matches the table above.)
+
+## 12f rounds 3-5 (all reverted: no combined gain)
+- 3, cross-store agreement: a third signal, the best TF-IDF cosine to a title from another store
+  (scaled at 0.3/0.4/0.5, weight 0.1-0.3, threshold 0.55-0.65). Best combined p@10 96.3% only at
+  weight 0 (95.4% with weight 0.2, which restores cheapest-first to 85.7%). Beauty-blender sponges
+  have few cross-store twins, but desk organizers, lap desks and milk frothers do.
+- 4, other resemblance references: k-nearest reference listings instead of the centroid (k=5),
+  the same restricted to other stores, and a store-balanced centroid. Best 96.0% / 94.6% / 95.7%,
+  all with lower cheapest-first.
+- 5, cheap items need more evidence: threshold +0.05/0.1/0.2 below 0.1/0.2/0.3 x the median price.
+  Combined p@10 up to 96.9%, but only by pushing cheapest-first down (tuning 53%, all 49%); at a
+  cost that keeps tuning >= 85% the gain is 0.3 points (96.6%) with all-set cheapest-first 71%.
+Three rounds in a row without a combined gain: stop.
+
+## 12f final (after round 2)
+| set | p@10 | acc@10 | wrong@10 | recall | cheapest-first |
+|---|---|---|---|---|---|
+| target | >= 90% | <= 3% | <= 5% | >= 80% | >= 85% |
+| tuning (15) | 99.3% | 0.7% | 0% | 92.4% | 93.3% |
+| holdout (8) | 98.8% | 1.3% | 0% | 86.5% | 87.5% |
+| holdout2 (6) | 100% | 0% | 0% | 89.8% | 66.7% (miss) |
+| holdout3 (6) | 81.7% (miss) | 3.3% (miss) | 5.0% | 89.9% | 66.7% (miss) |
+| all (35) | 96.3% | 1.1% | 0.9% | 90.2% | 82.9% |
+Confident tier: median 90% of a query's results (median 246 items; smallest share 56%, instant
+camera 141/250). Cheapest-first misses: 6 of 35. In 5 of them (hair dryer, bluetooth speaker, air
+purifier, baby stroller, noise cancelling headphones) #1 IS the cheapest relevant item of the
+confident tier, and the cheapest relevant item overall is doubtful or weak (baby stroller is the
+label-capped 12e case). Only blender's #1 is wrong (a milk frother). Holdout3 left: blender 50%
+(milk frothers, egg beaters, a garlic chopper and a lipstick "jelly blender" that are worded like
+the product's own cheap listings), noise cancelling headphones 70% (wired in-ear earphones that
+call themselves headphones, labelled wrong-model), standing desk 80%, galaxy tab s9 90% (11
+results, 9 relevant: capped).

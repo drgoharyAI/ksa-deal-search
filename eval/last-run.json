@@ -1,5 +1,5 @@
 {
-  "at": "2026-11-27T09:06:50.512Z",
+  "at": "2026-11-27T09:12:51.509Z",
   "queries": [
     {
       "query": "anc earbuds under 300",
@@ -899,9 +899,9 @@
       "labelled": true,
       "metrics": {
         "top": 10,
-        "precisionAt10": 0.9,
+        "precisionAt10": 1,
         "accessoryAt10": 0,
-        "wrongModelAt10": 0.1,
+        "wrongModelAt10": 0,
         "unlabeledAt10": 0,
         "recall": 0.9050632911392406,
         "relevantRecorded": 158,
@@ -915,13 +915,6 @@
           "price": 4.24,
           "title": "Compact Mechanical Gaming Keyboard with RGB Backlit Computer Keyboard Hot Swappable Keyboard for Windows Laptops and PC Gamers",
           "label": "relevant"
-        },
-        {
-          "key": "amazon-sa:B08CF2W4Z1",
-          "store": "amazon-sa",
-          "price": 29.9,
-          "title": "SKY-TOUCH G2 Computer Gaming Keyboard and Mouse Combo :Keyboard with Flexible Polychromatic LED Lights Mechanical Feel - Black and white",
-          "label": "wrong-model"
         },
         {
           "key": "aliexpress:1005013037927286",
@@ -977,6 +970,13 @@
           "store": "noon-sa",
           "price": 69.9,
           "title": "Rock Pow 61 keys 60% Mechanical Gaming Keyboard Arabic English Ice Blue Backlit Ultra-Compact Mini Keyboard, Mini Compact Keyboard for PC/Mac Gamer, Typist, Easy Carry on Trip Red Switch Black",
+          "label": "relevant"
+        },
+        {
+          "key": "noon-sa:ZED55FAACED7B62812C69Z",
+          "store": "noon-sa",
+          "price": 75.5,
+          "title": "DUNISO Mechanical Gaming Keyboard 79 Key Wireless Rechargeable Bluetooth Dual-mode Keyboard RGB Silent Office Keyboard for PC Gaming and Working",
           "label": "relevant"
         }
       ]
@@ -4848,9 +4848,9 @@
   ],
   "overall": {
     "queries": 35,
-    "precisionAt10": 0.9600000000000001,
+    "precisionAt10": 0.9628571428571427,
     "accessoryAt10": 0.011428571428571429,
-    "wrongModelAt10": 0.011428571428571429,
+    "wrongModelAt10": 0.008571428571428572,
     "recall": 0.9016875443536256,
     "cheapestRelevantFirst": 0.8285714285714286
   }
