@@ -138,7 +138,7 @@ describe("helpers", () => {
     expect(k).toBe(`amazon-sa:${p.id}`);
   });
   it("recordedProducts cuts titles to MAX_TITLE like the pipeline (task 18 review)", () => {
-    const m = recordedProducts([recordingFor("x", "aliexpress", [{ id: "1", title: "Earbuds " + "pro ".repeat(5000), price: 50 }])], sites);
+    const m = recordedProducts([recordingFor("x", "aliexpress", [{ id: "1", title: "Earbuds " + "pro ".repeat(5000), price: 50, currency: "SAR" }])], sites);
     expect([...m.values()][0].title).toHaveLength(MAX_TITLE);
   });
 });

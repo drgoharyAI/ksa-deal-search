@@ -17,7 +17,7 @@ describe("itemId (task 18: object ids no longer become '[object Object]')", () =
   });
   it("every API adapter drops an item whose id is an object", () => {
     const items: [(raw: unknown) => unknown, Record<string, unknown>][] = [
-      [aliexpress, { title: "Earbuds", price: 50 }],
+      [aliexpress, { title: "Earbuds", price: 50, currency: "SAR" }],
       [amazon, { title: "Earbuds", price: "50", url: "/dp/B0C1" }],
       [extra, { title: "Earbuds", price: 50, url: "https://www.extra.com/en-sa/p/1" }],
       [jarir, { title: "Earbuds", price: "50", path: "earbuds-1" }],

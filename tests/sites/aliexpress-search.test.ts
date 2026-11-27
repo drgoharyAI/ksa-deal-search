@@ -52,24 +52,29 @@ describe("normalizeSearchItem", () => {
     expect(p.rating).toBeNull();
     expect(p.discountPct).toBe(80);
   });
+  it("keeps SAR prices only: another currency or none is dropped", () => {
+    expect(normalizeSearchItem({ id: "1", title: "X", price: 5, currency: "USD" })).toBeNull();
+    expect(normalizeSearchItem({ id: "1", title: "X", price: 5 })).toBeNull();
+    expect(normalizeSearchItem({ id: "1", title: "X", price: 5, currency: "SAR" })?.currency).toBe("SAR");
+  });
   it("returns null without price", () => {
     expect(normalizeSearchItem({ id: "1", title: "X" })).toBeNull();
     expect(normalizeSearchItem(null)).toBeNull();
   });
   it("null discountPct/origPrice when both missing", () => {
-    const p = normalizeSearchItem({ id: "1", title: "X", price: 5 })!;
+    const p = normalizeSearchItem({ id: "1", title: "X", price: 5, currency: "SAR" })!;
     expect(p.discountPct).toBeNull();
     expect(p.origPrice).toBeNull();
   });
   it("discount outside 0-100 % or a 'was' price not above the price is dropped (task 18, Task 4 minor)", () => {
     for (const discount of [0, -5, 100, 150]) {
-      const p = normalizeSearchItem({ id: "1", title: "X", price: 50, discount })!;
+      const p = normalizeSearchItem({ id: "1", title: "X", price: 50, currency: "SAR", discount })!;
       expect(p.discountPct).toBeNull();
       expect(p.origPrice).toBeNull();
     }
-    expect(normalizeSearchItem({ id: "1", title: "X", price: 50, origPrice: 50 })!.origPrice).toBeNull();
-    expect(normalizeSearchItem({ id: "1", title: "X", price: 50, origPrice: 40 })!.origPrice).toBeNull();
-    expect(normalizeSearchItem({ id: "1", title: "X", price: 50, origPrice: 80 })!.origPrice).toBe(80);
+    expect(normalizeSearchItem({ id: "1", title: "X", price: 50, currency: "SAR", origPrice: 50 })!.origPrice).toBeNull();
+    expect(normalizeSearchItem({ id: "1", title: "X", price: 50, currency: "SAR", origPrice: 40 })!.origPrice).toBeNull();
+    expect(normalizeSearchItem({ id: "1", title: "X", price: 50, currency: "SAR", origPrice: 80 })!.origPrice).toBe(80);
   });
   it("fixture: >=50 normalize, no NaN, SAR, aliexpress URLs", () => {
     const items = (fixture as { data: unknown[] }).data;

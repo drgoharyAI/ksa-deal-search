@@ -38,7 +38,7 @@ describe("runSearch", () => {
       id: "huge",
       label: "Huge",
       searchCalls: () => [{ op: "search", args: {} }],
-      runCall: async () => ({ ok: true, tier: 1, data: [{ id: "1", title: "ANC Earbuds Wireless " + "pro ".repeat(5000), price: 50 }] }),
+      runCall: async () => ({ ok: true, tier: 1, data: [{ id: "1", title: "ANC Earbuds Wireless " + "pro ".repeat(5000), price: 50, currency: "SAR" }] }),
       normalizeSearchItem: sites.aliexpress.normalizeSearchItem,
     };
     try {

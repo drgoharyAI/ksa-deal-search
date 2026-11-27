@@ -29,6 +29,8 @@ export function normalizeSearchItem(raw: unknown): Product | null {
   const r = raw as Record<string, unknown>;
   const price = num(r.price);
   if (price === null) return null;
+  // KSA/SAR only: a price in another currency (or none stated) is not used.
+  if (r.currency !== "SAR") return null;
   const id = itemId(r.id);
   if (id === null) return null;
 
@@ -49,7 +51,7 @@ export function normalizeSearchItem(raw: unknown): Product | null {
     listPrice: price,
     origPrice,
     discountPct: discount,
-    currency: typeof r.currency === "string" && r.currency ? r.currency : "SAR",
+    currency: "SAR",
     rating: num(r.rating),
     soldCount: parseSold(typeof r.sold === "string" ? r.sold : undefined),
     image: img.startsWith("//") ? `https:${img}` : img,
