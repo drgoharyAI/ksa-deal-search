@@ -1,9 +1,13 @@
 "use client";
 
+import { useState } from "react";
 import type { SortKey } from "@/src/lib/rank";
 import { STORES } from "@/src/lib/stores";
-import StoreLogo from "./StoreLogo";
 import QueryCombobox from "./QueryCombobox";
+import Button from "./ui/Button";
+import Chip from "./ui/Chip";
+import Input from "./ui/Input";
+import StoreMark from "./ui/StoreMark";
 
 export type FormValues = {
   query: string;
@@ -48,6 +52,9 @@ export default function SearchForm({ values, onChange, onSubmit, onStop, loading
     );
   const queryError = errorField === "query" ? error : null;
   const sitesError = errorField === "sites" ? error : null;
+  // The options open by themselves when one is set (a History re-run), so a value is never hidden.
+  const [optionsOpen, setOptionsOpen] = useState(false);
+  const optionsSet = values.sort !== "price" || !!values.minPrice || !!values.maxPrice || !!values.minRating;
 
   return (
     <form
@@ -72,13 +79,13 @@ export default function SearchForm({ values, onChange, onSubmit, onStop, loading
             invalid={!!queryError}
             describedBy="q-help"
           />
-          <button type="submit" className="btn btn--primary" disabled={loading} aria-busy={loading || undefined}>
+          <Button type="submit" variant="primary" size="lg" loading={loading}>
             {loading ? "Searching" : "Search"}
-          </button>
+          </Button>
           {loading && (
-            <button type="button" className="btn btn--quiet" onClick={onStop}>
+            <Button variant="secondary" size="lg" onClick={onStop}>
               Stop
-            </button>
+            </Button>
           )}
         </div>
         <p id="q-help" className={queryError ? "helper helper--error" : "helper"}>
@@ -91,26 +98,28 @@ export default function SearchForm({ values, onChange, onSubmit, onStop, loading
       </div>
 
       <fieldset className="stores" aria-describedby="stores-help" aria-invalid={sitesError ? true : undefined}>
-        <legend className="label">Stores</legend>
+        <legend className="label">
+          Stores <span className="stores__count">{`${values.sites.length} of ${STORES.length} on`}</span>
+        </legend>
         <div className="stores__list">
           {STORES.map((s) => (
-            <label key={s.id} className="chip">
-              <input
-                type="checkbox"
-                name="sites"
-                value={s.id}
-                checked={values.sites.includes(s.id)}
-                onChange={(e) => toggleSite(s.id, e.target.checked)}
-                aria-describedby={"note" in s ? `store-note-${s.id}` : undefined}
-              />
-              <StoreLogo id={s.id} size={24} />
-              <span className="chip__name">{s.label}</span>
+            <Chip
+              key={s.id}
+              kind="checkbox"
+              className="chip--store"
+              name="sites"
+              value={s.id}
+              checked={values.sites.includes(s.id)}
+              onChange={(on) => toggleSite(s.id, on)}
+              describedBy={"note" in s ? `store-note-${s.id}` : undefined}
+            >
+              <StoreMark id={s.id} size={22} />
               {"note" in s && (
                 <span id={`store-note-${s.id}`} className="chip__note">
                   {s.note}
                 </span>
               )}
-            </label>
+            </Chip>
           ))}
         </div>
         <p id="stores-help" className={sitesError ? "helper helper--error" : "helper"}>
@@ -118,78 +127,41 @@ export default function SearchForm({ values, onChange, onSubmit, onStop, loading
         </p>
       </fieldset>
 
-      <div className="filters">
-        <div className="field">
-          <label htmlFor="sort" className="label">
-            Sort by
-          </label>
-          <select
-            id="sort"
-            name="sort"
-            className="input select"
-            value={values.sort}
-            onChange={(e) => set("sort", e.target.value as SortKey)}
-          >
-            {SORTS.map((o) => (
-              <option key={o.value} value={o.value}>
-                {o.label}
-              </option>
-            ))}
-          </select>
+      <details className="options" open={optionsOpen || optionsSet} onToggle={(e) => setOptionsOpen(e.currentTarget.open)}>
+        <summary className="options__toggle">Sort, price and rating</summary>
+        <div className="filters">
+          <div className="field">
+            <label htmlFor="sort" className="label">
+              Sort by
+            </label>
+            <select id="sort" name="sort" className="input select" value={values.sort} onChange={(e) => set("sort", e.target.value as SortKey)}>
+              {SORTS.map((o) => (
+                <option key={o.value} value={o.value}>
+                  {o.label}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="field">
+            <label htmlFor="min-price" className="label">
+              Min price, SAR
+            </label>
+            <Input id="min-price" name="minPrice" type="number" inputMode="decimal" min={0} step="any" autoComplete="off" value={values.minPrice} onChange={(e) => set("minPrice", e.target.value)} />
+          </div>
+          <div className="field">
+            <label htmlFor="max-price" className="label">
+              Max price, SAR
+            </label>
+            <Input id="max-price" name="maxPrice" type="number" inputMode="decimal" min={0} step="any" autoComplete="off" value={values.maxPrice} onChange={(e) => set("maxPrice", e.target.value)} />
+          </div>
+          <div className="field">
+            <label htmlFor="min-rating" className="label">
+              Min rating, 0 to 5
+            </label>
+            <Input id="min-rating" name="minRating" type="number" inputMode="decimal" min={0} max={5} step={0.1} autoComplete="off" value={values.minRating} onChange={(e) => set("minRating", e.target.value)} />
+          </div>
         </div>
-        <div className="field">
-          <label htmlFor="min-price" className="label">
-            Min price, SAR
-          </label>
-          <input
-            id="min-price"
-            name="minPrice"
-            type="number"
-            inputMode="decimal"
-            min={0}
-            step="any"
-            className="input"
-            autoComplete="off"
-            value={values.minPrice}
-            onChange={(e) => set("minPrice", e.target.value)}
-          />
-        </div>
-        <div className="field">
-          <label htmlFor="max-price" className="label">
-            Max price, SAR
-          </label>
-          <input
-            id="max-price"
-            name="maxPrice"
-            type="number"
-            inputMode="decimal"
-            min={0}
-            step="any"
-            className="input"
-            autoComplete="off"
-            value={values.maxPrice}
-            onChange={(e) => set("maxPrice", e.target.value)}
-          />
-        </div>
-        <div className="field">
-          <label htmlFor="min-rating" className="label">
-            Min rating, 0 to 5
-          </label>
-          <input
-            id="min-rating"
-            name="minRating"
-            type="number"
-            inputMode="decimal"
-            min={0}
-            max={5}
-            step={0.1}
-            className="input"
-            autoComplete="off"
-            value={values.minRating}
-            onChange={(e) => set("minRating", e.target.value)}
-          />
-        </div>
-      </div>
+      </details>
     </form>
   );
 }

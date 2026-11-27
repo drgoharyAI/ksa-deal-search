@@ -5,9 +5,14 @@ import type { HistoryEntry } from "@/src/lib/alerts/shared";
 import { storeLabel } from "@/src/lib/stores";
 import { rerunHref } from "@/src/lib/rerun";
 import AppHeader from "../components/AppHeader";
-import StoreLogo from "../components/StoreLogo";
+import AppFooter from "../components/AppFooter";
+import Button from "../components/ui/Button";
+import EmptyState from "../components/ui/EmptyState";
+import ErrorState from "../components/ui/ErrorState";
+import SectionHeader from "../components/ui/SectionHeader";
+import StoreMark from "../components/ui/StoreMark";
 import When from "../components/When";
-import { formatMoney } from "../components/ResultCard";
+import { formatMoney } from "@/src/lib/money";
 
 type State = { phase: "loading" } | { phase: "error"; message: string } | { phase: "ready"; items: HistoryEntry[] };
 
@@ -49,49 +54,52 @@ export default function HistoryView() {
     <div className="app">
       <AppHeader current="history" />
       <main className="container main">
-        <div className="page-head">
-          <h1 className="page-title">Search history</h1>
-          {items.length > 0 && (
-            <button
-              type="button"
-              className="btn btn--quiet btn--small"
-              onClick={() => {
-                if (window.confirm("Clear the whole search history? This cannot be undone.")) void remove("all=1");
-              }}
-            >
-              Clear all
-            </button>
-          )}
-        </div>
-        {notice && (
-          <p className="notice notice--error" role="alert">
-            {notice}
-          </p>
-        )}
+        <SectionHeader
+          as="h1"
+          title="Search history"
+          note="Every search you run is kept on this device so you can run it again."
+          actions={
+            items.length > 0 && (
+              <Button
+                size="sm"
+                variant="destructive"
+                onClick={() => {
+                  if (window.confirm("Clear the whole search history? This cannot be undone.")) void remove("all=1");
+                }}
+              >
+                Clear all
+              </Button>
+            )
+          }
+        />
+        {notice && <ErrorState message={notice} />}
 
         {state.phase === "loading" ? (
           <p className="results__note" role="status">
             Loading
           </p>
         ) : state.phase === "error" ? (
-          <p className="notice notice--error" role="alert">
-            {state.message}
-          </p>
+          <ErrorState message={state.message} onRetry={() => void load()} />
         ) : !items.length ? (
-          <div className="empty">
-            <p className="empty__title">No searches yet</p>
-            <p className="empty__body">Each search you run is kept here so you can run it again.</p>
-          </div>
+          <EmptyState
+            title="No searches yet"
+            body="Each search you run is kept here so you can run it again."
+            action={
+              <Button href="/" size="sm" variant="primary">
+                Search the stores
+              </Button>
+            }
+          />
         ) : (
           <ul className="rows">
             {items.map((e) => (
               <li key={e.id} className="row">
                 <div className="row__main">
-                  <p className="row__title">{e.query}</p>
+                  <p className="row__title" dir="auto">{e.query}</p>
                   <p className="row__meta">
-                    <span className="row__logos" aria-label={e.sites.map(storeLabel).join(", ")}>
+                    <span className="row__logos">
                       {e.sites.map((s) => (
-                        <StoreLogo key={s} id={s} size={18} />
+                        <StoreMark key={s} id={s} variant="compact" size={18} />
                       ))}
                     </span>
                     <When at={e.at} />
@@ -109,18 +117,19 @@ export default function HistoryView() {
                   )}
                 </div>
                 <div className="row__actions">
-                  <a className="btn btn--quiet btn--small" href={rerunHref(e)}>
+                  <Button size="sm" href={rerunHref(e)}>
                     Re-run<span className="visually-hidden"> {e.query}</span>
-                  </a>
-                  <button type="button" className="btn btn--quiet btn--small" onClick={() => void remove(`id=${e.id}`)}>
+                  </Button>
+                  <Button size="sm" variant="ghost" onClick={() => void remove(`id=${e.id}`)}>
                     Delete<span className="visually-hidden"> {e.query}</span>
-                  </button>
+                  </Button>
                 </div>
               </li>
             ))}
           </ul>
         )}
       </main>
+      <AppFooter />
     </div>
   );
 }

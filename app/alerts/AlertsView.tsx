@@ -2,13 +2,17 @@
 
 import { useEffect, useState } from "react";
 import type { AlertEvent, WatchView } from "@/src/lib/alerts/shared";
-import { storeLabel } from "@/src/lib/stores";
 import AppHeader, { ALERTS_SEEN_EVENT } from "../components/AppHeader";
-import StoreLogo from "../components/StoreLogo";
+import AppFooter from "../components/AppFooter";
+import Button from "../components/ui/Button";
+import EmptyState from "../components/ui/EmptyState";
+import ErrorState from "../components/ui/ErrorState";
+import SectionHeader from "../components/ui/SectionHeader";
+import StoreMark from "../components/ui/StoreMark";
 import Sparkline from "../components/Sparkline";
 import WatchForm from "../components/WatchForm";
 import When from "../components/When";
-import { formatMoney } from "../components/ResultCard";
+import { formatMoney } from "@/src/lib/money";
 
 type Data = { watches: WatchView[]; events: AlertEvent[]; telegram: { configured: boolean } };
 type State = { phase: "loading" } | { phase: "error"; message: string } | ({ phase: "ready" } & Data);
@@ -98,25 +102,15 @@ export default function AlertsView() {
     <div className="app">
       <AppHeader current="alerts" />
       <main className="container main">
-        <div className="page-head">
-          <h1 className="page-title">Price alerts</h1>
-        </div>
-        {notice && (
-          <p className="notice notice--error" role="alert">
-            {notice}
-          </p>
-        )}
+        <SectionHeader as="h1" title="Price alerts" note="Watches are checked in the background; a fired alert shows here and, when set up, in Telegram." />
+        {notice && <ErrorState message={notice} />}
 
         {state.phase === "loading" && (
           <p className="results__note" role="status">
             Loading
           </p>
         )}
-        {state.phase === "error" && (
-          <p className="notice notice--error" role="alert">
-            {state.message}
-          </p>
-        )}
+        {state.phase === "error" && <ErrorState message={state.message} onRetry={() => void load()} />}
 
         {ready && (
           <>
@@ -133,9 +127,9 @@ export default function AlertsView() {
                 </p>
               )}
               <div className="panel__actions">
-                <button type="button" className="btn btn--quiet btn--small" onClick={() => void sendTest()} disabled={test.busy} aria-busy={test.busy || undefined}>
+                <Button size="sm" onClick={() => void sendTest()} loading={test.busy}>
                   Send test message
-                </button>
+                </Button>
                 {test.text && (
                   <p className={test.ok ? "helper" : "helper helper--error"} role="status">
                     {test.text}
@@ -145,14 +139,17 @@ export default function AlertsView() {
             </section>
 
             <section className="results" aria-labelledby="watch-head">
-              <h2 id="watch-head" className="section-title">
-                Watching
-              </h2>
+              <SectionHeader id="watch-head" title="Watching" />
               {!ready.watches.length ? (
-                <div className="empty">
-                  <p className="empty__title">Nothing watched yet</p>
-                  <p className="empty__body">Press Watch on a result, or Watch this search above the results.</p>
-                </div>
+                <EmptyState
+                  title="Nothing watched yet"
+                  body="Press Watch on a result, or Watch this search above the results."
+                  action={
+                    <Button href="/" size="sm" variant="primary">
+                      Search the stores
+                    </Button>
+                  }
+                />
               ) : (
                 <ul className="rows">
                   {ready.watches.map((w) => {
@@ -173,14 +170,11 @@ export default function AlertsView() {
                           </p>
                           <p className="row__meta">
                             {store ? (
-                              <span className="row__store">
-                                <StoreLogo id={store} size={18} />
-                                {storeLabel(store)}
-                              </span>
+                              <StoreMark id={store} size={18} />
                             ) : (
-                              <span className="row__logos" aria-label={w.sites.map(storeLabel).join(", ")}>
+                              <span className="row__logos">
                                 {w.sites.map((s) => (
-                                  <StoreLogo key={s} id={s} size={18} />
+                                  <StoreMark key={s} id={s} variant="compact" size={18} />
                                 ))}
                               </span>
                             )}
@@ -223,27 +217,23 @@ export default function AlertsView() {
                         </div>
                         <div className="row__actions">
                           {editing !== w.id && (
-                            <button type="button" className="btn btn--quiet btn--small" onClick={() => setEditing(w.id)}>
+                            <Button size="sm" onClick={() => setEditing(w.id)}>
                               Edit target<span className="visually-hidden"> for {name}</span>
-                            </button>
+                            </Button>
                           )}
-                          <button
-                            type="button"
-                            className="btn btn--quiet btn--small"
-                            onClick={() => void change("PATCH", { id: w.id, status: w.status === "active" ? "paused" : "active" }).then(setNotice)}
-                          >
+                          <Button size="sm" variant="ghost" onClick={() => void change("PATCH", { id: w.id, status: w.status === "active" ? "paused" : "active" }).then(setNotice)}>
                             {w.status === "active" ? "Pause" : "Resume"}
                             <span className="visually-hidden"> {name}</span>
-                          </button>
-                          <button
-                            type="button"
-                            className="btn btn--quiet btn--small"
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="destructive"
                             onClick={() => {
                               if (window.confirm(`Stop watching "${name}"?`)) void change("DELETE", { id: w.id }).then(setNotice);
                             }}
                           >
                             Delete<span className="visually-hidden"> {name}</span>
-                          </button>
+                          </Button>
                         </div>
                       </li>
                     );
@@ -253,9 +243,7 @@ export default function AlertsView() {
             </section>
 
             <section className="results" aria-labelledby="log-head">
-              <h2 id="log-head" className="section-title">
-                Fired alerts
-              </h2>
+              <SectionHeader id="log-head" title="Fired alerts" />
               {!ready.events.length ? (
                 <p className="results__note">No alert has fired yet.</p>
               ) : (
@@ -274,10 +262,7 @@ export default function AlertsView() {
                           )}
                         </p>
                         <p className="row__meta">
-                          <span className="row__store">
-                            <StoreLogo id={e.site} size={18} />
-                            {storeLabel(e.site)}
-                          </span>
+                          <StoreMark id={e.site} size={18} />
                           <When at={e.at} />
                           <span>{e.sent ? "Sent to Telegram" : "Shown here only"}</span>
                         </p>
@@ -294,6 +279,7 @@ export default function AlertsView() {
           </>
         )}
       </main>
+      <AppFooter />
     </div>
   );
 }

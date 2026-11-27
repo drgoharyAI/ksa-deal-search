@@ -2,11 +2,18 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { Product, SiteStatus } from "@/src/lib/types";
-import { defaultSites } from "@/src/lib/stores";
+import { STORES, defaultSites } from "@/src/lib/stores";
 import SearchForm, { type ErrorField, type FormValues } from "./components/SearchForm";
 import StatusBar from "./components/StatusBar";
 import ResultTiers from "./components/ResultTiers";
 import AppHeader from "./components/AppHeader";
+import AppFooter from "./components/AppFooter";
+import HomeSuggestions from "./components/HomeSuggestions";
+import HomeDiscover from "./components/HomeDiscover";
+import Button from "./components/ui/Button";
+import EmptyState from "./components/ui/EmptyState";
+import ErrorState from "./components/ui/ErrorState";
+import { SkeletonCard } from "./components/ui/Skeleton";
 import WatchForm, { postWatch } from "./components/WatchForm";
 import { cheapestConfident, defaultTarget, priceOf } from "@/src/lib/alerts/shared";
 import { valuesFromUrl } from "@/src/lib/rerun";
@@ -207,6 +214,8 @@ export default function Home() {
   }
 
   const loading = phase === "loading";
+  // Before the first search the page is the home: brand line, search, suggestions and discovery.
+  const home = !loading && !results;
   const cheapest = useMemo(() => (all.length ? cheapestConfident(all) : null), [all]);
   const formError = errorField === "form" ? error : null;
 
@@ -220,7 +229,15 @@ export default function Home() {
     <div className="app">
       <AppHeader current="search" />
 
-      <main className="container main">
+      <main className={home ? "container main main--home" : "container main"}>
+        {home ? (
+          <div className="home-intro">
+            <h1 className="home-intro__title">{`One search across ${STORES.length} Saudi stores`}</h1>
+            <p className="home-intro__lead">Listed prices side by side, with deals marked only when the price history backs them.</p>
+          </div>
+        ) : (
+          <h1 className="visually-hidden">Deal search</h1>
+        )}
         <SearchForm
           values={values}
           onChange={setValues}
@@ -235,90 +252,88 @@ export default function Home() {
           {live}
         </p>
 
-        {formError && (
-          <p className="notice notice--error" role="alert">
-            {formError}
-          </p>
-        )}
+        {formError && <ErrorState message={formError} />}
 
         <StatusBar pending={loading ? pending : null} statuses={results?.statuses ?? []} counts={counts} />
 
-        <section className="results" aria-labelledby="results-head" aria-busy={loading || undefined}>
-          <div className="results__head">
-            <h2 id="results-head">
-              {loading ? "Searching" : results && filtering ? `${items.length} of ${units.length} results` : results && items.length ? `${items.length} results` : "Results"}
-            </h2>
-            {!loading && results && items.length > 0 && <p className="results__note">Prices exclude shipping</p>}
-            {!loading && results && cheapest && !watchOpen && !watchSaved && (
-              <button type="button" className="btn btn--quiet btn--small" onClick={() => setWatchOpen(true)}>
-                Watch this search
-              </button>
-            )}
-            {/* Always in the page, so screen readers announce the text when it changes. */}
-            <p className={!loading && watchSaved ? "results__note" : "visually-hidden"} role="status">
-              {!loading && watchSaved && (
-                <>
-                  Watching this search. <a href="/alerts">See alerts</a>
-                </>
-              )}
-            </p>
-          </div>
-          {!loading && results && cheapest && watchOpen && (
-            <WatchForm
-              label={`Alert me when a match is at or under, ${cheapest.currency || "SAR"}`}
-              initial={defaultTarget(priceOf(cheapest))}
-              onCancel={() => setWatchOpen(false)}
-              onSave={async (target) => {
-                const err = await postWatch({ kind: "search", query: results.query, sites: results.sites, target, filters: results.filters });
-                if (!err) {
-                  setWatchOpen(false);
-                  setWatchSaved(true);
-                }
-                return err;
+        {home && (
+          <>
+            <HomeSuggestions
+              onPick={(q) => {
+                setValues((v) => ({ ...v, query: q }));
+                void search(q);
               }}
             />
-          )}
+            <HomeDiscover />
+          </>
+        )}
 
-          {!loading && all.length > 0 && <FilterChips filters={chips} onChange={setChips} facets={facets} bounds={bounds} currency={all[0].currency || "SAR"} kept={kept} />}
+        {!home && (
+          <section className="results" aria-labelledby="results-head" aria-busy={loading || undefined}>
+            <div className="results__head">
+              <h2 id="results-head">
+                {loading ? "Searching" : results && filtering ? `${items.length} of ${units.length} results` : results && items.length ? `${items.length} results` : "Results"}
+              </h2>
+              {!loading && results && items.length > 0 && <p className="results__note">Prices exclude shipping</p>}
+              {!loading && results && cheapest && !watchOpen && !watchSaved && (
+                <Button size="sm" onClick={() => setWatchOpen(true)}>
+                  Watch this search
+                </Button>
+              )}
+              {/* Always in the page, so screen readers announce the text when it changes. */}
+              <p className={!loading && watchSaved ? "results__note" : "visually-hidden"} role="status">
+                {!loading && watchSaved && (
+                  <>
+                    Watching this search. <a href="/alerts">See alerts</a>
+                  </>
+                )}
+              </p>
+            </div>
+            {!loading && results && cheapest && watchOpen && (
+              <WatchForm
+                label={`Alert me when a match is at or under, ${cheapest.currency || "SAR"}`}
+                initial={defaultTarget(priceOf(cheapest))}
+                onCancel={() => setWatchOpen(false)}
+                onSave={async (target) => {
+                  const err = await postWatch({ kind: "search", query: results.query, sites: results.sites, target, filters: results.filters });
+                  if (!err) {
+                    setWatchOpen(false);
+                    setWatchSaved(true);
+                  }
+                  return err;
+                }}
+              />
+            )}
 
-          {loading ? (
-            <ul className="grid" aria-hidden="true">
-              {Array.from({ length: SKELETONS }, (_, i) => (
-                <li key={i} className="card card--skeleton">
-                  <div className="card__media skeleton" />
-                  <div className="card__body">
-                    <span className="skeleton skeleton--line" />
-                    <span className="skeleton skeleton--line skeleton--short" />
-                    <span className="skeleton skeleton--price" />
-                  </div>
-                </li>
-              ))}
-            </ul>
-          ) : results && items.length ? (
-            <ResultTiers items={items} query={results.query} compare={compare} />
-          ) : results && filtering ? (
-            <div className="empty">
-              <p className="empty__title">No results match these filters</p>
-              <p className="empty__body">Loosen a filter above, or clear them all.</p>
-              <div>
-                <button type="button" className="btn btn--quiet btn--small" onClick={() => setChips(NO_FILTERS)}>
-                  Clear all filters
-                </button>
-              </div>
-            </div>
-          ) : results ? (
-            <div className="empty">
-              <p className="empty__title">{results.reason ?? "No products matched your search and filters"}</p>
-              <p className="empty__body">Try fewer words, another store, or looser price and rating filters.</p>
-            </div>
-          ) : (
-            <div className="empty">
-              <p className="empty__title">Nothing searched yet</p>
-              <p className="empty__body">Type a product above and press Search to compare prices across the stores you picked.</p>
-            </div>
-          )}
-        </section>
+            {!loading && all.length > 0 && <FilterChips filters={chips} onChange={setChips} facets={facets} bounds={bounds} currency={all[0].currency || "SAR"} kept={kept} />}
+
+            {loading ? (
+              <ul className="grid" aria-hidden="true">
+                {Array.from({ length: SKELETONS }, (_, i) => (
+                  <li key={i}>
+                    <SkeletonCard />
+                  </li>
+                ))}
+              </ul>
+            ) : results && items.length ? (
+              <ResultTiers items={items} query={results.query} compare={compare} />
+            ) : results && filtering ? (
+              <EmptyState
+                title="No results match these filters"
+                body="Loosen a filter above, or clear them all."
+                action={
+                  <Button size="sm" onClick={() => setChips(NO_FILTERS)}>
+                    Clear all filters
+                  </Button>
+                }
+              />
+            ) : results ? (
+              <EmptyState title={results.reason ?? "No products matched your search and filters"} body="Try fewer words, another store, or looser price and rating filters." />
+            ) : null}
+          </section>
+        )}
       </main>
+      <AppFooter />
 
       <CompareTray
         items={compareList}

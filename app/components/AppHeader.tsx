@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import Badge from "./ui/Badge";
 
 type Page = "search" | "history" | "alerts";
 
@@ -14,7 +15,7 @@ const LINKS: { page: Page; href: string; label: string }[] = [
 /** Fired by the Alerts page once it marked the alerts seen, so the badge clears at once. */
 export const ALERTS_SEEN_EVENT = "deal-search:alerts-seen";
 
-/** Top bar with the app's three pages; Alerts carries the count of fired alerts not yet seen. */
+/** The compact top bar on every page: the wordmark, then Search, History and Alerts (with the unseen count). */
 export default function AppHeader({ current }: { current: Page }) {
   const [unread, setUnread] = useState(0);
 
@@ -37,16 +38,18 @@ export default function AppHeader({ current }: { current: Page }) {
   return (
     <header className="topbar">
       <div className="container topbar__inner">
-        {current === "search" ? <h1 className="wordmark">Deal search</h1> : <p className="wordmark">Deal search</p>}
+        <Link href="/" className="wordmark" aria-label="Deal search, home">
+          Deal search
+        </Link>
         <nav className="nav" aria-label="Pages">
           {LINKS.map((l) => (
             <Link key={l.page} href={l.href} className="nav__link" aria-current={l.page === current ? "page" : undefined}>
               {l.label}
               {l.page === "alerts" && unread > 0 && (
-                <span className="nav__count">
+                <Badge tone="count">
                   {unread}
                   <span className="visually-hidden"> new</span>
-                </span>
+                </Badge>
               )}
             </Link>
           ))}
