@@ -9,6 +9,7 @@ import { getDb } from "@/src/lib/db";
 import { addSearch, historyEntryFor } from "@/src/lib/history";
 import { ensureChecker } from "@/src/lib/alerts/service";
 import { attachInsights, insightsFor, recordObservations } from "@/src/lib/insights";
+import { recordSeen } from "@/src/lib/discover";
 
 const SORTS: SortKey[] = ["price", "discount", "deal"];
 const EMPTY = { error: "Enter something to search for" };
@@ -77,6 +78,7 @@ function withInsights(products: Product[]): Product[] {
   }
   try {
     recordObservations(getDb(), products, now);
+    recordSeen(getDb(), products, now);
   } catch (e) {
     console.warn("[insights] could not record price observations", e instanceof Error ? e.message : String(e));
   }

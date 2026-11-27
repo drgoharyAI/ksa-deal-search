@@ -186,7 +186,7 @@ function v1Db(): Db {
   ).map((r) => r.sql.replace(/,\s*filters TEXT NOT NULL DEFAULT '\{\}'/, ""));
   src.close();
   const db = openDb(":memory:");
-  for (const t of ["observations", "alert_events", "price_points", "watches", "searches"]) db.exec(`DROP TABLE IF EXISTS ${t}`);
+  for (const t of ["seen_products", "observations", "alert_events", "price_points", "watches", "searches"]) db.exec(`DROP TABLE IF EXISTS ${t}`);
   for (const q of sql) db.exec(q);
   db.prepare("UPDATE schema_version SET version = 1").run();
   return db;

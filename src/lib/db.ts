@@ -109,6 +109,18 @@ const MIGRATIONS: string[] = [
    CREATE INDEX observations_at ON observations(at);`,
   // 3: a search watch keeps the search form's price and rating filters (JSON).
   `ALTER TABLE watches ADD COLUMN filters TEXT NOT NULL DEFAULT '{}';`,
+  // 4: the title, link and picture of each product seen in a search (home "Recently seen deals").
+  `CREATE TABLE seen_products (
+     site TEXT NOT NULL,
+     productId TEXT NOT NULL,
+     title TEXT NOT NULL,
+     url TEXT NOT NULL,
+     image TEXT,
+     currency TEXT NOT NULL DEFAULT 'SAR',
+     lastSeen INTEGER NOT NULL,
+     PRIMARY KEY (site, productId)
+   );
+   CREATE INDEX seen_products_last ON seen_products(lastSeen);`,
 ];
 
 export const SCHEMA_VERSION = MIGRATIONS.length;
