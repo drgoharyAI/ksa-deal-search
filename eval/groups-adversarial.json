@@ -1,5 +1,5 @@
 {
-  "about": "Hand-written title pairs from the 17b reviews, each grouped inside a recorded result set (pad) so result-set word frequencies apply. apart: must stay separate; merge: must group. Round 4 added the reviewer's 58 pairs (suffix-free: weights, layouts, bands, tyres, sets) and 72 fresh pairs; knownMiss marks merges the rules do not make yet (recall, not precision).",
+  "about": "Hand-written title pairs from the 17b reviews, each grouped inside a recorded result set (pad) so result-set word frequencies apply. apart: must stay separate; merge: must group. Round 4 added the reviewer's 58 pairs (suffix-free: weights, layouts, bands, tyres, sets) and 72 fresh pairs; knownMiss marks merges the rules do not make yet (recall, not precision). Round 5 added the reviewer's pairs on parts and accessories named beside a shared code (adv9, adv10, adv11).",
   "pairs": [
     {
       "pad": "iphone 16",
@@ -1178,6 +1178,635 @@
       "expect": "merge",
       "a": "Samsung 55 Inch Crystal UHD 4K Smart TV UA55DU7000",
       "b": "Samsung UA55DU7000 55\" Crystal UHD 4K Smart TV (2024)"
+    },
+    {
+      "pad": "electric kettle",
+      "expect": "apart",
+      "a": "LG 8kg Front Load Washing Machine FV1208S4W Inverter Direct Drive",
+      "b": "LG 8kg/5kg Front Load Washer Dryer FV1208D4W Inverter Direct Drive",
+      "source": "review round 5"
+    },
+    {
+      "pad": "electric kettle",
+      "expect": "apart",
+      "a": "Hisense 8kg Front Load Washing Machine Silver",
+      "b": "Hisense 10kg Front Load Washing Machine Silver",
+      "source": "review round 5"
+    },
+    {
+      "pad": "electric kettle",
+      "expect": "apart",
+      "a": "Hisense 516L Side by Side Refrigerator Inox",
+      "b": "Hisense 516L Top Mount Refrigerator Inox",
+      "source": "review round 5"
+    },
+    {
+      "pad": "electric kettle",
+      "expect": "apart",
+      "a": "LG 423 Litre Top Freezer Refrigerator Silver",
+      "b": "LG 509 Litre Top Freezer Refrigerator Silver",
+      "source": "review round 5"
+    },
+    {
+      "pad": "air purifier",
+      "expect": "apart",
+      "a": "Gree Split Air Conditioner 1.5 Ton Cold Only Inverter 18000 BTU",
+      "b": "Gree Split Air Conditioner 2 Ton Cold Only Inverter 24000 BTU",
+      "source": "review round 5"
+    },
+    {
+      "pad": "air purifier",
+      "expect": "apart",
+      "a": "Midea Split AC 18000 BTU Inverter Hot & Cold",
+      "b": "Midea Split AC 18000 BTU Non-Inverter Hot & Cold",
+      "source": "review round 5"
+    },
+    {
+      "pad": "4k monitor 27",
+      "expect": "apart",
+      "a": "Samsung 65 Inch QLED 4K Smart TV",
+      "b": "Samsung 65 Inch OLED 4K Smart TV",
+      "source": "review round 5"
+    },
+    {
+      "pad": "instant camera",
+      "expect": "apart",
+      "a": "Nikon Z50 Mirrorless Camera Body",
+      "b": "Nikon Z50 Mirrorless Camera with 16-50mm VR Lens Kit",
+      "source": "review round 5"
+    },
+    {
+      "pad": "water bottle",
+      "expect": "apart",
+      "a": "Hero Sprint Mountain Bike 26 Inch 21 Speed Black",
+      "b": "Hero Sprint Mountain Bike 29 Inch 21 Speed Black",
+      "source": "review round 5"
+    },
+    {
+      "pad": "running shoes",
+      "expect": "apart",
+      "a": "Nike Air Max 90 Men's Shoes White Size 42",
+      "b": "Nike Air Max 90 Men's Shoes White Size 44",
+      "source": "review round 5"
+    },
+    {
+      "pad": "running shoes",
+      "expect": "apart",
+      "a": "Adidas Ultraboost 22 Running Shoes Men Black",
+      "b": "Adidas Ultraboost 22 Running Shoes Women Black",
+      "source": "review round 5"
+    },
+    {
+      "pad": "running shoes",
+      "expect": "apart",
+      "a": "Levi's 511 Slim Fit Jeans Men Dark Blue W32 L32",
+      "b": "Levi's 511 Slim Fit Jeans Men Dark Blue W34 L32",
+      "source": "review round 5"
+    },
+    {
+      "pad": "baby stroller",
+      "expect": "apart",
+      "a": "Pampers Baby-Dry Diapers Size 4, 9-14 kg, 64 Count",
+      "b": "Pampers Baby-Dry Diapers Size 5, 11-16 kg, 64 Count",
+      "source": "review round 5"
+    },
+    {
+      "pad": "baby stroller",
+      "expect": "apart",
+      "a": "Aptamil Advance Stage 1 Infant Formula 400g",
+      "b": "Aptamil Advance Stage 2 Follow-on Formula 400g",
+      "source": "review round 5"
+    },
+    {
+      "pad": "dash cam",
+      "expect": "apart",
+      "a": "Varta Blue Dynamic Car Battery 12V 60Ah",
+      "b": "Varta Blue Dynamic Car Battery 12V 74Ah",
+      "source": "review round 5"
+    },
+    {
+      "pad": "dash cam",
+      "expect": "apart",
+      "a": "Mobil 1 Fully Synthetic Engine Oil 5W-30 4L",
+      "b": "Mobil 1 Fully Synthetic Engine Oil 5W-40 4L",
+      "source": "review round 5"
+    },
+    {
+      "pad": "dash cam",
+      "expect": "apart",
+      "a": "Castrol EDGE 5W-30 Fully Synthetic Engine Oil 4 Litre",
+      "b": "Castrol EDGE 5W-30 Fully Synthetic Engine Oil 5 Litre",
+      "source": "review round 5"
+    },
+    {
+      "pad": "usb-c cable 100w",
+      "expect": "apart",
+      "a": "Ugreen HDMI Cable 2m Braided HDMI 2.1",
+      "b": "Ugreen HDMI Cable 2m Braided HDMI 2.0",
+      "source": "review round 5"
+    },
+    {
+      "pad": "led desk lamp",
+      "expect": "apart",
+      "a": "Philips Hue White Ambiance Smart Bulb E27 Bluetooth",
+      "b": "Philips Hue White Ambiance Smart Bulb E14 Bluetooth",
+      "source": "review round 5"
+    },
+    {
+      "pad": "electric kettle",
+      "expect": "apart",
+      "a": "Samsung 23 Litre Solo Microwave Oven White",
+      "b": "Samsung 23 Litre Grill Microwave Oven White",
+      "source": "review round 5"
+    },
+    {
+      "pad": "electric kettle",
+      "expect": "apart",
+      "a": "Sharp Microwave Oven 20L Silver",
+      "b": "Sharp Microwave Oven 25L Silver",
+      "source": "review round 5"
+    },
+    {
+      "pad": "usb-c cable 100w",
+      "expect": "apart",
+      "a": "Anker 6-Outlet Power Strip with 3 USB Ports 1.5m",
+      "b": "Anker 12-Outlet Power Strip with 3 USB Ports 1.5m",
+      "source": "review round 5"
+    },
+    {
+      "pad": "electric kettle",
+      "expect": "apart",
+      "a": "Bosch Series 4 Freestanding Dishwasher 12 Place Settings Silver",
+      "b": "Bosch Series 4 Freestanding Dishwasher 14 Place Settings Silver",
+      "source": "review round 5"
+    },
+    {
+      "pad": "electric kettle",
+      "expect": "apart",
+      "a": "Midea Water Dispenser Hot and Cold Top Loading",
+      "b": "Midea Water Dispenser Hot and Cold Bottom Loading",
+      "source": "review round 5"
+    },
+    {
+      "pad": "led desk lamp",
+      "expect": "apart",
+      "a": "Jotun Fenomastic My Home Rich Matt 4L Colour 1001 Egg White",
+      "b": "Jotun Fenomastic My Home Rich Matt 4L Colour 1024 Timeless",
+      "source": "review round 5"
+    },
+    {
+      "pad": "water bottle",
+      "expect": "apart",
+      "a": "Xiaomi Electric Scooter 4 Pro",
+      "b": "Xiaomi Electric Scooter 4 Lite",
+      "source": "review round 5"
+    },
+    {
+      "pad": "electric kettle",
+      "expect": "apart",
+      "a": "Samsung 9kg Washing Machine WW90T534DAW",
+      "b": "Samsung 9kg Washer Dryer WW90T534DAW",
+      "source": "review round 5"
+    },
+    {
+      "pad": "instant camera",
+      "expect": "apart",
+      "a": "Sony Alpha a6400 ILCE-6400 Mirrorless Camera Body",
+      "b": "Sony Alpha a6400 ILCE-6400L Mirrorless Camera with 16-50mm Lens",
+      "source": "review round 5"
+    },
+    {
+      "pad": "instant camera",
+      "expect": "apart",
+      "a": "Sony Alpha a6400 ILCE-6400 Mirrorless Camera Body",
+      "b": "Sony Alpha a6400 ILCE-6400 Mirrorless Camera with 16-50mm Lens",
+      "source": "review round 5"
+    },
+    {
+      "pad": "running shoes",
+      "expect": "apart",
+      "a": "Nike Dri-FIT Men's T-Shirt Black Size M",
+      "b": "Nike Dri-FIT Men's T-Shirt Black Size L",
+      "source": "review round 5"
+    },
+    {
+      "pad": "water bottle",
+      "expect": "apart",
+      "a": "Spartan 16 inch Kids Bike Blue",
+      "b": "Spartan 20 inch Kids Bike Blue",
+      "source": "review round 5"
+    },
+    {
+      "pad": "air purifier",
+      "expect": "apart",
+      "a": "LG Dual Inverter Split AC 18000 BTU",
+      "b": "LG Dual Inverter Split AC 24000 BTU",
+      "source": "review round 5"
+    },
+    {
+      "pad": "usb-c cable 100w",
+      "expect": "apart",
+      "a": "Anker USB-C to USB-C Cable 100W 1m",
+      "b": "Anker USB-C to USB-C Cable 100W 2m",
+      "source": "review round 5"
+    },
+    {
+      "pad": "4k monitor 27",
+      "expect": "apart",
+      "a": "TCL 55 Inch C645 QLED 4K Google TV",
+      "b": "TCL 65 Inch C645 QLED 4K Google TV",
+      "source": "review round 5"
+    },
+    {
+      "pad": "electric kettle",
+      "expect": "apart",
+      "a": "Bosch Dishwasher SMS4HVI33E",
+      "b": "Bosch Dishwasher Inlet Hose SMS4HVI33E",
+      "source": "review round 5"
+    },
+    {
+      "pad": "electric kettle",
+      "expect": "apart",
+      "a": "LG Refrigerator GR-B247SLUV",
+      "b": "LG Refrigerator GR-B247SLUV Water Filter",
+      "source": "review round 5"
+    },
+    {
+      "pad": "electric kettle",
+      "expect": "apart",
+      "a": "Samsung Front Load Washer WW11BB944DGB",
+      "b": "Samsung Front Load Washer Dryer Stacking Kit WW11BB944DGB",
+      "source": "review round 5"
+    },
+    {
+      "pad": "electric kettle",
+      "expect": "apart",
+      "a": "Samsung Refrigerator RS68A8820S9 Side by Side",
+      "b": "Samsung Refrigerator RS68A8820S9 Door Seal Gasket",
+      "source": "review round 5"
+    },
+    {
+      "pad": "dash cam",
+      "expect": "apart",
+      "a": "Michelin Car Battery 70Ah",
+      "b": "Michelin Car Battery 70Ah Charger",
+      "source": "review round 5"
+    },
+    {
+      "pad": "running shoes",
+      "expect": "apart",
+      "a": "Huggies Extra Care Diapers Size 3 Jumbo Pack 76",
+      "b": "Huggies Extra Care Diapers Size 3 Mega Pack 104",
+      "source": "review round 5"
+    },
+    {
+      "pad": "instant camera",
+      "expect": "apart",
+      "a": "Canon RF 24-105mm f/4L IS USM Lens",
+      "b": "Canon RF 24-105mm f/4-7.1 IS STM Lens",
+      "source": "review round 5"
+    },
+    {
+      "pad": "instant camera",
+      "expect": "apart",
+      "a": "Sony FE 85mm F1.8 Lens SEL85F18",
+      "b": "Sony FE 85mm F1.4 GM Lens SEL85F14GM",
+      "source": "review round 5"
+    },
+    {
+      "pad": "dash cam",
+      "expect": "apart",
+      "a": "Shell Helix HX8 5W-30 Engine Oil 4L",
+      "b": "Shell Helix HX8 5W-30 Engine Oil 1L",
+      "source": "review round 5"
+    },
+    {
+      "pad": "4k monitor 27",
+      "expect": "apart",
+      "a": "LG 55 Inch OLED evo C4 4K Smart TV OLED55C46LA",
+      "b": "LG 65 Inch OLED evo C4 4K Smart TV OLED65C46LA",
+      "source": "review round 5"
+    },
+    {
+      "pad": "electric kettle",
+      "expect": "merge",
+      "a": "Samsung 9kg Front Load Washing Machine WW90T534DAW",
+      "b": "Samsung WW90T534DAW 9 kg Washer, White",
+      "knownMiss": true,
+      "source": "review round 5"
+    },
+    {
+      "pad": "instant camera",
+      "expect": "merge",
+      "a": "Canon EF 50mm f/1.8 STM Lens",
+      "b": "Canon EF 50mm F1.8 STM Standard Prime Lens",
+      "knownMiss": true,
+      "source": "review round 5"
+    },
+    {
+      "pad": "dash cam",
+      "expect": "merge",
+      "a": "Mobil 1 5W-30 Fully Synthetic Engine Oil 4L",
+      "b": "Mobil 1 Advanced Full Synthetic Motor Oil 5W30, 4 Liter",
+      "knownMiss": true,
+      "source": "review round 5"
+    },
+    {
+      "pad": "led desk lamp",
+      "expect": "merge",
+      "a": "Philips Hue White Ambiance E27 Smart Bulb",
+      "b": "Philips Hue White Ambiance Smart Light Bulb E27, Bluetooth",
+      "source": "review round 5"
+    },
+    {
+      "pad": "dash cam",
+      "expect": "merge",
+      "a": "Varta Blue Dynamic 12V 60Ah Car Battery D24",
+      "b": "Varta Blue Dynamic D24 60Ah 12V Battery",
+      "source": "review round 5"
+    },
+    {
+      "pad": "baby stroller",
+      "expect": "merge",
+      "a": "Pampers Baby-Dry Diapers Size 4, 64 Count",
+      "b": "Pampers Baby Dry Size 4 Diapers 64 Pieces",
+      "source": "review round 5"
+    },
+    {
+      "pad": "air purifier",
+      "expect": "merge",
+      "a": "Gree 18000 BTU Split AC Inverter Cold",
+      "b": "Gree Inverter Split Air Conditioner 18000 BTU Cold Only",
+      "knownMiss": true,
+      "source": "review round 5"
+    },
+    {
+      "pad": "instant camera",
+      "expect": "merge",
+      "a": "Nikon Z50 Mirrorless Camera with 16-50mm Lens",
+      "b": "Nikon Z 50 Mirrorless Digital Camera + 16-50mm VR Lens Kit",
+      "knownMiss": true,
+      "source": "review round 5"
+    },
+    {
+      "pad": "usb-c cable 100w",
+      "expect": "merge",
+      "a": "Ugreen HDMI 2.1 Cable 8K 2m",
+      "b": "UGREEN 8K HDMI 2.1 Cable 2 Meter",
+      "source": "review round 5"
+    },
+    {
+      "pad": "baby stroller",
+      "expect": "merge",
+      "a": "Aptamil Advance Stage 1 Infant Formula 400g",
+      "b": "Aptamil Advance 1 Infant Milk Formula 400 g",
+      "knownMiss": true,
+      "source": "review round 5"
+    },
+    {
+      "pad": "electric kettle",
+      "expect": "apart",
+      "a": "DJI Mini 4 Pro Drone Fly More Combo",
+      "b": "DJI Mini 4 Pro Intelligent Flight Battery",
+      "source": "review round 5"
+    },
+    {
+      "pad": "instant camera",
+      "expect": "apart",
+      "a": "DJI Mini 4 Pro Drone",
+      "b": "DJI Mini 4 Pro Battery",
+      "source": "review round 5"
+    },
+    {
+      "pad": "dash cam",
+      "expect": "apart",
+      "a": "Dyson V15 Detect Cordless Vacuum",
+      "b": "Dyson V15 Detect Battery",
+      "source": "review round 5"
+    },
+    {
+      "pad": "air fryer",
+      "expect": "apart",
+      "a": "Nintendo Switch 2 Console",
+      "b": "Nintendo Switch 2 Charger",
+      "source": "review round 5"
+    },
+    {
+      "pad": "electric kettle",
+      "expect": "apart",
+      "a": "Samsung 45W Super Fast Charger EP-T4510",
+      "b": "Samsung 45W Super Fast Charger EP-T4510 Cable",
+      "source": "review round 5"
+    },
+    {
+      "pad": "instant camera",
+      "expect": "apart",
+      "a": "LG Refrigerator GR-B247SLUV",
+      "b": "Water Filter for LG Refrigerator GR-B247SLUV",
+      "source": "review round 5"
+    },
+    {
+      "pad": "dash cam",
+      "expect": "apart",
+      "a": "LG Refrigerator GR-B247SLUV",
+      "b": "LG Water Filter GR-B247SLUV",
+      "source": "review round 5"
+    },
+    {
+      "pad": "air fryer",
+      "expect": "apart",
+      "a": "Samsung Refrigerator RS68A8820S9",
+      "b": "Samsung RS68A8820S9 Refrigerator Door Handle",
+      "source": "review round 5"
+    },
+    {
+      "pad": "electric kettle",
+      "expect": "apart",
+      "a": "Bosch Serie 6 Washing Machine WAU28PH9GC",
+      "b": "Bosch WAU28PH9GC Washing Machine Drain Pump",
+      "source": "review round 5"
+    },
+    {
+      "pad": "instant camera",
+      "expect": "apart",
+      "a": "Varta Car Battery 12V 70Ah",
+      "b": "Varta Car Battery Charger 12V",
+      "source": "review round 5"
+    },
+    {
+      "pad": "dash cam",
+      "expect": "apart",
+      "a": "Varta Car Battery 12V 70Ah",
+      "b": "Varta Car Battery 12V 70Ah Charger",
+      "source": "review round 5"
+    },
+    {
+      "pad": "air fryer",
+      "expect": "apart",
+      "a": "Canon EOS R50 Camera Body",
+      "b": "Canon EOS R50 Camera Battery LP-E17",
+      "source": "review round 5"
+    },
+    {
+      "pad": "electric kettle",
+      "expect": "apart",
+      "a": "Canon EOS R50 Camera Body",
+      "b": "Canon EOS R50 Battery",
+      "source": "review round 5"
+    },
+    {
+      "pad": "instant camera",
+      "expect": "apart",
+      "a": "Sony a6400 Camera Body",
+      "b": "Sony a6400 Camera Bag",
+      "source": "review round 5"
+    },
+    {
+      "pad": "dash cam",
+      "expect": "apart",
+      "a": "Ninja Foodi Dual Zone Air Fryer AF300",
+      "b": "Ninja Foodi Dual Zone Air Fryer AF300 Basket",
+      "source": "review round 5"
+    },
+    {
+      "pad": "air fryer",
+      "expect": "apart",
+      "a": "Ninja Foodi Dual Zone Air Fryer AF300",
+      "b": "Ninja AF300 Air Fryer Silicone Liners",
+      "source": "review round 5"
+    },
+    {
+      "pad": "electric kettle",
+      "expect": "apart",
+      "a": "Philips Sonicare 4100 Toothbrush HX3681",
+      "b": "Philips Sonicare 4100 Toothbrush Heads HX3681",
+      "source": "review round 5"
+    },
+    {
+      "pad": "instant camera",
+      "expect": "apart",
+      "a": "Samsung Front Load Washer 9kg WW90T534DAW",
+      "b": "Samsung Front Load Washer Dryer 9kg WW90T534DAW",
+      "source": "review round 5"
+    },
+    {
+      "pad": "dash cam",
+      "expect": "apart",
+      "a": "Hisense 9kg Washing Machine",
+      "b": "Hisense 9kg Washer Dryer",
+      "source": "review round 5"
+    },
+    {
+      "pad": "air fryer",
+      "expect": "apart",
+      "a": "Ninja Foodi Dual Zone Air Fryer AF300",
+      "b": "Silicone Liners for Ninja Foodi Dual Zone Air Fryer AF300",
+      "source": "review round 5"
+    },
+    {
+      "pad": "electric kettle",
+      "expect": "apart",
+      "a": "Sony Alpha a6400 Mirrorless Camera",
+      "b": "Camera Bag for Sony Alpha a6400",
+      "source": "review round 5"
+    },
+    {
+      "pad": "instant camera",
+      "expect": "apart",
+      "a": "Sony Alpha a6400 Mirrorless Camera",
+      "b": "Sony Alpha a6400 Mirrorless Camera Bag",
+      "source": "review round 5"
+    },
+    {
+      "pad": "dash cam",
+      "expect": "apart",
+      "a": "Philips Sonicare 4100 Toothbrush HX3681/24",
+      "b": "Philips Sonicare 4100 Toothbrush Heads HX3681/24",
+      "source": "review round 5"
+    },
+    {
+      "pad": "air fryer",
+      "expect": "apart",
+      "a": "Philips Sonicare ProtectiveClean 4100 Electric Toothbrush",
+      "b": "Philips Sonicare ProtectiveClean 4100 Toothbrush Heads",
+      "source": "review round 5"
+    },
+    {
+      "pad": "electric kettle",
+      "expect": "apart",
+      "a": "Oral-B iO Series 3 Electric Toothbrush",
+      "b": "Oral-B iO Series 3 Brush Heads 4 Count",
+      "source": "review round 5"
+    },
+    {
+      "pad": "instant camera",
+      "expect": "apart",
+      "a": "Ninja Foodi Dual Zone Air Fryer",
+      "b": "Ninja Foodi Dual Zone Air Fryer Basket",
+      "source": "review round 5"
+    },
+    {
+      "pad": "dash cam",
+      "expect": "apart",
+      "a": "Apple iPad Air 11 M2 128GB",
+      "b": "Apple iPad Air 11 M2 Keyboard",
+      "source": "review round 5"
+    },
+    {
+      "pad": "air fryer",
+      "expect": "apart",
+      "a": "Apple iPad Air 11 M2 128GB",
+      "b": "Apple iPad Air 11 M2 Screen Protector",
+      "source": "review round 5"
+    },
+    {
+      "pad": "electric kettle",
+      "expect": "apart",
+      "a": "Samsung Galaxy Tab S9 Wi-Fi 128GB",
+      "b": "Samsung Galaxy Tab S9 Book Cover Keyboard",
+      "source": "review round 5"
+    },
+    {
+      "pad": "instant camera",
+      "expect": "apart",
+      "a": "Dyson V15 Detect Absolute Cordless Vacuum SV47",
+      "b": "Dyson V15 Detect Absolute Wall Dock SV47",
+      "source": "review round 5"
+    },
+    {
+      "pad": "dash cam",
+      "expect": "apart",
+      "a": "GoPro HERO13 Black Action Camera",
+      "b": "GoPro HERO13 Black Enduro Battery",
+      "source": "review round 5"
+    },
+    {
+      "pad": "air fryer",
+      "expect": "apart",
+      "a": "GoPro HERO13 Black Action Camera",
+      "b": "GoPro HERO13 Black Housing",
+      "source": "review round 5"
+    },
+    {
+      "pad": "electric kettle",
+      "expect": "apart",
+      "a": "Samsung 65 Inch QLED TV QA65Q60D",
+      "b": "Samsung 65 Inch QLED TV QA65Q60D Wall Mount",
+      "source": "review round 5"
+    },
+    {
+      "pad": "instant camera",
+      "expect": "apart",
+      "a": "Samsung 65 Inch QLED TV QA65Q60D",
+      "b": "Samsung 65 Inch QLED TV QA65Q60D Remote",
+      "source": "review round 5"
+    },
+    {
+      "pad": "dash cam",
+      "expect": "apart",
+      "a": "Hisense 55 Inch 4K Smart TV 55A6N",
+      "b": "Hisense 55A6N TV Stand Legs",
+      "source": "review round 5"
     }
   ]
 }

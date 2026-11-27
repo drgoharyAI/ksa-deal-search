@@ -174,6 +174,29 @@ const EXTRA_WORDS = new Set("extra additional spare bonus second".split(" "));
 const singular = (w: string) => (/(?:ch|sh)es$/.test(w) ? w.slice(0, -2) : w.endsWith("ss") ? w : w.replace(/s$/, ""));
 const NOT_ACCESSORY = /\b(?:aluminium|aluminum|titanium|steel|ceramic|charging|magsafe|usb[-\s]?c|lightning|wireless)\s+(?:charging\s+)?case\b/g;
 
+/**
+ * Parts and accessories sold for a product. One in a title's name that the other title does not
+ * mention at all makes it another item, also with a shared code ("TV QA65Q60D" / "TV QA65Q60D Wall
+ * Mount"). The name is the title up to its first separator or "with / for / +" clause, so feature
+ * lists ("..., Detachable Basket, Cool-Touch Handle") and add-on clauses do not count.
+ */
+const PART_NOUNS = new Set(
+  (
+    "mount mounts bracket brackets remote remotes filter filters gasket gaskets seal seals head heads basket baskets " +
+    "liner liners pump pumps dock docks bag bags charger chargers cable cables cord hose hoses kit kits legs handle " +
+    "handles battery batteries case cases cover covers strap straps stand stands adapter adapters adaptor blade " +
+    "blades brush brushes cartridge cartridges lid lids tray trays shelf shelves knob knobs belt belts housing " +
+    "nozzle nozzles tips eartips"
+  ).split(/\s+/),
+);
+const PART_HINT = /mount|bracket|remote|filter|gasket|seal|head|basket|liner|pump|dock|bag|charger|cable|cord|hose|kit|legs|handle|batter|case|cover|strap|stand|adapt|blade|brush|cartridge|lid|tray|shel|knob|belt|housing|nozzle|tips/;
+const NAME_END = /[,|;(\[–]|\s-\s|\b(?:with|includes?|including|for)\b|\s[+&]\s/;
+/** Product names made of a part noun: a power bank is a "portable charger" or "battery pack". */
+const OWN_PRODUCT = /\b(?:portable|wireless|fast|wall|car|usb(?:[\s-]?c)?|travel)\s+chargers?\b|\bbattery\s+packs?\b|\bbuilding\s+kits?\b/g;
+const COUNT_WORDS = new Set("single dual double twin triple quad multi".split(" "));
+/** A washer with a dryer in one machine. */
+const WASHER_DRYER = /\bwash(?:er|ing\s+machine)?[\s/&-]*(?:and\s+)?dryer\b/;
+
 const STOP = new Set(
   "for with and the of in to by on new original compatible version edition model 2024 2025 2026 a an or".split(" "),
 );
@@ -181,7 +204,7 @@ const STOP = new Set(
 /** Spec dimensions read from titles. Values are canonical strings; each dimension is a set. */
 type Dim =
   | "mah" | "storage" | "ram" | "watt" | "inch" | "mm" | "hz" | "litre" | "gen" | "res" | "net" | "bt"
-  | "count" | "pieces" | "dims" | "dec" | "ifgen" | "in1" | "dpi" | "wt" | "oz" | "k" | "mp" | "year" | "pa" | "mbs" | "gbps" | "len" | "model"
+  | "count" | "pieces" | "dims" | "dec" | "ifgen" | "visc" | "in1" | "dpi" | "wt" | "oz" | "k" | "mp" | "year" | "pa" | "mbs" | "gbps" | "len" | "model"
   | `qty:${string}` | `u:${string}`;
 
 export type TitleFeatures = {
@@ -202,6 +225,8 @@ export type TitleFeatures = {
   codePrev?: Map<string, string>;
   /** Add-on nouns in "with / + / & / and / includes / bundle" clauses ("... and Camera"). */
   addons: Set<string>;
+  /** Part and accessory nouns in the title's name ("... GR-B247SLUV Water Filter": filter), see PART_NOUNS. */
+  parts: Set<string>;
   /** The "/NN" suffixes written after each code ("HR2041/10" -> HR2041: {10}): the exact article. */
   codeSfx: ReadonlyMap<string, Set<string>>;
   /** The brand this item is made for ("Trail Loop Band for Apple Watch"), when it names no brand of its own. */
@@ -249,11 +274,19 @@ function prepare(title: string): string {
       // Tyre sizes written glued or spaced: "225/45R17" = "225/45 R17".
       .replace(/(\d{3})\s*\/\s*(\d{2})\s*(z?r)\s*(\d{2})\b/g, "$1/$2 $3$4");
   t = t.replace(SPELLING, (w) => SPELLING_MAP[w]);
+  // Oil viscosity in one form, read as a spec: "5W30" = "5W-30".
+  if (VISCOSITY_HINT.test(t)) t = t.replace(VISCOSITY, "$1w-$2");
+  // A brand's model letter written apart from its number: "Nikon Z 50" = "Nikon Z50".
+  if (LETTER_NUMBER.test(t)) t = t.replace(LETTER_NUMBER_G, (m, brand: string, letter: string, n: string) => (KNOWN_BRANDS.has(brand) ? `${brand} ${letter}${n}` : m));
   // A trailing "+" names the bigger model: "S24+", "Pro+", "Primacy 4+" (not "8+256GB", "Wi-Fi + Cellular").
   if (t.includes("+")) t = t.replace(/(\b[a-z0-9]+)\+(?![a-z0-9+])/g, "$1 plus ");
   return expandLists(t);
 }
 
+const VISCOSITY_HINT = /\dw-?\d\d/;
+const VISCOSITY = /(?<![a-z\d.])(\d{1,2})w-?(16|20|30|40|50|60)(?!\w)/g;
+const LETTER_NUMBER = /\s[a-z]\s\d{2,4}\b/;
+const LETTER_NUMBER_G = /\b([a-z]+)\s([a-z])\s(\d{2,4})\b/g;
 const CODE_SUFFIX = /\b([a-z]{1,4}-?\d{3,}[a-z]*)((?:\/\d{1,3})+)(?![\w/])/g;
 
 const NO_SUFFIXES: ReadonlyMap<string, Set<string>> = new Map();
@@ -314,6 +347,7 @@ const SPEC_RULES: SpecRule[] = [
   { hint: ["in"], dim: "in1", re: /(?<![\d.])(\d+)\s*-?\s*in\s*-?\s*1\b/g, val: (m) => m[1] },
   { hint: ["ram", "memory", "ddr"], dim: "ram", re: /(?<![\d.])(\d+)\s*gb\s*(?:of\s*)?(?:ram|memory|lpddr\d*x?|ddr\d*)\b/g, val: (m) => m[1] },
   { hint: ["ram"], dim: "ram", re: /\bram\s*:?\s*(\d+)\s*gb\b/g, val: (m) => m[1] },
+  { hint: ["w-"], dim: "visc", re: /(?<![a-z\d.])(\d{1,2})w-(\d\d)(?!\w)/g, val: (m) => `${m[1]}w${m[2]}` },
   // An interface generation ("PCIe Gen4", "USB 3.2 Gen 2" against "Gen 2x2") is not the product's.
   { hint: ["gen"], dim: "ifgen", re: /\b(?:pcie?|pci[\s-]express|usb|nvme|thunderbolt)\s*(?:\d(?:\.\d)?\s*)?gen\s*(\d(?:x\d)?)\b/g, val: (m) => m[1] },
   { hint: ["gen"], dim: "gen", re: /(?<![\d.])(\d+)(?:st|nd|rd|th)?\s*-?\s*gen(?:eration)?\b/g, val: (m) => m[1] },
@@ -596,6 +630,15 @@ export function titleFeatures(title: string): TitleFeatures {
     for (const l of langs) variants.add(`lang:${l}`);
   }
 
+  const parts = new Set<string>();
+  if (PART_HINT.test(prepared)) {
+    const name = (prepared.includes("case") ? prepared.replace(NOT_ACCESSORY, " ") : prepared).replace(OWN_PRODUCT, " ").split(NAME_END)[0];
+    const nameWords = words(name);
+    // A counted part describes the product ("Dual Basket Airfryer", "2 Drawer", "3 Heads").
+    for (let i = 0; i < nameWords.length; i++)
+      if (PART_NOUNS.has(nameWords[i]) && !(i > 0 && (COUNT_WORDS.has(nameWords[i - 1]) || /^\d+$/.test(nameWords[i - 1])))) parts.add(singular(nameWords[i]));
+  }
+  if (prepared.includes("dryer") && WASHER_DRYER.test(prepared)) variants.add("type:washer-dryer");
   const core = prepared.split(/\b(?:with|includes?|including)\b|\s[+&]\s/)[0].replace(NOT_ACCESSORY, " ");
   const accessory = ACCESSORY_HINT.test(core) && words(core).some((w) => ACCESSORY_NOUNS.has(w));
   // Nouns in add-on clauses: "Console Bundle with Mario Kart World and Nintendo Switch 2 Camera".
@@ -677,6 +720,7 @@ export function titleFeatures(title: string): TitleFeatures {
     codeNext,
     codePrevRaw,
     addons,
+    parts,
     codeSfx: codeSuffixes(title),
     forBrand,
     specs,
@@ -856,6 +900,12 @@ function sfxMatch(a: TitleFeatures, b: TitleFeatures, c: string): boolean | unde
   return false;
 }
 
+/** A part noun in `a`'s name that `b` names nowhere. */
+function partMissing(a: TitleFeatures, b: TitleFeatures): boolean {
+  for (const x of a.parts) if (!b.tokens.has(x) && !b.tokens.has(`${x}s`) && !b.tokens.has(`${x}es`) && !(x === "battery" && b.tokens.has("batteries")) && !(x === "shelf" && b.tokens.has("shelves"))) return true;
+  return false;
+}
+
 /** An add-on of `a` that `b` neither lists as an add-on nor names anywhere ("with Plastic Jar" / "1.5L Plastic Jar"). */
 function addonMissing(a: TitleFeatures, b: TitleFeatures): boolean {
   for (const x of a.addons) if (!b.addons.has(x) && !b.tokens.has(x) && !b.tokens.has(`${x}s`) && !b.tokens.has(`${x}es`)) return true;
@@ -884,6 +934,7 @@ function conflicts(a: TitleFeatures, b: TitleFeatures): boolean {
   if (a.brand && b.brand && a.brand !== b.brand) return true;
   if (a.knownBrand && b.knownBrand && a.knownBrand !== b.knownBrand) return true;
   if (a.variantKey !== b.variantKey || a.accessory !== b.accessory) return true;
+  if (partMissing(a, b) || partMissing(b, a)) return true;
   if ((a.forBrand && a.forBrand === b.knownBrand) || (b.forBrand && b.forBrand === a.knownBrand)) return true;
   // The same article number is the same box, however each store lists what is in it.
   if ((addonMissing(a, b) || addonMissing(b, a)) && !sameArticle(a, b)) return true;
