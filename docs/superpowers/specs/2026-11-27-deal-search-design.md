@@ -267,3 +267,22 @@ non-goals for these three.
   Anything first, Playwright as a fallback. `finalPrice = listPrice`, and cards say
   "shipping not included".
 - **More KSA stores (owner, 2026-11-27):** eXtra (`extra-sa`, extra.com), Carrefour KSA (`carrefour-sa`, carrefourksa.com), SHEIN KSA (`shein-sa`), Temu KSA (`temu-sa`). All must be Saudi storefronts with SAR prices and English titles. Each is spiked first with the usual method: API Anything at tier 1–2, then real Chrome over CDP only if blocked. Personal-volume traffic only, no CAPTCHA solving. A store that can't be read reliably is dropped and reported.
+
+## Search history and price alerts (owner, 2026-11-27)
+These move out of non-goals.
+- **Storage:** a local SQLite file via Node's built-in `node:sqlite` (`%LOCALAPPDATA%\deal-search\data.db`, overridable with `DEAL_SEARCH_DB`). No new native dependencies.
+- **Search history:** every successful search is recorded: query, stores, sort, filters, time, result count, and the cheapest confident match (title, store, price, url). A History page lists them newest first, re-runs one with a click, deletes single entries, and can clear all.
+- **Price alerts:**
+  - **Product watch:** from any result card, with a target price (default: the current price minus 5%).
+  - **Search watch:** a query plus stores plus a max price. It fires when any confident match (not "less likely") is at or below the target.
+  - Each watch keeps its own price history.
+  - An Alerts page lists watches, the last check, the current and lowest price, a small sparkline, and pause and delete buttons.
+- **Checker:** runs in the app's server process while the app runs.
+  - It checks every 6 h by default (configurable), staggered, and reuses the normal store adapters, caches and back-offs.
+  - Each store is fetched at most once per query per cycle.
+  - A product watch is checked by re-running its source query on its store and matching the product id.
+  - A watch that has already fired notifies again only after the price rises above the target and then falls back.
+- **Notifications: Telegram.** A bot token and chat id are kept in `.env.local` (`TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`; never committed). Each message gives the title, store, old and new price, target, and link.
+  - The Alerts page has a "Send test message" button.
+  - If Telegram isn't configured, alerts still show in the app with a setup hint.
+  - The token never reaches the browser.
