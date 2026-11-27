@@ -65,6 +65,8 @@ for (const [i, query] of queries.entries()) {
 const adv = JSON.parse(readFileSync(path.join(root, "eval/groups-adversarial.json"), "utf8")).pairs;
 const padCache = new Map();
 const advBad = [];
+const advFixed = [];
+let advMiss = 0;
 for (const x of adv) {
   if (!padCache.has(x.pad)) {
     const slug = ev.querySlug(x.pad);
@@ -78,10 +80,14 @@ for (const x of adv) {
   const gs = ev.groupProducts([...padCache.get(x.pad), mk("amazon-sa", "adv-a", x.a), mk("noon-sa", "adv-b", x.b)], gopts);
   const ga = gs.find((g) => g.members.some((m) => m.id === "adv-a"));
   const merged = ga.members.some((m) => m.id === "adv-b");
-  if (merged !== (x.expect === "merge")) advBad.push(`${x.expect.toUpperCase()} expected: ${x.a} | ${x.b}`);
+  // knownMiss: a merge the rules do not make yet (a recall gap), counted apart from failures.
+  if (x.knownMiss) merged ? advFixed.push(`${x.a} | ${x.b}`) : advMiss++;
+  else if (merged !== (x.expect === "merge")) advBad.push(`${x.expect.toUpperCase()} expected: ${x.a} | ${x.b}`);
 }
 console.warn = warn;
-console.log(`adversarial pairs ${adv.length - advBad.length}/${adv.length} as expected`);
+const advN = adv.filter((x) => !x.knownMiss).length;
+console.log(`adversarial pairs ${advN - advBad.length}/${advN} as expected` + (advMiss ? ` (+${advMiss} known recall misses)` : ""));
+for (const b of advFixed) console.log(`         now merges, drop knownMiss: ${b}`);
 for (const b of advBad) console.log(`         ${b}`);
 console.log(`threshold ${threshold ?? "default"}  generic share ${genericShare ?? "default"}`);
 for (const [split, t] of Object.entries(tot)) {

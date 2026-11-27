@@ -1,5 +1,5 @@
 {
-  "about": "Hand-written title pairs from the 17b reviews, each grouped inside a recorded result set (pad) so result-set word frequencies apply. apart: must stay separate; merge: must group.",
+  "about": "Hand-written title pairs from the 17b reviews, each grouped inside a recorded result set (pad) so result-set word frequencies apply. apart: must stay separate; merge: must group. Round 4 added the reviewer's 58 pairs (suffix-free: weights, layouts, bands, tyres, sets) and 72 fresh pairs; knownMiss marks merges the rules do not make yet (recall, not precision).",
   "pairs": [
     {
       "pad": "iphone 16",
@@ -395,6 +395,789 @@
       "a": "Samsung Galaxy A55 5G SM-A556E 256GB Navy",
       "b": "Samsung Galaxy A35 5G SM-A556E 256GB Navy",
       "source": "review round 3"
+    },
+    {
+      "pad": "hair dryer",
+      "expect": "apart",
+      "a": "Dior Sauvage Eau de Parfum 100ml for Men",
+      "b": "Dior Sauvage Eau de Toilette 100ml for Men"
+    },
+    {
+      "pad": "hair dryer",
+      "expect": "apart",
+      "a": "Chanel Coco Mademoiselle Eau de Parfum Spray 50ml",
+      "b": "Chanel Coco Mademoiselle Eau de Parfum Spray 100ml"
+    },
+    {
+      "pad": "hair dryer",
+      "expect": "apart",
+      "a": "La Roche-Posay Anthelios UVMune 400 Invisible Fluid SPF50+ 50ml",
+      "b": "La Roche-Posay Anthelios UVMune 400 Invisible Fluid SPF30 50ml"
+    },
+    {
+      "pad": "dash cam",
+      "expect": "apart",
+      "a": "Michelin Primacy 4 205/55 R16 91V Car Tyre",
+      "b": "Michelin Primacy 4 205/60 R16 92V Car Tyre"
+    },
+    {
+      "pad": "office chair",
+      "expect": "apart",
+      "a": "HP LaserJet Pro M404dn Monochrome Laser Printer",
+      "b": "HP LaserJet Pro M404dw Monochrome Laser Printer"
+    },
+    {
+      "pad": "4k monitor 27",
+      "expect": "apart",
+      "a": "Samsung Odyssey G5 27 inch QHD 144Hz Curved Gaming Monitor LC27G55TQ",
+      "b": "Samsung Odyssey G5 32 inch QHD 144Hz Curved Gaming Monitor LC32G55TQ"
+    },
+    {
+      "pad": "4k monitor 27",
+      "expect": "apart",
+      "a": "LG UltraGear 27 inch QHD IPS 165Hz Gaming Monitor Black",
+      "b": "LG UltraGear 27 inch QHD IPS 240Hz Gaming Monitor Black"
+    },
+    {
+      "pad": "wireless charger 15w",
+      "expect": "apart",
+      "a": "TP-Link Archer AX3000 Dual Band Wi-Fi 6 Router",
+      "b": "TP-Link Archer AX5400 Dual Band Wi-Fi 6 Router"
+    },
+    {
+      "pad": "coffee machine",
+      "expect": "apart",
+      "a": "De'Longhi Magnifica S ECAM22.110.B Bean to Cup Coffee Machine",
+      "b": "De'Longhi Magnifica S ECAM22.360.S Bean to Cup Coffee Machine with Milk Frother"
+    },
+    {
+      "pad": "blender",
+      "expect": "apart",
+      "a": "Zwilling Pro 5-Piece Knife Block Set",
+      "b": "Zwilling Pro 7-Piece Knife Block Set"
+    },
+    {
+      "pad": "baby stroller",
+      "expect": "apart",
+      "a": "Maxi-Cosi 360 Group 0+ Car Seat Authentic Black",
+      "b": "Maxi-Cosi 360 Group 1 Car Seat Authentic Black"
+    },
+    {
+      "pad": "smart watch >4 stars",
+      "expect": "apart",
+      "a": "Samsung Galaxy Watch6 Classic 47mm Black",
+      "b": "Samsung Galaxy Watch6 Classic 47mm Black Hybrid Leather Band Strap"
+    },
+    {
+      "pad": "instant camera",
+      "expect": "apart",
+      "a": "Atomic Habits by James Clear Paperback",
+      "b": "Atomic Habits by James Clear Hardcover"
+    },
+    {
+      "pad": "laptop backpack",
+      "expect": "apart",
+      "a": "Samsonite Proxis Spinner 55cm Cabin Luggage Black",
+      "b": "Samsonite Proxis Spinner 75cm Large Luggage Black"
+    },
+    {
+      "pad": "office chair",
+      "expect": "apart",
+      "a": "Raha Medical Mattress Single 90x190 cm",
+      "b": "Raha Medical Mattress Queen 160x200 cm"
+    },
+    {
+      "pad": "water bottle",
+      "expect": "apart",
+      "a": "Now Foods Omega-3 1000mg 100 Softgels",
+      "b": "Now Foods Omega-3 1000mg 200 Softgels"
+    },
+    {
+      "pad": "instant camera",
+      "expect": "apart",
+      "a": "LEGO Star Wars Millennium Falcon 75257 Building Set",
+      "b": "LEGO Star Wars Millennium Falcon 75375 Building Set"
+    },
+    {
+      "pad": "gaming mouse",
+      "expect": "apart",
+      "a": "ASUS Dual GeForce RTX 4060 OC 8GB GDDR6 Graphics Card",
+      "b": "ASUS Dual GeForce RTX 4060 Ti OC 8GB GDDR6 Graphics Card"
+    },
+    {
+      "pad": "gaming mouse",
+      "expect": "apart",
+      "a": "MSI GeForce RTX 4060 Ti Ventus 2X 8GB Graphics Card",
+      "b": "MSI GeForce RTX 4060 Ti Ventus 2X 16GB Graphics Card"
+    },
+    {
+      "pad": "external ssd 1tb",
+      "expect": "apart",
+      "a": "Samsung 990 PRO 1TB PCIe 4.0 NVMe M.2 Internal SSD",
+      "b": "Samsung 990 EVO 1TB PCIe 4.0 NVMe M.2 Internal SSD"
+    },
+    {
+      "pad": "mechanical keyboard -wired",
+      "expect": "apart",
+      "a": "Logitech MX Keys S Wireless Keyboard Arabic Layout Graphite",
+      "b": "Logitech MX Keys S Wireless Keyboard English Layout Graphite"
+    },
+    {
+      "pad": "bluetooth speaker",
+      "expect": "apart",
+      "a": "Marshall Emberton II Portable Bluetooth Speaker Black",
+      "b": "Marshall Emberton III Portable Bluetooth Speaker Black"
+    },
+    {
+      "pad": "4k monitor 27",
+      "expect": "apart",
+      "a": "Dell 27 Monitor S2721DS QHD IPS 75Hz",
+      "b": "Dell 27 Monitor S2721D QHD IPS 75Hz"
+    },
+    {
+      "pad": "hair dryer",
+      "expect": "apart",
+      "a": "CeraVe Moisturising Cream 340g",
+      "b": "CeraVe Moisturising Cream 454g"
+    },
+    {
+      "pad": "blender",
+      "expect": "apart",
+      "a": "Tefal Ingenio 13 Piece Cookware Set",
+      "b": "Tefal Ingenio 10 Piece Cookware Set"
+    },
+    {
+      "pad": "water bottle",
+      "expect": "apart",
+      "a": "Optimum Nutrition Gold Standard 100% Whey Protein Double Rich Chocolate 2 lb",
+      "b": "Optimum Nutrition Gold Standard 100% Whey Protein Double Rich Chocolate 5 lb"
+    },
+    {
+      "pad": "gaming mouse",
+      "expect": "apart",
+      "a": "Sapphire Pulse Radeon RX 7600 8GB",
+      "b": "Sapphire Pulse Radeon RX 7600 XT 16GB"
+    },
+    {
+      "pad": "instant camera",
+      "expect": "apart",
+      "a": "Harry Potter and the Philosopher's Stone Paperback",
+      "b": "Harry Potter and the Chamber of Secrets Paperback"
+    },
+    {
+      "pad": "dash cam",
+      "expect": "apart",
+      "a": "Bridgestone Turanza T005 225/45 R17 94W",
+      "b": "Bridgestone Turanza T005 225/45 R18 94W"
+    },
+    {
+      "pad": "wireless charger 15w",
+      "expect": "apart",
+      "a": "TP-Link Deco X20 AX1800 Mesh Wi-Fi 6 System 2-Pack",
+      "b": "TP-Link Deco X20 AX1800 Mesh Wi-Fi 6 System 3-Pack"
+    },
+    {
+      "pad": "coffee machine",
+      "expect": "apart",
+      "a": "Nespresso Vertuo Pop Coffee Machine Black",
+      "b": "Nespresso Vertuo Pop Coffee Machine Black with Aeroccino Milk Frother"
+    },
+    {
+      "pad": "smart watch >4 stars",
+      "expect": "apart",
+      "a": "Apple Watch Ultra 2 49mm Titanium Case Black Trail Loop",
+      "b": "Trail Loop Band for Apple Watch Ultra 2 49mm Black"
+    },
+    {
+      "pad": "hair dryer",
+      "expect": "merge",
+      "a": "Dior Sauvage Eau de Parfum 100ml",
+      "b": "Dior Sauvage EDP 100 ml Perfume for Men"
+    },
+    {
+      "pad": "wireless charger 15w",
+      "expect": "merge",
+      "a": "TP-Link Archer AX55 AX3000 Wi-Fi 6 Router",
+      "b": "TP-Link AX3000 Dual Band Gigabit Wi-Fi 6 Router Archer AX55"
+    },
+    {
+      "pad": "external ssd 1tb",
+      "expect": "merge",
+      "a": "Samsung 990 PRO 2TB PCIe 4.0 NVMe M.2 Internal SSD MZ-V9P2T0BW",
+      "b": "Samsung 990 Pro NVMe M.2 SSD 2TB, PCIe Gen4, MZ-V9P2T0BW"
+    },
+    {
+      "pad": "instant camera",
+      "expect": "merge",
+      "a": "LEGO Technic Ford Mustang Shelby GT500 42138",
+      "b": "LEGO 42138 Technic Ford Mustang Shelby GT500 Building Kit (544 Pieces)"
+    },
+    {
+      "pad": "coffee machine",
+      "expect": "merge",
+      "a": "Nespresso Vertuo Pop Coffee Machine Black",
+      "b": "Nespresso Vertuo Pop Coffee Maker, Liquorice Black",
+      "knownMiss": true
+    },
+    {
+      "pad": "instant camera",
+      "expect": "merge",
+      "a": "Atomic Habits: An Easy & Proven Way to Build Good Habits & Break Bad Ones Paperback",
+      "b": "Atomic Habits by James Clear (Paperback)",
+      "knownMiss": true
+    },
+    {
+      "pad": "bluetooth speaker",
+      "expect": "merge",
+      "a": "Marshall Emberton II Portable Bluetooth Speaker Black and Brass",
+      "b": "Marshall Emberton II Bluetooth Speaker - Black & Brass"
+    },
+    {
+      "pad": "office chair",
+      "expect": "merge",
+      "a": "HP LaserJet Pro M404dn Printer",
+      "b": "HP LaserJet Pro M404dn Monochrome Laser Printer, W1A53A"
+    },
+    {
+      "pad": "mechanical keyboard -wired",
+      "expect": "merge",
+      "a": "Logitech MX Keys S Wireless Keyboard Graphite",
+      "b": "Logitech MX Keys S Advanced Wireless Illuminated Keyboard, Graphite",
+      "knownMiss": true
+    },
+    {
+      "pad": "dash cam",
+      "expect": "merge",
+      "a": "Michelin Pilot Sport 4 225/45 R17 94Y",
+      "b": "Michelin 225/45R17 94Y Pilot Sport 4 Tyre"
+    },
+    {
+      "pad": "water bottle",
+      "expect": "apart",
+      "a": "Nido Fortified Milk Powder 900g",
+      "b": "Nido Fortified Milk Powder 1800g"
+    },
+    {
+      "pad": "blender",
+      "expect": "apart",
+      "a": "Nido Fortified Milk Powder 900g",
+      "b": "Nido Fortified Milk Powder 1.8kg"
+    },
+    {
+      "pad": "hair dryer",
+      "expect": "apart",
+      "a": "Lavazza Qualita Oro Coffee Beans 250g",
+      "b": "Lavazza Qualita Oro Coffee Beans 1kg"
+    },
+    {
+      "pad": "gaming mouse",
+      "expect": "apart",
+      "a": "Optimum Nutrition Gold Standard Whey 2.5 lb Chocolate",
+      "b": "Optimum Nutrition Gold Standard Whey 5.5 lb Chocolate"
+    },
+    {
+      "pad": "bluetooth speaker",
+      "expect": "apart",
+      "a": "Davidoff Cool Water EDT 4.2 oz",
+      "b": "Davidoff Cool Water EDT 6.7 oz"
+    },
+    {
+      "pad": "coffee machine",
+      "expect": "apart",
+      "a": "Nivea Soft Cream 200ml",
+      "b": "Nivea Soft Cream 300ml"
+    },
+    {
+      "pad": "smart watch >4 stars",
+      "expect": "apart",
+      "a": "Pampers Premium Care Size 3 60 Diapers",
+      "b": "Pampers Premium Care Size 3 120 Diapers"
+    },
+    {
+      "pad": "air fryer",
+      "expect": "apart",
+      "a": "Ariel Automatic Powder Detergent 2.5kg",
+      "b": "Ariel Automatic Powder Detergent 5kg"
+    },
+    {
+      "pad": "water bottle",
+      "expect": "apart",
+      "a": "Apple Watch Series 10 46mm Black Sport Band",
+      "b": "Sport Band for Apple Watch 46mm Black"
+    },
+    {
+      "pad": "blender",
+      "expect": "apart",
+      "a": "Samsung Galaxy Watch7 44mm Green",
+      "b": "Strap for Samsung Galaxy Watch7 44mm Green"
+    },
+    {
+      "pad": "hair dryer",
+      "expect": "apart",
+      "a": "Kindle Paperwhite 16GB Black",
+      "b": "Kindle Paperwhite 16GB Black Cover"
+    },
+    {
+      "pad": "gaming mouse",
+      "expect": "apart",
+      "a": "Hisense 55 Inch 4K UHD Smart TV A6",
+      "b": "Hisense 55 Inch 4K UHD Smart TV A7"
+    },
+    {
+      "pad": "bluetooth speaker",
+      "expect": "apart",
+      "a": "Canon PIXMA G3420 Printer",
+      "b": "Canon PIXMA G3430 Printer"
+    },
+    {
+      "pad": "coffee machine",
+      "expect": "apart",
+      "a": "Canon EOS R50 Mirrorless Camera with RF-S 18-45mm Lens",
+      "b": "Canon EOS R50 Mirrorless Camera Body Only"
+    },
+    {
+      "pad": "smart watch >4 stars",
+      "expect": "apart",
+      "a": "Sony Alpha a7 IV Camera Body",
+      "b": "Sony Alpha a7 III Camera Body"
+    },
+    {
+      "pad": "air fryer",
+      "expect": "apart",
+      "a": "Jarir Samsonite Luggage Set of 3",
+      "b": "Samsonite Luggage Set of 2"
+    },
+    {
+      "pad": "water bottle",
+      "expect": "merge",
+      "a": "Nido Fortified Milk Powder 1.8kg",
+      "b": "Nido Fortified Milk Powder 1800g"
+    },
+    {
+      "pad": "water bottle",
+      "expect": "apart",
+      "a": "Samsung 55 Inch Crystal UHD 4K Smart TV UA55DU7000",
+      "b": "Samsung 65 Inch Crystal UHD 4K Smart TV UA65DU7000"
+    },
+    {
+      "pad": "blender",
+      "expect": "apart",
+      "a": "Apple iPad Air 11-inch M2 Wi-Fi 128GB Blue",
+      "b": "Apple iPad Air 11-inch M2 Wi-Fi + Cellular 128GB Blue"
+    },
+    {
+      "pad": "hair dryer",
+      "expect": "apart",
+      "a": "Apple MacBook Air 13-inch M3 8GB 256GB Midnight",
+      "b": "Apple MacBook Air 15-inch M3 8GB 256GB Midnight"
+    },
+    {
+      "pad": "gaming mouse",
+      "expect": "apart",
+      "a": "Dyson Airwrap Complete Long",
+      "b": "Dyson Airwrap Complete"
+    },
+    {
+      "pad": "bluetooth speaker",
+      "expect": "apart",
+      "a": "Pampers Baby-Dry Size 4 64 Diapers",
+      "b": "Pampers Baby-Dry Size 5 64 Diapers"
+    },
+    {
+      "pad": "coffee machine",
+      "expect": "apart",
+      "a": "Nescafe Gold 200g Jar",
+      "b": "Nescafe Gold 100g Jar"
+    },
+    {
+      "pad": "smart watch >4 stars",
+      "expect": "apart",
+      "a": "Almarai Full Fat Milk 1L",
+      "b": "Almarai Low Fat Milk 1L"
+    },
+    {
+      "pad": "air fryer",
+      "expect": "apart",
+      "a": "Sony PlayStation 5 Pro Console 2TB",
+      "b": "Sony PlayStation 5 Slim Console 1TB"
+    },
+    {
+      "pad": "water bottle",
+      "expect": "apart",
+      "a": "EA Sports FC 25 PS5",
+      "b": "EA Sports FC 25 PS4"
+    },
+    {
+      "pad": "blender",
+      "expect": "apart",
+      "a": "Xiaomi Redmi Note 13 Pro 5G 256GB 8GB RAM",
+      "b": "Xiaomi Redmi Note 13 Pro 4G 256GB 8GB RAM"
+    },
+    {
+      "pad": "hair dryer",
+      "expect": "apart",
+      "a": "JBL Tune 520BT Wireless Headphones",
+      "b": "JBL Tune 720BT Wireless Headphones"
+    },
+    {
+      "pad": "gaming mouse",
+      "expect": "apart",
+      "a": "Ray-Ban Wayfarer RB2140 50mm",
+      "b": "Ray-Ban Wayfarer RB2140 54mm"
+    },
+    {
+      "pad": "bluetooth speaker",
+      "expect": "apart",
+      "a": "Casio G-Shock GA-2100-1A1",
+      "b": "Casio G-Shock GA-2100-4A"
+    },
+    {
+      "pad": "coffee machine",
+      "expect": "apart",
+      "a": "Oral-B iO Series 9 Electric Toothbrush",
+      "b": "Oral-B iO Series 7 Electric Toothbrush"
+    },
+    {
+      "pad": "smart watch >4 stars",
+      "expect": "apart",
+      "a": "Huawei Watch GT 5 46mm",
+      "b": "Huawei Watch GT 5 Pro 46mm"
+    },
+    {
+      "pad": "air fryer",
+      "expect": "apart",
+      "a": "Brita Maxtra Pro Filter Pack of 3",
+      "b": "Brita Maxtra Pro Filter Pack of 6"
+    },
+    {
+      "pad": "water bottle",
+      "expect": "apart",
+      "a": "Duracell AA Batteries 4 Pack",
+      "b": "Duracell AA Batteries 8 Pack"
+    },
+    {
+      "pad": "blender",
+      "expect": "apart",
+      "a": "Lenovo IdeaPad Slim 3 15IAH8 Core i5 8GB 512GB",
+      "b": "Lenovo IdeaPad Slim 3 15IAH8 Core i7 16GB 512GB"
+    },
+    {
+      "pad": "hair dryer",
+      "expect": "apart",
+      "a": "HP 305 Black Ink Cartridge",
+      "b": "HP 305XL Black Ink Cartridge"
+    },
+    {
+      "pad": "gaming mouse",
+      "expect": "apart",
+      "a": "HP 305 Black Ink Cartridge",
+      "b": "HP 305 Tri-color Ink Cartridge"
+    },
+    {
+      "pad": "bluetooth speaker",
+      "expect": "apart",
+      "a": "Samsung Galaxy Buds2 Pro",
+      "b": "Samsung Galaxy Buds3 Pro"
+    },
+    {
+      "pad": "coffee machine",
+      "expect": "apart",
+      "a": "Tide Liquid Detergent 2.8L",
+      "b": "Tide Liquid Detergent 1.8L"
+    },
+    {
+      "pad": "smart watch >4 stars",
+      "expect": "apart",
+      "a": "Apple iPhone 15 Pro Max 256GB Natural Titanium",
+      "b": "Apple iPhone 15 Pro Max 256GB Natural Titanium (Renewed)"
+    },
+    {
+      "pad": "air fryer",
+      "expect": "apart",
+      "a": "Sony Bravia 55 inch X90L",
+      "b": "Sony Bravia 55 inch X80L"
+    },
+    {
+      "pad": "water bottle",
+      "expect": "apart",
+      "a": "Instant Pot Duo 7-in-1 6 Quart",
+      "b": "Instant Pot Duo 7-in-1 8 Quart"
+    },
+    {
+      "pad": "blender",
+      "expect": "apart",
+      "a": "Philips Hue White Ambiance E27 Bulb",
+      "b": "Philips Hue White and Color Ambiance E27 Bulb"
+    },
+    {
+      "pad": "hair dryer",
+      "expect": "apart",
+      "a": "Garmin Forerunner 265 Black",
+      "b": "Garmin Forerunner 265S Black"
+    },
+    {
+      "pad": "gaming mouse",
+      "expect": "apart",
+      "a": "L'Oreal Elvive Shampoo 400ml",
+      "b": "L'Oreal Elvive Conditioner 400ml"
+    },
+    {
+      "pad": "bluetooth speaker",
+      "expect": "apart",
+      "a": "Apple Pencil (2nd Generation)",
+      "b": "Apple Pencil (USB-C)"
+    },
+    {
+      "pad": "coffee machine",
+      "expect": "apart",
+      "a": "Michelin Primacy 4 205/55 R16",
+      "b": "Michelin Primacy 4+ 205/55 R16"
+    },
+    {
+      "pad": "smart watch >4 stars",
+      "expect": "apart",
+      "a": "Braun Series 9 Pro Shaver",
+      "b": "Braun Series 9 Pro+ Shaver"
+    },
+    {
+      "pad": "air fryer",
+      "expect": "apart",
+      "a": "Samsung 980 Pro 1TB NVMe SSD",
+      "b": "Samsung 980 Pro 1TB NVMe SSD with Heatsink"
+    },
+    {
+      "pad": "water bottle",
+      "expect": "apart",
+      "a": "Sony WH-CH520 Wireless Headphones",
+      "b": "Sony WH-CH720N Wireless Headphones"
+    },
+    {
+      "pad": "blender",
+      "expect": "apart",
+      "a": "Apple AirPods Pro 2 MTJV3 USB-C",
+      "b": "Apple AirPods Pro 2 MTJV3 Lightning"
+    },
+    {
+      "pad": "hair dryer",
+      "expect": "apart",
+      "a": "Philips Avent Bottle SCY903 260ml Twin Pack",
+      "b": "Philips Avent Bottle SCY903 260ml"
+    },
+    {
+      "pad": "gaming mouse",
+      "expect": "apart",
+      "a": "Canon EF 50mm f/1.8 STM Lens",
+      "b": "Canon EF 50mm f/1.4 USM Lens"
+    },
+    {
+      "pad": "bluetooth speaker",
+      "expect": "apart",
+      "a": "Nike Air Force 1 Men Shoes Size 42",
+      "b": "Nike Air Force 1 Men Shoes Size 43"
+    },
+    {
+      "pad": "coffee machine",
+      "expect": "apart",
+      "a": "Tefal Easy Fry EY2018 4.2L",
+      "b": "Tefal Easy Fry EY2018 4.2L with Extra Basket"
+    },
+    {
+      "pad": "smart watch >4 stars",
+      "expect": "apart",
+      "a": "Ninja Blender BN495 with 2 To-Go Cups",
+      "b": "Ninja Blender BN495"
+    },
+    {
+      "pad": "air fryer",
+      "expect": "apart",
+      "a": "Samsung Galaxy Tab S9 FE 128GB Wi-Fi",
+      "b": "Samsung Galaxy Tab S9 FE 128GB LTE"
+    },
+    {
+      "pad": "water bottle",
+      "expect": "apart",
+      "a": "Sony Alpha a7 IV Body",
+      "b": "Sony Alpha a7 IV with 28-70mm Lens"
+    },
+    {
+      "pad": "blender",
+      "expect": "apart",
+      "a": "Bose QuietComfort Ultra Headphones",
+      "b": "Bose QuietComfort Ultra Earbuds"
+    },
+    {
+      "pad": "hair dryer",
+      "expect": "apart",
+      "a": "Bose QuietComfort Headphones",
+      "b": "Bose QuietComfort Ultra Headphones"
+    },
+    {
+      "pad": "gaming mouse",
+      "expect": "apart",
+      "a": "Apple Watch Series 10 GPS 42mm",
+      "b": "Apple Watch Series 10 GPS 46mm"
+    },
+    {
+      "pad": "bluetooth speaker",
+      "expect": "apart",
+      "a": "Apple Watch SE 44mm GPS",
+      "b": "Apple Watch SE 44mm GPS + Cellular"
+    },
+    {
+      "pad": "coffee machine",
+      "expect": "apart",
+      "a": "Nutella Hazelnut Spread 750g",
+      "b": "Nutella Hazelnut Spread 350g"
+    },
+    {
+      "pad": "smart watch >4 stars",
+      "expect": "apart",
+      "a": "Red Bull Energy Drink 250ml",
+      "b": "Red Bull Energy Drink 250ml x 24"
+    },
+    {
+      "pad": "air fryer",
+      "expect": "apart",
+      "a": "Red Bull Energy Drink 250ml",
+      "b": "Red Bull Energy Drink 250ml Pack of 4"
+    },
+    {
+      "pad": "water bottle",
+      "expect": "apart",
+      "a": "Lipton Yellow Label 100 Tea Bags",
+      "b": "Lipton Yellow Label 50 Tea Bags"
+    },
+    {
+      "pad": "blender",
+      "expect": "apart",
+      "a": "Fairy Dishwashing Liquid 1L",
+      "b": "Fairy Dishwashing Liquid 1.5L"
+    },
+    {
+      "pad": "hair dryer",
+      "expect": "apart",
+      "a": "Xiaomi Mi Band 8",
+      "b": "Xiaomi Mi Band 8 Strap"
+    },
+    {
+      "pad": "gaming mouse",
+      "expect": "apart",
+      "a": "Anker Soundcore Life Q30",
+      "b": "Anker Soundcore Life Q35"
+    },
+    {
+      "pad": "bluetooth speaker",
+      "expect": "apart",
+      "a": "De'Longhi Dedica EC685.M",
+      "b": "De'Longhi Dedica EC885.M"
+    },
+    {
+      "pad": "coffee machine",
+      "expect": "apart",
+      "a": "WD My Passport 2TB USB 3.0",
+      "b": "WD My Passport 4TB USB 3.0"
+    },
+    {
+      "pad": "smart watch >4 stars",
+      "expect": "apart",
+      "a": "SanDisk Ultra microSD 128GB 140MB/s",
+      "b": "SanDisk Extreme microSD 128GB 190MB/s"
+    },
+    {
+      "pad": "air fryer",
+      "expect": "apart",
+      "a": "Gillette Fusion5 Razor Blades 4 Count",
+      "b": "Gillette Fusion5 Razor Blades 8 Count"
+    },
+    {
+      "pad": "water bottle",
+      "expect": "apart",
+      "a": "Gillette Fusion5 Razor",
+      "b": "Gillette Fusion5 Razor Blades Refill 4 Count"
+    },
+    {
+      "pad": "blender",
+      "expect": "apart",
+      "a": "Samsung 25W Charger EP-TA800 with Cable",
+      "b": "Samsung 25W Charger EP-TA800"
+    },
+    {
+      "pad": "hair dryer",
+      "expect": "apart",
+      "a": "Hisense 43 Inch FHD Smart TV 43A4K",
+      "b": "Hisense 43 Inch 4K UHD Smart TV 43A6K"
+    },
+    {
+      "pad": "water bottle",
+      "expect": "merge",
+      "a": "Apple iPhone 15 128GB Black",
+      "b": "iPhone 15 (128 GB) - Black"
+    },
+    {
+      "pad": "blender",
+      "expect": "merge",
+      "a": "Sony WH-1000XM5 Wireless Noise Cancelling Headphones Black",
+      "b": "Sony WH1000XM5/B Noise Canceling Wireless Headphones"
+    },
+    {
+      "pad": "hair dryer",
+      "expect": "merge",
+      "a": "Samsung Galaxy S24 Ultra 256GB Titanium Gray 12GB RAM",
+      "b": "Samsung Galaxy S24 Ultra 5G 12GB RAM 256GB Titanium Grey"
+    },
+    {
+      "pad": "gaming mouse",
+      "expect": "merge",
+      "a": "Dyson V15 Detect Absolute Vacuum",
+      "b": "Dyson V15 Detect Absolute Cordless Vacuum Cleaner"
+    },
+    {
+      "pad": "bluetooth speaker",
+      "expect": "merge",
+      "a": "Pampers Baby-Dry Diapers Size 4, 64 Count",
+      "b": "Pampers Baby-Dry Size 4 Diapers 64 Pieces"
+    },
+    {
+      "pad": "coffee machine",
+      "expect": "merge",
+      "a": "Philips Airfryer XL NA230/00 Black 6.2L",
+      "b": "Philips Airfryer XL 6.2 L 1700 W NA230/00 Black"
+    },
+    {
+      "pad": "smart watch >4 stars",
+      "expect": "merge",
+      "a": "JBL Flip 6 Portable Bluetooth Speaker Black",
+      "b": "JBL Flip 6 Bluetooth Portable Speaker - Blue"
+    },
+    {
+      "pad": "air fryer",
+      "expect": "merge",
+      "a": "Anker 737 Power Bank 24000mAh 140W A1289",
+      "b": "Anker 737 Power Bank (PowerCore 24K) 24,000 mAh 140 W A1289"
+    },
+    {
+      "pad": "water bottle",
+      "expect": "merge",
+      "a": "Nutella Hazelnut Spread 750g",
+      "b": "Nutella Hazelnut Spread 750 g"
+    },
+    {
+      "pad": "blender",
+      "expect": "merge",
+      "a": "Optimum Nutrition Gold Standard Whey 5 lb Chocolate",
+      "b": "Optimum Nutrition Gold Standard Whey 5lbs Chocolate"
+    },
+    {
+      "pad": "hair dryer",
+      "expect": "merge",
+      "a": "Logitech MX Master 3S Wireless Mouse Graphite 910-006559",
+      "b": "Logitech MX Master 3S Performance Wireless Mouse, Graphite (910-006559)"
+    },
+    {
+      "pad": "gaming mouse",
+      "expect": "merge",
+      "a": "Samsung 55 Inch Crystal UHD 4K Smart TV UA55DU7000",
+      "b": "Samsung UA55DU7000 55\" Crystal UHD 4K Smart TV (2024)"
     }
   ]
 }

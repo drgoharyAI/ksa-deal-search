@@ -10,11 +10,14 @@ import { normalizeTitle } from "./spec";
  *   the other lacks must be generic: a marketing word, a product noun, or common in the result
  *   set), and a token similarity of at least GROUP_THRESHOLD.
  * Conflicts (any one keeps two titles apart): different brands; codes that disagree (none shared,
- * a different first code, or a different model word right after the shared code); any spec both
- * state that differs (capacity, storage, RAM, wattage, size, generation, resolution, speed, model
- * number...); storage or RAM, or a multi-unit pack, stated by one side only; different variant
- * words (pro, plus, max...), condition (renewed, open box, grade B...), bundle, watch band or
- * material; one side an accessory (case, ear pads, replacement...) and the other not.
+ * a different first code, a different model word right before or after the shared code, or
+ * different article suffixes: "HR2041/10" against "/30", unless only the colour differs); any spec
+ * both state that differs (capacity, weight, volume, storage, RAM, wattage, voltage, size,
+ * generation, resolution, speed, model number...); storage or RAM, a generation, or a multi-unit
+ * pack, stated by one side only; different variant words (pro, plus, max...), condition (renewed,
+ * open box, grade B...), language or keyboard layout, bundle, add-ons, watch band, material,
+ * connector, gender or size; one side an accessory (case, ear pads, refill, or an item made "for"
+ * the other's brand) and the other not.
  * A wrong merge is worse than a missed one, so any doubt keeps the listings apart. Colours may
  * differ: a group lists each member's colour.
  */
@@ -75,7 +78,7 @@ const COLOR_PAIR_RE = new RegExp(`\\b(?:${COLOR_PAIRS.join("|")})\\b`);
 
 /** Words that name a different model of the same line or a special run. Two titles must carry the same set. */
 const VARIANT_WORDS = new Set(
-  "pro plus max ultra mini lite se fe air slim edge note neo xl xs gps cellular kids prime turbo limited special tkl massage".split(" "),
+  "pro plus max ultra mini lite se fe air slim edge note neo xl xs gps cellular lte kids prime turbo limited special tkl massage".split(" "),
 );
 const GLUED_VARIANT = /^((?:[a-z])?\d{1,2})(pro|plus|max|ultra|fe|se|mini|lite)$/;
 
@@ -112,8 +115,23 @@ const REGIONS: [string, RegExp][] = [
   ["china", /\bchin(?:a|ese)\s+(?:version|edition|rom)\b/],
 ];
 const REGION_HINT = /east|international|global|uae|ksa|chin/;
+/**
+ * Keyboard layout and language ("Arabic Layout", "US Layout", "English/Arabic Keyboard"): the same
+ * keyboard, laptop or book in another language is another listing.
+ */
+const LANG_WORD = "us|uk|ar|en|eng|arabic|english|french|german|spanish|italian|turkish|russian|nordic|qwerty|azerty|qwertz";
+const LAYOUT = new RegExp(
+  `\\b((?:(?:${LANG_WORD})[\\s/&+,-]*)+)(?:keyboard\\s+|key\\s+)?layout\\b|\\blayout[\\s:(-]*((?:(?:${LANG_WORD})\\b[\\s/&+,-]*)+)`,
+  "g",
+);
+const LANG_FULL = /\b(?:arabic|english)\b/g;
+const LANG_HINT = /layout|arabic|english/;
+const LANG_CANON: Record<string, string> = { ar: "arabic", en: "english", eng: "english" };
+/** "for Apple Watch", "compatible with Dyson V8": the brand the item is made for. */
+const FOR_BRAND = /\b(?:for|compatible\s+with|fits?|works\s+with)\s+(?:the\s+|all\s+|most\s+|your\s+|new\s+)?([a-z0-9]+)[^|,;()[\]–]*/g;
+const FOR_HINT = /\bfor\b|compatible|\bfits?\b|works with/;
 /** Words after which a single letter names the model ("Series X", "EOS R"). */
-const LINE_WORDS = new Set("series eos galaxy model type mark class line".split(" "));
+const LINE_WORDS = new Set("series eos galaxy model type mark class line size".split(" "));
 const CONDITION_HINT = /renew|refurb|recondition|remanufactur|used|owned|hand|open|like/;
 
 /**
@@ -132,16 +150,28 @@ const BAND = /\b(alpine|trail|ocean|milanese|sport|link|solo|braided|nike|leathe
  * title's own part (before "with" / " + "). "Aluminium Case" on a watch is the watch.
  */
 const ACCESSORY_NOUNS = new Set(
-  "case cases cover covers protector protectors replacement skin skins sticker stickers keycap keycaps pad pads earpads cushion cushions spare parts accessory accessories sleeve".split(" "),
+  "case cases cover covers protector protectors replacement skin skins sticker stickers keycap keycaps pad pads earpads cushion cushions spare parts accessory accessories sleeve refill refills".split(" "),
 );
-const ACCESSORY_HINT = /case|cover|protector|replacement|skin|sticker|keycap|pad|cushion|spare|parts|accessor|sleeve/;
+const ACCESSORY_HINT = /case|cover|protector|replacement|skin|sticker|keycap|pad|cushion|spare|parts|accessor|sleeve|refill/;
 /** A clause that adds items: after "with / + / & / and / includes / plus", up to the next separator. */
 const ADDON_CLAUSE = /(?:\bwith\b|\binclud(?:es?|ing)\b|\s\+\s|\s&\s|\band\b|\bbundle\b)([^,;|()[\]–]*)/g;
 const ADDON_HINT = /with|includ|\+|&|and|bundle/;
+/** "&", "+" or "and": the word on its left is joined too ("Mill & Chopper" names two add-ons). */
+const CONJUNCTION = /\s+(?:[+&]\s|and\b)/g;
+const LAST_WORD = /([a-z]+)$/;
 /** Things sold along with the product. */
 const ADDON_NOUNS = new Set(
-  "camera cameras controller controllers charger chargers case cases bag bags game games card cards stand stands headset headsets mouse keyboard pen pens strap straps film films lens lenses battery batteries dock remote remotes mic microphone microphones cable cables tripod console consoles".split(" "),
+  (
+    "camera cameras controller controllers charger chargers case cases bag bags game games card cards stand stands " +
+    "headset headsets mouse keyboard pen pens strap straps film films lens lenses battery batteries dock remote remotes " +
+    "mic microphone microphones cable cables tripod console consoles " +
+    "mill mills chopper choppers grinder grinders jar jars jug jugs blade blades attachment attachments frother " +
+    "whisk diffuser concentrator pouch sleeve stylus pencil earbuds headphones tracker gimbal gift voucher " +
+    "subscription juicer"
+  ).split(/\s+/),
 );
+const EXTRA_WORDS = new Set("extra additional spare bonus second".split(" "));
+const singular = (w: string) => (/(?:ch|sh)es$/.test(w) ? w.slice(0, -2) : w.endsWith("ss") ? w : w.replace(/s$/, ""));
 const NOT_ACCESSORY = /\b(?:aluminium|aluminum|titanium|steel|ceramic|charging|magsafe|usb[-\s]?c|lightning|wireless)\s+(?:charging\s+)?case\b/g;
 
 const STOP = new Set(
@@ -151,7 +181,8 @@ const STOP = new Set(
 /** Spec dimensions read from titles. Values are canonical strings; each dimension is a set. */
 type Dim =
   | "mah" | "storage" | "ram" | "watt" | "inch" | "mm" | "hz" | "litre" | "gen" | "res" | "net" | "bt"
-  | "count" | "in1" | "dpi" | "kg" | "mp" | "year" | "pa" | "mbs" | "gbps" | "len" | "model" | `qty:${string}`;
+  | "count" | "pieces" | "dims" | "dec" | "ifgen" | "in1" | "dpi" | "wt" | "oz" | "k" | "mp" | "year" | "pa" | "mbs" | "gbps" | "len" | "model"
+  | `qty:${string}` | `u:${string}`;
 
 export type TitleFeatures = {
   /** Canonical brand from data/brands.json (or a product line naming it), else undefined. */
@@ -171,6 +202,10 @@ export type TitleFeatures = {
   codePrev?: Map<string, string>;
   /** Add-on nouns in "with / + / & / and / includes / bundle" clauses ("... and Camera"). */
   addons: Set<string>;
+  /** The "/NN" suffixes written after each code ("HR2041/10" -> HR2041: {10}): the exact article. */
+  codeSfx: ReadonlyMap<string, Set<string>>;
+  /** The brand this item is made for ("Trail Loop Band for Apple Watch"), when it names no brand of its own. */
+  forBrand?: string;
   specs: Map<Dim, Set<string>>;
   /** Variant words plus "bundle", "band:<type>" and condition ("cond:refurbished", "cond:grade-b"). */
   variants: Set<string>;
@@ -202,18 +237,41 @@ function expandLists(t: string): string {
   );
 }
 
-/** Lowercase, thousands separators gone, "S24+" -> "S24 plus", lists expanded. */
+/** Lowercase, thousands separators gone, "S24+" -> "S24 plus", lists expanded, spellings unified. */
 function prepare(title: string): string {
-  const t = normalizeTitle(title)
+  let t = normalizeTitle(title)
     .replace(/\bblack\s*(?:\+|&|and)\s*decker\b/g, "blackdecker")
-    .replace(/\boral[\s-]b\b/g, "oralb")
-    // A code's colour / region suffix ("HR3030/01", "BHD274/03") names the same model.
-    .replace(/\b([a-z]{1,4}\d{3,}[a-z]*)\/\d{1,3}\b/g, "$1")
-    .replace(SPELLING, (w) => SPELLING_MAP[w]);
-  return expandLists(t.replace(/(\b[a-z]+\d+)\+(?![a-z0-9])/g, "$1 plus "));
+    .replace(/\boral[\s-]b\b/g, "oralb");
+  if (t.includes("/"))
+    t = t
+      // A code's article suffix ("HR3030/01", "NA350/09 / NA350/00") is read apart (codeSuffixes).
+      .replace(CODE_SUFFIX, "$1")
+      // Tyre sizes written glued or spaced: "225/45R17" = "225/45 R17".
+      .replace(/(\d{3})\s*\/\s*(\d{2})\s*(z?r)\s*(\d{2})\b/g, "$1/$2 $3$4");
+  t = t.replace(SPELLING, (w) => SPELLING_MAP[w]);
+  // A trailing "+" names the bigger model: "S24+", "Pro+", "Primacy 4+" (not "8+256GB", "Wi-Fi + Cellular").
+  if (t.includes("+")) t = t.replace(/(\b[a-z0-9]+)\+(?![a-z0-9+])/g, "$1 plus ");
+  return expandLists(t);
 }
 
-/** British / US spellings and spelled-out units read as one word. */
+const CODE_SUFFIX = /\b([a-z]{1,4}-?\d{3,}[a-z]*)((?:\/\d{1,3})+)(?![\w/])/g;
+
+const NO_SUFFIXES: ReadonlyMap<string, Set<string>> = new Map();
+
+/** The "/NN" suffixes after each code: "NA150/00/09" -> NA150: {00, 09}. */
+function codeSuffixes(title: string): ReadonlyMap<string, Set<string>> {
+  if (!title.includes("/")) return NO_SUFFIXES;
+  const out = new Map<string, Set<string>>();
+  for (const m of normalizeTitle(title).matchAll(CODE_SUFFIX)) {
+    const c = m[1].replace(/-/g, "").toUpperCase();
+    const set = out.get(c) ?? new Set<string>();
+    for (const x of m[2].split("/")) if (x) set.add(x);
+    out.set(c, set);
+  }
+  return out;
+}
+
+/** British / US spellings, spelled-out names and their short forms read as one word. */
 const SPELLING_MAP: Record<string, string> = {
   aluminum: "aluminium",
   colour: "color",
@@ -225,6 +283,19 @@ const SPELLING_MAP: Record<string, string> = {
   cancelling: "canceling",
   cancellation: "canceling",
   noisecancelling: "noise canceling",
+  "eau de parfum": "edp",
+  "eau de toilette": "edt",
+  "eau de cologne": "edc",
+  tyre: "tire",
+  tyres: "tire",
+  tires: "tire",
+  mens: "men",
+  "men's": "men",
+  "men’s": "men",
+  womens: "women",
+  "women's": "women",
+  "women’s": "women",
+  ladies: "women",
 };
 const SPELLING = new RegExp(`\\b(?:${Object.keys(SPELLING_MAP).join("|")})\\b`, "g");
 
@@ -243,25 +314,43 @@ const SPEC_RULES: SpecRule[] = [
   { hint: ["in"], dim: "in1", re: /(?<![\d.])(\d+)\s*-?\s*in\s*-?\s*1\b/g, val: (m) => m[1] },
   { hint: ["ram", "memory", "ddr"], dim: "ram", re: /(?<![\d.])(\d+)\s*gb\s*(?:of\s*)?(?:ram|memory|lpddr\d*x?|ddr\d*)\b/g, val: (m) => m[1] },
   { hint: ["ram"], dim: "ram", re: /\bram\s*:?\s*(\d+)\s*gb\b/g, val: (m) => m[1] },
+  // An interface generation ("PCIe Gen4", "USB 3.2 Gen 2" against "Gen 2x2") is not the product's.
+  { hint: ["gen"], dim: "ifgen", re: /\b(?:pcie?|pci[\s-]express|usb|nvme|thunderbolt)\s*(?:\d(?:\.\d)?\s*)?gen\s*(\d(?:x\d)?)\b/g, val: (m) => m[1] },
   { hint: ["gen"], dim: "gen", re: /(?<![\d.])(\d+)(?:st|nd|rd|th)?\s*-?\s*gen(?:eration)?\b/g, val: (m) => m[1] },
   { hint: ["gen"], dim: "gen", re: /\bgen(?:eration)?\s*-?\s*(\d+)\b/g, val: (m) => m[1] },
   { hint: ["hd"], dim: "res", re: /\b(fhd|qhd|uhd)\b/g, val: (m) => ({ fhd: "1080", qhd: "1440", uhd: "2160" })[m[1]]! },
-  { hint: ["bluetooth", "bt"], dim: "bt", re: /\b(?:bluetooth|bt)\s*v?\s*(\d(?:\.\d)?)\b/g, val: (m) => num(m[1]) },
+  { hint: ["bluetooth", "bt"], dim: "bt", re: /\b(?:bluetooth|bt)\s*(?:version\s*|ver\.?\s*|v\.?\s*)?(\d(?:\.\d)?)\b/g, val: (m) => num(m[1]) },
+  { hint: ["dpi"], dim: "dpi", re: /(?<![\d.])(\d+(?:\.\d+)?)\s*k\s*dpi\b/g, val: (m) => String(Math.round(Number(m[1]) * 1000)) },
+  { hint: ["mah"], dim: "mah", re: /(?<![\d.])(\d+(?:\.\d+)?)\s*k\s*mah\b/g, val: (m) => String(Math.round(Number(m[1]) * 1000)) },
+  // A voltage range ("100-240V") is the mains input, not a model voltage.
+  { hint: ["0v", "0 v", "volt"], dim: null, re: /(?<![\d.])\d{2,3}\s*(?:-|~|to)\s*\d{2,3}\s*v(?:olts?)?(?![a-z0-9])/g, val: () => "" },
   { hint: [" of"], dim: "count", re: /\b(?:pack|set)\s*of\s*(\d+)\b/g, val: (m) => m[1] },
+  { hint: ["pack"], dim: "count", re: /\b(twin|double|dual|duo|triple)[\s-]*pack\b/g, val: (m) => (m[1] === "triple" ? "3" : "2") },
+  // "3 x 75ml", "6x330 ml": several units of a size (the size stays in the title for its own rule).
+  { hint: ["x"], dim: "count", re: /(?<![\d.a-z])(\d{1,2})\s?x\s?(?=\d+(?:\.\d+)?\s?(?:ml|cl|l|g|kg|oz|mg)\b)/g, val: (m) => m[1] },
   { hint: ["20"], dim: "year", re: /(?<![\d.])(20[12]\d)(?![\d.])/g, val: (m) => m[1] },
   { hint: ["ip"], dim: null, re: /\bipx?\s*\d+\b/g, val: () => "" },
-  { hint: ["x", "*", "×"], dim: null, re: /\b\d{2,4}\s*[x×*]\s*\d{2,4}\b/g, val: () => "" },
+  // Width x length ("160x230 cm", "1920 x 1080"); a third number (depth) is left out.
+  {
+    hint: ["x", "*", "×"],
+    dim: "dims",
+    re: /(?<![\d.])(\d{2,4})\s*[x×*]\s*(\d{2,4})(?:\s*[x×*]\s*\d{1,4})?(?![\d.])/g,
+    val: (m) => `${m[1]}x${m[2]}`,
+  },
   { hint: ["qi"], dim: null, re: /\bqi\s*\d\b/g, val: () => "" },
 ];
 
 /** A number with its unit ("20000mAh", "27-inch", "2 m", "6ft"), read in one pass; see unitSpec. */
 const NUM_UNIT =
-  /(?<![\d.])(\d+(?:\.\d+)?)\s*-?\s*(mb\s*\/\s*s|gb\s*\/\s*s|mbps|gbps|mah|gb|tb|watts?|w|inch(?:es)?|in|"|''|”|mm|cm|meters?|metres?|m|ft|feet|foot|hz|ml|liters?|litres?|ltr|lt|l|k|p|g|pcs|pc|pieces?|pack|pk|count|ct|dpi|kg|mp|pa|hours?|hrs?|h|years?|yrs?|months?|days?|minutes?|mins?|db|ms|d|rpm|kpa|v|a|°)(?![a-z0-9²³])/g;
+  /(?<![\d.])(\d+(?:\.\d+)?)\s*-?\s*(mb\s*\/\s*s|gb\s*\/\s*s|mbps|gbps|mah|gb|tb|watts?|w|fl\.?\s*oz|oz|ounces?|lbs?|pounds?|mg|kgs?|grams?|volts?|tons?|btu|hp|cc|inch(?:es)?|in|"|''|”|mm|cm|meters?|metres?|m|ft|feet|foot|hz|ml|liters?|litres?|ltr|lt|l|k|p|g|pcs|pc|pieces?|pack|pk|count|ct|dpi|mp|pa|hours?|hrs?|h|years?|yrs?|months?|days?|minutes?|mins?|db|ms|d|rpm|kpa|v|a|°)(?![a-z0-9²³])/g;
+
+/** Weight in grams to 3 significant digits (1.8 kg = 1800 g, 5 lb = 2270 g = 2.27 kg). */
+const grams = (g: number) => String(Number(g.toPrecision(3)));
 
 /** Length in metres, to 0.1 m (6 ft = 1.8 m = 180 cm). */
 const metres = (n: number) => (Math.round(n * 10) / 10).toFixed(1);
 
-/** The dimension and value of a number + unit, or null for noise (hours, dB, volts, "60g"...). */
+/** The dimension and value of a number + unit, or null for noise (hours, dB, latency...). */
 function unitSpec(n: string, unit: string): [Dim, string] | null {
   const x = Number(n);
   const u = unit.replace(/\s+/g, "");
@@ -279,16 +368,27 @@ function unitSpec(n: string, unit: string): [Dim, string] | null {
   if (u === "hz") return ["hz", n];
   if (u === "ml") return ["litre", num(String(x / 1000))];
   if (u === "l" || u === "lt" || u === "ltr" || u.startsWith("liter") || u.startsWith("litre")) return ["litre", num(n)];
-  if (u === "k") return n === "2" || n === "4" || n === "8" ? ["res", ({ "2": "1440", "4": "2160", "8": "4320" } as Record<string, string>)[n]] : null;
+  if (u === "k") return n === "2" || n === "4" || n === "8" ? ["res", ({ "2": "1440", "4": "2160", "8": "4320" } as Record<string, string>)[n]] : ["k", num(n)];
   if (u === "p") return ["720", "1080", "1440", "2160"].includes(n) ? ["res", n] : null;
-  if (u === "g") return n === "3" || n === "4" || n === "5" ? ["net", n] : null;
+  // "5G" reads as the network; specConflict sets it against a weight ("Saffron 5g" against "10g").
+  if (u === "g") return n === "3" || n === "4" || n === "5" ? ["net", n] : n === "2.4" || n === "5.8" ? null : ["wt", grams(x)];
+  if (u.startsWith("gram")) return ["wt", grams(x)];
+  if (u === "mg") return ["wt", grams(x / 1000)];
+  if (u === "lb" || u === "lbs" || u.startsWith("pound")) return ["wt", grams(x * 453.592)];
+  // Ounces may be weight or volume (fl oz): compared with ounces only.
+  if (u.endsWith("oz") || u.startsWith("ounce")) return ["oz", num(n)];
+  if (u.startsWith("volt") || u === "v") return ["u:v", num(n)];
+  if (u.startsWith("ton") || u === "btu" || u === "hp" || u === "cc") return [`u:${u.replace(/s$/, "")}`, num(n)];
   if (u === "pcs" || u === "pc" || u.startsWith("piece") || u === "pack" || u === "pk" || u === "count" || u === "ct") return ["count", n];
   if (u === "dpi") return ["dpi", n];
-  if (u === "kg") return ["kg", num(n)];
+  if (u === "kg" || u === "kgs") return ["wt", grams(x * 1000)];
   if (u === "mp") return ["mp", num(n)];
   if (u === "pa") return ["pa", n];
   return null;
 }
+
+/** From this many pieces a count describes what a set holds ("544 Pieces"), not a multi-pack. */
+const CONTENTS_MIN = 20;
 
 /** Component codes (mouse and camera sensors) name a part many models share, not a model. */
 const COMPONENT_CODE = /^(?:paw|pmw|imx|ov)\d+/;
@@ -388,13 +488,33 @@ const ASCII = /^[\x00-\x7f]*$/;
 const HAS_DIGIT = /\d/;
 const GLUED_LINE = /^([a-z]{4,}|air|pro|max|mini)(\d{1,2})$/;
 
+const CONNECTOR = /\blightning\b|\b(?:usb|type)[\s-]?c\b|\bmicro[\s-]?usb\b/g;
+const SIM_COUNT = /\b(single|dual)[\s-]*sim\b/;
+const CONNECTOR_HINT = /lightning|usb|type/;
+const NUM_COMPOUND = /(?<![\w.-])(\d+)-([a-z]{3,})\b/g;
+
 /** Word families where two titles naming different members are different products. */
 const EXCLUSIVE: Set<string>[] = [
   "fabric leather mesh velvet",
   "glass plastic stainless steel metal aluminium aluminum wood bamboo",
   "wired wireless cordless corded",
   "digital mechanical manual analog",
+  "men women boys girls unisex",
+  "small medium large",
+  "single double twin queen king",
+  "hardcover paperback audiobook",
+  "indoor outdoor",
+  "left right",
 ].map((g) => new Set(g.split(" ")));
+/** Each family word's family (a word belongs to one). */
+const EXCLUSIVE_OF = new Map(EXCLUSIVE.flatMap((g, i) => [...g].map((w) => [w, i] as const)));
+
+/** The connectors a title names ("usbc", "lightning usbc"): "USB-C" and "Lightning" models differ. */
+function connectors(prepared: string): string {
+  const found = new Set<string>();
+  for (const m of prepared.matchAll(CONNECTOR)) found.add(m[0][0] === "l" ? "lightning" : m[0][0] === "m" ? "micro" : "usbc");
+  return [...found].sort().join(" ");
+}
 
 export function titleFeatures(title: string): TitleFeatures {
   const prepared = prepare(title);
@@ -427,7 +547,11 @@ export function titleFeatures(title: string): TitleFeatures {
   }
   rest = rest.replace(NUM_UNIT, (_m, n: string, unit: string) => {
     const spec = unitSpec(n, unit);
-    if (spec) add(spec[0], spec[1]);
+    if (spec) {
+      add(spec[0], spec[1]);
+      // A set's contents ("544 Pieces"), as opposed to a pack of several units.
+      if (spec[0] === "count" && unit.startsWith("p") && unit !== "pack" && unit !== "pk" && Number(n) >= CONTENTS_MIN) add("pieces", n);
+    }
     return " ";
   });
   // "256GB 12GB" with no RAM named: the smaller is RAM.
@@ -448,7 +572,12 @@ export function titleFeatures(title: string): TitleFeatures {
   // Bare numbers and short letter+digit tokens ("16", "s24", "m3", "16e"), compatibility lists
   // left out: the model number. Decimals ("2.0") and long digit runs (SKUs) are not.
   const ownWords = words(own);
-  for (const w of ownWords) if (HAS_DIGIT.test(w) && !/^\d+\.\d+$/.test(w) && !/^\d{6,}$/.test(w)) add("model", w);
+  // A bare decimal ("f/1.8", "TruEdge 2.0") is compared apart, see specConflict.
+  for (const w of ownWords) {
+    if (!HAS_DIGIT.test(w)) continue;
+    if (/^\d+\.\d+$/.test(w)) add("dec", num(w));
+    else if (!/^\d{6,}$/.test(w)) add("model", w);
+  }
 
   const quiet = own.replace(VARIANT_NOISE, " ");
   const variants = new Set((quiet === own ? ownWords : words(quiet)).filter((w) => VARIANT_WORDS.has(w)));
@@ -461,13 +590,38 @@ export function titleFeatures(title: string): TitleFeatures {
   if (REGION_HINT.test(prepared)) for (const [name, re] of REGIONS) if (re.test(prepared)) variants.add(`region:${name}`);
   const grade = prepared.match(GRADE);
   if (grade) variants.add(`cond:grade-${grade[1]}`);
+  if (LANG_HINT.test(prepared)) {
+    const langs = new Set<string>(prepared.match(LANG_FULL) ?? []);
+    for (const m of prepared.matchAll(LAYOUT)) for (const w of (m[1] ?? m[2]).split(/[^a-z]+/)) if (w) langs.add(LANG_CANON[w] ?? w);
+    for (const l of langs) variants.add(`lang:${l}`);
+  }
 
   const core = prepared.split(/\b(?:with|includes?|including)\b|\s[+&]\s/)[0].replace(NOT_ACCESSORY, " ");
   const accessory = ACCESSORY_HINT.test(core) && words(core).some((w) => ACCESSORY_NOUNS.has(w));
   // Nouns in add-on clauses: "Console Bundle with Mario Kart World and Nintendo Switch 2 Camera".
   const addons = new Set<string>();
-  if (ADDON_HINT.test(prepared))
-    for (const m of prepared.matchAll(ADDON_CLAUSE)) for (const w of words(m[1].replace(NOT_ACCESSORY, " "))) if (ADDON_NOUNS.has(w)) addons.add(w.replace(/s$/, ""));
+  if (ADDON_HINT.test(prepared)) {
+    const text = prepared.includes("case") ? prepared.replace(NOT_ACCESSORY, " ") : prepared;
+    for (const m of text.matchAll(ADDON_CLAUSE)) {
+      let extra = false;
+      for (const w of words(m[1])) {
+        // "with Extra Jar": one more than the product has, which a plain "Jar" elsewhere does not cover.
+        if (EXTRA_WORDS.has(w)) extra = true;
+        else if (extra && !STOP.has(w) && !HAS_DIGIT.test(w)) {
+          // Whatever comes extra is an add-on ("with Extra Basket").
+          addons.add(`extra ${singular(w)}`);
+          extra = false;
+        } else if (ADDON_NOUNS.has(w)) addons.add(singular(w));
+      }
+    }
+    // The left word of a conjunction too ("Blender, Mill & Chopper"), unless it is the product itself
+    // (nothing but its name before it: "Philips Blender & Mill").
+    for (const m of text.matchAll(CONJUNCTION)) {
+      const before = text.slice(0, m.index);
+      const left = before.match(LAST_WORD)?.[1];
+      if (left && ADDON_NOUNS.has(left) && /[,;|(\[–&+]|\band\b|\bwith\b/.test(before.slice(0, -left.length))) addons.add(singular(left));
+    }
+  }
 
   const plain = ws.filter((w) => !/\d/.test(w));
   // A single letter after a line word is a model designator ("Series X", "EOS R", "Galaxy Z").
@@ -480,24 +634,40 @@ export function titleFeatures(title: string): TitleFeatures {
   for (const w of plain) if (keep(w)) tokens.add(w);
   // Model words come from the item's own text (not "for iPhone 17 Pro Max").
   const plainWords = new Set(ownWords.filter((w) => keep(w) && !KNOWN_BRANDS.has(w)));
+  // A counted feature no rule above read ("2-Way", "4-Wheel"): a model word, so a title without it differs.
+  if (own.includes("-")) for (const m of own.matchAll(NUM_COMPOUND)) plainWords.add(`${m[1]}-${m[2]}`);
   // Model number and generation share one token form ("Pro 2" = "Pro (2nd Generation)").
-  for (const [d, vs] of specs) for (const v of vs) tokens.add(`${d === "gen" ? "model" : d}:${v}`);
+  for (const [d, vs] of specs) if (d !== "dec") for (const v of vs) tokens.add(`${d === "gen" ? "model" : d}:${v}`);
   for (const c of codes) tokens.add(`code:${c}`);
 
   // The item's own brand, compatibility lists left out (a PS5 controller by KISSUN).
   // Raw words ("ps5" is no brand; words() would read it as "playstation").
-  const known = own.split(ASCII.test(own) ? /[^a-z0-9]+/ : /[^a-z0-9\p{L}]+/u).find((w) => KNOWN_BRANDS.has(w));
+  // A brand named only in a "for <brand> ..." clause is the brand the item fits, not its own.
+  let forWord: string | undefined;
+  let ownBrandText = own;
+  if (FOR_HINT.test(prepared)) {
+    for (const m of prepared.matchAll(FOR_BRAND)) if (KNOWN_BRANDS.has(m[1])) forWord ??= m[1];
+    if (forWord) ownBrandText = own.replace(FOR_BRAND, (m0, w: string) => (KNOWN_BRANDS.has(w) ? " " : m0));
+  }
+  const known = ownBrandText.split(ASCII.test(ownBrandText) ? /[^a-z0-9]+/ : /[^a-z0-9\p{L}]+/u).find((w) => KNOWN_BRANDS.has(w));
   const knownBrand = known ? (BRAND_CANON[known] ?? known) : undefined;
+  const forBrand = !known && forWord ? (BRAND_CANON[forWord] ?? forWord) : undefined;
   const first = (ASCII.test(title) ? title.trim().split(/[^A-Za-z0-9&'-]+/) : title.trim().split(/[^\p{L}\p{N}&'-]+/u)).find(Boolean) ?? "";
   const leadWord =
     /^\p{Lu}[\p{L}&'-]{2,}$/u.test(first) && !first.toLowerCase().split("-").some((w) => GENERIC_LEAD.has(w) || COLORS.has(w))
       ? first.toLowerCase()
       : undefined;
 
-  const specVals = new Set([...specs].filter(([d]) => d !== "model").flatMap(([, v]) => [...v]));
+  const specVals = new Set([...specs].filter(([d]) => d !== "model" && d !== "dec").flatMap(([, v]) => [...v]));
   const fam: string[][] = EXCLUSIVE.map(() => []);
-  for (const t of tokens) for (let i = 0; i < EXCLUSIVE.length; i++) if (EXCLUSIVE[i].has(t)) fam[i].push(t);
-  const exclusive = fam.map((x) => x.sort().join(" "));
+  for (const t of tokens) {
+    const i = EXCLUSIVE_OF.get(t);
+    if (i !== undefined) fam[i].push(t);
+  }
+  const exclusive = fam.map((x) => (x.length > 1 ? x.sort().join(" ") : (x[0] ?? "")));
+  // Two more families read from phrases: the SIM count and the connector.
+  const sim = prepared.includes("sim") ? prepared.match(SIM_COUNT) : null;
+  exclusive.push(sim ? sim[1] : "", CONNECTOR_HINT.test(prepared) ? connectors(prepared) : "");
   return {
     knownBrand,
     leadWord,
@@ -507,6 +677,8 @@ export function titleFeatures(title: string): TitleFeatures {
     codeNext,
     codePrevRaw,
     addons,
+    codeSfx: codeSuffixes(title),
+    forBrand,
     specs,
     variants,
     accessory,
@@ -529,7 +701,11 @@ const ONE_SIDED: Dim[] = ["storage", "ram"];
  */
 export function specConflict(a: TitleFeatures, b: TitleFeatures): boolean {
   for (const d of ONE_SIDED) if (a.specs.has(d) !== b.specs.has(d)) return true;
-  if (multiPack(a) !== multiPack(b)) return true;
+  // "5g" read as a network on one side and a weight in grams on the other: a 5 g pack against 10 g.
+  if (netVsWeight(a, b) || netVsWeight(b, a)) return true;
+  if (genMissing(a, b) || genMissing(b, a)) return true;
+  const ma = multiPack(a);
+  if (ma !== multiPack(b) && !(contentsOnly(ma ? a : b) && sharesId(a, b))) return true;
   for (const [d, va] of a.specs) {
     const vb = b.specs.get(d);
     if (!vb) continue;
@@ -537,12 +713,47 @@ export function specConflict(a: TitleFeatures, b: TitleFeatures): boolean {
       const x = modelOnly(va, b);
       const y = modelOnly(vb, a);
       if (x.size && y.size && !setsEqual(x, y)) return true;
+    } else if (d === "dec") {
+      // Titles list different version numbers ("TruEdge 2.0, ZeroTangle 3.0" / "ZeroTangle 3.0"):
+      // a conflict only when each has one the other lacks ("f/1.4" / "f/1.8").
+      if (!subset(va, vb) && !subset(vb, va)) return true;
     } else if (!setsEqual(va, vb)) return true;
   }
   return false;
 }
 
+const netVsWeight = (a: TitleFeatures, b: TitleFeatures) =>
+  a.specs.has("net") && !a.specs.has("wt") && b.specs.has("wt") && !b.specs.has("net");
+
+/**
+ * `a` names a generation and `b` none: `b` must carry that number as its model number ("AirPods
+ * Pro (2nd Generation)" / "AirPods Pro 2"), else it is another or an unknown generation.
+ */
+function genMissing(a: TitleFeatures, b: TitleFeatures): boolean {
+  const gen = a.specs.get("gen");
+  if (!gen || b.specs.has("gen")) return false;
+  const model = b.specs.get("model");
+  for (const g of gen) if (!model?.has(g)) return true;
+  return false;
+}
+
 const multiPack = (f: TitleFeatures) => [...(f.specs.get("count") ?? [])].some((v) => Number(v) > 1);
+
+/** Every count over one is a set's contents ("544 Pieces"), none a multi-pack. */
+function contentsOnly(f: TitleFeatures): boolean {
+  const pieces = f.specs.get("pieces");
+  if (!pieces) return false;
+  for (const v of f.specs.get("count") ?? []) if (Number(v) > 1 && !pieces.has(v)) return false;
+  return true;
+}
+
+/** The same code, or the same model number of 4+ digits ("LEGO 42138"). */
+function sharesId(a: TitleFeatures, b: TitleFeatures): boolean {
+  if (sharesCode(a, b)) return true;
+  const mb = b.specs.get("model");
+  if (mb) for (const m of a.specs.get("model") ?? []) if (/^\d{4,}$/.test(m) && mb.has(m)) return true;
+  return false;
+}
 
 /** Model numbers minus values the other title states as a spec. */
 function modelOnly(model: Set<string>, other: TitleFeatures): Set<string> {
@@ -554,6 +765,11 @@ function modelOnly(model: Set<string>, other: TitleFeatures): Set<string> {
     }
   return out ?? model;
 }
+
+const subset = (a: Set<string>, b: Set<string>) => {
+  for (const x of a) if (!b.has(x)) return false;
+  return true;
+};
 
 const setsEqual = (a: Set<string>, b: Set<string>) => {
   if (a.size !== b.size) return false;
@@ -593,7 +809,9 @@ function idfWeights(fs: TitleFeatures[]): Weight {
  * counts only where the title uses it as one ("Air" in "AF100ME Air Fryer" does not).
  */
 const tightWord = (w: string, f: TitleFeatures) =>
-  (VARIANT_WORDS.has(w) && f.variants.has(w)) || w.length <= 2 || /\d/.test(w) || w === "hero";
+  (VARIANT_WORDS.has(w) && f.variants.has(w)) || w.length <= 2 || /\d/.test(w) || w === "hero" || ROMAN.test(w);
+
+const ROMAN = /^(?:i{1,3}|iv|vi{0,3}|ix|x)$/;
 
 function sharesCode(a: TitleFeatures, b: TitleFeatures): boolean {
   for (const c of a.codes) if (b.codes.has(c)) return true;
@@ -603,16 +821,50 @@ function sharesCode(a: TitleFeatures, b: TitleFeatures): boolean {
 /** Codes disagree: none shared, different first codes, or a different model word right after a shared code. */
 function codeConflict(a: TitleFeatures, b: TitleFeatures): boolean {
   if (!a.codes.size || !b.codes.size) return false;
-  if (!sharesCode(a, b) || a.firstCode !== b.firstCode) return true;
+  // Different first codes, unless both carry the same codes in another order ("Archer AX55 AX3000").
+  if (!sharesCode(a, b) || (a.firstCode !== b.firstCode && !setsEqual(a.codes, b.codes))) return true;
   for (const c of a.codes) {
     if (!b.codes.has(c)) continue;
-    const x = a.codeNext.get(c);
-    const y = b.codeNext.get(c);
+    // Different article suffixes ("HR2041/10" against "/30") are different articles: only a
+    // colour may differ, so everything else in the two titles must be the same.
+    if (sfxMatch(a, b, c) === false && !setsEqual(a.tokens, b.tokens)) return true;
+    const x = nextWord(a, b, c);
+    const y = nextWord(b, a, c);
     if (x !== y && ((x !== undefined && tightWord(x, a)) || (y !== undefined && tightWord(y, b)))) return true;
     const pa = (a.codePrev ?? staticPrev(a)).get(c);
     const pb = (b.codePrev ?? staticPrev(b)).get(c);
-    if (pa !== undefined && pb !== undefined && pa !== pb) return true;
+    // Different words before the code, unless each title has the other's word too ("3000 Series HR3030" / "Series ... Steamer HR3030").
+    if (pa !== undefined && pb !== undefined && pa !== pb && !(a.tokens.has(pb) && b.tokens.has(pa))) return true;
   }
+  return false;
+}
+
+/** The word after a code, unless the other title carries it too as a code or model number ("AX55 AX3000", "GT500 42138"). */
+function nextWord(f: TitleFeatures, other: TitleFeatures, c: string): string | undefined {
+  const w = f.codeNext.get(c);
+  if (w === undefined || !HAS_DIGIT.test(w)) return w;
+  // Its own spec value ("... 30000 DPI") is no model word either.
+  return f.specVals.has(w) || other.specs.get("model")?.has(w) || other.codes.has(w.replace(/[-.]/g, "").toUpperCase()) ? undefined : w;
+}
+
+/** A shared code's suffixes: true when one is common, false when both state some and none is, else undefined. */
+function sfxMatch(a: TitleFeatures, b: TitleFeatures, c: string): boolean | undefined {
+  const x = a.codeSfx.get(c);
+  const y = b.codeSfx.get(c);
+  if (!x || !y) return undefined;
+  for (const s of x) if (y.has(s)) return true;
+  return false;
+}
+
+/** An add-on of `a` that `b` neither lists as an add-on nor names anywhere ("with Plastic Jar" / "1.5L Plastic Jar"). */
+function addonMissing(a: TitleFeatures, b: TitleFeatures): boolean {
+  for (const x of a.addons) if (!b.addons.has(x) && !b.tokens.has(x) && !b.tokens.has(`${x}s`) && !b.tokens.has(`${x}es`)) return true;
+  return false;
+}
+
+/** The same full article number ("HR2041/30" on both sides). */
+function sameArticle(a: TitleFeatures, b: TitleFeatures): boolean {
+  for (const c of a.codeSfx.keys()) if (a.codes.has(c) && b.codes.has(c) && sfxMatch(a, b, c)) return true;
   return false;
 }
 
@@ -632,7 +884,9 @@ function conflicts(a: TitleFeatures, b: TitleFeatures): boolean {
   if (a.brand && b.brand && a.brand !== b.brand) return true;
   if (a.knownBrand && b.knownBrand && a.knownBrand !== b.knownBrand) return true;
   if (a.variantKey !== b.variantKey || a.accessory !== b.accessory) return true;
-  if (!setsEqual(a.addons, b.addons)) return true;
+  if ((a.forBrand && a.forBrand === b.knownBrand) || (b.forBrand && b.forBrand === a.knownBrand)) return true;
+  // The same article number is the same box, however each store lists what is in it.
+  if ((addonMissing(a, b) || addonMissing(b, a)) && !sameArticle(a, b)) return true;
   for (let i = 0; i < a.exclusive.length; i++) if (a.exclusive[i] && b.exclusive[i] && a.exclusive[i] !== b.exclusive[i]) return true;
   if (codeConflict(a, b)) return true;
   return specConflict(a, b);
@@ -661,14 +915,14 @@ export function sameProduct(a: TitleFeatures, b: TitleFeatures, opts: MatchOptio
 const STATIC_GENERIC = new Set(
   (
     "wireless bluetooth new original genuine official authentic portable smart charging charge fast latest premium " +
-    "edition console device unit product kit system tool quality professional powerful durable lightweight " +
+    "edition console device unit product system tool quality professional powerful durable lightweight " +
     "headphones headphone headset earbuds earphones earphone buds speaker speakers camera phone smartphone mobile " +
-    "cellphone tablet laptop notebook watch smartwatch controller gamepad mouse keyboard monitor display screen cable " +
+    "cellphone tablet laptop notebook watch smartwatch perfume fragrance tire controller gamepad mouse keyboard monitor display screen cable " +
     "cord charger adapter vacuum cleaner purifier fryer kettle blender machine maker iron dryer hairdryer chair desk " +
     "lamp bottle backpack bag shoes sneakers stroller toothbrush electric version warranty year years generation " +
     "black usb type genuine brand hot sale best top high super ultra-thin certified compatible sealed box " +
     "storage performance rechargeable liter liters capacity size power battery cordless aluminium material " +
-    "color colors style design function functions technology tech support home office travel daily"
+    "style design function functions technology tech support home office travel daily"
   ).split(/\s+/),
 );
 const isStaticGeneric = (w: string) => STATIC_GENERIC.has(w);
