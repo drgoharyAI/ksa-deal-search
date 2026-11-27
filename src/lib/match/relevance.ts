@@ -105,12 +105,19 @@ const allowedMisses = (n: number) => (n >= 4 ? 1 : 0);
  */
 export function matchesAllTokens(queryTokens: string[][], title: string): boolean {
   const tt = tokenizeKeepDigits(title);
+  // Compound words are written open or closed: "dash cam" = "Dashcam", "toothbrush" = "Tooth Brush".
+  const joinedTitle = tt.slice(1).map((t, k) => tt[k] + t);
+  const closed = (a: string | undefined, b: string | undefined) =>
+    !!a && !!b && !hasDigit(a) && !hasDigit(b) && matchesAny(a + b, tt);
   return queryTokens.some((variant) => {
     if (!variant.length) return false;
     const misses = variant.filter((q, i) =>
       hasDigit(q)
         ? !specMatches(q, variant[i - 1], title) && !aliasMatches(q, tt)
-        : !matchesWithAliases(q, tt),
+        : !matchesWithAliases(q, tt) &&
+          !closed(variant[i - 1], q) &&
+          !closed(q, variant[i + 1]) &&
+          !(q.length >= 6 && joinedTitle.includes(q)),
     );
     if (misses.length > allowedMisses(variant.length)) return false;
     return !misses.includes(variant[variant.length - 1]);

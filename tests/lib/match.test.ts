@@ -397,3 +397,14 @@ describe("12d round 3: fastening and consumable part nouns", () => {
     expect(isStrongAccessory("Rotating Electric Toothbrush, 5 Cleaning Modes", ["electric", "toothbrush"], [["electric", "toothbrush"]])).toBe(false);
   });
 });
+
+describe("12d round 4: compound words open or closed", () => {
+  it("matches a two-word query against the closed compound and back", () => {
+    expect(matchesAllTokens([["dash", "cam"]], "70mai Dashcam A800 4K")).toBe(true);
+    expect(matchesAllTokens([["air", "fryer"]], "Philips Airfryer XXL 7.3L")).toBe(true);
+    expect(matchesAllTokens([["electric", "toothbrush"]], "Oral-B Electric Tooth Brush Pro 3")).toBe(true);
+  });
+  it("still needs every word", () => {
+    expect(matchesAllTokens([["dash", "cam"]], "Action Cam 4K Waterproof")).toBe(false);
+  });
+});

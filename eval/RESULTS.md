@@ -233,3 +233,14 @@ included in a kit) and "tape" ("Mouse-Black Ink+Tape"): each cost recall.
 | tuning (15) | 98.0% | 0% | 1.3% | 91.5% | 100% |
 | holdout (8) | 95.0% | 3.8% | 0% | 82.5% | 75.0% |
 | all (23) | 97.0% | 1.3% | 0.9% | 88.4% | 91.3% |
+
+## 12d round 4: compound words open or closed (kept)
+The all-words rule (12c round 1) missed compounds written closed or open: "Dashcam" for "dash
+cam", "Airfryer" for "air fryer", "Tooth Brush" for "toothbrush". Two adjacent digit-free query
+words now also match their joined form in a title token, and a query word of 6+ letters matches two
+adjacent title tokens joined. Softens round 1; no new vocabulary.
+| set | p@10 | acc@10 | wrong@10 | recall | cheapest-first |
+|---|---|---|---|---|---|
+| tuning (15) | 98.0% | 0% | 1.3% | 92.1% | 100% |
+| holdout (8) | 95.0% | 3.8% | 0% | 83.3% | 75.0% |
+| all (23) | 97.0% | 1.3% | 0.9% | 89.0% | 91.3% |
