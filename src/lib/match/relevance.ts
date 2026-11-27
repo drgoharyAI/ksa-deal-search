@@ -20,13 +20,13 @@ export function stem(t: string): string {
   return s.replace(/([a-z])$/, "$1"); // cancell -> cancel
 }
 
-/** Exact; else (no digits in either token) same stem, prefix (query >= 4 chars) or edit distance <= 1 (query >= 5 chars). */
+/** Exact; else (no digits in either token) same stem, prefix (query >= 4 chars) or edit distance <= 1 after the first letter (query >= 5 chars). */
 export function tokenMatches(q: string, t: string): boolean {
   if (q === t) return true;
   if (hasDigit(q) || hasDigit(t)) return false;
   if (q.length >= 4 && t.startsWith(q)) return true;
   if (q.length >= 4 && t.length >= 4 && stem(q) === stem(t)) return true;
-  return q.length >= 5 && withinOneEdit(q, t);
+  return q.length >= 5 && q[0] === t[0] && withinOneEdit(q, t); // typos rarely hit the first letter (iphone != phone)
 }
 
 /** Query token matches a title token via any hyphen/join/part form on either side. */

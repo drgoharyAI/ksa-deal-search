@@ -1,5 +1,5 @@
 {
-  "at": "2026-11-27T01:55:08.935Z",
+  "at": "2026-11-27T01:56:47.227Z",
   "queries": [
     {
       "query": "anc earbuds under 300",
@@ -194,28 +194,21 @@
         }
       ],
       "recordedItems": 488,
-      "results": 78,
+      "results": 77,
       "missingCalls": [],
       "labelled": true,
       "metrics": {
         "top": 10,
-        "precisionAt10": 0.9,
-        "accessoryAt10": 0.1,
+        "precisionAt10": 1,
+        "accessoryAt10": 0,
         "wrongModelAt10": 0,
         "unlabeledAt10": 0,
         "recall": 1,
         "relevantRecorded": 157,
         "relevantKept": 157,
-        "cheapestRelevantFirst": false
+        "cheapestRelevantFirst": true
       },
       "top": [
-        {
-          "key": "trendyol-sa:1243548956",
-          "store": "trendyol-sa",
-          "price": 13.37,
-          "title": "B-1PCS Mobile Phone Speaker Charging Port Cleaning Set Dust Plug for iPhone 16 15 14 Earphones Clean",
-          "label": "accessory"
-        },
         {
           "key": "jarir:648552",
           "store": "jarir",
@@ -277,6 +270,13 @@
           "store": "jarir",
           "price": 2499,
           "title": "Renewed Grade B Apple iPhone 16 Plus, 256 GB, Teal, 5G",
+          "label": "relevant"
+        },
+        {
+          "key": "jarir:652472",
+          "store": "jarir",
+          "price": 2499,
+          "title": "Renewed Grade B Apple iPhone 16, 512 GB, Ultramarine, 5G",
           "label": "relevant"
         }
       ]
@@ -2104,10 +2104,10 @@
   ],
   "overall": {
     "queries": 15,
-    "precisionAt10": 0.7066666666666667,
-    "accessoryAt10": 0.19333333333333333,
+    "precisionAt10": 0.7133333333333334,
+    "accessoryAt10": 0.18666666666666668,
     "wrongModelAt10": 0.04,
     "recall": 0.9014549789282128,
-    "cheapestRelevantFirst": 0.4666666666666667
+    "cheapestRelevantFirst": 0.5333333333333333
   }
 }

@@ -48,6 +48,10 @@ describe("scoreRelevance", () => {
     expect(scoreRelevance([["earbud"]], "Wireless Earbuds")).toBe(1);
     expect(scoreRelevance([["headph"]], "Wireless Headphones")).toBe(1);
   });
+  it("does not typo-match the first letter (iphone != phone)", () => {
+    expect(scoreRelevance([["iphone"]], "Mobile Phone Dust Plug")).toBe(0);
+    expect(scoreRelevance([["keyboard"]], "Mechanical Keybord")).toBe(1);
+  });
   it("does not typo-match short tokens", () => {
     expect(scoreRelevance([["cab"]], "Cat")).toBe(0);
   });

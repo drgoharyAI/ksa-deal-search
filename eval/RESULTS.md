@@ -69,3 +69,10 @@ opens with "For" (a seller habit) also needs an accessory word.
 | p@10 | acc@10 | wrong@10 | recall | cheapest-first |
 |---|---|---|---|---|
 | 71% | 19% | 4% | 90% | 47% |
+
+## Round 4: no typo match on the first letter (kept)
+Edit-distance-1 matching now requires the same first letter, so "iphone" no longer matches
+"phone" (which let "Mobile Phone ... Dust Plug for iPhone 16" past the "made for" rule).
+| p@10 | acc@10 | wrong@10 | recall | cheapest-first |
+|---|---|---|---|---|
+| 71% | 19% | 4% | 90% | 53% |
