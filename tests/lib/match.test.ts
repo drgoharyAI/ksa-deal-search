@@ -347,3 +347,10 @@ describe("piece-count part listings (12c)", () => {
     expect(isStrongAccessory("3PCS 100W USB Type C Cable", ["usb-c", "cable", "100w"], [["usb-c", "cable", "100w"]])).toBe(false);
   });
 });
+
+describe("anc aliases (12c)", () => {
+  it("call noise reduction (ENC) is not ANC", () => {
+    expect(matchesAllTokens([["anc", "earbuds"]], "Lenovo XT88 TWS Earbuds ENC Noise Reduction")).toBe(false);
+    expect(matchesAllTokens([["anc", "earbuds"]], "Anker Soundcore R50i NC True Wireless Earbuds")).toBe(true);
+  });
+});

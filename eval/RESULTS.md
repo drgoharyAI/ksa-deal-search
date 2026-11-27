@@ -146,3 +146,10 @@ A bare size number also matches inside a size list ending in a unit ("24/27/32 I
 | p@10 | acc@10 | wrong@10 | recall | cheapest-first |
 |---|---|---|---|---|
 | 97% | 0% | 2.0% | 90% (89.8→90.2) | 80% |
+
+## Round 13: "noise reduction" is not ANC (kept)
+Removed "noise reduction" from the anc match aliases: on its own it almost always means call
+noise reduction (ENC), labelled wrong-model 34 times and never relevant without other ANC wording.
+| p@10 | acc@10 | wrong@10 | recall | cheapest-first |
+|---|---|---|---|---|
+| 98% (97.3→98.0) | 0% | 1.3% | 90% | 80% |
