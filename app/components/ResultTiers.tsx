@@ -1,6 +1,7 @@
 import type { Product } from "@/src/lib/types";
 import { isLikelyMatch } from "@/src/lib/rank";
 import { leadOf, type ViewItem } from "@/src/lib/view";
+import { productKey } from "@/src/lib/specs";
 import ResultCard, { type CardVariant } from "./ResultCard";
 import GroupCard from "./GroupCard";
 
@@ -20,7 +21,7 @@ function Grid({ items, query, compare, view = "grid" }: GridProps) {
         const cmp = compare && { compareChecked: compare.isChecked(lead), onCompare: compare.onToggle };
         return it.kind === "group" ? (
           <li key={it.key} className="grid__wide">
-            <GroupCard group={it} query={query} {...cmp} />
+            <GroupCard group={it} query={query} {...cmp} comparedRows={compare && it.rows.filter(compare.isChecked).map(productKey).join(" ")} />
           </li>
         ) : (
           <li key={it.key}>

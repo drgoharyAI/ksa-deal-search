@@ -26,7 +26,9 @@ const VISIBLE_ROWS = 4;
 
 const priceOf = (p: Product) => p.finalPrice ?? p.listPrice;
 
-function Row({ p, best, color }: { p: Product; best: boolean; color?: string }) {
+type RowCompare = { checked: boolean; onCompare: (p: Product) => void };
+
+function Row({ p, best, color, compare }: { p: Product; best: boolean; color?: string; compare?: RowCompare }) {
   const price = formatMoney(priceOf(p), p.currency);
   const store = storeLabel(p.site);
   const href = httpsUrl(p.url);
@@ -54,6 +56,11 @@ function Row({ p, best, color }: { p: Product; best: boolean; color?: string }) 
         {!isLikelyMatch(p) && <span className="gcard__note">Less likely match</span>}
       </span>
       {p.deal?.badge === "fake-deal" && <span className="deal__why gcard__why">{dealExplanation(p.deal)}</span>}
+      {compare && (
+        <span className="gcard__cmp">
+          <CardCompare product={p} checked={compare.checked} onCompare={compare.onCompare} label={`${p.title} at ${store}`} />
+        </span>
+      )}
       {href ? (
         <Button size="sm" className="gcard__go" href={href} external>
           Go to store
@@ -69,9 +76,11 @@ function Row({ p, best, color }: { p: Product; best: boolean; color?: string }) 
 /**
  * The same product at several stores: one picture and title, then a price ladder with a row per
  * listing, each linking to its store. "Best price" (accent) marks the lowest price in its currency,
- * and only when another row shares that currency. "Watch" and "Compare" act on the lead member.
+ * and only when another row shares that currency. Each row has its own "Compare"; "Watch" acts on
+ * the lead member. `comparedRows`: the ticked rows' product keys, space-separated (a string, so the
+ * memoized card re-renders only when its own rows change); without it only the lead counts.
  */
-function GroupCard({ group: g, query, compareChecked = false, onCompare }: { group: GroupItem; query?: string } & CompareControl) {
+function GroupCard({ group: g, query, compareChecked = false, comparedRows, onCompare }: { group: GroupItem; query?: string; comparedRows?: string } & CompareControl) {
   const shared = useContext(GroupOpenContext);
   const [localOpen, setLocalOpen] = useState(false);
   const rowKeys = g.rows.map(productKey);
@@ -84,9 +93,11 @@ function GroupCard({ group: g, query, compareChecked = false, onCompare }: { gro
   const extra = g.rows.length - VISIBLE_ROWS;
   const rows = open || extra <= 0 ? g.rows : g.rows.slice(0, VISIBLE_ROWS);
   const stores = `${g.storeCount} ${g.storeCount === 1 ? "store" : "stores"}`;
+  const ticked = new Set(comparedRows === undefined ? (compareChecked ? [productKey(b)] : []) : comparedRows.split(" ").filter(Boolean));
+  const selected = ticked.size > 0;
 
   return (
-    <article className={["card gcard", !isLikelyMatch(b) && "card--muted", compareChecked && "card--selected"].filter(Boolean).join(" ")}>
+    <article className={["card gcard", !isLikelyMatch(b) && "card--muted", selected && "card--selected"].filter(Boolean).join(" ")}>
       <div className="gcard__head">
         <CardMedia src={images} site={b.site} className="gcard__media" size={160} />
         <div className="gcard__lead">
@@ -106,7 +117,13 @@ function GroupCard({ group: g, query, compareChecked = false, onCompare }: { gro
       </div>
       <ul className="gcard__rows" role="list" id={listId} aria-label={`Prices for ${b.title}`}>
         {rows.map((p) => (
-          <Row key={productKey(p)} p={p} best={p === g.bestPrice} color={g.colors[`${p.site}:${p.id}`]} />
+          <Row
+            key={productKey(p)}
+            p={p}
+            best={p === g.bestPrice}
+            color={g.colors[`${p.site}:${p.id}`]}
+            compare={onCompare && { checked: ticked.has(productKey(p)), onCompare }}
+          />
         ))}
       </ul>
       <div className="gcard__foot">
@@ -116,7 +133,6 @@ function GroupCard({ group: g, query, compareChecked = false, onCompare }: { gro
             <span className="visually-hidden">{open ? "" : ` ${extra === 1 ? "price" : "prices"}`}</span>
           </Button>
         )}
-        {onCompare && <CardCompare product={b} checked={compareChecked} onCompare={onCompare} />}
         {query && <CardWatch key={productKey(b)} product={b} query={query} />}
       </div>
     </article>

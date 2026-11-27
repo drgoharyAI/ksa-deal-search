@@ -20,7 +20,7 @@ const count = (s: string, needle: string) => s.split(needle).length - 1;
 describe("ResultCard variants (U3)", () => {
   it("an image: fixed box, lazy, async decode, width and height set", () => {
     const out = card(P());
-    expect(out).toMatch(/<div class="card__media"><img src="https:\/\/m\.media-amazon\.com\/a\.jpg" alt="" width="400" height="400" loading="lazy" decoding="async"/);
+    expect(out).toMatch(/<a class="card__media card__medialink" href="https:\/\/www\.amazon\.sa\/dp\/A" target="_blank" rel="noopener noreferrer" tabindex="-1" aria-hidden="true"><img src="https:\/\/m\.media-amazon\.com\/a\.jpg" alt="" width="400" height="400" loading="lazy" decoding="async"/);
     expect(out).not.toContain("No image");
   });
   it("a missing image: a placeholder with the store's mark, no broken <img>", () => {
@@ -71,6 +71,18 @@ describe("ResultCard variants (U3)", () => {
     expect(doubtful).toContain('class="card card--grid card--muted"');
     expect(doubtful).toContain("Less likely match");
     expect(card(P(), { compareChecked: true, onCompare: () => {} })).toContain("card--selected");
+    expect(card(P({ matchScore: 0.1 }), { compareChecked: true, onCompare: () => {} })).toContain("card--muted card--selected");
+  });
+  it("the Compare toggle: a labelled checkbox whose ticked state also shows in words", () => {
+    expect(card(P(), { compareChecked: false, onCompare: () => {} })).toMatch(/<label class="card__compare"><input type="checkbox"\/>Compare<span class="visually-hidden">/);
+    expect(card(P(), { compareChecked: true, onCompare: () => {} })).toMatch(/<label class="card__compare"><input type="checkbox" checked=""\/>In compare<span class="visually-hidden">/);
+    expect(card(P(), { variant: "list", onCompare: () => {} })).toContain("card__compare");
+  });
+  it("the picture also opens the store page, out of the tab order and hidden from screen readers", () => {
+    const out = card(P());
+    expect(out).toContain('<a class="card__media card__medialink" href="https://www.amazon.sa/dp/A" target="_blank" rel="noopener noreferrer" tabindex="-1" aria-hidden="true">');
+    expect(count(out, 'href="https://www.amazon.sa/dp/A"')).toBe(2);
+    expect(card(P({ url: "http://insecure.example/x" }))).toContain('<div class="card__media">');
   });
   it("ResultTiers draws list rows in a one-column list", () => {
     const out = renderToStaticMarkup(createElement(ResultTiers, { products: [P(), P({ id: "B" })], view: "list" }));

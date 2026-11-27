@@ -59,11 +59,21 @@ describe("GroupCard (17b2)", () => {
     expect(out).toContain("+2 more");
     expect(html(groupOf(4))).not.toContain("aria-expanded");
   });
-  it("Watch and Compare act on the best member", () => {
+  it("Watch acts on the best member; every store row has its own Compare", () => {
     const out = html(groupOf(2), { query: "tv", compareChecked: true, onCompare: () => {} });
-    expect(count(out, 'type="checkbox"')).toBe(1);
-    expect(out).toContain("checked");
+    expect(count(out, 'type="checkbox"')).toBe(2);
+    expect(count(out, 'checked=""')).toBe(1);
+    expect(out).toContain("card--selected");
     expect(out).toContain("Watch");
+    expect(out).toContain("Samsung TV QA65Q60D at noon KSA");
+  });
+  it("comparedRows ticks exactly those rows and rings the card", () => {
+    const g = groupOf(3);
+    const out = html(g, { comparedRows: "jarir+p2", onCompare: () => {} });
+    expect(count(out, 'checked=""')).toBe(1);
+    expect(out).toMatch(/checked=""\/>In compare<span class="visually-hidden"> Samsung TV QA65Q60D at Jarir/);
+    expect(out).toContain("card--selected");
+    expect(html(g, { comparedRows: "", onCompare: () => {} })).not.toContain("card--selected");
   });
   it("ResultTiers shows a group as one wide card beside single cards", () => {
     const g = groupOf(2);
@@ -72,6 +82,6 @@ describe("GroupCard (17b2)", () => {
     );
     expect(count(out, 'class="grid__wide"')).toBe(1);
     expect(out).toContain('<ul class="grid" role="list">');
-    expect(count(out, 'type="checkbox"')).toBe(2);
+    expect(count(out, 'type="checkbox"')).toBe(3);
   });
 });

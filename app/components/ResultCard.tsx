@@ -51,7 +51,7 @@ function DealBadge({ deal }: { deal: DealInsight }) {
   );
 }
 
-function Trend({ trend, title }: { trend: PriceTrend; title: string }) {
+export function Trend({ trend, title }: { trend: PriceTrend; title: string }) {
   const change = trend.changePct7d === undefined ? null : trendChange(trend.changePct7d);
   const first = trend.points[0].day;
   const span = trend.points[trend.points.length - 1].day - first + 1;
@@ -79,12 +79,13 @@ function Trend({ trend, title }: { trend: PriceTrend; title: string }) {
  */
 export type CompareControl = { compareChecked?: boolean; onCompare?: (p: Product) => void };
 
-export function CardCompare({ product: p, checked, onCompare }: { product: Product; checked: boolean; onCompare: (p: Product) => void }) {
+export function CardCompare({ product: p, checked, onCompare, label }: { product: Product; checked: boolean; onCompare: (p: Product) => void; label?: string }) {
+  // A 44px target; ticked, it reads "In compare" on an ink-bordered fill, not colour alone.
   return (
     <label className="card__compare">
       <input type="checkbox" checked={checked} onChange={() => onCompare(p)} />
-      Compare
-      <span className="visually-hidden"> {p.title}</span>
+      {checked ? "In compare" : "Compare"}
+      <span className="visually-hidden"> {label ?? p.title}</span>
     </label>
   );
 }
@@ -142,22 +143,30 @@ export type CardVariant = "grid" | "list";
  * The picture box: the store's image at a fixed ratio, or a quiet placeholder with the store's
  * mark. `src` may list several pictures (a group's members): a broken one gives way to the next.
  */
-export function CardMedia({ src, site, className = "card__media", size = 400 }: { src: string | string[]; site: string; className?: string; size?: number }) {
+export function CardMedia({ src, site, className = "card__media", size = 400, href }: { src: string | string[]; site: string; className?: string; size?: number; href?: string | null }) {
   const [failed, setFailed] = useState<ReadonlySet<string>>(() => new Set());
   const show = (Array.isArray(src) ? src : [src]).find((s) => !!s && !failed.has(s));
+  const inner = show ? (
+    // Remote store images: plain <img> keeps Next's image optimizer off the stores' CDNs.
+    // eslint-disable-next-line @next/next/no-img-element
+    <img src={show} alt="" width={size} height={size} loading="lazy" decoding="async" referrerPolicy="no-referrer" onError={() => setFailed((f) => new Set(f).add(show))} />
+  ) : (
+    <span className="noimg">
+      <StoreLogo id={site} size={24} />
+      <span className="noimg__text">No image</span>
+    </span>
+  );
+  // With `href` the picture also opens the store page, for a tap or click. It stays out of the tab
+  // order and the accessibility tree: "View on <store>" is the one named link.
+  if (href) {
+    return (
+      <a className={`${className} card__medialink`} href={href} target="_blank" rel="noopener noreferrer" tabIndex={-1} aria-hidden="true">
+        {inner}
+      </a>
+    );
+  }
   return (
-    <div className={className}>
-      {show ? (
-        // Remote store images: plain <img> keeps Next's image optimizer off the stores' CDNs.
-        // eslint-disable-next-line @next/next/no-img-element
-        <img src={show} alt="" width={size} height={size} loading="lazy" decoding="async" referrerPolicy="no-referrer" onError={() => setFailed((f) => new Set(f).add(show))} />
-      ) : (
-        <span className="noimg">
-          <StoreLogo id={site} size={24} />
-          <span className="noimg__text">No image</span>
-        </span>
-      )}
-    </div>
+    <div className={className}>{inner}</div>
   );
 }
 
@@ -176,7 +185,7 @@ function ResultCard({ product: p, query, compareChecked = false, onCompare, vari
 
   return (
     <article className={cls}>
-      <CardMedia src={p.image} site={p.site} />
+      <CardMedia src={p.image} site={p.site} href={href} />
       <div className="card__body">
         <div className="card__store">
           <StoreMark id={p.site} size={18} />
