@@ -20,15 +20,15 @@ const api = (saved: string[] = []): SavedApi => ({ isSaved: (k) => saved.include
 const withSaved = (node: ReactNode, saved: string[] = []) => renderToStaticMarkup(createElement(SavedContext, { value: api(saved) }, node));
 
 describe("Save toggle (favourites)", () => {
-  it("is a 44px button with aria-pressed, a stable name and the visible state in words", () => {
+  it("is a 44px button with aria-pressed, the visible state in words, and that text first in its name", () => {
+    const hidden = (t: string) => `<span class="visually-hidden"> ${t}</span></button>`;
     const off = withSaved(createElement(SaveToggle, { product: P("N1") }));
     expect(off).toContain('aria-pressed="false"');
-    expect(off).toContain('aria-label="Save JBL Flip 6 N1"');
-    expect(off).toContain(">Save</button>");
+    expect(off).not.toContain("aria-label");
+    expect(off).toContain(`>Save${hidden("JBL Flip 6 N1")}`);
     const on = withSaved(createElement(SaveToggle, { product: P("N1") }), ["noon-sa+N1"]);
     expect(on).toContain('aria-pressed="true"');
-    expect(on).toContain(">Saved</button>");
-    expect(on).toContain('aria-label="Save JBL Flip 6 N1"');
+    expect(on).toContain(`>Saved${hidden("JBL Flip 6 N1")}`);
   });
   it("renders nothing without the saved store (no dead button)", () => {
     expect(renderToStaticMarkup(createElement(SaveToggle, { product: P("N1") }))).toBe("");
@@ -39,7 +39,7 @@ describe("Save toggle (favourites)", () => {
     const g: GroupItem = { kind: "group", key: "g", best: rows[0], rows, bestPrice: rows[0], storeCount: 2, colors: {} };
     const group = withSaved(createElement(GroupCard, { group: g, query: "jbl" }), ["jarir+J1"]);
     expect(group.split("save__btn").length - 1).toBe(2);
-    expect(group).toContain('aria-label="Save JBL Flip 6 J1 at Jarir"');
+    expect(group).toContain('<span class="visually-hidden"> JBL Flip 6 J1 at Jarir</span>');
     const dialog = withSaved(createElement(CompareDialog, { items: rows, open: false, onClose: () => {} }));
     expect(dialog.split("cmp__save").length - 1).toBe(2);
   });

@@ -13,6 +13,7 @@
   --color-muted: oklch(48% 0.012 65);
   --color-rule: oklch(88.5% 0.01 75);
   --color-rule-2: oklch(79% 0.012 75);
+  --color-field-edge: oklch(60% 0.012 75); /* a text field's edge: 3:1 or better on surface and paper (WCAG 1.4.11) */
   --color-accent: oklch(47% 0.085 170);
   --color-accent-strong: oklch(38% 0.075 170);
   --color-accent-well: oklch(95% 0.028 170);
@@ -88,3 +89,5 @@
 }
 @media (min-width: 48rem) { :root { --gutter: 24px; } }
 @media (min-width: 64rem) { :root { --gutter: 40px; } }
+/* Touch screens: the small control size is a full 44px target too. */
+@media (pointer: coarse) { :root { --target-sm: var(--target); } }

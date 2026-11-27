@@ -34,6 +34,7 @@ Warm off-white neutrals, charcoal text, and one accent. All colours are OKLCH to
 | `--color-ink-2` | Secondary text |
 | `--color-muted` | Helper text, captions (4.5:1 or better on paper) |
 | `--color-rule`, `--color-rule-2` | Hairlines; stronger borders on controls |
+| `--color-field-edge` | A text field's or select's edge, 3:1 or better against paper and surface (WCAG 1.4.11) |
 | `--color-accent` | Palm green: primary button, focus ring, selected chip mark |
 | `--color-accent-strong` | Accent text on paper, and the primary button's hover state |
 | `--color-accent-well`, `--color-accent-edge` | A verified good price (best price, lowest in 30 days) |
@@ -117,7 +118,7 @@ Media queries use rem widths (`48rem`, `64rem`, `90rem`), because CSS variables 
 
 | Primitive | Variants | Notes |
 | --- | --- | --- |
-| `Button` | `primary`, `secondary`, `ghost`, `destructive`; sizes `sm` (40px), `md` (44px), `lg` (52px) | `loading` sets `aria-busy`, disables the button and shows a small spinner. `href` renders a link with the same look. One primary per view. |
+| `Button` | `primary`, `secondary`, `ghost`, `destructive`; sizes `sm` (40px, and 44px on touch screens), `md` (44px), `lg` (52px) | `loading` sets `aria-busy`, disables the button and shows a small spinner. `href` renders a link with the same look. One primary per view. |
 | `Input` | `md`, `compact`; `invalid` | A 44px field with the same focus ring as every control. The query box is `QueryCombobox` (its own ARIA). |
 | `Chip` | `checkbox` (stores, facets), `toggle` (`aria-pressed`) | A 44px target with a visible selected state (ink border and a green check mark), never colour alone. |
 | `Badge` | `neutral`, `accent`, `warn`, `count` | Words, never a dot. `count` is the Alerts number. |
@@ -151,6 +152,9 @@ the card lifts 1px to `--shadow-2`. There is never a card inside a card.
   (3 lines in the grid, 2 in a list), with the full title in `title`. Next come the `Price` primitive, rating and sold
   count only when given, quiet deal labels and the sparkline. "View on <store>" (new tab, noopener
   noreferrer) is the main action, and Compare and Watch sit under it.
+- **Long result lists.** Cards are drawn 48 at a time (`RESULTS_STEP`): more follow as the reader scrolls
+  near the end, and a "Show more results" button does the same from the keyboard. A search can return
+  400+ cards, and mounting them all at once blocks a phone's main thread for seconds.
 - **Group card.** It shows one picture and title, then a price ladder. "Best price" (the accent row) goes only to the lowest
   price in its own currency, and only when another row shares that currency.
 

@@ -90,7 +90,10 @@ export function useFavourites(): SavedApi {
   return useMemo(() => ({ isSaved: (k: string) => keys.has(k), toggle }), [keys, toggle]);
 }
 
-/** The heart: a 44px toggle (aria-pressed) that saves the product; it reads "Saved" when on. */
+/**
+ * The heart: a 44px toggle (aria-pressed) that saves the product; it reads "Saved" when on. Its
+ * name starts with those visible words (WCAG 2.5.3, label in name), then the product for context.
+ */
 export function SaveToggle({ product: p, query, label, className }: { product: Product; query?: string; label?: string; className?: string }) {
   const api = useContext(SavedContext);
   const [error, setError] = useState<string | null>(null);
@@ -102,7 +105,6 @@ export function SaveToggle({ product: p, query, label, className }: { product: P
         type="button"
         className="save__btn"
         aria-pressed={on}
-        aria-label={`Save ${label ?? p.title}`}
         onClick={() => {
           setError(null);
           void api.toggle(p, !on, query).then(setError);
@@ -112,6 +114,7 @@ export function SaveToggle({ product: p, query, label, className }: { product: P
           <path d="M12 20.5 10.6 19.2C5.4 14.5 2 11.4 2 7.7 2 4.6 4.4 2.3 7.4 2.3c1.7 0 3.4.8 4.6 2.1 1.2-1.3 2.9-2.1 4.6-2.1 3 0 5.4 2.3 5.4 5.4 0 3.7-3.4 6.8-8.6 11.5L12 20.5Z" />
         </svg>
         {on ? "Saved" : "Save"}
+        <span className="visually-hidden"> {label ?? p.title}</span>
       </button>
       {error && (
         <span className="save__error" role="alert">
