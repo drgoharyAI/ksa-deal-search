@@ -1,0 +1,56 @@
+# Deal search on the LAN Proxmox VM. Usage: docs/DEPLOY.md
+#   docker compose up -d --build                 # app on http://<vm-ip>:3000
+#   docker compose --profile https up -d         # plus Caddy with LAN HTTPS (internal CA)
+services:
+  app:
+    build: .
+    image: deal-search:latest
+    container_name: deal-search
+    restart: unless-stopped
+    init: true
+    ports:
+      - "3000:3000"
+    env_file: .env
+    environment:
+      NODE_ENV: production
+      DEAL_SEARCH_DB: /data/data.db
+      API_ANYTHING_HOME: /data/aa-home
+      NOON_PROFILE_DIR: /data/noon-profile
+      SHEIN_PROFILE_DIR: /data/shein-profile
+    volumes:
+      - deal-data:/data
+    # Chrome uses /dev/shm heavily; Docker's 64 MB default crashes tabs.
+    shm_size: 1gb
+    # SIGTERM: Chrome gets Browser.close (20 s cap), then the DB closes.
+    stop_grace_period: 30s
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "5"
+
+  caddy:
+    image: caddy:2.10-alpine
+    profiles: ["https"]
+    restart: unless-stopped
+    depends_on:
+      - app
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      CADDY_HOST: ${CADDY_HOST:-deals.lan}
+    volumes:
+      - ./docker/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  deal-data:
+  caddy-data:
+  caddy-config:

@@ -1,0 +1,25 @@
+# Keep the build context small and free of secrets, local profiles and dev data.
+node_modules
+.next
+.git
+.gitignore
+.env
+.env.*
+!.env.example
+.aa-home*
+.noon-profile*
+.shein-profile*
+.superpowers
+.claude
+.hallmark
+eval
+tests
+docs
+coverage
+*.tsbuildinfo
+next-env.d.ts
+probe-*.txt
+npm-debug.log*
+Dockerfile
+docker-compose.yml
+.dockerignore

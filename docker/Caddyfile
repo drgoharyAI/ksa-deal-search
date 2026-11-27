@@ -1,0 +1,8 @@
+# Optional LAN HTTPS (compose profile "https"). Caddy's internal CA issues the certificate;
+# install Caddy's root (see docs/DEPLOY.md) on each device to avoid browser warnings.
+# Add the host name to APP_HOSTS in .env (for example APP_HOSTS=192.168.1.48:3000,deals.lan).
+{$CADDY_HOST:deals.lan} {
+	tls internal
+	encode gzip
+	reverse_proxy app:3000
+}
