@@ -14,7 +14,7 @@ import { valuesFromUrl } from "@/src/lib/rerun";
 import FilterChips from "./components/FilterChips";
 import { CompareDialog, CompareTray } from "./components/Compare";
 import {
-  NO_FILTERS, applyFilters, chipContext, chipParamsOnly, facetCounts, filtersFromSearch, isActive, priceBounds,
+  NO_FILTERS, applyFilters, chipContext, chipParamsOnly, chipsForNewQuery, facetCounts, filtersFromSearch, isActive, priceBounds,
   withChipParams, type ChipFilters,
 } from "@/src/lib/chips";
 import { toggleCompare } from "@/src/lib/compare";
@@ -65,6 +65,8 @@ export default function Home() {
   // Quick filter chips: client-side over the current results, kept in the URL (never a new search).
   const [chips, setChips] = useState<ChipFilters>(NO_FILTERS);
   const [chipsRead, setChipsRead] = useState(false);
+  /** Chips carried over from the previous query (rating, discounted); named in a note. */
+  const [keptChips, setKeptChips] = useState<("rating" | "discounted")[]>([]);
   const [compareList, setCompareList] = useState<Product[]>([]);
   const [compareFull, setCompareFull] = useState(false);
   const [compareOpen, setCompareOpen] = useState(false);
@@ -102,6 +104,14 @@ export default function Home() {
   const bounds = useMemo(() => priceBounds(all), [all]);
   const products = useMemo(() => rank(applyFilters(all, chips, chipCtx), values.sort), [all, chips, chipCtx, values.sort]);
   const filtering = isActive(chips) && all.length > 0;
+  const kept = keptChips.filter((k) => (k === "rating" ? chips.minRating !== undefined : chips.discounted));
+  // The live region hears "N of M results" once a change settles (a dragged slider fires many).
+  const filterLive = filtering ? `${products.length} of ${all.length} results` : "";
+  const [liveFilter, setLiveFilter] = useState("");
+  useEffect(() => {
+    const t = setTimeout(() => setLiveFilter(filterLive), 400);
+    return () => clearTimeout(t);
+  }, [filterLive]);
   const compareKeys = useMemo(() => new Set(compareList.map(productKey)), [compareList]);
   const compare = useMemo(
     () => ({
@@ -141,6 +151,10 @@ export default function Home() {
     setErrorField(null);
     setPhase("loading");
     setPending(v.sites);
+    // A new query drops the store, brand and price chips of the old results (not on a History re-run).
+    const carried = chipsForNewQuery(chips, results?.query, v.query);
+    if (carried.filters !== chips) setChips(carried.filters);
+    setKeptChips(carried.kept);
 
     const body = {
       query: v.query,
@@ -191,7 +205,7 @@ export default function Home() {
   let live = "";
   if (loading) live = `Searching ${values.sites.length} ${values.sites.length === 1 ? "store" : "stores"}`;
   else if (phase === "error" && error) live = error;
-  else if (phase === "done" && results && filtering) live = `${products.length} of ${all.length} results`;
+  else if (phase === "done" && results && filtering) live = liveFilter;
   else if (phase === "done" && results) live = products.length ? `${products.length} results` : (results.reason ?? "");
 
   return (
@@ -257,7 +271,7 @@ export default function Home() {
             />
           )}
 
-          {!loading && all.length > 0 && <FilterChips filters={chips} onChange={setChips} facets={facets} bounds={bounds} currency={all[0].currency || "SAR"} />}
+          {!loading && all.length > 0 && <FilterChips filters={chips} onChange={setChips} facets={facets} bounds={bounds} currency={all[0].currency || "SAR"} kept={kept} />}
 
           {loading ? (
             <ul className="grid" aria-hidden="true">

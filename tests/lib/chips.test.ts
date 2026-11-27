@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import {
-  NO_FILTERS, applyFilters, chipContext, facetCounts, filtersFromSearch, isActive, isDiscounted, passes,
+  activeCount, activeSummary, chipsForNewQuery, NO_FILTERS, applyFilters, chipContext, facetCounts, filtersFromSearch, isActive, isDiscounted, passes,
   priceBounds, withChipParams, type ChipFilters,
 } from "@/src/lib/chips";
 import type { Product } from "@/src/lib/types";
@@ -102,5 +102,31 @@ describe("URL state", () => {
   });
   it("no filters writes no chip params", () => {
     expect(withChipParams("?store=jarir", NO_FILTERS)).toBe("");
+  });
+});
+
+describe("chipsForNewQuery (17c fix I1)", () => {
+  const f = F({ stores: ["jarir"], brands: ["apple"], minPrice: 5000, maxPrice: 9000, minRating: 4, discounted: true });
+  it("a different query drops store, brand and price; keeps rating and discounted, and says so", () => {
+    expect(chipsForNewQuery(f, "laptop", " phone case ")).toEqual({ filters: F({ minRating: 4, discounted: true }), kept: ["rating", "discounted"] });
+    expect(chipsForNewQuery(F({ brands: ["apple"] }), "laptop", "phone")).toEqual({ filters: NO_FILTERS, kept: [] });
+  });
+  it("the same query (trimmed, any case) keeps everything", () => {
+    expect(chipsForNewQuery(f, "Laptop", " laptop ")).toEqual({ filters: f, kept: [] });
+  });
+  it("no earlier results (a History re-run or first search) keeps the URL's filters", () => {
+    expect(chipsForNewQuery(f, undefined, "phone")).toEqual({ filters: f, kept: [] });
+  });
+});
+
+describe("activeCount / activeSummary (17c fix M4)", () => {
+  it("counts and names the active filters", () => {
+    const f = F({ stores: ["noon-sa"], brands: ["apple", "hp"], minPrice: 500, minRating: 4.5, discounted: true });
+    expect(activeCount(f)).toBe(6);
+    expect(activeSummary(f)).toBe("noon KSA, Apple, HP, from SAR 500, 4.5+ stars, discounted");
+    expect(activeSummary(F({ minPrice: 100, maxPrice: 2000 }))).toBe("SAR 100 to 2,000");
+    expect(activeSummary(F({ maxPrice: 2000 }))).toBe("up to SAR 2,000");
+    expect(activeSummary(NO_FILTERS)).toBe("");
+    expect(activeCount(NO_FILTERS)).toBe(0);
   });
 });

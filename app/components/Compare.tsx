@@ -90,7 +90,7 @@ export function CompareDialog({ items, open, onClose }: DialogProps) {
           Close
         </button>
       </div>
-      <p className="cmp__note">Shaded rows differ. Specs are read from the titles; check the store page before you buy.</p>
+      <p className="cmp__note">Shaded cells differ from the rest of their row. Specs are read from the titles; check the store page before you buy.</p>
       <div className="cmp__scroll" tabIndex={0} role="region" aria-label="Comparison table, scrolls sideways">
         <table className="cmp__table">
           <thead>
@@ -122,7 +122,7 @@ export function CompareDialog({ items, open, onClose }: DialogProps) {
                   {r.differs && <span className="visually-hidden">, differs</span>}
                 </th>
                 {r.cells.map((c, i) => (
-                  <td key={i} className={r.lowest?.[i] ? "cmp__lowest" : undefined}>
+                  <td key={i} className={[r.diff[i] && "cmp__diff", r.lowest?.[i] && "cmp__lowest"].filter(Boolean).join(" ") || undefined}>
                     {c ?? <span className="cmp__none">Not given</span>}
                     {r.lowest?.[i] && <span className="cmp__tag">Lowest</span>}
                   </td>

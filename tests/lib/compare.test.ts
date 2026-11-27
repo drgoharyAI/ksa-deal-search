@@ -36,6 +36,16 @@ describe("compareRows (17c)", () => {
     expect(row(rows, "price")!.lowest).toEqual([false, true]);
     expect(row(compareRows([P("x"), P("y"), P("z", { listPrice: 200 })]), "price")!.lowest).toEqual([true, true, false]);
   });
+  it("flags each cell that differs from the row's majority value; no majority means all differ", () => {
+    const three = compareRows([P("x", { rating: 4 }), P("y", { rating: 4 }), P("z", { rating: 3 })]);
+    expect(row(three, "rating")!.diff).toEqual([false, false, true]);
+    expect(row(rows, "storage")!.diff).toEqual([true, true]);
+    expect(row(rows, "ram")!.diff).toEqual([false, false]);
+  });
+  it("no 'lowest' when every price is the same or the currencies differ", () => {
+    expect(row(compareRows([P("x"), P("y")]), "price")!.lowest).toBeUndefined();
+    expect(row(compareRows([P("x"), P("y", { listPrice: 50, currency: "USD" })]), "price")!.lowest).toBeUndefined();
+  });
   it("drops a spec row no product has", () => {
     expect(rows.find((r) => r.key === "wattage")).toBeUndefined();
   });

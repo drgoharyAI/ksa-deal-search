@@ -26,11 +26,27 @@ export type CompareRow = {
   cells: (string | null)[];
   /** The products do not all show the same value (a missing one counts as different). */
   differs: boolean;
-  /** Price row only: the cheapest product(s). */
+  /** Per cell: differs from the row's majority value (no single majority: every cell differs). */
+  diff: boolean[];
+  /** Price row only: the cheapest product(s); absent when all prices match or currencies differ. */
   lowest?: boolean[];
 };
 
 const differs = (cells: (string | null)[]) => new Set(cells.map((c) => c ?? "")).size > 1;
+
+/** Per-cell difference from the row's majority value; a tie for the majority flags every cell. */
+function cellDiffs(cells: (string | null)[]): boolean[] {
+  const n = new Map<string, number>();
+  for (const c of cells) n.set(c ?? "", (n.get(c ?? "") ?? 0) + 1);
+  const top = Math.max(...n.values());
+  const majority = [...n].filter(([, k]) => k === top);
+  if (majority.length > 1) return cells.map(() => true);
+  return cells.map((c) => (c ?? "") !== majority[0][0]);
+}
+
+const row = (key: string, label: string, cells: (string | null)[]): CompareRow => ({
+  key, label, cells, differs: differs(cells), diff: cellDiffs(cells),
+});
 
 export function compareRows(products: Product[]): CompareRow[] {
   const prices = products.map(priceOf);
@@ -45,14 +61,15 @@ export function compareRows(products: Product[]): CompareRow[] {
   ];
   const rows: CompareRow[] = fixed.map((r) => {
     const cells = products.map(r.cell);
-    return { key: r.key, label: r.label, cells, differs: differs(cells) };
+    return row(r.key, r.label, cells);
   });
-  rows[1].lowest = prices.map((x) => x === min);
+  const oneCurrency = new Set(products.map((p) => p.currency || "SAR")).size === 1;
+  if (oneCurrency && new Set(prices).size > 1) rows[1].lowest = prices.map((x) => x === min);
 
   const specs = products.map((p) => parseSpecs(p.title));
   for (const s of SPEC_ROWS) {
     const cells = specs.map((x) => x[s.key] ?? null);
-    if (cells.some((c) => c !== null)) rows.push({ key: s.key, label: s.label, cells, differs: differs(cells) });
+    if (cells.some((c) => c !== null)) rows.push(row(s.key, s.label, cells));
   }
   return rows;
 }

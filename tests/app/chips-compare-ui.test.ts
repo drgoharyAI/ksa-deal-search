@@ -28,6 +28,17 @@ describe("FilterChips (17c)", () => {
     expect(out).toContain('aria-label="Lowest price"');
     expect(out).toContain('aria-label="Highest price"');
   });
+  it("a folded-bar toggle with the active count and summary; prices spoken with the currency", () => {
+    expect(out).toContain('aria-expanded="false"');
+    expect(out).toContain("Filters (1 active)");
+    expect(out).toContain("4+ stars");
+    expect(out).toContain('aria-valuetext="SAR 2000"');
+    expect(out).toContain('aria-valuetext="SAR 3000"');
+  });
+  it("names the filters kept from the previous query", () => {
+    const k = renderToStaticMarkup(createElement(FilterChips, { filters: f, onChange: noop, facets: facetCounts(ps, f, ctx), bounds: priceBounds(ps), kept: ["rating"] }));
+    expect(k).toContain("Filters kept: rating");
+  });
   it("rating and discount chips are pressed buttons", () => {
     expect(out).toMatch(/aria-pressed="true"[^>]*>.*?4\+/);
     expect(out).toContain("Only discounted");
@@ -56,6 +67,7 @@ describe("Compare UI (17c)", () => {
     expect(d).toContain("cmp__lowest");
     expect(d).toContain("Lowest");
     expect(d).toContain("cmp__row--differs");
+    expect(d).toMatch(/<td class="cmp__diff/);
     expect(d).toContain("Storage");
   });
 });

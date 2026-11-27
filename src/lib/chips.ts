@@ -1,6 +1,7 @@
 import type { Product } from "@/src/lib/types";
 import { STORES } from "@/src/lib/stores";
-import { brandsFor, productKey } from "@/src/lib/specs";
+import { brandLabel, brandsFor, productKey } from "@/src/lib/specs";
+import { storeLabel } from "@/src/lib/stores";
 
 /**
  * Quick filter chips (spec: "Comparison and deal-insight features", item 3). Client-side and
@@ -166,4 +167,42 @@ export function withChipParams(search: string, f: ChipFilters): string {
 /** Only the chip keys of `search` (drops a re-run link's own keys once it has been read). */
 export function chipParamsOnly(search: string): string {
   return withChipParams("", filtersFromSearch(search));
+}
+
+/**
+ * Chips for a search about to run. A different query (trimmed, any case) drops the store, brand
+ * and price chips, which belong to the old results, and keeps rating and "only discounted"
+ * (`kept` names those still on). Without earlier results (first search, a History re-run) the
+ * filters stay as they are, so ones read from the URL survive.
+ */
+export function chipsForNewQuery(
+  f: ChipFilters,
+  prevQuery: string | undefined,
+  nextQuery: string,
+): { filters: ChipFilters; kept: ("rating" | "discounted")[] } {
+  if (prevQuery === undefined || prevQuery.trim().toLowerCase() === nextQuery.trim().toLowerCase()) return { filters: f, kept: [] };
+  const filters: ChipFilters = { ...NO_FILTERS, discounted: f.discounted };
+  if (f.minRating !== undefined) filters.minRating = f.minRating;
+  const kept: ("rating" | "discounted")[] = [];
+  if (f.minRating !== undefined) kept.push("rating");
+  if (f.discounted) kept.push("discounted");
+  return { filters, kept };
+}
+
+/** How many filters are on: each store and brand, plus price, rating and discounted. */
+export const activeCount = (f: ChipFilters): number =>
+  f.stores.length + f.brands.length + (f.minPrice !== undefined || f.maxPrice !== undefined ? 1 : 0) +
+  (f.minRating !== undefined ? 1 : 0) + (f.discounted ? 1 : 0);
+
+const amt = (n: number) => n.toLocaleString("en-US", { maximumFractionDigits: 2 });
+
+/** The active filters in words, for the folded filter bar ("noon KSA, Apple, from SAR 500"). */
+export function activeSummary(f: ChipFilters, currency = "SAR"): string {
+  const parts: string[] = [...f.stores.map(storeLabel), ...f.brands.map(brandLabel)];
+  if (f.minPrice !== undefined && f.maxPrice !== undefined) parts.push(`${currency} ${amt(f.minPrice)} to ${amt(f.maxPrice)}`);
+  else if (f.minPrice !== undefined) parts.push(`from ${currency} ${amt(f.minPrice)}`);
+  else if (f.maxPrice !== undefined) parts.push(`up to ${currency} ${amt(f.maxPrice)}`);
+  if (f.minRating !== undefined) parts.push(`${f.minRating}+ stars`);
+  if (f.discounted) parts.push("discounted");
+  return parts.join(", ");
 }
