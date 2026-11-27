@@ -76,16 +76,30 @@ functional QA, a responsive and accessibility pass, and a performance pass.
 
 | # | Finding | Fix | Test |
 | --- | --- | --- | --- |
-| F1 | **Back from results left the app.** A search from home replaced the home's history entry, so Back went to the previous site (about:blank in the test). | A search shown over the home now pushes its own entry (`urlWrite` in `src/lib/rerun.ts`). The home entry is marked, so Back shows the clean home (results stashed) and Forward brings them back. | `tests/lib/share.test.ts`; browser: history 2 to 3, Back to home, Forward restores |
-| F2 | **Stop before any store answered said "No products matched your search and filters"**, which is not true. | A dedicated empty state: "The search was stopped before any results came", with "Search again". The live region says "Search stopped; 0 results from 0 of 8 stores". | browser |
-| F3 | **Watch was offered on branch-pickup-only listings** (the known gap at ResultCard.tsx:97). The checker never records a pickup-only price, so the alert could never fire. | `CardWatch` renders nothing for `pickupOnly`. `parseNewWatch` rejects `pickupOnly: true`. A group card's Watch stays when its lead listing can be delivered. | `tests/lib/saco-flows.test.ts`; browser: 24 pickup cards, 0 Watch buttons on them |
+| F1 | **Back from results left the app.** A search from home replaced the home's history entry, so Back went to the previous site (about:blank in the test). | A search from the home pushes its own entry (`urlWrite` in `src/lib/rerun.ts`), but only once it has something to show: a first result, or the search finished on its own. Until then the URL stays "/", so a search stopped early or one that fails leaves no entry behind. The home entry is marked, so Back shows the clean home (results stashed) and Forward brings them back. | `tests/lib/share.test.ts`; browser at 375 and 1440: Stop and error leave history unchanged, results push one entry |
+| F2 | **Stop before any store answered said "No products matched your search and filters"**, which is not true. | A dedicated empty state (`STOPPED_EMPTY`, `showStoppedEmpty`): "The search was stopped before any results came", with "Search again". The live region says "Search stopped; 0 results from 0 of 8 stores". | `tests/lib/u6-round1.test.ts`; browser |
+| F3 | **Watch was offered on branch-pickup-only listings** (the known gap at ResultCard.tsx:97), on result cards and on /saved. The checker never records a pickup-only price, so the alert could never fire. | Result cards: `CardWatch` renders nothing for `pickupOnly`; a group card's Watch stays when its lead listing can be delivered. /saved: a "Branch pickup only" badge, and no "Watch price". Data: migration 6 (a new, idempotent step; migration 5 untouched) adds `pickupOnly` to `seen_products` (the latest search's state wins) and to the favourites snapshot. Server: `POST /api/watches` refuses a product watch when the latest known state is pickup only (`isPickupOnly`: the latest search, else the saved snapshot), whatever the page sends. A product the app has never seen is still accepted. | `tests/lib/saco-flows.test.ts`, `tests/app/alerts-api.test.ts`, `tests/lib/saved.test.ts`; browser: 24 pickup cards with 0 Watch buttons; a saved pickup item shows the badge and no Watch price; the API answers 400 to a POST without the flag |
 | F4 | **Layout shift on a results URL** (shared link, reload, History re-run). The prerendered home showed first and then collapsed into the results layout. CLS was 0.38 on desktop and 0.30 on mobile. | A tiny inline script in `app/layout.tsx` marks `<html>` before first paint when the URL has a query, and CSS keeps the home hidden until the results layout replaces it. There is a 4s CSS fallback, so a failed script never leaves a blank page. The search page clears the mark. | browser: CLS 0.07 (desktop) and 0.06 (mobile) |
-| F5 | **Mounting 400+ cards blocked a phone's main thread.** TBT was 9.5s with 4x CPU throttling. | Cards are drawn 48 at a time (`RESULTS_STEP`). More come as the reader scrolls near the end (IntersectionObserver), and "Show more results" does the same from the keyboard. | `tests/app/result-tiers.test.ts`; browser: 48 to 349 cards on scroll; TBT 1.7s |
+| F5 | **Mounting 400+ cards blocked a phone's main thread.** TBT was 9.5s with 4x CPU throttling. | Cards are drawn 48 at a time (`RESULTS_STEP`). More come as the reader scrolls near the end (IntersectionObserver), and "Show more results" does the same from the keyboard: focus moves to the first new card, and "Showing N of M results" is announced politely. The page owns the count and keeps it with stashed results, so Back and Forward bring back as many cards as were on screen (scroll restoration is not cut at 48). | `tests/app/result-tiers.test.ts`, `tests/lib/u6-round1.test.ts`; browser at 375 and 1440: 144 cards before home, 144 after Back; Show more focuses card 49 |
 | F6 | The sort select cut its own label to "Best match, then p" (`max-width: 11rem`). | The select sizes to its longest label and only shrinks when the row is too narrow. | screenshots at all widths |
 | F7 | **Tap targets under 44px on phones:** every `btn--sm` (40px), the segmented Grid/List, the sort select, filter chips, and the wordmark (22px tall). | `--target-sm` becomes 44px under `(pointer: coarse)`. The wordmark is a 44px-tall flex link. | responsive audit: 0 targets under 44px at 375, 390 and 430 |
 | F8 | **Text fields failed non-text contrast** (WCAG 1.4.11). Their 1px edge was 1.88:1. | New token `--color-field-edge` (3.88:1) on `.input` (selects, price fields, watch target). Documented in DESIGN.md. | computed 3.88:1 |
 | F9 | **Save toggle failed label-in-name** (axe, serious). Its visible text "Saved" was not in its accessible name "Save …". | No `aria-label`. The name is now the visible word plus the product in visually hidden text ("Saved JBL Flip 6 …"). | `tests/app/discovery-ui.test.ts`; axe 0 |
-| F10 | **Store status details were cut off with "…"** on phones ("some pa…", "try after …"). | The detail sits on its own line under the state and wraps whole. | screenshots 375 and 768 |
+| F10 | **Store status details were cut off with "…"** on phones ("some pa…", "try after …"). | The detail sits on its own line under the state and wraps whole, never cut. Every cell keeps three lines for its state from the start, so a wrapped "Temporarily unavailable" or a detail arriving mid-stream never moves the page. | browser at 375 and 1440: every cell 100px |
+
+## Fix round 1 (review)
+
+- **Pickup-only watches (F3).** The API now refuses by stored state (migration 6), not by a flag the
+  page sends. /saved hides Watch price and shows the badge.
+- **History entry (F1).** It is pushed only once results come or the search finishes. Stop and errors
+  leave none.
+- **Show more and restored results (F5).** The count is restored on Back and Forward. Show more moves
+  focus to the first new card and announces "Showing N of M".
+- **Status cells (F10).** They have a fixed size.
+- **Tests.** New tests cover the stopped empty state and the pre-paint mark (setting and clearing it).
+  The mark now lives in `src/lib/results-url-mark.ts`.
+- **Gates.** `npm run qa` (1069 tests) and `npm run build` are green. Items 2 to 5 were re-checked in a
+  local production build at 375 and 1440.
 
 ## Metrics
 
@@ -148,8 +162,8 @@ about 6s on that run). It depends on the stores, not the page.
   "Show more results" draws the rest.
 - **Phone toolbar.** On phones the sticky results toolbar takes two rows (Filters and Sort, then
   Grid/List), because the full sort label is now readable.
-- **Store status cells.** A cell grows by one line when a detail appears ("some pages failed", "try
-  after …"). This happens only when that store answers.
+- **Store status cells.** They are taller than before (three reserved lines), which costs about 160px on
+  a phone, where the strip has four rows.
 - **Ranking.** In "air fryer", a silicone tray (an accessory) ranked first under "Best match, then
   price". That is the matching engine, and it is out of scope for the UX pass.
 - **Unchanged from U4 and U5:**
