@@ -286,3 +286,19 @@ These move out of non-goals.
   - The Alerts page has a "Send test message" button.
   - If Telegram isn't configured, alerts still show in the app with a setup hint.
   - The token never reaches the browser.
+
+## Comparison and deal-insight features (owner, 2026-11-27)
+1. **Same product across stores.** Group results that are the same product into one card with a price per store, the cheapest highlighted. Matching is rule-based:
+   - The strongest signal is a shared model number or part code (such as "WH-1000XM5" or "SM-S921").
+   - Without one, the titles must agree strongly: same brand, same key specs (capacity, wattage, size, generation), and token similarity above a tuned threshold.
+   - A wrong merge must never happen: when unsure, keep the cards separate.
+   - The group shows the best price, and each store row links to that store.
+   - Ranking applies per group, using the cheapest confident member.
+2. **"Is this a real deal?" badge.** Every search records price observations (site + id → price, time) in the local DB, pruned after 180 days.
+   - Badges: "Lowest in 30 days", "Below usual price" (more than 10% under the 30-day median), "Normal price".
+   - "Inflated 'was' price" applies when the store's original price is above every price we've observed for the item and at least 15% above the 30-day median.
+   - A badge needs at least 3 observations over at least 2 days; otherwise there is no badge.
+3. **Quick filter chips.** Client-side and instant, with no new request: brand (taken from titles), a price range slider, store, minimum rating, and only discounted. Counts show per chip. Filters combine with sort and the match tiers.
+4. **Side-by-side compare.** Tick 2–4 products for a compare drawer or page showing image, title, store, price, discount, rating, the deal badge, and key specs parsed from titles (storage, RAM, wattage, capacity, size, resolution, model). Differences are highlighted.
+5. **Price trend on cards.** A tiny inline SVG sparkline and a change label ("↓12% vs last week") from the observations, shown only with enough data (same rule as the badge).
+No LLM or AI. Everything is computed locally, and the UI follows the Hallmark Floor rules.
