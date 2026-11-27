@@ -294,3 +294,9 @@ else moves, so it stays. Four rounds in a row without a combined gain: stop.
 Every target is met on both sets except holdout acc@10 (3.8% vs <= 2%): coffee machine has a
 coffee brush kit and a portafilter handle in its top 10, bluetooth speaker a pair of DIY speaker
 drivers. None carries a word that separates it from the product without costing recall elsewhere.
+
+## Holdout 2 (6 unseen queries, after 12d, rules unchanged)
+| p@10 | acc@10 | wrong@10 | recall | cheapest-first |
+|---|---|---|---|---|
+| 70% | 20% | 0% | 89% | 50% |
+Failures: nintendo switch 2 (acc@10 100%: games, cases and controllers titled with the console name), baby stroller (p@10 50%, recall 72%), air purifier (p@10 80%). Good: electric kettle, gaming chair, macbook air m3. Takeaway: word lists don't transfer to new categories; structural signals are needed.
