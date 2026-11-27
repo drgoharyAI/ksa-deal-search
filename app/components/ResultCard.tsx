@@ -76,8 +76,14 @@ export function formatMoney(n: number, currency = "SAR"): string {
   return `${currency || "SAR"}${NBSP}${num}`;
 }
 
-/** `query`: the search this card came from; with it the card offers a price alert ("Watch"). */
-export default function ResultCard({ product: p, query }: { product: Product; query?: string }) {
+/** A card's "Compare" checkbox: ticked state and the toggle (the page caps the list at 4). */
+export type CompareControl = { checked: boolean; onToggle: () => void };
+
+/**
+ * `query`: the search this card came from; with it the card offers a price alert ("Watch").
+ * `compare`: with it the card offers a "Compare" checkbox.
+ */
+export default function ResultCard({ product: p, query, compare }: { product: Product; query?: string; compare?: CompareControl }) {
   const [imgFailed, setImgFailed] = useState(false);
   const [watch, setWatch] = useState<"closed" | "open" | "saved">("closed");
   const price = p.finalPrice ?? p.listPrice;
@@ -138,6 +144,13 @@ export default function ResultCard({ product: p, query }: { product: Product; qu
           </p>
         )}
         {p.ratingUnavailable && <p className="card__meta">No rating</p>}
+        {compare && (
+          <label className="card__compare">
+            <input type="checkbox" checked={compare.checked} onChange={compare.onToggle} />
+            Compare
+            <span className="visually-hidden"> {p.title}</span>
+          </label>
+        )}
         {query && (
           <div className="card__watch">
             {watch === "open" ? (

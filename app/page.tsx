@@ -11,6 +11,14 @@ import AppHeader from "./components/AppHeader";
 import WatchForm, { postWatch } from "./components/WatchForm";
 import { cheapestConfident, defaultTarget, priceOf } from "@/src/lib/alerts/shared";
 import { valuesFromUrl } from "@/src/lib/rerun";
+import FilterChips from "./components/FilterChips";
+import { CompareDialog, CompareTray } from "./components/Compare";
+import {
+  NO_FILTERS, applyFilters, chipContext, chipParamsOnly, facetCounts, filtersFromSearch, isActive, priceBounds,
+  withChipParams, type ChipFilters,
+} from "@/src/lib/chips";
+import { toggleCompare } from "@/src/lib/compare";
+import { productKey } from "@/src/lib/specs";
 
 type Results = {
   products: Product[];
@@ -54,22 +62,58 @@ export default function Home() {
   const abortRef = useRef<AbortController | null>(null);
   const [watchOpen, setWatchOpen] = useState(false);
   const [watchSaved, setWatchSaved] = useState(false);
+  // Quick filter chips: client-side over the current results, kept in the URL (never a new search).
+  const [chips, setChips] = useState<ChipFilters>(NO_FILTERS);
+  const [chipsRead, setChipsRead] = useState(false);
+  const [compareList, setCompareList] = useState<Product[]>([]);
+  const [compareFull, setCompareFull] = useState(false);
+  const [compareOpen, setCompareOpen] = useState(false);
 
   useEffect(() => () => abortRef.current?.abort(), []);
 
   // A History "Re-run" link: fill the form from the URL, clean the URL, and search once.
+  // The chip filters come back from the URL too (a refresh or Back keeps them).
   useEffect(() => {
-    const fromUrl = valuesFromUrl(window.location.search, INITIAL);
+    const qs = window.location.search;
+    // Read once after hydration (the server render has no URL state); not a cascade.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setChips(filtersFromSearch(qs));
+    setChipsRead(true);
+    const fromUrl = valuesFromUrl(qs, INITIAL);
     if (!fromUrl) return;
-    window.history.replaceState(null, "", window.location.pathname);
+    window.history.replaceState(null, "", window.location.pathname + chipParamsOnly(qs));
     setValues(fromUrl.values);
     if (fromUrl.run) void search(undefined, fromUrl.values);
     // Runs once on mount by design.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Sort changes re-rank the current results in place; no new request.
-  const products = useMemo(() => (results ? rank(results.products, values.sort) : []), [results, values.sort]);
+  // Chip changes write the URL in place (replaceState: no history entry, no request).
+  useEffect(() => {
+    if (!chipsRead) return;
+    const next = withChipParams(window.location.search, chips);
+    if (next !== window.location.search) window.history.replaceState(null, "", window.location.pathname + next);
+  }, [chips, chipsRead]);
+
+  // Chips narrow the results, then sort and the match tiers apply; no new request.
+  const all = useMemo(() => results?.products ?? [], [results]);
+  const chipCtx = useMemo(() => chipContext(all), [all]);
+  const facets = useMemo(() => facetCounts(all, chips, chipCtx), [all, chips, chipCtx]);
+  const bounds = useMemo(() => priceBounds(all), [all]);
+  const products = useMemo(() => rank(applyFilters(all, chips, chipCtx), values.sort), [all, chips, chipCtx, values.sort]);
+  const filtering = isActive(chips) && all.length > 0;
+  const compareKeys = useMemo(() => new Set(compareList.map(productKey)), [compareList]);
+  const compare = useMemo(
+    () => ({
+      isChecked: (p: Product) => compareKeys.has(productKey(p)),
+      onToggle: (p: Product) => {
+        const r = toggleCompare(compareList, p);
+        setCompareList(r.list);
+        setCompareFull(r.full);
+      },
+    }),
+    [compareKeys, compareList],
+  );
   const counts = useMemo(() => {
     const c: Record<string, number> = {};
     for (const p of results?.products ?? []) c[p.site] = (c[p.site] ?? 0) + 1;
@@ -121,6 +165,8 @@ export default function Home() {
       setResults({ products: data.products, statuses: data.statuses ?? [], reason: data.reason, query: v.query.trim(), sites: v.sites, filters: { minPrice: body.minPrice, maxPrice: body.maxPrice, minRating: body.minRating } });
       setWatchOpen(false);
       setWatchSaved(false);
+      setCompareList([]);
+      setCompareFull(false);
       setPending(null);
       setPhase("done");
     } catch (e) {
@@ -145,6 +191,7 @@ export default function Home() {
   let live = "";
   if (loading) live = `Searching ${values.sites.length} ${values.sites.length === 1 ? "store" : "stores"}`;
   else if (phase === "error" && error) live = error;
+  else if (phase === "done" && results && filtering) live = `${products.length} of ${all.length} results`;
   else if (phase === "done" && results) live = products.length ? `${products.length} results` : (results.reason ?? "");
 
   return (
@@ -176,7 +223,9 @@ export default function Home() {
 
         <section className="results" aria-labelledby="results-head" aria-busy={loading || undefined}>
           <div className="results__head">
-            <h2 id="results-head">{loading ? "Searching" : results && products.length ? `${products.length} results` : "Results"}</h2>
+            <h2 id="results-head">
+              {loading ? "Searching" : results && filtering ? `${products.length} of ${all.length} results` : results && products.length ? `${products.length} results` : "Results"}
+            </h2>
             {!loading && results && products.length > 0 && <p className="results__note">Prices exclude shipping</p>}
             {!loading && results && cheapest && !watchOpen && !watchSaved && (
               <button type="button" className="btn btn--quiet btn--small" onClick={() => setWatchOpen(true)}>
@@ -208,6 +257,8 @@ export default function Home() {
             />
           )}
 
+          {!loading && all.length > 0 && <FilterChips filters={chips} onChange={setChips} facets={facets} bounds={bounds} currency={all[0].currency || "SAR"} />}
+
           {loading ? (
             <ul className="grid" aria-hidden="true">
               {Array.from({ length: SKELETONS }, (_, i) => (
@@ -222,7 +273,17 @@ export default function Home() {
               ))}
             </ul>
           ) : results && products.length ? (
-            <ResultTiers products={products} query={results.query} />
+            <ResultTiers products={products} query={results.query} compare={compare} />
+          ) : results && filtering ? (
+            <div className="empty">
+              <p className="empty__title">No results match these filters</p>
+              <p className="empty__body">Loosen a filter above, or clear them all.</p>
+              <div>
+                <button type="button" className="btn btn--quiet btn--small" onClick={() => setChips(NO_FILTERS)}>
+                  Clear all filters
+                </button>
+              </div>
+            </div>
           ) : results ? (
             <div className="empty">
               <p className="empty__title">{results.reason ?? "No products matched your search and filters"}</p>
@@ -236,6 +297,21 @@ export default function Home() {
           )}
         </section>
       </main>
+
+      <CompareTray
+        items={compareList}
+        full={compareFull}
+        onRemove={(p) => {
+          setCompareList(compareList.filter((x) => productKey(x) !== productKey(p)));
+          setCompareFull(false);
+        }}
+        onClear={() => {
+          setCompareList([]);
+          setCompareFull(false);
+        }}
+        onOpen={() => setCompareOpen(true)}
+      />
+      <CompareDialog items={compareList} open={compareOpen} onClose={() => setCompareOpen(false)} />
     </div>
   );
 }
