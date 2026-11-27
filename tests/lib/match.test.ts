@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { tokenize } from "@/src/lib/match/tokenize";
-import { scoreRelevance, filterRelevant } from "@/src/lib/match/relevance";
+import { scoreRelevance, filterRelevant, matchesAllTokens } from "@/src/lib/match/relevance";
 import { isAccessory, isStrongAccessory, dropAccessories } from "@/src/lib/match/accessory";
 import { dedupe } from "@/src/lib/match/dedupe";
 import type { Product } from "@/src/lib/types";
@@ -103,7 +103,7 @@ describe("dedupe", () => {
 });
 
 describe("review fixes", () => {
-  it("1: head noun keeps plain earbuds, drops headphones", () => {
+  it("1: every query token is required: drops plain earbuds and headphones", () => {
     const ps = [
       prod("ANC Earbuds A", 1, "a1"), prod("ANC Earbuds B", 1, "a2"),
       ...[1, 2, 3, 4, 5, 6].map((i) => prod(`Earbuds X${i}`, 1, `p${i}`)),
@@ -113,8 +113,16 @@ describe("review fixes", () => {
     const ids = filterRelevant(ps, [["anc", "earbuds"]]).map((p) => p.id);
     expect(ids).not.toContain("h");
     expect(ids).not.toContain("c");
-    expect(ids).toContain("p1");
+    expect(ids).not.toContain("p1");
     expect(ids).toContain("a1");
+  });
+  it("12c: alias phrases and stems satisfy a query token (matching only)", () => {
+    expect(matchesAllTokens([["anc", "earbuds"]], "TWS Earphones Active Noise Cancellation")).toBe(true);
+    expect(matchesAllTokens([["ps5", "controller"]], "Sony DualSense Wireless Controller - White")).toBe(true);
+    expect(matchesAllTokens([["ps5", "controller"]], "PlayStation 5 Wireless Gamepad")).toBe(true);
+    expect(matchesAllTokens([["gaming", "mouse"]], "2.4GHz Wireless Game Mouse")).toBe(true);
+    expect(matchesAllTokens([["apple", "watch"]], "D20 Smart Watch Fitness Tracker")).toBe(false);
+    expect(matchesAllTokens([["4k", "monitor"]], "27 inch FHD Monitor")).toBe(false);
   });
   it("2: tokens with digits match exactly only", () => {
     expect(scoreRelevance([["sony", "wh-1000xm4"]], "Sony WH-1000XM5 Wireless Headphones")).toBeLessThan(0.6);

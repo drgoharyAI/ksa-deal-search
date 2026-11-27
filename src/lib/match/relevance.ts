@@ -1,5 +1,6 @@
 import type { Product } from "@/src/lib/types";
-import { tokenize, tokenForms, hasDigit } from "./tokenize";
+import { tokenize, tokenizeKeepDigits, tokenForms, hasDigit } from "./tokenize";
+import { aliasPhrases } from "./aliases";
 
 function withinOneEdit(a: string, b: string): boolean {
   if (Math.abs(a.length - b.length) > 1) return false;
@@ -11,11 +12,19 @@ function withinOneEdit(a: string, b: string): boolean {
   return s.slice(i) === l.slice(i + 1);
 }
 
-/** Exact; else (no digits in either token) prefix (query >= 4 chars) or edit distance <= 1 (query >= 5 chars). */
+/** Light English stem: drops one common inflection suffix (gaming/gamer/games -> gam). */
+export function stem(t: string): string {
+  const m = t.match(/^(.{3,}?)(?:ation|ing|ers|er|es|ed|s|e)$/);
+  const s = m ? m[1] : t;
+  return s.replace(/([a-z])$/, "$1"); // cancell -> cancel
+}
+
+/** Exact; else (no digits in either token) same stem, prefix (query >= 4 chars) or edit distance <= 1 (query >= 5 chars). */
 export function tokenMatches(q: string, t: string): boolean {
   if (q === t) return true;
   if (hasDigit(q) || hasDigit(t)) return false;
   if (q.length >= 4 && t.startsWith(q)) return true;
+  if (q.length >= 4 && t.length >= 4 && stem(q) === stem(t)) return true;
   return q.length >= 5 && withinOneEdit(q, t);
 }
 
@@ -75,6 +84,29 @@ function buildIdf(titles: string[][], queryTokens: string[][]): Map<string, numb
   return idf;
 }
 
+/** The token, or every word of one of its alias phrases, appears in the title. */
+function matchesWithAliases(q: string, tt: string[]): boolean {
+  return matchesAny(q, tt) || aliasPhrases(q).some((ph) => ph.every((w) => matchesAny(w, tt)));
+}
+
+/** Query tokens a variant may leave unmatched: none up to 3 tokens, one non-head token from 4. */
+const allowedMisses = (n: number) => (n >= 4 ? 1 : 0);
+
+/**
+ * True when some variant matches every query token (all but one non-head token for long queries).
+ * Shoppers type the words they need: a missing brand ("apple watch" -> generic watch) or qualifier
+ * ("4k monitor" -> FHD monitor) is a different product.
+ */
+export function matchesAllTokens(queryTokens: string[][], title: string): boolean {
+  const tt = tokenizeKeepDigits(title);
+  return queryTokens.some((variant) => {
+    if (!variant.length) return false;
+    const misses = variant.filter((q) => !matchesWithAliases(q, tt));
+    if (misses.length > allowedMisses(variant.length)) return false;
+    return !misses.includes(variant[variant.length - 1]);
+  });
+}
+
 export function filterRelevant(
   products: Product[],
   queryTokens: string[][],
@@ -82,5 +114,7 @@ export function filterRelevant(
 ): Product[] {
   if (!products.length) return [];
   const idf = buildIdf(products.map((p) => tokenize(p.title)), queryTokens);
-  return products.filter((p) => scoreRelevance(queryTokens, p.title, idf) >= threshold);
+  return products.filter(
+    (p) => matchesAllTokens(queryTokens, p.title) && scoreRelevance(queryTokens, p.title, idf) >= threshold,
+  );
 }

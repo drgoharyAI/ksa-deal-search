@@ -39,3 +39,13 @@ Labels: 15/15 queries, ~7,500 products. Sorted by price.
 |---|---|---|---|---|
 | 41% | 39% | 4% | 92% | 33% |
 Worst: samsung galaxy s24 (p@10 0%, accessories 100%), ps5 controller (accessories 90%), mechanical keyboard (p@10 10%), robot vacuum (accessories 80%).
+
+## Round 1: every query token required (kept)
+Relevance now requires every query token in the title (all but one non-head token from 4 tokens),
+with a light stemmer (gaming/game, cancelling/cancellation) and matching-only alias phrases
+(`data/match-aliases.json` + the synonym groups: anc/noise cancelling, ps5/playstation 5/dualsense,
+laptop/notebook/computer, controller/gamepad). Drops brand-less and qualifier-less items
+(generic "smart watch" for "apple watch", FHD monitors for "4k monitor").
+| p@10 | acc@10 | wrong@10 | recall | cheapest-first |
+|---|---|---|---|---|
+| 51% | 40% | 4% | 88% | 47% |

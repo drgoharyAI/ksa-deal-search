@@ -1,5 +1,5 @@
 {
-  "at": "2026-11-27T01:45:28.393Z",
+  "at": "2026-11-27T01:51:13.947Z",
   "queries": [
     {
       "query": "anc earbuds under 300",
@@ -54,7 +54,7 @@
         }
       ],
       "recordedItems": 682,
-      "results": 345,
+      "results": 285,
       "missingCalls": [],
       "labelled": true,
       "metrics": {
@@ -66,16 +66,9 @@
         "recall": 0.8168674698795181,
         "relevantRecorded": 415,
         "relevantKept": 339,
-        "cheapestRelevantFirst": false
+        "cheapestRelevantFirst": true
       },
       "top": [
-        {
-          "key": "trendyol-sa:1174016929",
-          "store": "trendyol-sa",
-          "price": 8.32,
-          "title": "A high-quality wireless earbud that delivers a superior stereo sound experience.",
-          "label": "wrong-model"
-        },
         {
           "key": "aliexpress:1005012229570528",
           "store": "aliexpress",
@@ -126,18 +119,25 @@
           "label": "relevant"
         },
         {
-          "key": "trendyol-sa:1029696897",
-          "store": "trendyol-sa",
-          "price": 13.15,
-          "title": "M5 sports Bluetooth 5.0 Wireless Earbuds Magnetic In-Ear Headset with Mic",
-          "label": "wrong-model"
-        },
-        {
           "key": "aliexpress:1005012742101670",
           "store": "aliexpress",
           "price": 13.46,
           "title": "Bluetooth Earbuds Wireless Earphones Bluetooth Earphones Bluetooth Headphones with ANC Improve Focus in Noisy Environments",
           "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005013515343137",
+          "store": "aliexpress",
+          "price": 13.83,
+          "title": "X55 Invisible Sleep Wireless Earphone TWS Bluetooth 5.3 Headphones Hidden Earbuds IPX5 Waterproof Noise Reduction Sports Headset",
+          "label": "wrong-model"
+        },
+        {
+          "key": "aliexpress:1005008611014056",
+          "store": "aliexpress",
+          "price": 13.87,
+          "title": "Earhooks Wireless Bluetooth 5.4 Headphones Gaming Sports Headset HiFi Stereo Noise Reduction Earbuds Earphone With Microphone",
+          "label": "wrong-model"
         }
       ]
     },
@@ -194,13 +194,13 @@
         }
       ],
       "recordedItems": 488,
-      "results": 96,
+      "results": 93,
       "missingCalls": [],
       "labelled": true,
       "metrics": {
         "top": 10,
         "precisionAt10": 0,
-        "accessoryAt10": 0.9,
+        "accessoryAt10": 1,
         "wrongModelAt10": 0,
         "unlabeledAt10": 0,
         "recall": 1,
@@ -209,13 +209,6 @@
         "cheapestRelevantFirst": false
       },
       "top": [
-        {
-          "key": "aliexpress:1005012700711804",
-          "store": "aliexpress",
-          "price": 3.47,
-          "title": "Special specification for special needs customers only 17 16 15 14 13 Pro Max Plus please do not order directly without contact",
-          "label": "off-topic"
-        },
         {
           "key": "trendyol-sa:984511278",
           "store": "trendyol-sa",
@@ -278,6 +271,13 @@
           "price": 32.99,
           "title": "WYLIE for IPhone 16 Built-in (MEP) Integrated Card Slot Finished Product Dual Card+eSIM OTA Upgrade 5G Signal US Version Only",
           "label": "accessory"
+        },
+        {
+          "key": "amazon-sa:B0DHG4X5JB",
+          "store": "amazon-sa",
+          "price": 35.9,
+          "title": "Compatible with iPhone 16 Case with Stand, Multi-Functional Magnetic Vertical & Horizontal Kickstand Protective Phone Case, Candy Color Slim Cute Hybrid Cover (Black, iphone 16)",
+          "label": "accessory"
         }
       ]
     },
@@ -334,7 +334,7 @@
         }
       ],
       "recordedItems": 534,
-      "results": 327,
+      "results": 313,
       "missingCalls": [],
       "labelled": true,
       "metrics": {
@@ -343,9 +343,9 @@
         "accessoryAt10": 0,
         "wrongModelAt10": 0,
         "unlabeledAt10": 0,
-        "recall": 0.8743315508021391,
+        "recall": 0.8689839572192514,
         "relevantRecorded": 374,
-        "relevantKept": 327,
+        "relevantKept": 325,
         "cheapestRelevantFirst": true
       },
       "top": [
@@ -474,7 +474,7 @@
         }
       ],
       "recordedItems": 465,
-      "results": 370,
+      "results": 366,
       "missingCalls": [],
       "labelled": true,
       "metrics": {
@@ -483,9 +483,9 @@
         "accessoryAt10": 0.8,
         "wrongModelAt10": 0,
         "unlabeledAt10": 0,
-        "recall": 0.9168975069252078,
+        "recall": 0.9141274238227147,
         "relevantRecorded": 361,
-        "relevantKept": 331,
+        "relevantKept": 330,
         "cheapestRelevantFirst": false
       },
       "top": [
@@ -614,18 +614,18 @@
         }
       ],
       "recordedItems": 475,
-      "results": 261,
+      "results": 112,
       "missingCalls": [],
       "labelled": true,
       "metrics": {
         "top": 10,
         "precisionAt10": 0,
-        "accessoryAt10": 0.3,
-        "wrongModelAt10": 0,
+        "accessoryAt10": 0.6,
+        "wrongModelAt10": 0.2,
         "unlabeledAt10": 0,
-        "recall": 1,
+        "recall": 0.8607594936708861,
         "relevantRecorded": 158,
-        "relevantKept": 158,
+        "relevantKept": 136,
         "cheapestRelevantFirst": false
       },
       "top": [
@@ -635,20 +635,6 @@
           "price": 5.3,
           "title": "Premium Braided Leather Solo Loop for Apple Watch (44/42mm, S) - Red",
           "label": "accessory"
-        },
-        {
-          "key": "aliexpress:1005007260133007",
-          "store": "aliexpress",
-          "price": 6.19,
-          "title": "D20 Smart Watch Sport Fitness Tracker Pedometer Smartwatch for Men Women Digital Wristwatch Y68 Pro6 Gift",
-          "label": "off-topic"
-        },
-        {
-          "key": "aliexpress:1005005768028640",
-          "store": "aliexpress",
-          "price": 6.89,
-          "title": "Health Monitor Smart Watch Y68 Men Sports Watches Women Fitness Tracker Bracelet Steps Calorie Bluetooth Wrist Watch D20 Clock",
-          "label": "off-topic"
         },
         {
           "key": "amazon-sa:B0G9264Q6M",
@@ -665,39 +651,53 @@
           "label": "accessory"
         },
         {
-          "key": "aliexpress:1005008061144294",
-          "store": "aliexpress",
-          "price": 8.91,
-          "title": "Smart Watch 116Plus D13 Y68 Sport Wristband Running Fitness Monitor Track Heart Rate Message Remind Men Smartwatch Woman Clock",
+          "key": "amazon-sa:B0C78K3VJW",
+          "store": "amazon-sa",
+          "price": 19.95,
+          "title": "Compatible with Apple Watch Band 49mm 46mm 45mm 44mm 42mm 41mm 40mm 38mm for Women Men Air Holes Design Sport Silicone Wristband Bands Strap for iWatch Ultra Series 11/10/9/8/7/6/5/4/3/SE Multi Color",
+          "label": "accessory"
+        },
+        {
+          "key": "amazon-sa:B0C2H1ZSPM",
+          "store": "amazon-sa",
+          "price": 26.99,
+          "title": "Compatible with Apple Watch Band 49mm 46mm 44mm 42mm 41mm 40mm 38mm for Women Men,Magnetic Metal Stainless Steel Strap for Ultra 3/2/1 Series 11 10 9 8 7 6 5 4 3 2 SE",
+          "label": "accessory"
+        },
+        {
+          "key": "jarir:531617",
+          "store": "jarir",
+          "price": 29,
+          "title": "Apple Watch for Dummies, 2nd Edition - Computer/Tech",
           "label": "off-topic"
         },
         {
-          "key": "aliexpress:1005005017254589",
+          "key": "amazon-sa:B0DLKBDTYQ",
+          "store": "amazon-sa",
+          "price": 42,
+          "title": "Compatible with Apple Watch Strap 49mm 46mm 45mm 44mm 42mm 41mm 40mm, Elasticated Magnetic Nylon Strap Band for IWatch Series 11/10/9/8/7/6/5/4/SE 3/SE 2/Ultra 3/2 Men Women",
+          "label": "accessory"
+        },
+        {
+          "key": "aliexpress:1005009657036132",
           "store": "aliexpress",
-          "price": 10.29,
-          "title": "Multifunctional Smart Watch Men Women Bluetooth Connected Phone Music Fitness Sports Bracelet Sleep Monitor Y68 Smartwatch D20",
+          "price": 53.44,
+          "title": "2025 T900 Ultra 2 Smart Watch Men 49mm Series 8 2.3 \"AMOLED Screen NFC Compass Waterproof For Apple Watch IWO Ultra 8 Smartwatc",
           "label": "off-topic"
         },
         {
-          "key": "aliexpress:1005007517165983",
+          "key": "aliexpress:1005012577564194",
           "store": "aliexpress",
-          "price": 12,
-          "title": "Smartwatch Men Women Wristwatches Smart Watch Message Fitness Monitor Bracelet Birthday Gift Electronic Clock For Android IOS",
-          "label": "off-topic"
+          "price": 68.87,
+          "title": "Apple Watch New Series 10 Watch 10 GPS Smart Watch Memory Music Video Bluetooth Call Heart Rate Waterproof NFC Smartwatch For Apple Android",
+          "label": "wrong-model"
         },
         {
-          "key": "aliexpress:1005007691876886",
+          "key": "aliexpress:1005012556664544",
           "store": "aliexpress",
-          "price": 12.59,
-          "title": "Smart Watch Sport Wristband Fitness Monitoring Track Heart Rate Call and Message Remind Men Smartwatch Woman 116 Plus Clock D13",
-          "label": "off-topic"
-        },
-        {
-          "key": "aliexpress:1005008151952563",
-          "store": "aliexpress",
-          "price": 19.09,
-          "title": "Smart Watch For Women Men Wristwatch Bluetooth Connected Phone Music Player Fitness Sport Bracelet Sleep Monitor Digital Watches",
-          "label": "off-topic"
+          "price": 72.82,
+          "title": "Apple Watch Smart For GPS Smart Watch Men For Apple Watch 10 Series Always On Display Body Temperature BT Call NFC Women DT Smartwatch For IOS Android",
+          "label": "wrong-model"
         }
       ]
     },
@@ -894,7 +894,7 @@
         }
       ],
       "recordedItems": 494,
-      "results": 221,
+      "results": 192,
       "missingCalls": [],
       "labelled": true,
       "metrics": {
@@ -903,9 +903,9 @@
         "accessoryAt10": 0.3,
         "wrongModelAt10": 0,
         "unlabeledAt10": 0,
-        "recall": 0.9936708860759493,
+        "recall": 0.9050632911392406,
         "relevantRecorded": 158,
-        "relevantKept": 157,
+        "relevantKept": 143,
         "cheapestRelevantFirst": false
       },
       "top": [
@@ -952,13 +952,6 @@
           "label": "accessory"
         },
         {
-          "key": "aliexpress:1005007604449188",
-          "store": "aliexpress",
-          "price": 14.91,
-          "title": "RGB 3 Keys Macro Programming Mini Keyboard for Photoshop Gaming Hotswap Programming Keypad Copy Paste Mini Button Macropad",
-          "label": "off-topic"
-        },
-        {
           "key": "trendyol-sa:893563300",
           "store": "trendyol-sa",
           "price": 15.1,
@@ -978,6 +971,13 @@
           "price": 15.85,
           "title": "black 2 in 1 Key Switch Puller Keycaps Puller Unloading Wire Switch Mechanical Keyboard Removal Tool",
           "label": "accessory"
+        },
+        {
+          "key": "aliexpress:1005003299455210",
+          "store": "aliexpress",
+          "price": 16.99,
+          "title": "2/3/4/6/7/8/9/16 Keys Black Mini Keypad Numpad Mechanical Keyboard OSU Gaming Programming Custom Keyboard For Photoshop",
+          "label": "off-topic"
         }
       ]
     },
@@ -1034,18 +1034,18 @@
         }
       ],
       "recordedItems": 501,
-      "results": 425,
+      "results": 410,
       "missingCalls": [],
       "labelled": true,
       "metrics": {
         "top": 10,
-        "precisionAt10": 0.6,
+        "precisionAt10": 0.8,
         "accessoryAt10": 0.2,
         "wrongModelAt10": 0,
         "unlabeledAt10": 0,
-        "recall": 0.9905882352941177,
+        "recall": 0.9858823529411764,
         "relevantRecorded": 425,
-        "relevantKept": 421,
+        "relevantKept": 419,
         "cheapestRelevantFirst": true
       },
       "top": [
@@ -1055,13 +1055,6 @@
           "price": 4.24,
           "title": "Bluetooth 5.2 Mouse RGB 2.4G Wireless Mouse Dual-Mode Gaming Mouse 6 Buttons Silent Mouse For MacBook Tablet Laptops Computer",
           "label": "relevant"
-        },
-        {
-          "key": "aliexpress:1005006938870812",
-          "store": "aliexpress",
-          "price": 4.24,
-          "title": "113 Wireless Mouse 2.4GHz Wireless Optical Mouse with USB Receiver 6 Button Portable Wireless Mouse for Laptops",
-          "label": "off-topic"
         },
         {
           "key": "aliexpress:1005007030574531",
@@ -1092,13 +1085,6 @@
           "label": "relevant"
         },
         {
-          "key": "aliexpress:1005010629297803",
-          "store": "aliexpress",
-          "price": 4.24,
-          "title": "Wireless Bluetooth Mouse 2.4GHz Dual Modes RGB Rechargable Quiet Slim Wireless Mice Compatible For PC iPad Laptop PC Computer",
-          "label": "off-topic"
-        },
-        {
           "key": "trendyol-sa:887875144",
           "store": "trendyol-sa",
           "price": 4.42,
@@ -1118,6 +1104,20 @@
           "price": 4.63,
           "title": "Gaming Mouse Pad Textured Surface Length:15.9Cm Width:8Cm",
           "label": "accessory"
+        },
+        {
+          "key": "aliexpress:1005010651862682",
+          "store": "aliexpress",
+          "price": 4.82,
+          "title": "USB Wired Gaming Mouse 7 Button Backlit Ergonomic Mice 2400 DPI Backlight Adjustable Optical Mice for PC Gamer Computer Desktop",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005008657944727",
+          "store": "aliexpress",
+          "price": 5.71,
+          "title": "RGB Wired BackLight Mute USB Mice USB Wired Gaming Mouse for Desktop PC Notebook Computer Home Office LED Luminous 1600DPI",
+          "label": "relevant"
         }
       ]
     },
@@ -1174,14 +1174,14 @@
         }
       ],
       "recordedItems": 451,
-      "results": 72,
+      "results": 67,
       "missingCalls": [],
       "labelled": true,
       "metrics": {
         "top": 10,
         "precisionAt10": 0,
-        "accessoryAt10": 1,
-        "wrongModelAt10": 0,
+        "accessoryAt10": 0.8,
+        "wrongModelAt10": 0.2,
         "unlabeledAt10": 0,
         "recall": 0.9818181818181818,
         "relevantRecorded": 55,
@@ -1211,41 +1211,6 @@
           "label": "accessory"
         },
         {
-          "key": "trendyol-sa:1063355225",
-          "store": "trendyol-sa",
-          "price": 18.63,
-          "title": "100cm with Box black Original 45W PD USB C Cable 1/1.8M 3A For Galaxy S24 S25 Ultra",
-          "label": "accessory"
-        },
-        {
-          "key": "trendyol-sa:1184185074",
-          "store": "trendyol-sa",
-          "price": 18.83,
-          "title": "Galaxy S26 Black For Galaxy S26 S25 S26Plus S26Ultra Edge S24 S23 S22 S21 Ultra FE C",
-          "label": "accessory"
-        },
-        {
-          "key": "trendyol-sa:1067434936",
-          "store": "trendyol-sa",
-          "price": 21.75,
-          "title": "100cm with Box black 65W 45W 5A PD Cable For Galaxy S22 S23 S24 FE S25 Ultra Z Flip",
-          "label": "accessory"
-        },
-        {
-          "key": "trendyol-sa:1063355203",
-          "store": "trendyol-sa",
-          "price": 22.64,
-          "title": "180cm with Box black Original 45W PD USB C Cable 1/1.8M 3A For Galaxy S24 S25 Ultra",
-          "label": "accessory"
-        },
-        {
-          "key": "trendyol-sa:1067434940",
-          "store": "trendyol-sa",
-          "price": 25.13,
-          "title": "180cm with Box black 65W 45W 5A PD Cable For Galaxy S22 S23 S24 FE S25 Ultra Z Flip",
-          "label": "accessory"
-        },
-        {
           "key": "amazon-sa:B0DHWSFVSS",
           "store": "amazon-sa",
           "price": 28.13,
@@ -1258,6 +1223,41 @@
           "price": 29,
           "title": "Raptic Raptic Glass 2-in-1 Bundle: Tempered Glass + Camera Lens Protector Smartphone Display Protection, for Samsung Galaxy S24 Ultra, Clear",
           "label": "accessory"
+        },
+        {
+          "key": "amazon-sa:B0DPDF3JDS",
+          "store": "amazon-sa",
+          "price": 31.5,
+          "title": "[4Pcs]FortuneMore Compatible with Samsung Galaxy S24 Fe Privacy Screen Protector Tempered Glass Screen Film with Camera Lens Protector Anti Scratch Anti Spy Bubble Free 9H Hardness",
+          "label": "accessory"
+        },
+        {
+          "key": "amazon-sa:B0DPMLDPH3",
+          "store": "amazon-sa",
+          "price": 33.58,
+          "title": "[3 in 1] Compatible with Galaxy S24 FE Case Built in Slide Camera Lens Cover+Screen Protector+Finger Ring Holder Kickstand,Heavy Duty Shockproof Phone Cover (Red, Samsung S24 FE)",
+          "label": "accessory"
+        },
+        {
+          "key": "amazon-sa:B0G491K553",
+          "store": "amazon-sa",
+          "price": 53.1,
+          "title": "Compatible with Samsung Galaxy S24 Ultra Wallet Cover Clear Back Magnetic",
+          "label": "accessory"
+        },
+        {
+          "key": "aliexpress:1005010677079809",
+          "store": "aliexpress",
+          "price": 1282.31,
+          "title": "Samsung Galaxy S24 FE 5G S721U1 S721B S7210 S721N 6.7\" AMOLED 8GB 128/256/512GB Original Android AI Mobile Phone Virtually New",
+          "label": "wrong-model"
+        },
+        {
+          "key": "noon-sa:N70430462V",
+          "store": "noon-sa",
+          "price": 1299,
+          "title": "Samsung Renewed - Galaxy S24 FE Dual SIM Graphite 8GB RAM 128GB 5G - International version",
+          "label": "wrong-model"
         }
       ]
     },
@@ -1314,18 +1314,18 @@
         }
       ],
       "recordedItems": 502,
-      "results": 375,
+      "results": 285,
       "missingCalls": [],
       "labelled": true,
       "metrics": {
         "top": 10,
-        "precisionAt10": 0.2,
+        "precisionAt10": 1,
         "accessoryAt10": 0,
         "wrongModelAt10": 0,
         "unlabeledAt10": 0,
-        "recall": 0.8928571428571429,
+        "recall": 0.7666666666666667,
         "relevantRecorded": 420,
-        "relevantKept": 375,
+        "relevantKept": 322,
         "cheapestRelevantFirst": true
       },
       "top": [
@@ -1344,60 +1344,60 @@
           "label": "relevant"
         },
         {
-          "key": "trendyol-sa:1041584480",
+          "key": "trendyol-sa:1105322178",
           "store": "trendyol-sa",
-          "price": 11.86,
-          "title": "Black Embellished Mini Backpack with Chain Straps",
-          "label": "off-topic"
+          "price": 15.47,
+          "title": "Anti-Theft Backpack with USB Charging Port, Waterproof Laptop Travel Bag Width 30cm Length 40cm Premium Design",
+          "label": "relevant"
         },
         {
-          "key": "trendyol-sa:1160295682",
-          "store": "trendyol-sa",
-          "price": 12.95,
-          "title": "FIFA Boys Green Sudi Backpack",
-          "label": "off-topic"
+          "key": "aliexpress:1005013535633100",
+          "store": "aliexpress",
+          "price": 28.9,
+          "title": "Casual Business Backpack for Men Women Large Capacity Travel Daypack with 15.6 Inch Laptop Compartment Water Resistant PU",
+          "label": "relevant"
         },
         {
-          "key": "trendyol-sa:1160295744",
+          "key": "trendyol-sa:1077695187",
           "store": "trendyol-sa",
-          "price": 12.95,
-          "title": "FIFA Boys Blue And White Argentina Backpack",
-          "label": "off-topic"
+          "price": 29.83,
+          "title": "Premium Waterproof Laptop Backpack – Multi-Compartment School, Office & Travel Bag for Men & Boys",
+          "label": "relevant"
         },
         {
-          "key": "trendyol-sa:1119052742",
-          "store": "trendyol-sa",
-          "price": 13.65,
-          "title": "Boys Black Printed Backpack",
-          "label": "off-topic"
+          "key": "aliexpress:1005013152504826",
+          "store": "aliexpress",
+          "price": 29.99,
+          "title": "Laptop Backpack Organized Backpack with USB Port Daypack Abrasion-Resistant Bag Multipurpose for Commuters, Daily Commute",
+          "label": "relevant"
         },
         {
-          "key": "trendyol-sa:1195151844",
-          "store": "trendyol-sa",
-          "price": 14.04,
-          "title": "Printed 19 inches Backpack, UT015",
-          "label": "off-topic"
+          "key": "aliexpress:1005012972864462",
+          "store": "aliexpress",
+          "price": 32.79,
+          "title": "Laptop Backpack Expandable Backpack with Laptop Compartment Daypack Structured Bag Padded for Commuters, Office",
+          "label": "relevant"
         },
         {
-          "key": "trendyol-sa:1195152248",
-          "store": "trendyol-sa",
-          "price": 14.04,
-          "title": "Printed 19 inches Backpack, UT001",
-          "label": "off-topic"
+          "key": "noon-sa:Z1F80BEE7A5A213D0DAEDZ",
+          "store": "noon-sa",
+          "price": 33.82,
+          "title": "15-inch durable waterproof business laptop backpack Computer layer with USB charging port",
+          "label": "relevant"
         },
         {
-          "key": "trendyol-sa:1195151786",
-          "store": "trendyol-sa",
-          "price": 14.04,
-          "title": "Printed 19 inches Backpack, UT009",
-          "label": "off-topic"
+          "key": "aliexpress:1005012877308920",
+          "store": "aliexpress",
+          "price": 34.59,
+          "title": "Skeleton Motorcyclist Lightweight Backpack, Large Capacity for Laptop & Books, Adjustable Straps, Perfect for Work, Travel & Col",
+          "label": "relevant"
         },
         {
-          "key": "trendyol-sa:1195151851",
-          "store": "trendyol-sa",
-          "price": 14.04,
-          "title": "Printed 19 inches Backpack, UT002",
-          "label": "off-topic"
+          "key": "noon-sa:ZBBC061E35535BFE58F88Z",
+          "store": "noon-sa",
+          "price": 35,
+          "title": "Laptop Backpack With USB Charging Port Grey",
+          "label": "relevant"
         }
       ]
     },
@@ -1454,18 +1454,18 @@
         }
       ],
       "recordedItems": 408,
-      "results": 277,
+      "results": 123,
       "missingCalls": [],
       "labelled": true,
       "metrics": {
         "top": 10,
-        "precisionAt10": 0.6,
+        "precisionAt10": 1,
         "accessoryAt10": 0,
-        "wrongModelAt10": 0.4,
+        "wrongModelAt10": 0,
         "unlabeledAt10": 0,
-        "recall": 0.8494623655913979,
+        "recall": 0.7688172043010753,
         "relevantRecorded": 186,
-        "relevantKept": 158,
+        "relevantKept": 143,
         "cheapestRelevantFirst": true
       },
       "top": [
@@ -1498,27 +1498,6 @@
           "label": "relevant"
         },
         {
-          "key": "noon-sa:N70182098V",
-          "store": "noon-sa",
-          "price": 347,
-          "title": "Dahua 27\" FHD Monitor – 100Hz, VA Panel, HDMI & VGA, Eye Comfort, Ultra-Slim Design, VESA Mountable Black",
-          "label": "wrong-model"
-        },
-        {
-          "key": "noon-sa:N70082549V",
-          "store": "noon-sa",
-          "price": 399,
-          "title": "GAMEON 27 inch Gaming Monitor FHD 120Hz IPS 1ms, Wide IPS Screen Fast HDMI 2.1 and VGA Display Port Built-in Speakers Support PS5 FHD Black",
-          "label": "wrong-model"
-        },
-        {
-          "key": "noon-sa:Z25BED76E5DF903E2C0A1Z",
-          "store": "noon-sa",
-          "price": 399.89,
-          "title": "Majesty Gaming Monitor 27\" FHD 1920x1080 | IPS | 120Hz | 1ms | HDR | 8-Bit | 100% sRGB | G-SYNC & FreeSync | VGA & HDMI | VESA | Built-in Speakers",
-          "label": "wrong-model"
-        },
-        {
           "key": "aliexpress:1005012784994627",
           "store": "aliexpress",
           "price": 407.79,
@@ -1533,11 +1512,32 @@
           "label": "relevant"
         },
         {
-          "key": "jarir:668034",
-          "store": "jarir",
-          "price": 429,
-          "title": "AOC 27B36X 27\" Gaming Monitor, WLED, FHD (Full HD), 144 Hz, 0.5ms (MPRT), Black",
-          "label": "wrong-model"
+          "key": "aliexpress:1005012332030303",
+          "store": "aliexpress",
+          "price": 495.19,
+          "title": "24/27/32/34 Inch Curved Monitor | 1K/2K/4K | Height-Adjustable + Backlit | Up To 280Hz HDR400",
+          "label": "relevant"
+        },
+        {
+          "key": "amazon-sa:B0FQBQWWDP",
+          "store": "amazon-sa",
+          "price": 499.96,
+          "title": "Gawfolk 27 inch Gaming Monitor 4K 60Hz IPS Computer Monitors",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005010059310871",
+          "store": "aliexpress",
+          "price": 519.9,
+          "title": "Chinese factory New280Hz/360Hz/540Hz 600Hz 1K 4K Gaming Screen Desktop 24 27 32 Inch LedPc computer Monitor",
+          "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005010131912434",
+          "store": "aliexpress",
+          "price": 519.9,
+          "title": "600Hz 540HZ 500HZ 360hzHigh Refresh Rate Gaming Pc Monitor 24 27 Inch 5K/4K/2K FramelessLow Blue Light LED LCD DP Desktop",
+          "label": "relevant"
         }
       ]
     },
@@ -1594,7 +1594,7 @@
         }
       ],
       "recordedItems": 449,
-      "results": 283,
+      "results": 256,
       "missingCalls": [],
       "labelled": true,
       "metrics": {
@@ -1603,9 +1603,9 @@
         "accessoryAt10": 0.9,
         "wrongModelAt10": 0,
         "unlabeledAt10": 0,
-        "recall": 0.9558359621451105,
+        "recall": 0.943217665615142,
         "relevantRecorded": 317,
-        "relevantKept": 303,
+        "relevantKept": 299,
         "cheapestRelevantFirst": false
       },
       "top": [
@@ -1734,7 +1734,7 @@
         }
       ],
       "recordedItems": 473,
-      "results": 369,
+      "results": 333,
       "missingCalls": [],
       "labelled": true,
       "metrics": {
@@ -1743,9 +1743,9 @@
         "accessoryAt10": 0.8,
         "wrongModelAt10": 0,
         "unlabeledAt10": 0,
-        "recall": 0.9619883040935673,
+        "recall": 0.956140350877193,
         "relevantRecorded": 342,
-        "relevantKept": 329,
+        "relevantKept": 327,
         "cheapestRelevantFirst": true
       },
       "top": [
@@ -1874,28 +1874,21 @@
         }
       ],
       "recordedItems": 587,
-      "results": 319,
+      "results": 295,
       "missingCalls": [],
       "labelled": true,
       "metrics": {
         "top": 10,
-        "precisionAt10": 0.9,
-        "accessoryAt10": 0.1,
+        "precisionAt10": 1,
+        "accessoryAt10": 0,
         "wrongModelAt10": 0,
         "unlabeledAt10": 0,
-        "recall": 0.981029810298103,
+        "recall": 0.9105691056910569,
         "relevantRecorded": 369,
-        "relevantKept": 362,
-        "cheapestRelevantFirst": false
+        "relevantKept": 336,
+        "cheapestRelevantFirst": true
       },
       "top": [
-        {
-          "key": "trendyol-sa:1143933750",
-          "store": "trendyol-sa",
-          "price": 2.96,
-          "title": "Protection For Watch 44mm Black",
-          "label": "accessory"
-        },
         {
           "key": "aliexpress:1005007226824395",
           "store": "aliexpress",
@@ -1958,6 +1951,13 @@
           "price": 15.06,
           "title": "New Smart Watch 1.88-inch HD Display Bluetooth Calling Heart Rate Activity Tracking Sport Smartwatch Men Women Holiday Gift H10",
           "label": "relevant"
+        },
+        {
+          "key": "aliexpress:1005012970003161",
+          "store": "aliexpress",
+          "price": 15.17,
+          "title": "New Smart Watch 1.88'' HD Screen Bluetooth Calls Sleep Blood Oxygen Pressure Health Monitoring Smart Watches For Women Men Ht30",
+          "label": "relevant"
         }
       ]
     },
@@ -2014,7 +2014,7 @@
         }
       ],
       "recordedItems": 471,
-      "results": 361,
+      "results": 354,
       "missingCalls": [],
       "labelled": true,
       "metrics": {
@@ -2023,9 +2023,9 @@
         "accessoryAt10": 0.6,
         "wrongModelAt10": 0,
         "unlabeledAt10": 0,
-        "recall": 0.9710526315789474,
+        "recall": 0.95,
         "relevantRecorded": 380,
-        "relevantKept": 369,
+        "relevantKept": 361,
         "cheapestRelevantFirst": false
       },
       "top": [
@@ -2104,10 +2104,10 @@
   ],
   "overall": {
     "queries": 15,
-    "precisionAt10": 0.4066666666666667,
-    "accessoryAt10": 0.3933333333333333,
+    "precisionAt10": 0.5066666666666667,
+    "accessoryAt10": 0.4,
     "wrongModelAt10": 0.04000000000000001,
-    "recall": 0.9208010540604121,
-    "cheapestRelevantFirst": 0.3333333333333333
+    "recall": 0.8836352618125934,
+    "cheapestRelevantFirst": 0.4666666666666667
   }
 }
