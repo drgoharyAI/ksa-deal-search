@@ -101,3 +101,49 @@ describe("dedupe", () => {
     expect(dedupe([])).toEqual([]);
   });
 });
+
+describe("review fixes", () => {
+  it("1: head noun keeps plain earbuds, drops headphones", () => {
+    const ps = [
+      prod("ANC Earbuds A", 1, "a1"), prod("ANC Earbuds B", 1, "a2"),
+      ...[1, 2, 3, 4, 5, 6].map((i) => prod(`Earbuds X${i}`, 1, `p${i}`)),
+      prod("ANC Over-Ear Headphones Sony", 1, "h"),
+      prod("ANC Case Silicone", 1, "c"),
+    ];
+    const ids = filterRelevant(ps, [["anc", "earbuds"]]).map((p) => p.id);
+    expect(ids).not.toContain("h");
+    expect(ids).not.toContain("c");
+    expect(ids).toContain("p1");
+    expect(ids).toContain("a1");
+  });
+  it("2: tokens with digits match exactly only", () => {
+    expect(scoreRelevance([["sony", "wh-1000xm4"]], "Sony WH-1000XM5 Wireless Headphones")).toBeLessThan(0.6);
+    expect(scoreRelevance([["rtx4070"]], "MSI GeForce RTX4060")).toBeLessThan(0.6);
+    expect(scoreRelevance([["sony", "wh-1000xm4"]], "Sony WH-1000XM4 Headphones")).toBe(1);
+  });
+  it("3: hyphen and split forms match", () => {
+    expect(scoreRelevance([["usb", "cable"]], "Anker USB-C to USB-C Cable 100W")).toBeGreaterThanOrEqual(0.6);
+    expect(scoreRelevance([["usb-c", "cable"]], "UGREEN USB C Cable")).toBeGreaterThanOrEqual(0.6);
+    expect(scoreRelevance([["noise", "cancelling", "earbuds"]], "Noise-Cancelling Earbuds")).toBeGreaterThanOrEqual(0.6);
+  });
+  it("4: main products with accessory words are not flagged", () => {
+    const cases: [string, string[]][] = [
+      ["Soundcore P20i Earbuds with Charging Case", ["anc", "earbuds"]],
+      ["Xiaomi Smart Band 9 Fitness Tracker", ["fitness", "tracker"]],
+      ["Laptop Backpack Bag 15.6 inch", ["laptop", "backpack"]],
+      ["Baseus Power Bank Wireless Charger 10000mAh", ["power", "bank"]],
+      ["Anker Power Bank with Built-in Cable", ["power", "bank"]],
+      ["TP-Link USB WiFi Adapter", ["wifi", "dongle"]],
+    ];
+    for (const [t, q] of cases) expect(isAccessory(t, q), t).toBe(false);
+    expect(isAccessory("Silicone Case for AirPods Pro 2", ["anc", "earbuds"])).toBe(true);
+    expect(isAccessory("Ear Tips Replacement for Galaxy Buds", ["anc", "earbuds"])).toBe(true);
+  });
+  it("5: dedupe keeps distinct models, merges color variants", () => {
+    const t = (m: string) => `Sony ${m} Wireless Noise Cancelling Bluetooth Over Ear Headphones With Mic Black`;
+    expect(dedupe([prod(t("WH-1000XM4"), 1, "a"), prod(t("WH-1000XM5"), 2, "b")])).toHaveLength(2);
+    const ip = (g: string) => `Apple iPhone 15 Pro Max ${g} Natural Titanium Unlocked Smartphone`;
+    expect(dedupe([prod(ip("256GB"), 1, "a"), prod(ip("512GB"), 2, "b")])).toHaveLength(2);
+    expect(dedupe([prod("Apple AirPods Pro 2 White", 9, "w"), prod("Apple AirPods Pro 2 Black", 5, "k")]).map((p) => p.id)).toEqual(["k"]);
+  });
+});
