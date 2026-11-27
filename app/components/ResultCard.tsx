@@ -8,8 +8,9 @@ import StoreLogo from "./StoreLogo";
 import WatchForm, { postWatch } from "./WatchForm";
 import { defaultTarget } from "@/src/lib/alerts/shared";
 import Sparkline from "./Sparkline";
+import { formatMoney } from "@/src/lib/money";
+import Button from "./ui/Button";
 
-const NBSP = " ";
 
 const DEAL_EXPLAIN: Record<DealInsight["badge"], string> = {
   "fake-deal": "The discount does not hold up against the prices we've seen",
@@ -70,12 +71,6 @@ function Trend({ trend, title }: { trend: PriceTrend; title: string }) {
   );
 }
 
-export function formatMoney(n: number, currency = "SAR"): string {
-  const digits = Number.isInteger(n) ? 0 : 2;
-  const num = n.toLocaleString("en-US", { minimumFractionDigits: digits, maximumFractionDigits: 2 });
-  return `${currency || "SAR"}${NBSP}${num}`;
-}
-
 /**
  * A card's "Compare" checkbox. `onCompare` gets the product, so one stable function serves every
  * card and memoized cards re-render only when their own ticked state changes.
@@ -121,10 +116,10 @@ export function CardWatch({ product: p, query }: { product: Product; query: stri
           }}
         />
       ) : watch === "saved" ? null : (
-        <button type="button" className="btn btn--quiet btn--small" onClick={() => setWatch("open")}>
+        <Button size="sm" onClick={() => setWatch("open")}>
           Watch
           <span className="visually-hidden"> {p.title}</span>
-        </button>
+        </Button>
       )}
       {/* Always in the page, so screen readers announce the text when it changes. */}
       <p className={watch === "saved" ? "card__watched" : "visually-hidden"} role="status">

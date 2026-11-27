@@ -1,6 +1,6 @@
 import type { SiteStatus } from "@/src/lib/types";
 import { storeLabel } from "@/src/lib/stores";
-import StoreLogo from "./StoreLogo";
+import StoreMark from "./ui/StoreMark";
 
 type Props = {
   /** Stores being searched right now (loading), or null when settled. */
@@ -24,10 +24,7 @@ export default function StatusBar({ pending, statuses, counts }: Props) {
       <ul className="status" aria-label="Store status">
         {pending.map((site) => (
           <li key={site} className="status__item status__item--loading">
-            <span className="status__store">
-              <StoreLogo id={site} size={22} />
-              <span className="status__name">{storeLabel(site)}</span>
-            </span>
+            <StoreMark id={site} size={22} />
             <span className="status__text">Searching</span>
           </li>
         ))}
@@ -45,10 +42,7 @@ export default function StatusBar({ pending, statuses, counts }: Props) {
         return (
           <li key={s.site} className={`status__item status__item--${s.status}`}>
             {s.status === "ok" && (
-              <span className="status__store">
-                <StoreLogo id={s.site} size={22} />
-                <span className="status__name">{storeLabel(s.site)}</span>
-              </span>
+              <StoreMark id={s.site} size={22} />
             )}
             <span className="status__text">{text}</span>
           </li>

@@ -1,6 +1,8 @@
 "use client";
 
 import { useId, useState } from "react";
+import Button from "./ui/Button";
+import Input from "./ui/Input";
 
 type Props = {
   /** Field label, e.g. "Alert me at or under, SAR". */
@@ -43,9 +45,9 @@ export default function WatchForm({ label, initial, onSave, onCancel }: Props) {
         {label}
       </label>
       <div className="watch-form__row">
-        <input
+        <Input
           id={`${id}-t`}
-          className="input input--compact"
+          size="compact"
           type="number"
           inputMode="decimal"
           min={0}
@@ -53,16 +55,16 @@ export default function WatchForm({ label, initial, onSave, onCancel }: Props) {
           autoComplete="off"
           autoFocus
           value={value}
-          aria-invalid={error ? true : undefined}
+          invalid={!!error}
           aria-describedby={error ? `${id}-e` : undefined}
           onChange={(e) => setValue(e.target.value)}
         />
-        <button type="submit" className="btn btn--primary btn--small" disabled={busy} aria-busy={busy || undefined}>
+        <Button type="submit" variant="primary" size="sm" loading={busy}>
           Save
-        </button>
-        <button type="button" className="btn btn--quiet btn--small" onClick={onCancel}>
+        </Button>
+        <Button size="sm" variant="ghost" onClick={onCancel}>
           Cancel
-        </button>
+        </Button>
       </div>
       {error && (
         <p id={`${id}-e`} className="helper helper--error" role="alert">

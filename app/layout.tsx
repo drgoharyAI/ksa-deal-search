@@ -1,30 +1,26 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Gloock, IBM_Plex_Mono, IBM_Plex_Sans, IBM_Plex_Sans_Arabic } from "next/font/google";
+import { STORES } from "@/src/lib/stores";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-  weight: ["400", "500", "600"],
-  display: "swap",
-});
+// Self-hosted by next/font at build time: no font request leaves the browser at runtime.
+const display = Gloock({ variable: "--font-gloock", subsets: ["latin"], weight: "400", display: "swap" });
+const plex = IBM_Plex_Sans({ variable: "--font-plex", subsets: ["latin"], weight: ["400", "500", "600"], display: "swap" });
+// Arabic product titles: Plex's own Arabic companion, so mixed-script titles share one rhythm.
+const plexArabic = IBM_Plex_Sans_Arabic({ variable: "--font-plex-arabic", subsets: ["arabic"], weight: ["400", "500", "600"], display: "swap", preload: false });
+const plexMono = IBM_Plex_Mono({ variable: "--font-plex-mono", subsets: ["latin"], weight: "400", display: "swap", preload: false });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-  weight: ["400"],
-  display: "swap",
-});
+const storeList = STORES.map((s) => s.label);
 
 export const metadata: Metadata = {
   title: "Deal search",
-  description: "Search AliExpress, Amazon KSA, Jarir, noon KSA and Trendyol KSA at once and rank the results by price, discount or deal.",
+  description: `Search ${storeList.slice(0, -1).join(", ")} and ${storeList.at(-1)} at once and rank the results by price, discount or deal.`,
 };
 
 export default function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
   return (
-    <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
+    <html lang="en" className={`${display.variable} ${plex.variable} ${plexArabic.variable} ${plexMono.variable}`}>
       <body>{children}</body>
     </html>
   );

@@ -7,7 +7,9 @@ import { isLikelyMatch } from "@/src/lib/rank";
 import { productKey } from "@/src/lib/specs";
 import { httpsUrl, type GroupItem } from "@/src/lib/view";
 import StoreLogo from "./StoreLogo";
-import { CardCompare, CardWatch, dealExplanation, formatMoney, type CompareControl } from "./ResultCard";
+import { CardCompare, CardWatch, dealExplanation, type CompareControl } from "./ResultCard";
+import { formatMoney } from "@/src/lib/money";
+import Button from "./ui/Button";
 
 /** Rows shown before "Show N more". */
 const VISIBLE_ROWS = 4;
@@ -43,10 +45,10 @@ function Row({ p, best, color }: { p: Product; best: boolean; color?: string }) 
       </span>
       {p.deal?.badge === "fake-deal" && <span className="deal__why gcard__why">{dealExplanation(p.deal)}</span>}
       {href ? (
-        <a className="btn btn--quiet btn--small gcard__go" href={href} target="_blank" rel="noopener noreferrer">
+        <Button size="sm" className="gcard__go" href={href} external>
           Go to store
           <span className="visually-hidden">{`: ${p.title} at ${store}, ${price} (opens in a new tab)`}</span>
-        </a>
+        </Button>
       ) : (
         <span className="gcard__nolink">No store link</span>
       )}
@@ -100,10 +102,10 @@ function GroupCard({ group: g, query, compareChecked = false, onCompare }: { gro
       </ul>
       <div className="gcard__foot">
         {extra > 0 && (
-          <button type="button" className="btn btn--quiet btn--small" aria-expanded={open} aria-controls={listId} onClick={() => setOpen(!open)}>
+          <Button size="sm" variant="ghost" aria-expanded={open} aria-controls={listId} onClick={() => setOpen(!open)}>
             {open ? "Show fewer" : `+${extra} more`}
             <span className="visually-hidden">{open ? "" : ` ${extra === 1 ? "price" : "prices"}`}</span>
-          </button>
+          </Button>
         )}
         <p className="card__ship">Shipping not included</p>
         {onCompare && <CardCompare product={b} checked={compareChecked} onCompare={onCompare} />}

@@ -2,9 +2,11 @@
 
 import { useState, type CSSProperties } from "react";
 import { NO_FILTERS, activeCount, activeSummary, isActive, type ChipFilters, type Facets } from "@/src/lib/chips";
-import { storeLabel } from "@/src/lib/stores";
 import { brandLabel } from "@/src/lib/specs";
-import StoreLogo from "./StoreLogo";
+import Button from "./ui/Button";
+import Chip from "./ui/Chip";
+import Input from "./ui/Input";
+import StoreMark from "./ui/StoreMark";
 
 /** Brands shown before "More brands". */
 const TOP_BRANDS = 12;
@@ -62,9 +64,9 @@ export default function FilterChips({ filters: f, onChange, facets, bounds, curr
     <section className="facets" aria-label="Filter these results" data-open={open || undefined}>
       {kept.length > 0 && <p className="facets__note">Filters kept: {kept.join(", ")}</p>}
       <div className="facets__bar">
-        <button type="button" className="btn btn--quiet btn--small" aria-expanded={open} aria-controls="facets-body" onClick={() => setOpen(!open)}>
+        <Button size="sm" aria-expanded={open} aria-controls="facets-body" onClick={() => setOpen(!open)}>
           {n ? `Filters (${n} active)` : "Filters"}
-        </button>
+        </Button>
         {n > 0 && <p className="facets__summary">{activeSummary(f, currency)}</p>}
       </div>
       <div className="facets__body" id="facets-body">
@@ -73,12 +75,10 @@ export default function FilterChips({ filters: f, onChange, facets, bounds, curr
             <legend className="facet__legend">Store</legend>
             <div className="facet__options">
               {facets.stores.map((s) => (
-                <label key={s.id} className="chip fchip">
-                  <input type="checkbox" checked={f.stores.includes(s.id)} onChange={() => set({ stores: toggle(f.stores, s.id) })} />
-                  <StoreLogo id={s.id} size={18} />
-                  <span className="chip__name">{storeLabel(s.id)}</span>
+                <Chip key={s.id} kind="checkbox" className="fchip" checked={f.stores.includes(s.id)} onChange={() => set({ stores: toggle(f.stores, s.id) })}>
+                  <StoreMark id={s.id} size={18} />
                   <Count n={s.count} />
-                </label>
+                </Chip>
               ))}
             </div>
           </fieldset>
@@ -89,16 +89,15 @@ export default function FilterChips({ filters: f, onChange, facets, bounds, curr
             <legend className="facet__legend">Brand</legend>
             <div className="facet__options" id="facet-brands">
               {shownBrands.map((b) => (
-                <label key={b.id} className="chip fchip">
-                  <input type="checkbox" checked={f.brands.includes(b.id)} onChange={() => set({ brands: toggle(f.brands, b.id) })} />
+                <Chip key={b.id} kind="checkbox" className="fchip" checked={f.brands.includes(b.id)} onChange={() => set({ brands: toggle(f.brands, b.id) })}>
                   <span className="chip__name">{brandLabel(b.id)}</span>
                   <Count n={b.count} />
-                </label>
+                </Chip>
               ))}
               {(hiddenCount > 0 || moreBrands) && rest.length > 0 && (
-                <button type="button" className="btn btn--quiet btn--small" aria-expanded={moreBrands} aria-controls="facet-brands" onClick={() => setMoreBrands(!moreBrands)}>
+                <Button size="sm" variant="ghost" aria-expanded={moreBrands} aria-controls="facet-brands" onClick={() => setMoreBrands(!moreBrands)}>
                   {moreBrands ? "Fewer brands" : `More brands (${hiddenCount})`}
-                </button>
+                </Button>
               )}
             </div>
           </fieldset>
@@ -126,11 +125,11 @@ export default function FilterChips({ filters: f, onChange, facets, bounds, curr
               </div>
               <label className="range__field">
                 <span className="label">From</span>
-                <input className="input input--compact" type="number" inputMode="decimal" min={0} placeholder={String(bounds.min)} value={f.minPrice ?? ""} onChange={(e) => set({ minPrice: typed(e.target.value) })} />
+                <Input size="compact" type="number" inputMode="decimal" min={0} placeholder={String(bounds.min)} value={f.minPrice ?? ""} onChange={(e) => set({ minPrice: typed(e.target.value) })} />
               </label>
               <label className="range__field">
                 <span className="label">To</span>
-                <input className="input input--compact" type="number" inputMode="decimal" min={0} placeholder={String(bounds.max)} value={f.maxPrice ?? ""} onChange={(e) => set({ maxPrice: typed(e.target.value) })} />
+                <Input size="compact" type="number" inputMode="decimal" min={0} placeholder={String(bounds.max)} value={f.maxPrice ?? ""} onChange={(e) => set({ maxPrice: typed(e.target.value) })} />
               </label>
             </div>
           </fieldset>
@@ -140,26 +139,26 @@ export default function FilterChips({ filters: f, onChange, facets, bounds, curr
           <legend className="facet__legend">Rating</legend>
           <div className="facet__options">
             {facets.ratings.map((r) => (
-              <button key={r.min ?? "any"} type="button" className="chip fchip" aria-pressed={f.minRating === r.min} onClick={() => set({ minRating: r.min })}>
+              <Chip key={r.min ?? "any"} kind="toggle" className="fchip" pressed={f.minRating === r.min} onToggle={() => set({ minRating: r.min })}>
                 <span className="chip__name">
                   {r.min === undefined ? "Any" : `${r.min}+`}
                   {r.min !== undefined && <span className="visually-hidden"> stars and up</span>}
                 </span>
                 <Count n={r.count} />
-              </button>
+              </Chip>
             ))}
           </div>
         </fieldset>
 
         <div className="facets__actions">
-          <button type="button" className="chip fchip" aria-pressed={f.discounted} onClick={() => set({ discounted: !f.discounted })}>
+          <Chip kind="toggle" className="fchip" pressed={f.discounted} onToggle={() => set({ discounted: !f.discounted })}>
             <span className="chip__name">Only discounted</span>
             <Count n={facets.discounted} />
-          </button>
+          </Chip>
           {isActive(f) && (
-            <button type="button" className="btn btn--quiet btn--small" onClick={() => onChange(NO_FILTERS)}>
+            <Button size="sm" variant="ghost" onClick={() => onChange(NO_FILTERS)}>
               Clear all filters
-            </button>
+            </Button>
           )}
         </div>
       </div>

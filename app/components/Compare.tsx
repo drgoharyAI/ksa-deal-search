@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import type { Product } from "@/src/lib/types";
 import { MAX_COMPARE, MIN_COMPARE, compareRows } from "@/src/lib/compare";
 import { productKey } from "@/src/lib/specs";
+import Button from "./ui/Button";
 
 type TrayProps = {
   items: Product[];
@@ -42,12 +43,12 @@ export function CompareTray({ items, full, onRemove, onClear, onOpen }: TrayProp
           {note}
         </p>
         <div className="tray__actions">
-          <button type="button" className="btn btn--quiet btn--small" onClick={onClear}>
+          <Button size="sm" variant="ghost" onClick={onClear}>
             Clear
-          </button>
-          <button type="button" className="btn btn--primary btn--small" disabled={n < MIN_COMPARE} onClick={onOpen}>
+          </Button>
+          <Button size="sm" variant="primary" disabled={n < MIN_COMPARE} onClick={onOpen}>
             Compare ({n})
-          </button>
+          </Button>
         </div>
       </div>
     </section>
@@ -86,9 +87,9 @@ export function CompareDialog({ items, open, onClose }: DialogProps) {
     >
       <div className="cmp__head">
         <h2 id="cmp-title">Compare {items.length} products</h2>
-        <button type="button" className="btn btn--quiet btn--small" autoFocus onClick={() => ref.current?.close()}>
+        <Button size="sm" autoFocus onClick={() => ref.current?.close()}>
           Close
-        </button>
+        </Button>
       </div>
       <p className="cmp__note">Shaded cells differ from the rest of their row. Specs are read from the titles; check the store page before you buy.</p>
       <div className="cmp__scroll" tabIndex={0} role="region" aria-label="Comparison table, scrolls sideways">
