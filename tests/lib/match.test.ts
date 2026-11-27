@@ -487,6 +487,10 @@ describe("brand + category queries keep the cheapest genuine products (final rev
     ["jbl speaker", jbl, ["jbl", "speaker"]],
     ["logitech mouse", logi, ["logitech", "mouse"]],
     ["anker power bank", anker, ["anker", "power", "bank"]],
+    // A spec number is not a model number (task 18, deferred final-review minor).
+    ["anker 10000mah power bank", anker, ["anker", "10000mah", "power", "bank"]],
+    ["anker power bank 20 w", anker, ["anker", "power", "bank", "20", "w"]],
+    ["jbl speaker 30w", jbl, ["jbl", "speaker", "30w"]],
   ] as const)("%s: every product stays in the results", (_q, set, tokens) => {
     const out = applyBrandPriceRules([...set], [...tokens]);
     expect(out.map((p) => p.id).sort()).toEqual(set.map((p) => p.id).sort());

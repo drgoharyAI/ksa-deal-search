@@ -15,13 +15,30 @@ const median = (xs: number[]): number => {
 /** True when the query names a known brand ("apple watch", "samsung galaxy s24"). */
 const namesBrand = (queryTokens: string[]) => queryTokens.some((t) => BRANDS.has(t.toLowerCase()));
 
+/** A number with a unit ("20000mah", "65w", "1tb"): a spec any model may have, not a model number. */
+const SPEC_NUMBER = /^\d+(?:\.\d+)?(?:mah|wh|ah|w|watts?|kw|tb|gb|mb|inch(?:es)?|in|hz|khz|mm|cm|m|ft|l|ml|kg|g|lbs?|oz|v|a|k|p|pcs?|pack|x)$/;
+const UNIT_WORD = /^(?:mah|wh|ah|w|watts?|kw|tb|gb|mb|inch(?:es)?|in|hz|khz|mm|cm|m|ft|l|ml|kg|g|lbs?|oz|v|a|pcs?|pack)$/;
+
+/**
+ * True when a query token is a model number ("16" in "iphone 16", "s24", "m3"): it has a digit,
+ * is not a number with a unit, and is not a bare number followed by a unit word ("55 inch").
+ */
+function hasModelNumber(queryTokens: string[]): boolean {
+  return queryTokens.some((t, i) => {
+    if (!/\d/.test(t) || SPEC_NUMBER.test(t)) return false;
+    const next = queryTokens[i + 1] as string | undefined;
+    return !(/^\d+(?:\.\d+)?$/.test(t) && next !== undefined && UNIT_WORD.test(next));
+  });
+}
+
 /**
  * Brand queries only: price evidence against items priced far below the matching items.
  * - Below BRAND_PRICE_RATIO x the median price, or in the lower group of a TIER_RATIO price split
  *   (tierCutoff), an item may be a clone ("Apple Watch Series 10 Smart Watch" at 70 SAR), a part
  *   or the ecosystem around a product (games and adapters titled with the console's name).
  * - With a model number in the query ("iphone 16", "nintendo switch 2"), every genuine listing is
- *   that one model, so such items are dropped.
+ *   that one model, so such items are dropped. A spec number ("anker 20000mah power bank", "sony
+ *   55 inch tv") is not a model number: those queries get the demotion below.
  * - Without one ("jbl speaker", "logitech mouse"), the brand's own cheap line (JBL Go, Logitech
  *   M170) is a real product at a real low price, so such items are only demoted (weakMatch, shown
  *   under "Less likely matches"): never removed.
@@ -33,7 +50,7 @@ export function applyBrandPriceRules(products: Product[], queryTokens: string[],
   const above = products.filter((p) => p.listPrice >= cutoff);
   const tier = tierCutoff(above);
   const floor = tier === null ? cutoff : Math.max(cutoff, tier);
-  if (queryTokens.some((t) => /\d/.test(t))) return products.filter((p) => p.listPrice >= floor);
+  if (hasModelNumber(queryTokens)) return products.filter((p) => p.listPrice >= floor);
   return products.map((p) => (p.listPrice < floor ? { ...p, weakMatch: true as const } : p));
 }
 
