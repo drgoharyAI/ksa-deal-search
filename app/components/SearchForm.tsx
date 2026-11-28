@@ -16,6 +16,8 @@ export type FormValues = {
   minPrice: string;
   maxPrice: string;
   minRating: string;
+  /** Search the query as typed, without typo correction ("Search instead for ..."). */
+  noCorrect?: boolean;
 };
 
 export type ErrorField = "query" | "sites" | "form" | null;

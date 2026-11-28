@@ -18,7 +18,7 @@ import { SkeletonCard } from "./components/ui/Skeleton";
 import WatchForm, { postWatch } from "./components/WatchForm";
 import { cheapestConfident, defaultTarget, priceOf } from "@/src/lib/alerts/shared";
 import { HOME_ENTRY, historyMove, searchKey, urlPlan } from "@/src/lib/rerun";
-import { parseShare, runOnce, shareSearch } from "@/src/lib/share";
+import { editedForm, parseShare, runOnce, shareSearch } from "@/src/lib/share";
 import CopyLink from "./components/CopyLink";
 import RecentlyViewed from "./components/RecentlyViewed";
 import { SavedContext, useFavourites } from "./components/Saved";
@@ -54,6 +54,8 @@ type Results = {
   groups: GroupRef[];
   groupExtras: Product[];
   reason?: string;
+  /** The query was corrected: as typed and as searched. */
+  correction?: { from: string; to: string };
   query: string;
   sites: string[];
   /** The form filters this search ran with; a "Watch this search" keeps them. */
@@ -159,6 +161,7 @@ export default function Home() {
             groups: Array.isArray(payload.groups) ? payload.groups : [],
             groupExtras: Array.isArray(payload.groupExtras) ? payload.groupExtras : [],
             reason: payload.reason,
+            correction: payload.correction,
             query: run.query,
             sites: run.sites,
             filters: run.filters,
@@ -372,7 +375,8 @@ export default function Home() {
 
   async function search(query?: string, base: FormValues = values) {
     // A picked suggestion (or a re-run from History) is passed in because the state update has not landed yet.
-    const v = query === undefined ? base : { ...base, query };
+    // A picked or re-run query is searched with typo correction on.
+    const v = query === undefined ? base : { ...base, query, noCorrect: false };
     // Checked before anything stops: an invalid form never ends the search on screen.
     const problem = !v.query.trim() ? "Enter something to search for" : !v.sites.length ? "Pick at least one store" : null;
     if (problem) {
@@ -412,6 +416,7 @@ export default function Home() {
       minPrice: toNum(v.minPrice),
       maxPrice: toNum(v.maxPrice),
       minRating: toNum(v.minRating),
+      ...(v.noCorrect ? { noCorrect: true } : {}),
     };
     const meta = { query: v.query.trim(), sites: v.sites, filters: { minPrice: body.minPrice, maxPrice: body.maxPrice, minRating: body.minRating }, form: { ...v, query: v.query.trim() } };
     setRun({ ...meta, stream: initStream(v.sites) });
@@ -560,7 +565,7 @@ export default function Home() {
           <SearchForm
             key={formKey}
             values={values}
-            onChange={setValues}
+            onChange={(next) => setValues((prev) => editedForm(prev, next))}
             onSubmit={(q) => void search(q)}
             onStop={stop}
             loading={loading}
@@ -619,13 +624,29 @@ export default function Home() {
                   )}
                 </p>
               </div>
+              {results?.correction && run && (
+                <p className="results__correction">
+                  Showing results for <strong>{results.correction.to}</strong>. Search instead for{" "}
+                  <a
+                    href={shareSearch({ ...run.form, query: results.correction.from, noCorrect: true })}
+                    onClick={(e) => {
+                      if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return; // a new tab follows the link
+                      e.preventDefault();
+                      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- inside results?.correction
+                      searchWith({ query: results.correction!.from, noCorrect: true });
+                    }}
+                  >
+                    <em>{results.correction.from}</em>
+                  </a>
+                </p>
+              )}
               {!loading && results && cheapest && watchOpen && (
                 <WatchForm
                   label={`Alert me when a match is at or under, ${cheapest.currency || "SAR"}`}
                   initial={defaultTarget(priceOf(cheapest))}
                   onCancel={() => setWatchOpen(false)}
                   onSave={async (target) => {
-                    const err = await postWatch({ kind: "search", query: results.query, sites: results.sites, target, filters: results.filters });
+                    const err = await postWatch({ kind: "search", query: results.correction?.to ?? results.query, sites: results.sites, target, filters: results.filters });
                     if (!err) {
                       setWatchOpen(false);
                       setWatchSaved(true);

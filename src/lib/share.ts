@@ -10,12 +10,14 @@ import { keysFromSearch, withCompareParam } from "@/src/lib/compare";
  *
  *   /?q=jbl+flip+6&sites=noon-sa,jarir&sort=price&min=100&store=jarir&cmp=jarir+123
  *
+ * `noCorrect=1`: the query is searched as typed, without typo correction ("Search instead for").
+ *
  * The History page's older re-run links (`…&run=1`) read the same way.
  */
 
 type Sort = "price" | "discount" | "deal";
 /** The search form's values, as strings (the form's own shape). */
-type Values = { query: string; sites: string[]; sort: Sort; minPrice: string; maxPrice: string; minRating: string };
+type Values = { query: string; sites: string[]; sort: Sort; minPrice: string; maxPrice: string; minRating: string; noCorrect?: boolean };
 
 /** The longest query a link may carry (the search API refuses longer ones). */
 export const MAX_SHARE_QUERY = 200;
@@ -45,7 +47,16 @@ export function shareSearch(v: Values, chips: ChipFilters = NO_FILTERS, cmp: str
     const n = num(val);
     if (n) p.set(k, n);
   }
+  if (v.noCorrect) p.set("noCorrect", "1");
   return withCompareParam(withChipParams(`?${p.toString()}`, chips), cmp);
+}
+
+/**
+ * The form after an edit: "Search instead" (noCorrect) is for the query it was offered on, so
+ * editing the query turns typo correction back on.
+ */
+export function editedForm<V extends Values>(prev: V, next: V): V {
+  return prev.noCorrect && next.query !== prev.query ? { ...next, noCorrect: false } : next;
 }
 
 export type SharedSearch<V> = { values: V; chips: ChipFilters; cmp: string[] };
@@ -71,6 +82,7 @@ export function parseShare<V extends Values>(search: string, base: V): SharedSea
       minPrice: num(p.get("min")),
       maxPrice: num(p.get("max")),
       minRating: num(p.get("rating")),
+      ...(p.get("noCorrect") === "1" ? { noCorrect: true } : {}),
     },
     chips: filtersFromSearch(search),
     cmp: keysFromSearch(search),

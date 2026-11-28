@@ -200,6 +200,10 @@
 .copylink__field { flex: 1 1 auto; width: auto; font-size: var(--text-sm); }
 .results__note { display: flex; flex-wrap: wrap; gap: 0 var(--space-md); font-size: var(--text-sm); color: var(--color-muted); font-variant-numeric: tabular-nums; }
 .results__note a { color: var(--color-ink); text-decoration-color: var(--color-accent); }
+/* "Showing results for X. Search instead for Y": the corrected query, then the query as typed. */
+.results__correction { font-size: var(--text-sm); color: var(--color-ink-2); overflow-wrap: anywhere; }
+.results__correction strong { font-weight: 600; color: var(--color-ink); }
+.results__correction a { color: var(--color-ink); text-decoration-color: var(--color-accent); }
 .rtiers { display: contents; } /* ResultTiers' wrapper: the grids stay direct flow children */
 .results__more { display: flex; justify-content: center; padding-block: var(--space-md); }
 .results__divider { display: grid; gap: var(--space-2xs); padding-top: var(--space-md); border-top: var(--border); }

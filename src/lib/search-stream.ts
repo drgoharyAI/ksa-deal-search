@@ -48,6 +48,8 @@ export type SearchPayload = {
   queryTokens?: string[][];
   groups?: GroupRef[];
   groupExtras?: Product[];
+  /** The query was corrected before the search: as typed (`from`) and as searched (`to`). */
+  correction?: { from: string; to: string };
   reason?: string;
 };
 

@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { MAX_SHARE_LENGTH, MAX_SHARE_QUERY, parseShare, runOnce, shareSearch } from "@/src/lib/share";
+import { MAX_SHARE_LENGTH, MAX_SHARE_QUERY, editedForm, parseShare, runOnce, shareSearch } from "@/src/lib/share";
 import { NO_FILTERS, filtersFromSearch } from "@/src/lib/chips";
 import { historyMove, HOME_ENTRY, urlWrite } from "@/src/lib/rerun";
 import { copyText } from "@/app/components/CopyLink";
@@ -25,6 +25,13 @@ describe("shareable result URLs: serialize and parse", () => {
     const qs = shareSearch({ ...base, query: "airpods" });
     expect(qs).toBe("?q=airpods&sites=jarir%2Cnoon-sa&sort=price");
     expect(parseShare(qs, base)).toEqual({ values: { ...base, query: "airpods" }, chips: NO_FILTERS, cmp: [] });
+  });
+  it("carries noCorrect=1 (\"Search instead\" for the query as typed) and round-trips it", () => {
+    const qs = shareSearch({ ...base, query: "airpdos 4", noCorrect: true });
+    expect(qs).toBe("?q=airpdos+4&sites=jarir%2Cnoon-sa&sort=price&noCorrect=1");
+    expect(parseShare(qs, base)?.values).toEqual({ ...base, query: "airpdos 4", noCorrect: true });
+    expect(parseShare("?q=airpdos+4&noCorrect=yes", base)?.values).not.toHaveProperty("noCorrect");
+    expect(shareSearch({ ...base, query: "airpods", noCorrect: false })).not.toContain("noCorrect");
   });
   it("ignores an unknown parameter, and serializing again drops it", () => {
     const r = parseShare("?q=airpods&utm_source=x&evil=%3Cscript%3E&sort=price", base);
@@ -168,5 +175,16 @@ describe("urlWrite: a search from the home gets its own history entry once it ha
     expect(urlWrite("?q=airpods&sort=price", true, false)).toBe("replace");
     expect(urlWrite("", false, false)).toBe("replace");
     expect(urlWrite("?store=jarir", false, false)).toBe("replace");
+  });
+});
+
+describe("editedForm: noCorrect lasts until the query is edited", () => {
+  type Form = Omit<typeof base, "sort"> & { sort: "price" | "deal"; noCorrect?: boolean };
+  const prev: Form = { ...base, query: "airpdos", noCorrect: true };
+  it("drops noCorrect when the query changes", () => {
+    expect(editedForm(prev, { ...prev, query: "airpdos 4" })).toEqual({ ...base, query: "airpdos 4", noCorrect: false });
+  });
+  it("keeps it when another field changes", () => {
+    expect(editedForm(prev, { ...prev, sort: "deal" })).toEqual({ ...prev, sort: "deal" });
   });
 });
