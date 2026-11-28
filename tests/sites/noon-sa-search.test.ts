@@ -189,6 +189,23 @@ describe("runCall", () => {
     ]);
   });
 
+  it("page 2 loads after a full page 1 when both are queued at once (live regression)", async () => {
+    const page = fakePage({ cards: fullPage });
+    // The real browser queue (src/sites/chrome/cdp.ts): the caller's promise has an extra
+    // .finally() hop, so page 2's job starts before page 1's caller resumes.
+    let tail: Promise<unknown> = Promise.resolve();
+    const withPage = <T,>(fn: (p: NoonPage) => Promise<T>): Promise<T> => {
+      const r = tail.then(() => fn(page));
+      tail = r.catch(() => {});
+      return r.finally(() => {});
+    };
+    const run = createRunCall({ withPage, minGapMs: 0 });
+    const [r1, r2] = await Promise.all([run(call), run({ ...call, args: { ...call.args, page: "2" } })]);
+    expect(r1).toMatchObject({ ok: true });
+    expect(r2).toMatchObject({ ok: true });
+    expect(page.visited.filter((u) => u.includes("page=2"))).toHaveLength(1);
+  });
+
   it("page 2 loads only when page 1 was full", async () => {
     const page = fakePage({ cards: [{ href: "/saudi-en/a/N1/p/", title: "A", price: "10", origPrice: null, rating: null, reviews: null, image: null }] });
     const run = runCallWith(page);

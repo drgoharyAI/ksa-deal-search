@@ -315,12 +315,14 @@ export function createRunCall(deps: {
           warmed.add(page);
         }
         await gap();
-        return loadSearch(page, url);
+        const loaded = await loadSearch(page, url);
+        // Cached inside the queued job: the next page's job may start before this caller resumes
+        // (the browser queue adds promise hops), and it reads this page from the cache.
+        cache.set(key, { ok: true, tier: 3, data: loaded });
+        return loaded;
       });
       if (items === null) return { ok: true, tier: 3, data: [] }; // the previous page was the last
-      const ok: AaResult = { ok: true, tier: 3, data: items };
-      cache.set(key, ok);
-      return ok;
+      return { ok: true, tier: 3, data: items };
     } catch (e) {
       if (e instanceof BlockedRecently) return BLOCKED_RECENTLY;
       if (e instanceof PreviousPageMissing) return { ok: false, class: "error", reason: "previous page not loaded; this page skipped" };
