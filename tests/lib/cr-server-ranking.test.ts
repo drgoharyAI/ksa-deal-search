@@ -3,6 +3,8 @@ import type { Product } from "@/src/lib/types";
 import { rank } from "@/src/lib/rank";
 import { bestPriceRow, groupRows } from "@/src/lib/view";
 import { cheapestConfident } from "@/src/lib/alerts/shared";
+import { historyEntryFor } from "@/src/lib/history";
+import { formatAlertMessage } from "@/src/lib/telegram";
 
 /** Code review round (server): "from" prices (AliExpress, the cheapest variant) never pass as fixed prices. */
 
@@ -47,8 +49,20 @@ describe('"from" prices', () => {
     expect(bestPriceRow(groupRows([from20, jarir90]))).toBeNull();
   });
 
-  it("are never the cheapest confident match (History, search alerts)", () => {
+  it("a fixed price is the cheapest match whenever one exists; else the cheapest from price", () => {
     expect(cheapestConfident([from20, jarir90, noon95])?.id).toBe("j");
-    expect(cheapestConfident([from20])).toBeNull();
+    expect(cheapestConfident([P("aliexpress", "b", 30), from20])?.id).toBe("a");
+    expect(cheapestConfident([from20, P("jarir", "x", 5, { matchScore: 0.1 })])?.id).toBe("a");
+  });
+
+  it("History marks a from price", () => {
+    expect(historyEntryFor({ query: "q", sites: ["aliexpress"], sort: "price" }, [from20], 1).cheapest).toMatchObject({ price: 20, from: true });
+    expect(historyEntryFor({ query: "q", sites: ["jarir"], sort: "price" }, [from20, jarir90], 1).cheapest).not.toHaveProperty("from");
+  });
+
+  it("the alert text says from SAR X", () => {
+    const text = formatAlertMessage({ title: "T", store: "AliExpress", oldPrice: 30, newPrice: 20, target: 25, currency: "SAR", url: null, from: true });
+    expect(text).toContain("Price: SAR 30 → from SAR 20");
+    expect(formatAlertMessage({ title: "T", store: "Jarir", oldPrice: null, newPrice: 20, target: 25, currency: "SAR", url: null })).toContain("Price: SAR 20");
   });
 });

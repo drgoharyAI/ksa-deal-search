@@ -1,6 +1,7 @@
 import "server-only";
 import type { Db } from "@/src/lib/db";
 import type { Product } from "@/src/lib/types";
+import { isFromPrice } from "@/src/lib/discount";
 import { cheapestConfident, normQuery, priceOf, type CheapestMatch, type HistoryEntry } from "@/src/lib/alerts/shared";
 
 export const MAX_HISTORY = 500;
@@ -97,6 +98,8 @@ export function historyEntryFor(
     sort: input.sort,
     filters,
     resultCount: products.length,
-    cheapest: best ? { title: best.title, site: best.site, price: priceOf(best), currency: best.currency || "SAR", url: best.url } : null,
+    cheapest: best
+      ? { title: best.title, site: best.site, price: priceOf(best), currency: best.currency || "SAR", url: best.url, ...(isFromPrice(best) ? { from: true as const } : {}) }
+      : null,
   };
 }

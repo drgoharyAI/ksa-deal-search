@@ -27,14 +27,14 @@ export type AlertMessage = {
   target: number;
   currency: string;
   url: string | null;
+  /** A "from" price (the store's cheapest variant): the text says "from SAR X". */
+  from?: boolean;
 };
 
 /** The alert text in Telegram's HTML parse mode; every dynamic part is escaped. */
 export function formatAlertMessage(m: AlertMessage): string {
-  const price =
-    m.oldPrice !== null && m.oldPrice !== m.newPrice
-      ? `${money(m.oldPrice, m.currency)} → ${money(m.newPrice, m.currency)}`
-      : money(m.newPrice, m.currency);
+  const now = `${m.from ? "from " : ""}${money(m.newPrice, m.currency)}`;
+  const price = m.oldPrice !== null && m.oldPrice !== m.newPrice ? `${money(m.oldPrice, m.currency)} → ${now}` : now;
   const lines = [
     `<b>Price alert: ${escapeHtml(m.title)}</b>`,
     `Store: ${escapeHtml(m.store)}`,

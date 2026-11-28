@@ -4,7 +4,8 @@ import { isFromPrice } from "@/src/lib/discount";
 
 /** Client-safe shapes and helpers for history and price alerts (no server imports). */
 
-export type CheapestMatch = { title: string; site: string; price: number; currency: string; url: string };
+/** `from`: a "from" price (isFromPrice), shown as "from SAR X"; only when no fixed price matched. */
+export type CheapestMatch = { title: string; site: string; price: number; currency: string; url: string; from?: true };
 
 export type HistoryEntry = {
   id: number;
@@ -72,15 +73,18 @@ export const priceOf = (p: Product): number => p.finalPrice ?? p.listPrice;
 export const defaultTarget = (price: number): number => Math.round(price * 0.95 * 100) / 100;
 
 /**
- * The cheapest confident, deliverable, fixed-price match, or null. "Less likely" matches,
- * branch-pickup-only listings and "from" prices (isFromPrice: a store's cheapest variant) never
- * count (no alert fires on them, history does not call them the cheapest).
+ * The cheapest confident, deliverable match, or null. "Less likely" matches and branch-pickup-only
+ * listings never count. A fixed price always wins: a "from" price (isFromPrice: a store's cheapest
+ * variant) counts only when no fixed price matched, and callers label it "from" (isFromPrice).
  */
 export function cheapestConfident(products: Product[]): Product | null {
-  let best: Product | null = null;
+  let fixed: Product | null = null;
+  let from: Product | null = null;
   for (const p of products) {
-    if (!isLikelyMatch(p) || p.pickupOnly || isFromPrice(p)) continue;
-    if (!best || priceOf(p) < priceOf(best)) best = p;
+    if (!isLikelyMatch(p) || p.pickupOnly) continue;
+    if (isFromPrice(p)) {
+      if (!from || priceOf(p) < priceOf(from)) from = p;
+    } else if (!fixed || priceOf(p) < priceOf(fixed)) fixed = p;
   }
-  return best;
+  return fixed ?? from;
 }

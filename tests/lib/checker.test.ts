@@ -469,4 +469,11 @@ describe("code review round: alert checker", () => {
       vi.useRealTimers();
     }
   });
+
+  it("an AliExpress-only search watch fires on the from price, labelled from", async () => {
+    createWatch(db, { kind: "search", site: null, productId: null, query: "airpods", sites: ["aliexpress"], target: 100 }, 0);
+    answers["aliexpress"] = { products: [prod("aliexpress", "A", 90)] };
+    expect((await tick()).fired).toBe(1);
+    expect(notify.mock.calls[0][0]).toMatchObject({ newPrice: 90, from: true });
+  });
 });

@@ -3,6 +3,7 @@ import type { Db } from "@/src/lib/db";
 import type { SearchInput, SearchOptions, SearchResult } from "@/src/lib/pipeline";
 import type { Product, SiteStatus } from "@/src/lib/types";
 import { storeLabel } from "@/src/lib/stores";
+import { isFromPrice } from "@/src/lib/discount";
 import type { AlertMessage, SendResult } from "@/src/lib/telegram";
 import { addEvent, addPricePoint, getWatch, listWatches, pendingEvent, pruneAlertHistory, updateEvent, updateWatch } from "./repo";
 import { passesPriceRating, ratinglessSites } from "@/src/lib/filters";
@@ -155,6 +156,7 @@ async function processWatch(deps: CheckerDeps, id: number, outcomes: Map<string,
       target: w.target,
       currency: hit.currency || w.currency,
       url: hit.url,
+      ...(isFromPrice(hit) ? { from: true } : {}),
     };
     let sent = false;
     let retry = false;
