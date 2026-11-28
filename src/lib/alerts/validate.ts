@@ -74,7 +74,10 @@ export function parseId(v: unknown): number | null {
   return Number.isSafeInteger(n) && n > 0 ? n : null;
 }
 
-/** { minPrice?, maxPrice?, minRating? } as finite non-negative numbers (rating 0 to 5); null when invalid. */
+/**
+ * { minPrice?, maxPrice?, minRating? } as finite non-negative numbers (rating 0 to 5), and
+ * noCorrect when it is exactly true; null when invalid.
+ */
 function parseFilters(v: unknown): WatchFilters | null {
   if (v === undefined || v === null) return {};
   if (typeof v !== "object" || Array.isArray(v)) return null;
@@ -86,5 +89,6 @@ function parseFilters(v: unknown): WatchFilters | null {
     if (typeof n !== "number" || !Number.isFinite(n) || n < 0 || n > MAX_TARGET || (k === "minRating" && n > 5)) return null;
     out[k] = n;
   }
+  if (o.noCorrect === true) out.noCorrect = true;
   return out;
 }

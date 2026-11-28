@@ -80,10 +80,14 @@ function filterFor(w: Watch, products: Product[]): Product[] {
 
 const storesOf = (w: Watch): string[] => (w.kind === "product" ? (w.site ? [w.site] : []) : w.sites);
 
-async function fetchGroup(deps: CheckerDeps, g: { site: string; query: string }): Promise<GroupOutcome> {
+/** A watch's search group: its store, its words, and whether they are searched as typed. */
+const groupKey = (site: string, w: Watch): string => `${site}${SEP}${normQuery(w.query)}${w.filters?.noCorrect ? `${SEP}typed` : ""}`;
+
+async function fetchGroup(deps: CheckerDeps, g: { site: string; query: string; noCorrect?: true }): Promise<GroupOutcome> {
   try {
     let listings: Product[] | null = null;
-    const r = await deps.search({ query: g.query, sites: [g.site], sort: "price" }, { onFiltered: (ps) => (listings = ps) });
+    const input = { query: g.query, sites: [g.site], sort: "price" as const, ...(g.noCorrect ? { noCorrect: true } : {}) };
+    const r = await deps.search(input, { onFiltered: (ps) => (listings = ps) });
     const st = r.statuses.find((s) => s.site === g.site);
     if (st && st.status !== "ok") return { ok: false, status: st.status };
     return {
@@ -108,7 +112,7 @@ async function processWatch(deps: CheckerDeps, id: number, outcomes: Map<string,
   if (!w || w.status !== "active") return false; // deleted or paused since the cycle began
   const now = deps.now();
   const stores = storesOf(w);
-  const outs = stores.map((site) => outcomes.get(`${site}${SEP}${normQuery(w.query)}`)).filter((o): o is GroupOutcome => !!o);
+  const outs = stores.map((site) => outcomes.get(groupKey(site, w))).filter((o): o is GroupOutcome => !!o);
   const answered = outs.filter((o): o is Answer => o.ok);
   if (!answered.length) {
     const blocked = outs.some((o) => !o.ok && o.status === "blocked");
@@ -192,13 +196,13 @@ export async function runCycle(deps: CheckerDeps): Promise<CycleReport> {
     .sort((a, b) => (a.lastCheckedAt ?? -Infinity) - (b.lastCheckedAt ?? -Infinity) || a.id - b.id);
   const due = all.slice(0, MAX_WATCHES_PER_CYCLE);
 
-  const groups = new Map<string, { site: string; query: string }>();
+  const groups = new Map<string, { site: string; query: string; noCorrect?: true }>();
   const perSite = new Map<string, number>();
   const watches: Watch[] = [];
   let deferred = all.length - due.length;
   for (const w of due) {
     const fresh = storesOf(w)
-      .map((site) => ({ site, key: `${site}${SEP}${normQuery(w.query)}` }))
+      .map((site) => ({ site, key: groupKey(site, w) }))
       .filter((g) => !groups.has(g.key));
     const over = fresh.some((g) => {
       const cap = deps.siteCaps?.[g.site];
@@ -209,7 +213,7 @@ export async function runCycle(deps: CheckerDeps): Promise<CycleReport> {
       continue;
     }
     for (const g of fresh) {
-      groups.set(g.key, { site: g.site, query: w.query.trim() });
+      groups.set(g.key, { site: g.site, query: w.query.trim(), ...(w.filters?.noCorrect ? { noCorrect: true as const } : {}) });
       perSite.set(g.site, (perSite.get(g.site) ?? 0) + 1);
     }
     watches.push(w);

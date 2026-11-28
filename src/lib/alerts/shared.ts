@@ -13,15 +13,19 @@ export type HistoryEntry = {
   query: string;
   sites: string[];
   sort: string;
-  filters: { minPrice?: number; maxPrice?: number; minRating?: number };
+  /** noCorrect: the search ran as typed ("Search instead"), without typo correction. */
+  filters: { minPrice?: number; maxPrice?: number; minRating?: number; noCorrect?: true };
   resultCount: number;
   cheapest: CheapestMatch | null;
 };
 
 export type WatchKind = "product" | "search";
 
-/** A search watch's price and rating filters, as on the search form. */
-export type WatchFilters = { minPrice?: number; maxPrice?: number; minRating?: number };
+/**
+ * A search watch's price and rating filters, as on the search form. `noCorrect`: the watch was saved
+ * from a search run as typed ("Search instead"), so its checks skip typo correction too.
+ */
+export type WatchFilters = { minPrice?: number; maxPrice?: number; minRating?: number; noCorrect?: true };
 
 /** Query key for grouping and duplicate checks: trimmed, single-spaced, lower case. */
 export const normQuery = (q: string): string => q.trim().replace(/\s+/g, " ").toLowerCase();

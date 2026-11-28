@@ -10,6 +10,10 @@ describe("re-run links (read by the shareable-URL parser)", () => {
     const r = parseShare(href.slice(1), base);
     expect(r?.values).toEqual({ query: "airpods 4 & case", sites: ["amazon-sa", "noon-sa"], sort: "deal", minPrice: "", maxPrice: "900", minRating: "4" });
   });
+  it("re-runs a search run as typed as typed (noCorrect=1)", () => {
+    const href = rerunHref({ query: "airpdos", sites: ["jarir"], sort: "price", filters: { noCorrect: true } });
+    expect(parseShare(href.slice(1), base)?.values).toEqual({ ...base, query: "airpdos", noCorrect: true });
+  });
   it("ignores unknown stores, sorts and bad numbers, and needs a query", () => {
     expect(parseShare("?sites=jarir", base)).toBeNull();
     expect(parseShare("?q=x&sites=evil&sort=drop&max=abc", base)?.values).toEqual({ ...base, query: "x" });

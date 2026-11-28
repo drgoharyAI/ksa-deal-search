@@ -646,7 +646,14 @@ export default function Home() {
                   initial={defaultTarget(priceOf(cheapest))}
                   onCancel={() => setWatchOpen(false)}
                   onSave={async (target) => {
-                    const err = await postWatch({ kind: "search", query: results.correction?.to ?? results.query, sites: results.sites, target, filters: results.filters });
+                    const err = await postWatch({
+                      kind: "search",
+                      query: results.correction?.to ?? results.query,
+                      sites: results.sites,
+                      target,
+                      // Saved from a search run as typed: its checks skip correction too.
+                      filters: run?.form.noCorrect ? { ...results.filters, noCorrect: true } : results.filters,
+                    });
                     if (!err) {
                       setWatchOpen(false);
                       setWatchSaved(true);

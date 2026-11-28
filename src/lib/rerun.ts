@@ -13,6 +13,7 @@ export function rerunHref(e: Pick<HistoryEntry, "query" | "sites" | "sort" | "fi
   if (e.filters.minPrice !== undefined) p.set("min", String(e.filters.minPrice));
   if (e.filters.maxPrice !== undefined) p.set("max", String(e.filters.maxPrice));
   if (e.filters.minRating !== undefined) p.set("rating", String(e.filters.minRating));
+  if (e.filters.noCorrect) p.set("noCorrect", "1");
   p.set("run", "1");
   return `/?${p.toString()}`;
 }

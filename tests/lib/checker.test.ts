@@ -325,6 +325,16 @@ describe("runCycle: search watch filters", () => {
   });
 });
 
+describe("runCycle: a watch saved after \"Search instead\" (noCorrect)", () => {
+  it("searches its query as typed, apart from a corrected watch on the same words", async () => {
+    const typed = createWatch(db, { kind: "search", site: null, productId: null, query: "airpdos", sites: ["amazon-sa"], target: 450, filters: { noCorrect: true } }, 0);
+    createWatch(db, { kind: "search", site: null, productId: null, query: "airpdos", sites: ["amazon-sa"], target: 450 }, 0);
+    expect(getWatch(db, typed)?.filters).toEqual({ noCorrect: true });
+    await runCycle(deps());
+    expect(calls.map((c) => !!c.noCorrect).sort()).toEqual([false, true]);
+  });
+});
+
 describe("code review round: alert checker", () => {
   const searchWatch = (target: number, sites = ["noon-sa", "amazon-sa"]) =>
     createWatch(db, { kind: "search", site: null, productId: null, query: "airpods", sites, target }, 0);

@@ -82,7 +82,7 @@ export function clearSearches(db: Db): void {
 
 /** The history row for one finished search: its inputs, result count and cheapest confident match. */
 export function historyEntryFor(
-  input: { query: string; sites: string[]; sort: string; minPrice?: number; maxPrice?: number; minRating?: number },
+  input: { query: string; sites: string[]; sort: string; minPrice?: number; maxPrice?: number; minRating?: number; noCorrect?: boolean },
   products: Product[],
   at: number,
 ): Omit<HistoryEntry, "id"> {
@@ -91,6 +91,7 @@ export function historyEntryFor(
   if (input.minPrice !== undefined) filters.minPrice = input.minPrice;
   if (input.maxPrice !== undefined) filters.maxPrice = input.maxPrice;
   if (input.minRating !== undefined) filters.minRating = input.minRating;
+  if (input.noCorrect) filters.noCorrect = true; // run as typed: the vocabulary does not learn it
   return {
     at,
     query: input.query.trim(),
