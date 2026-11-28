@@ -406,7 +406,16 @@ auto-correct, others return junk or nothing) and our relevance filter required t
   letter-change-only correction (no letter added, dropped or swapped) needs 6+ letters and a target
   seen in 10+ product titles, 10 times as often as the typed word ("padel" stays). No splits
   ("paperwhite", "quietcomfort" are names); "air pods" joins only into a known brand in the
-  vocabulary ("airpods", "playstation"). A symmetric-delete index keeps a query under 2 ms. Never changed: words with a digit or symbol (model codes, prices,
+  vocabulary ("airpods", "playstation"). A symmetric-delete index keeps a query under 2 ms.
+- **Re-review (fresh typos):** a word stays as typed when a nearer candidate was refused for lack
+  of evidence ("sneekers" never reaches "speakers"). A one-letter change of a 5+ letter word toward
+  a single trusted word (`data/vocab-words.json` or a brand) needs no title evidence ("labtop",
+  "moniter", "sansung"); a letter added, dropped or swapped beats it ("chargr" is "charger"). A typed
+  final "s" keeps the plural. On a tie, a trusted word beats a word learnt from store titles. Real
+  words that are common misspellings go through a small curated map, `data/misspellings.json`
+  (gamming, pilow, trimer, frier, lense, mous, phon), applied before the dictionary; it never
+  learns. "blander" and "vison" are left out: they are real words. Enforced test: 48 held-out typos
+  (`tests/fixtures/spell/heldout-typos.json`): 46 fixed (96%), none miscorrected. Never changed: words with a digit or symbol (model codes, prices,
   `-case`, `>4`), words under 4 letters, known words and their plural or singular, query syntax.
 - **Bounded work** (security review): suggest checks its length before correcting; queries over 200
   characters, words over 30 letters and lookups past 12 per query are left as they are.
@@ -420,8 +429,8 @@ auto-correct, others return junk or nothing) and our relevance filter required t
 - **Relevance safety net:** a query word of 5+ letters already matched a title word one edit away
   (same first letter); two swapped letters now count as one edit. Exact matches are unaffected.
 - **Eval:** `eval/queries-typos.json` (40 misspellings of the labelled queries) and
-  `scripts/eval-typos.mjs`: correction accuracy (39/40: "vaccum" is a letter change without title
-  evidence), false-correction rate (0) and p@10/recall through replay (typos 93/88, clean 96/90).
+  `scripts/eval-typos.mjs`: correction accuracy (40/40), false-correction rate (0) and p@10/recall
+  through replay (typos 96/90, the same as clean).
   The main eval is unchanged (p@10 98, recall 92, cheapest-first 73).
 
 ## Google Shopping KSA validator (owner request, SerpApi free tier)
