@@ -43,13 +43,24 @@ describe("serpImmersive (engine=google_immersive_product)", () => {
     expect(r.offers).toHaveLength(6);
     expect(r.offers[1]).toEqual({ store: "Jarir Bookstore", title: "JBL Flip 6 Portable Speaker Black", price: 399, currency: "SAR", foreign: false, was: 499, url: "https://www.jarir.com/sa-en/jbl-flip-6-black.html", shipping: 15, from: "serpapi" });
     expect(r.offers[4]).toMatchObject({ store: "eBay", currency: "USD" });
+    // foreign reflects the currency and the host: desertcart.ae and ebay.com are not Saudi.
+    expect(r.offers.map((o) => [o.store, o.foreign])).toEqual([
+      ["Amazon.sa", false],
+      ["Jarir Bookstore", false],
+      ["Danube", false],
+      ["Desertcart.ae", true],
+      ["eBay", true],
+      ["Abdulwahed", false],
+    ]);
   });
 });
 
 describe("serpAccount (free, not counted)", () => {
   it("reads the searches left", async () => {
-    const s = stub(() => ok(JSON.stringify({ plan_searches_left: 212, total_searches_left: 212, searches_per_month: 250, api_key: KEY })));
-    expect(await serpAccount({ key: KEY, fetch: s.fetch })).toEqual({ searchesLeft: 212 });
+    const s = stub(() => ok(JSON.stringify({ plan_searches_left: 212, total_searches_left: 212, searches_per_month: 250, plan_renewal_date: "2026-12-28", api_key: KEY })));
+    expect(await serpAccount({ key: KEY, fetch: s.fetch })).toEqual({ searchesLeft: 212, renewal: "2026-12-28" });
+    const none = stub(() => ok(JSON.stringify({ plan_searches_left: 5, plan_renewal_date: null })));
+    expect(await serpAccount({ key: KEY, fetch: none.fetch })).toEqual({ searchesLeft: 5, renewal: null });
     expect(s.calls[0].url.origin + s.calls[0].url.pathname).toBe("https://serpapi.com/account.json");
   });
 });

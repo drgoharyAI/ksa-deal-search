@@ -59,9 +59,11 @@ describe("scrapeGoogle", () => {
     expect(r).toEqual({ kind: "blocked", reason: "captcha", loads: 1 });
     expect(log).toHaveLength(1);
   });
-  it("treats a timed-out load as a block", async () => {
+  it("a timed-out or empty page is an error, never a block (no back-off)", async () => {
     const { page } = fakePage({ gotoThrows: Object.assign(new Error("Timeout 30000ms exceeded"), { name: "TimeoutError" }) });
-    expect(await scrapeGoogle(TITLE, page, { beforeLoad: allow, beforePanel: allow })).toEqual({ kind: "blocked", reason: "timeout", loads: 1 });
+    expect(await scrapeGoogle(TITLE, page, { beforeLoad: allow, beforePanel: allow })).toMatchObject({ kind: "error", loads: 1 });
+    const empty = fakePage({ html: "<html><body></body></html>" });
+    expect(await scrapeGoogle(TITLE, empty.page, { beforeLoad: allow, beforePanel: allow })).toMatchObject({ kind: "error", message: "empty page", loads: 1 });
   });
   it("does not load when the scrape budget says no, and skips the panel when it is spent", async () => {
     const a = fakePage({ html: fixture("google-results-jbl-flip-6.html") });

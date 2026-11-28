@@ -1,5 +1,6 @@
 import "server-only";
 import type { GshopOffer } from "./validate";
+import { isKsaUrl } from "./links";
 
 /**
  * SerpApi client for Google Shopping KSA (the default source; scrape.ts is the fallback).
@@ -152,16 +153,19 @@ export async function serpImmersive(token: string, opts: SerpOpts): Promise<{ ti
     const price = num(s.extracted_price);
     const store = str(s.name).trim();
     if (price === null || !store) return [];
+    const currency = currencyOf(str(s.price));
+    const link = str(s.link) || null;
     const shipping = typeof s.shipping_extracted === "number" && Number.isFinite(s.shipping_extracted) ? s.shipping_extracted : undefined;
     return [
       {
         store,
         title: str(s.title) || title,
         price,
-        currency: currencyOf(str(s.price)),
-        foreign: false,
+        currency,
+        // Not a Saudi offer: priced in another currency, or sold from a non-Saudi host.
+        foreign: currency !== "SAR" || (link !== null && !isKsaUrl(link)),
         was: num(s.extracted_original_price),
-        url: str(s.link) || null,
+        url: link,
         ...(shipping !== undefined && { shipping }),
         from: "serpapi",
       },
@@ -170,9 +174,10 @@ export async function serpImmersive(token: string, opts: SerpOpts): Promise<{ ti
   return { title, offers };
 }
 
-/** Searches left on the account (free call, not counted); null when it does not say. */
-export async function serpAccount(opts: SerpOpts): Promise<{ searchesLeft: number | null }> {
+/** Searches left on the account and the plan's renewal date (free call, not counted); null when it does not say. */
+export async function serpAccount(opts: SerpOpts): Promise<{ searchesLeft: number | null; renewal: string | null }> {
   const body = await getJson(ACCOUNT, {}, opts);
   const left = [body.plan_searches_left, body.total_searches_left].find((v) => typeof v === "number" && Number.isFinite(v));
-  return { searchesLeft: typeof left === "number" ? left : null };
+  const renewal = str(body.plan_renewal_date);
+  return { searchesLeft: typeof left === "number" ? left : null, renewal: /^\d{4}-\d{2}-\d{2}$/.test(renewal) ? renewal : null };
 }

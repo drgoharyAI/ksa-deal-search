@@ -1,6 +1,6 @@
 import { conflicts, sameProduct, titleFeatures } from "@/src/lib/match/group";
 import { storeLink } from "@/src/lib/store-hosts";
-import { isDeniedMerchant, isKsaHost, merchantDomain, safeOfferLink } from "./links";
+import { isDeniedMerchant, isKsaUrl, merchantDomain, safeOfferLink } from "./links";
 
 /**
  * Google Shopping KSA as an independent check of our deal badges (owner request; spec decision
@@ -79,10 +79,14 @@ export const SOURCE_LABELS: Record<GshopSource, string> = {
   google: "Google Shopping (google.com.sa)",
 };
 
-/** Saudi merchants known by name (Google's "source"), lower case. */
-const KSA_NAMES = new Set(
-  ["amazon.sa", "noon", "jarir", "jarir bookstore", "extra", "saco", "carrefour", "carrefour ksa", "danube", "abdulwahed", "saeel", "desertcart.com.sa", "almanea", "sharaf dg", "virgin megastore", "lulu hypermarket", "panda", "mazeed"],
-);
+/**
+ * Merchants that sell only in Saudi Arabia, known by name (Google's "source"), lower case. Chains
+ * that also sell in other countries (noon, Carrefour, LuLu, Sharaf DG, Jarir, eXtra, Virgin
+ * Megastore, Amazon) are not here: by name alone they count only with a Saudi marker.
+ */
+const KSA_ONLY_NAMES = new Set(["abdulwahed", "saeel", "danube", "mazeed", "almanea", "saco", "panda", "bindawood"]);
+/** A Saudi marker in a store name: ".sa", "KSA", "Saudi" or "السعودية". */
+const KSA_MARKER = /\.sa$|\bksa\b|\bsaudi\b|السعودية/;
 
 /** Our own stores as Google names them: their offers are not "other stores". */
 const OUR_NAMES: Record<string, RegExp> = {
@@ -106,13 +110,17 @@ function isOurStore(site: string, o: GshopOffer): boolean {
   return !!re && re.test(nameKey(o.store));
 }
 
-/** A Saudi offer: SAR, not cross-border, not denied, new; an API or panel offer also needs a Saudi host or a known name. */
+/**
+ * A Saudi offer: SAR, not cross-border, not denied, new. With a link (or the merchant's site) the
+ * host decides: a .sa host or a known Saudi store host (noon only on /saudi-), whatever the name.
+ * With no link (the Google grid) the name must be a Saudi-only store or carry a Saudi marker.
+ */
 function isKsaOffer(o: GshopOffer): boolean {
   if (o.currency !== "SAR" || o.foreign || o.used || !valid(o.price) || isDeniedMerchant(o.store)) return false;
-  const host = merchantDomain(o.url) ?? merchantDomain(o.site);
-  if (host && !isKsaHost(host)) return o.from === "grid" ? false : KSA_NAMES.has(nameKey(o.store)) && !isDeniedMerchant(host);
-  if (o.from === "grid") return true;
-  return !!host || KSA_NAMES.has(nameKey(o.store));
+  const where = merchantDomain(o.url) ? o.url : merchantDomain(o.site) ? o.site : null;
+  if (where) return isKsaUrl(where);
+  const name = nameKey(o.store);
+  return KSA_ONLY_NAMES.has(name) || KSA_MARKER.test(name);
 }
 
 /** Other Saudi stores' offers of our product: one per store (its lowest), cheapest first. */

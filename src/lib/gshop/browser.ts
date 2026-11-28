@@ -60,6 +60,11 @@ function sharedGshopBrowser(): BrowserQueue {
   return g.__gshopBrowser;
 }
 
+/** Kills Google's Chrome now (a job past its deadline); the next job relaunches it. */
+export function recycleGshopBrowser(): void {
+  sharedGshopBrowser().killNow();
+}
+
 /** Run `fn` with Google's Chrome page; jobs are serialized. */
 export function withGshopPage<T>(fn: (page: ScrapePage) => Promise<T>): Promise<T> {
   return sharedGshopBrowser().withPage((p) => fn(playwrightScrapePage(p)));

@@ -23,7 +23,7 @@ export type ScrapePage = {
 
 export type ScrapeOutcome =
   | { kind: "ok"; offers: GshopOffer[]; loads: number; panel: boolean }
-  | { kind: "blocked"; reason: BlockReason | "timeout"; loads: number }
+  | { kind: "blocked"; reason: Exclude<BlockReason, "empty">; loads: number }
   | { kind: "skipped"; loads: 0 }
   | { kind: "error"; message: string; loads: number };
 
@@ -50,6 +50,9 @@ export async function scrapeGoogle(title: string, page: ScrapePage, gates: Scrap
     await page.wait(RENDER_MS);
     const html = await page.content();
     const block = detectBlock({ url: page.url(), html });
+    // Only a real CAPTCHA, /sorry/ or consent page is a block (and starts the back-off). An empty
+    // page is an error for this check only.
+    if (block === "empty") return { kind: "error", message: "empty page", loads };
     if (block) return { kind: "blocked", reason: block, loads };
     const cards = parseResultsHtml(html);
     const offers = cardOffers(cards);
@@ -62,16 +65,17 @@ export async function scrapeGoogle(title: string, page: ScrapePage, gates: Scrap
       await page.wait(PANEL_MS);
     } catch (e) {
       const after = blockedUrl(page.url());
-      if (after) return { kind: "blocked", reason: after, loads };
+      if (after && after !== "empty") return { kind: "blocked", reason: after, loads };
       console.warn("[gshop] product panel did not open", e instanceof Error ? e.message.slice(0, 120) : "error");
       return { kind: "ok", offers, loads, panel: false };
     }
     const after = blockedUrl(page.url());
-    if (after) return { kind: "blocked", reason: after, loads };
+    if (after && after !== "empty") return { kind: "blocked", reason: after, loads };
     const panel = parsePanelHtml(await page.content());
     return { kind: "ok", offers: [...offers, ...panelOffers(panel, best.title)], loads, panel: panel.length > 0 };
   } catch (e) {
-    if (isTimeout(e)) return { kind: "blocked", reason: "timeout", loads };
+    // A timeout is a slow network or page, not a CAPTCHA: an error, never a back-off.
+    if (isTimeout(e)) return { kind: "error", message: "timed out", loads };
     return { kind: "error", message: e instanceof Error ? e.message.slice(0, 200) : "scrape failed", loads };
   }
 }

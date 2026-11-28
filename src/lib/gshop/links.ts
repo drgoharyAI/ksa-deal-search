@@ -56,6 +56,12 @@ function rightStorefront(u: URL): boolean {
   return true;
 }
 
+/** The URL (http or https) points at a Saudi merchant: a Saudi host, and noon's Saudi storefront. */
+export function isKsaUrl(url: unknown): boolean {
+  const u = parse(url);
+  return !!u && /^https?:$/.test(u.protocol) && isKsaHost(u.hostname) && rightStorefront(u);
+}
+
 /** The link when it is safe to draw as a Saudi merchant's page; null otherwise. */
 export function safeOfferLink(url: unknown): string | null {
   const u = parse(url);

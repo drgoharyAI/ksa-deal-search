@@ -89,6 +89,29 @@ describe("keepOffers: Saudi offers of the same product only", () => {
     ]);
     expect(kept.map((k) => k.store)).toEqual(["Abdulwahed", "Carrefour KSA", "Doos.sa"]);
   });
+  it("a link or site must be a Saudi host, whatever the store's name (review round 1)", () => {
+    const kept = keepOffers(our, [
+      offer({ store: "Sharaf DG", price: 300, url: "https://uae.sharafdg.com/product/jbl-flip-6/", from: "serpapi" }),
+      offer({ store: "Carrefour", price: 310, url: "https://www.carrefouruae.com/mafuae/en/p/1", from: "serpapi" }),
+      offer({ store: "LuLu Hypermarket", price: 320, site: "https://www.luluhypermarket.com", from: "panel" }),
+      offer({ store: "noon", price: 330, site: "https://www.noon.com", from: "panel" }),
+      offer({ store: "Carrefour KSA", price: 399, url: "https://www.carrefourksa.com/mafsau/en/p/1", from: "serpapi" }),
+    ]);
+    expect(kept.map((k) => k.store)).toEqual(["Carrefour KSA"]);
+  });
+  it("with no link (the Google grid), the name must be Saudi-only or carry a Saudi marker", () => {
+    const kept = keepOffers(our, [
+      offer({ store: "noon", price: 300 }),
+      offer({ store: "LuLu Hypermarket", price: 301 }),
+      offer({ store: "Sharaf DG", price: 302 }),
+      offer({ store: "Jarir Bookstore", price: 303 }),
+      offer({ store: "Some Shop", price: 304 }),
+      offer({ store: "Carrefour KSA", price: 399 }),
+      offer({ store: "Saeel", price: 400 }),
+      offer({ store: "desertcart.com.sa", price: 401 }),
+    ]);
+    expect(kept.map((k) => k.store)).toEqual(["Carrefour KSA", "Saeel", "desertcart.com.sa"]);
+  });
   it("keeps one offer per store, its lowest, sorted by price", () => {
     const kept = keepOffers(our, [offer({ store: "Saeel", price: 499 }), offer({ store: "saeel", price: 479 }), offer({ store: "Danube", price: 450 })]);
     expect(kept.map((k) => [k.store, k.price])).toEqual([["Danube", 450], ["saeel", 479]]);
