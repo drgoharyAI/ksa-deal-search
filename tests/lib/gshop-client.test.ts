@@ -126,6 +126,21 @@ describe("helpers", () => {
     expect(cleanQuery("Philips Essential Airfryer Black Large Capacity Rapid Air")).toBe("Philips Essential Airfryer Black");
     expect(cleanQuery("  ")).toBe("");
   });
+  it("cleanQuery never takes a size, a unit or a pack count for the model number (review)", () => {
+    // A real model code wins: letters with digits.
+    expect(cleanQuery("Samsung 65 inch QLED 4K Q60D Smart TV")).toBe("Samsung 65 inch QLED 4K Q60D");
+    expect(cleanQuery("Tefal 1.7L Electric Kettle KO8501 Stainless Steel")).toBe("Tefal 1.7L Electric Kettle KO8501");
+    expect(cleanQuery("Sony WH-1000XM5 Wireless Noise Cancelling Headphones, Black")).toBe("Sony WH-1000XM5");
+    // No model code: the first words, sizes kept, so the query stays one product.
+    expect(cleanQuery("Samsung 65 inch QLED Smart TV")).toBe("Samsung 65 inch QLED");
+    expect(cleanQuery("Tefal 1.7L Electric Kettle")).toBe("Tefal 1.7L Electric Kettle");
+    expect(cleanQuery("2 Pack Anker USB-C Charging Cable")).toBe("2 Pack Anker USB-C");
+    // A bare series number is the model unless a unit follows it.
+    expect(cleanQuery("Apple iPhone 16 Pro 256GB Desert Titanium")).toBe("Apple iPhone 16 Pro");
+    expect(cleanQuery("iPhone 16 Pro 256GB")).toBe("iPhone 16 Pro");
+    expect(cleanQuery("Apple AirPods 4 with Active Noise Cancellation")).toBe("Apple AirPods 4");
+    expect(cleanQuery("Anker Power Bank 20000mAh 22.5W Fast Charging")).toBe("Anker Power Bank 20000mAh");
+  });
   it("currencyOf reads SAR and other currencies from Google's price text", () => {
     expect(currencyOf("SAR 349.00")).toBe("SAR");
     expect(currencyOf("349.00 ر.س.\u200f")).toBe("SAR");

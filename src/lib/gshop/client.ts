@@ -117,25 +117,35 @@ export function currencyOf(text: string): string {
 /** Words after a model number that still name the model ("iPhone 15 Pro Max", "Galaxy S24 Ultra"). */
 const MODEL_QUALIFIERS = new Set(["pro", "max", "plus", "ultra", "mini", "lite", "se", "fe", "air", "neo", "xl", "xxl", "slim", "edge"]);
 
+/** A size, a unit or a count: "65", "1.7L", "256GB", "4K", "20W", "20000mAh", "3rd". Never a model number. */
+const UNIT_TOKEN = /^\d+(?:[.,]\d+)?(?:gb|tb|mb|l|ml|cl|cm|mm|m|w|kw|mah|hz|khz|k|inch|in|"|v|kg|g|pcs|pc|x|st|nd|rd|th)?$/i;
+/** Words that make the number before them a size or a count ("65 inch", "2 pack"). */
+const UNIT_WORDS = new Set(["inch", "inches", "in", "pack", "pcs", "pieces", "piece", "x", "gb", "tb", "w", "l", "ml", "mm", "cm", "m", "mah", "hours", "hour", "hrs", "liter", "liters", "litre", "litres", "years", "year", "ft", "kg", "g"]);
+/** A model code: letters and digits together ("Q60D", "KO8501", "WH-1000XM5", "S24"), not a unit. */
+const isModelCode = (w: string) => /[a-z]/i.test(w) && /\d/.test(w) && !UNIT_TOKEN.test(w);
+const isBareNumber = (w: string) => /^\d{1,4}$/.test(w);
+
 /**
- * The search phrase for a store title: the product's name up to its model number ("JBL Flip 6"),
- * plus model words right after it ("Pro Max"); colours, sizes and marketing words are left out.
- * Without a model number, the first 4 words. Live 2026-11-28: the 7-word "JBL Flip 6 Gray Portable
- * Bluetooth Speaker" brought Google Shopping 40 unrelated speakers and no Flip 6.
+ * The search phrase for a store title: the product's name up to its model, plus model words right
+ * after it ("Pro Max"); colours, sizes and marketing words after it are left out. The model is a
+ * model code (letters with digits) when there is one, else a bare series number that is not a size
+ * or count ("Flip 6", "iPhone 16", but not "65 inch" or "2 Pack"). Without either, the first 4
+ * words, sizes kept. Live 2026-11-28: the 7-word "JBL Flip 6 Gray Portable Bluetooth Speaker"
+ * brought Google Shopping 40 unrelated speakers and no Flip 6.
  */
 export function cleanQuery(title: string): string {
   const noBrackets = title.replace(/\([^)]{0,200}\)|\[[^\]]{0,200}\]/g, " ");
   const head = noBrackets.split(/ [-|–—] |،|,/)[0];
   const words = head
-    .replace(/[^\p{L}\p{N}\s.+/-]/gu, " ")
+    .replace(/[^\p{L}\p{N}\s.+/"-]/gu, " ")
     .split(/\s+/)
     .filter(Boolean);
-  const model = words.slice(0, 6).findIndex((w) => /\d/.test(w));
-  let out = words.slice(0, 4);
-  if (model >= 0) {
-    out = words.slice(0, model + 1);
-    for (let i = model + 1; i < words.length && out.length < 6 && MODEL_QUALIFIERS.has(words[i].toLowerCase()); i++) out.push(words[i]);
-  }
+  const unitAfter = (i: number) => i + 1 < words.length && UNIT_WORDS.has(words[i + 1].toLowerCase());
+  let model = words.slice(0, 8).findIndex(isModelCode);
+  if (model < 0) model = words.slice(0, 6).findIndex((w, i) => i > 0 && isBareNumber(w) && !unitAfter(i));
+  if (model < 0) return words.slice(0, 4).join(" ").slice(0, 100);
+  const out = model < 6 ? words.slice(0, model + 1) : [words[0], words[model]];
+  for (let i = model + 1; i < words.length && out.length < 6 && MODEL_QUALIFIERS.has(words[i].toLowerCase()); i++) out.push(words[i]);
   return out.join(" ").slice(0, 100);
 }
 

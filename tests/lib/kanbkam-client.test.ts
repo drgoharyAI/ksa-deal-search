@@ -73,7 +73,7 @@ describe("classifyKanbkam", () => {
     expect(classifyKanbkam("amazon-sa", 410, "")).toEqual({ kind: "missing" });
     expect(classifyKanbkam("amazon-sa", 200, fixture("not-found.html"))).toEqual({ kind: "missing" });
   });
-  it("403, 429, 503 and a Cloudflare challenge page are a block", () => {
+  it("403, 429 and a Cloudflare challenge page (whatever its status, 503 included) are a block", () => {
     expect(classifyKanbkam("amazon-sa", 403, "")).toEqual({ kind: "blocked", why: "403" });
     expect(classifyKanbkam("amazon-sa", 429, "")).toEqual({ kind: "blocked", why: "429" });
     expect(classifyKanbkam("amazon-sa", 503, fixture("challenge.html"))).toEqual({ kind: "blocked", why: "challenge" });
