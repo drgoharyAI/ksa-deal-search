@@ -3,6 +3,7 @@ import { cachedAt } from "@/src/lib/cache";
 import type { ParsedQuery, Product, SiteAdapter, SiteStatus } from "@/src/lib/types";
 import { parseQuery } from "@/src/lib/query/parse";
 import { expandTerms } from "@/src/lib/query/synonyms";
+import { currentSpeller } from "@/src/lib/query/vocab";
 import { matchTerms } from "@/src/lib/query/filler";
 import { tokenizeKeepDigits } from "@/src/lib/match/tokenize";
 import { filterRelevant } from "@/src/lib/match/relevance";
@@ -25,7 +26,12 @@ export type SearchInput = {
   minPrice?: number;
   maxPrice?: number;
   minRating?: number;
+  /** Search the query as typed: no typo correction ("Search instead for ..."). */
+  noCorrect?: boolean;
 };
+
+/** A typo correction: the query as typed and the query searched. */
+export type QueryCorrection = { from: string; to: string };
 
 export type SearchResult = {
   products: Product[];
@@ -40,6 +46,8 @@ export type SearchResult = {
   groupExtras?: Product[];
   /** Listings dropped because their store marks them out of stock (site and id), when any. */
   outOfStock?: { site: string; id: string }[];
+  /** The query was corrected before the store calls (src/lib/query/spell.ts). */
+  correction?: QueryCorrection;
   reason?: string;
 };
 
@@ -212,10 +220,16 @@ export type PreparedSearch = {
   variants: string[];
   queryTokens: string[][];
   adapters: SiteAdapter[];
+  /** Set when the query was corrected: the stores get the corrected query. */
+  correction?: QueryCorrection;
 };
 
 export function prepareSearch(input: SearchInput): PreparedSearch {
-  const pq = parseQuery(input.query);
+  // Typos are fixed before anything else, so the stores, the matcher and the recordings (eval
+  // replay) all see the corrected words. English words only; operators and model codes stay.
+  const fixed = input.noCorrect ? null : currentSpeller().correct(input.query);
+  const correction = fixed?.changed ? { from: input.query, to: fixed.query } : undefined;
+  const pq = parseQuery(correction ? correction.to : input.query);
   const variants = expandTerms(pq.terms);
   // Digits stay even when single ("nintendo switch 2", "airpods 4"): a model number is a hard attribute.
   // Filler ("best", "cheap", "for") is not a required title word; stores still get the raw words.
@@ -226,7 +240,7 @@ export function prepareSearch(input: SearchInput): PreparedSearch {
   const adapters = input.sites
     .map((id) => (Object.hasOwn(registry, id) ? registry[id] : undefined))
     .filter((a): a is SiteAdapter => a !== undefined);
-  return { pq, variants, queryTokens, adapters };
+  return correction ? { pq, variants, queryTokens, adapters, correction } : { pq, variants, queryTokens, adapters };
 }
 
 export async function runSearch(input: SearchInput, opts: SearchOptions = {}): Promise<SearchResult> {
@@ -242,7 +256,7 @@ export async function runSearch(input: SearchInput, opts: SearchOptions = {}): P
  */
 export function assembleResults(
   input: SearchInput,
-  prepared: Pick<PreparedSearch, "pq" | "queryTokens">,
+  prepared: Pick<PreparedSearch, "pq" | "queryTokens" | "correction">,
   outs: SiteOutcome[],
   opts: Pick<SearchOptions, "onFiltered"> = {},
 ): SearchResult {
@@ -294,6 +308,7 @@ export function assembleResults(
 
   const result: SearchResult = { products, statuses, queryTokens, groups: groupRefs(groups), groupExtras };
   if (outOfStock.length) result.outOfStock = outOfStock;
+  if (prepared.correction) result.correction = prepared.correction;
   if (!products.length) result.reason = NO_MATCH_REASON;
   return result;
 }
