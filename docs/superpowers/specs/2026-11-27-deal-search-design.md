@@ -551,3 +551,14 @@ kept minimal and respectful:
   when one applies, and a small "History from Kanbkam" link (https Kanbkam product pages only)
   behind an (i) that opens on hover, focus or tap and closes with Esc (the gshop note's behaviour,
   copied so GshopCheck stays untouched). Off: nothing is drawn.
+
+**Hardening (2026-11-28, after review):**
+- Automatic lookups are capped on the server: 15 per 10 minutes across all clients (the browser's
+  "3 per search" is not trusted). Manual lookups keep the 10/h per client, 30/h and 200/day caps.
+- The hourly/daily quota is charged only when a page load actually starts; a queued lookup that
+  ends paused, busy or over a cap costs nothing.
+- Every redirect is a miss (cached 7 days, never followed), so a moved page is not retried on
+  each lookup. The page body is read with a 3 MB cap even without a Content-Length.
+- A product block showing a currency other than SAR is not used.
+- Accepted risk: `GET /api/kanbkam` tells any caller whether a listing's history is cached here
+  (i.e. that someone looked at it). Low value on a single-owner app; not worth an extra secret.

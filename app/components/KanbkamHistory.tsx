@@ -45,11 +45,11 @@ function useKanbkamResult(p: Product): KanbkamResult | null {
 
 type Answer = { status?: KanbkamStatus; result?: KanbkamResult | null; error?: string; calm?: boolean };
 
-async function call(p: Product, method: "GET" | "POST"): Promise<Answer> {
+async function call(p: Product, method: "GET" | "POST", auto = false): Promise<Answer> {
   const res =
     method === "GET"
       ? await fetch(`${API}?${new URLSearchParams({ site: p.site, id: p.id }).toString()}`, { cache: "no-store" })
-      : await fetch(API, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ site: p.site, id: p.id }) });
+      : await fetch(API, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ site: p.site, id: p.id, ...(auto && { auto: true }) }) });
   const body = (await res.json().catch(() => ({}))) as Answer;
   if (body.status) lastStatus = body.status;
   publish(keyOf(p), body.result);
@@ -59,13 +59,13 @@ async function call(p: Product, method: "GET" | "POST"): Promise<Answer> {
 }
 
 /** The listing's history, from the store or the server: cached first, looked up once per page. */
-async function load(p: Product): Promise<Answer> {
+async function load(p: Product, auto = false): Promise<Answer> {
   const k = keyOf(p);
   if (results.has(k)) return {};
   const first = await call(p, "GET");
   if (first.result || first.status?.enabled === false || asked.has(k)) return first;
   asked.add(k);
-  return call(p, "POST");
+  return call(p, "POST", auto);
 }
 
 // ---------------- the (i) source note ----------------
@@ -291,7 +291,7 @@ export function KanbkamAuto({ products }: { products: Product[] }) {
     void (async () => {
       for (const p of latest.current) {
         if (stop) return;
-        const a = await load(p).catch((): Answer => ({ error: "failed" }));
+        const a = await load(p, true).catch((): Answer => ({ error: "failed" }));
         if (a.error || a.status?.enabled === false) return;
       }
     })();

@@ -163,7 +163,7 @@ describe("fetchKanbkam", () => {
     expect(await fetchKanbkam("amazon-sa", "../admin", { fetch: fake })).toEqual({ kind: "error", message: "invalid id" });
     expect(calls).toBe(0);
   });
-  it("never follows a redirect: Kanbkam's redirect to its search (live check, unknown id) is a miss", async () => {
+  it("never follows a redirect; every redirect is a miss (cached, so it is not retried each lookup)", async () => {
     const urls: string[] = [];
     const hop = (to: string) =>
       (async (url: string) => {
@@ -172,9 +172,29 @@ describe("fetchKanbkam", () => {
       }) as unknown as typeof fetch;
     expect(await fetchKanbkam("amazon-sa", "B000000000", { fetch: hop("https://www.kanbkam.com/sa/en/search/l?q=p") })).toEqual({ kind: "missing" });
     expect(await fetchKanbkam("amazon-sa", "B000000000", { fetch: hop("/sa/en/search/l?q=p") })).toEqual({ kind: "missing" });
-    expect(await fetchKanbkam("amazon-sa", "B09HGPKY7Q", { fetch: hop("/sa/en/jbl-flip-6-B09HGPKY7Q") })).toEqual({ kind: "error", message: "redirect" });
-    expect(await fetchKanbkam("amazon-sa", "B09HGPKY7Q", { fetch: hop("https://evil.example/sa/en/search/x") })).toEqual({ kind: "error", message: "redirect" });
+    expect(await fetchKanbkam("amazon-sa", "B09HGPKY7Q", { fetch: hop("/sa/en/jbl-flip-6-B09HGPKY7Q") })).toEqual({ kind: "missing" });
+    expect(await fetchKanbkam("amazon-sa", "B09HGPKY7Q", { fetch: hop("https://evil.example/sa/en/search/x") })).toEqual({ kind: "missing" });
     expect(urls).toHaveLength(4);
+  });
+  it("stops reading at the size cap even without a Content-Length", async () => {
+    let pulled = 0;
+    const endless = (async () =>
+      new Response(
+        new ReadableStream({
+          pull(c) {
+            pulled += 1;
+            c.enqueue(new Uint8Array(1_000_000));
+          },
+        }),
+        { status: 200 },
+      )) as unknown as typeof fetch;
+    expect(await fetchKanbkam("amazon-sa", "B09HGPKY7Q", { fetch: endless })).toEqual({ kind: "error", message: "page too large" });
+    expect(pulled).toBeLessThan(10);
+  });
+  it("a product block priced in another currency is not this listing's history", () => {
+    const html = '<div class="product-info"> KWD <span id="min">20</span> <span id="max">40</span> </div>';
+    expect(parseKanbkamPage(html)).toBeNull();
+    expect(parseKanbkamPage(html.replace("KWD", "SAR"))).not.toBeNull();
   });
   it("a network failure or timeout is an error", async () => {
     const fail = (async () => {

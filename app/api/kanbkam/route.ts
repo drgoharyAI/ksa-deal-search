@@ -55,7 +55,7 @@ export async function POST(req: Request) {
   if (!valid(site, id)) return bad("Say which listing ({ site, id })");
   try {
     const deps = { db: getDb() };
-    const answer = await lookupHistory(deps, { site, id: id as string, client: clientKeyOf(req) });
+    const answer = await lookupHistory(deps, { site, id: id as string, client: clientKeyOf(req), auto: (body as Record<string, unknown>).auto === true });
     if (!answer.ok) return json({ error: MESSAGES[answer.error], status: kanbkamStatus(deps) }, STATUS[answer.error]);
     return json({ status: kanbkamStatus(deps), result: answer.result });
   } catch (e) {

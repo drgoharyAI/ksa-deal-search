@@ -32,6 +32,8 @@ export const KANBKAM_LIMITS = {
   TTL_MISSING_MS: 7 * DAY,
   /** Lookups waiting or running at once; more answer "busy" (a full queue is a minute of waiting). */
   MAX_QUEUE: 6,
+  /** Automatic lookups (after a search) across all clients, per 10 minutes; manual ones have the caps above. */
+  AUTO_PER_10MIN: 15,
 } as const;
 
 type Env = Record<string, string | undefined>;
@@ -144,9 +146,9 @@ function cachePut(db: Db, site: string, id: string, f: Extract<KanbkamFetch, { k
 export type LookupError = "off" | "unsupported" | "unknown" | "rate" | "busy" | "paused" | "failed";
 export type LookupAnswer = { ok: true; result: KanbkamResult } | { ok: false; error: LookupError };
 
-type Shared = { flights: Map<string, Promise<LookupAnswer>>; clients: ClientLimiter; tail: Promise<unknown>; pending: number };
+type Shared = { flights: Map<string, Promise<LookupAnswer>>; clients: ClientLimiter; tail: Promise<unknown>; pending: number; auto: number[] };
 const g = globalThis as typeof globalThis & { __kanbkam?: Shared };
-const shared = (): Shared => (g.__kanbkam ??= { flights: new Map(), clients: clientLimiter(KANBKAM_LIMITS.PER_CLIENT_HOUR), tail: Promise.resolve(), pending: 0 });
+const shared = (): Shared => (g.__kanbkam ??= { flights: new Map(), clients: clientLimiter(KANBKAM_LIMITS.PER_CLIENT_HOUR), tail: Promise.resolve(), pending: 0, auto: [] });
 
 /** For tests: forget in-flight lookups, the queue and the per-client counts (the persisted state stays). */
 export function resetKanbkam(): void {
@@ -178,7 +180,7 @@ export function cachedHistory(deps: KanbkamDeps, site: string, id: string): Kanb
  * Looks up one listing seen in a search. Every check that can refuse runs before anything is
  * queued, so a refused caller costs Kanbkam nothing; a cached or in-flight listing is free.
  */
-export function lookupHistory(deps: KanbkamDeps, req: { site: string; id: string; client?: string }): Promise<LookupAnswer> {
+export function lookupHistory(deps: KanbkamDeps, req: { site: string; id: string; client?: string; auto?: boolean }): Promise<LookupAnswer> {
   const { db } = deps;
   const clock = deps.now ?? Date.now;
   const sleep = deps.sleep ?? ((ms: number) => new Promise<void>((r) => setTimeout(r, ms)));
@@ -200,12 +202,21 @@ export function lookupHistory(deps: KanbkamDeps, req: { site: string; id: string
   const client = req.client ?? "local";
   if (used(db, hourKey(now)) >= cfg.perHour || used(db, dayKey(now)) >= cfg.perDay || !s.clients.allowed(client, now)) return no("rate");
   if (s.pending >= KANBKAM_LIMITS.MAX_QUEUE) return no("busy");
-  count(db, hourKey(now));
-  count(db, dayKey(now));
+  if (req.auto) {
+    // Server-side: the browser's "3 per search" is not trusted.
+    s.auto = s.auto.filter((t) => now - t < 10 * 60 * 1000);
+    if (s.auto.length >= KANBKAM_LIMITS.AUTO_PER_10MIN) return no("rate");
+    s.auto.push(now);
+  }
   s.clients.record(client, now);
   const run = enqueue(async (): Promise<LookupAnswer> => {
     // Another job may have been blocked while this one waited.
     if (backedOffUntil(db, clock()) !== null) return { ok: false, error: "paused" };
+    // The quota pays for real loads only: counted here, when one is about to start.
+    const t = clock();
+    if (used(db, hourKey(t)) >= cfg.perHour || used(db, dayKey(t)) >= cfg.perDay) return { ok: false, error: "rate" };
+    count(db, hourKey(t));
+    count(db, dayKey(t));
     const wait = getState(db, "lastLoad") + KANBKAM_LIMITS.GAP_MS - clock();
     if (wait > 0) await sleep(Math.min(wait, KANBKAM_LIMITS.GAP_MS));
     setState(db, "lastLoad", clock());

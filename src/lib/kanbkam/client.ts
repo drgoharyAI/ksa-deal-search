@@ -65,11 +65,15 @@ const CHANGE = /Recent Price (Drop|Increase|Raise|Rise)\s{0,20}<\/span>\s{0,400}
 const STORE = /data-gtmid="product-buy\|([a-z]{2,20})\|/;
 const SINCE = /\b[Ss]ince\s{1,5}([A-Z][a-z]{2,8}\.? \d{1,2},? \d{4}|\d{4}-\d{2}-\d{2}|\d{1,2}\/\d{1,2}\/\d{4})/;
 const TITLE = /<h1[^>]{0,200}>([^<]{1,600})<\/h1>/;
+/** The first currency code shown in the product block; the /sa/ pages are SAR, anything else is not ours. */
+const CURRENCY = /\b(SAR|KWD|AED|USD|EUR|QAR|BHD|OMR|EGP|JOD)\b/;
 
 /** The fields of a Kanbkam product page, or null when it shows no sound price history. Pure. */
 export function parseKanbkamPage(html: string): KanbkamPage | null {
   const s = mainSection(html);
   if (!s) return null;
+  const currency = CURRENCY.exec(s)?.[1];
+  if (currency && currency !== "SAR") return null;
   const min = num(MIN.exec(s)?.[1]);
   const max = num(MAX.exec(s)?.[1]);
   if (min === null || max === null || min <= 0 || max <= 0 || min > max) return null;
@@ -121,6 +125,25 @@ function redirectsToSearch(location: string | null, base: string): boolean {
   }
 }
 
+/** The body as text, or null past `max` bytes: stops reading at the cap even without a Content-Length. */
+async function readCapped(res: Response, max: number): Promise<string | null> {
+  if (!res.body) return "";
+  const reader = res.body.getReader();
+  const chunks: Uint8Array[] = [];
+  let size = 0;
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    size += value.byteLength;
+    if (size > max) {
+      await reader.cancel();
+      return null;
+    }
+    chunks.push(value);
+  }
+  return new TextDecoder().decode(Buffer.concat(chunks));
+}
+
 /**
  * Loads one listing's product page (exactly one request; a redirect is never followed) and
  * classifies it. Never throws.
@@ -136,11 +159,20 @@ export async function fetchKanbkam(site: string, id: string, opts: FetchOpts = {
   };
   try {
     const res = await doFetch(first, init);
-    if (res.status >= 300 && res.status < 400) return redirectsToSearch(res.headers.get("location"), first) ? { kind: "missing" } : { kind: "error", message: "redirect" };
+    // Any redirect is cached as a miss (never followed): to search it is an unknown id; anywhere
+    // else (a renamed page, a moved site) retrying each lookup would only spend the caps.
+    if (res.status >= 300 && res.status < 400) {
+      if (!redirectsToSearch(res.headers.get("location"), first)) console.warn("[kanbkam] unexpected redirect; treated as a miss");
+      await res.body?.cancel();
+      return { kind: "missing" };
+    }
     const declared = Number(res.headers.get("content-length"));
-    if (Number.isFinite(declared) && declared > MAX_PAGE) return { kind: "error", message: "page too large" };
-    const html = await res.text();
-    if (html.length > MAX_PAGE) return { kind: "error", message: "page too large" };
+    if (Number.isFinite(declared) && declared > MAX_PAGE) {
+      await res.body?.cancel();
+      return { kind: "error", message: "page too large" };
+    }
+    const html = await readCapped(res, MAX_PAGE);
+    if (html === null) return { kind: "error", message: "page too large" };
     return classifyKanbkam(site, res.status, html);
   } catch (e) {
     return { kind: "error", message: e instanceof Error ? e.message.slice(0, 200) : "error" };

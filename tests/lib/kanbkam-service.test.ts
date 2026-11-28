@@ -202,6 +202,24 @@ describe("lookupHistory", () => {
     expect((await look("B09HGPKY7Q")).ok).toBe(true);
     expect(fetches).toHaveLength(2);
   });
+  it("automatic lookups are capped on the server (15 per 10 minutes overall), whatever the browser does", async () => {
+    const n = KANBKAM_LIMITS.AUTO_PER_10MIN + 1;
+    for (let i = 1; i <= n; i++) seen("amazon-sa", asin(i), 300);
+    for (let i = 1; i < n; i++) expect((await lookupHistory(deps(), { site: "amazon-sa", id: asin(i), client: `cf:10.3.${i}.1`, auto: true })).ok).toBe(true);
+    expect(await lookupHistory(deps(), { site: "amazon-sa", id: asin(n), client: "cf:10.4.0.1", auto: true })).toEqual({ ok: false, error: "rate" });
+    // A manual lookup of the same listing is still allowed (its own caps).
+    expect((await lookupHistory(deps(), { site: "amazon-sa", id: asin(n), client: "cf:10.4.0.1" })).ok).toBe(true);
+  });
+  it("the quota pays only for real loads: a lookup that ends paused before loading costs nothing", async () => {
+    for (let i = 1; i <= 2; i++) seen("amazon-sa", asin(i), 300);
+    answer = () => new Response("", { status: 403 });
+    // Two queued: the first is blocked (back-off), the second then ends paused without loading.
+    const [a, b] = await Promise.all([look(asin(1), "cf:1.1.1.1"), look(asin(2), "cf:2.2.2.2")]);
+    expect([a, b]).toEqual([{ ok: false, error: "paused" }, { ok: false, error: "paused" }]);
+    expect(fetches).toHaveLength(1);
+    const used = db.prepare("SELECT calls FROM kanbkam_usage WHERE period LIKE 'hour:%'").get() as { calls: number };
+    expect(used.calls).toBe(1);
+  });
   it("a full queue answers 'busy' with no fetch", async () => {
     const n = KANBKAM_LIMITS.MAX_QUEUE + 1;
     for (let i = 1; i <= n; i++) seen("amazon-sa", asin(i), 300);
