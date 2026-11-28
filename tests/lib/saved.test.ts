@@ -38,7 +38,7 @@ describe("migration 5 (favourites, recently_viewed)", () => {
 
     db = openDb(file);
     expect(version(db)).toBe(SCHEMA_VERSION);
-    expect(SCHEMA_VERSION).toBe(7);
+    expect(SCHEMA_VERSION).toBe(8);
     expect(tables(db)).toEqual(expect.arrayContaining(["favourites", "recently_viewed", "searches", "observations", "seen_products"]));
     expect(listSearches(db)).toHaveLength(1);
     expect((db.prepare("SELECT count(*) n FROM observations").get() as { n: number }).n).toBe(1);

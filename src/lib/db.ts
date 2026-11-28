@@ -176,6 +176,27 @@ const MIGRATIONS: (string | ((db: Db) => void))[] = [
                AND id IN (SELECT max(id) FROM alert_events WHERE watchId IS NOT NULL GROUP BY watchId)
                AND watchId IN (SELECT id FROM watches WHERE lastFiredPrice IS NULL)`);
   },
+  // 8: Google Shopping KSA validator (src/lib/gshop): call counters per period (SerpApi month,
+  // Google loads per hour and day, automatic checks per day), small state values (the scrape
+  // back-off, the last load) and each product's captured offers for 24 h. Idempotent.
+  `CREATE TABLE IF NOT EXISTS gshop_usage (
+     period TEXT PRIMARY KEY,
+     calls INTEGER NOT NULL DEFAULT 0
+   );
+   CREATE TABLE IF NOT EXISTS gshop_state (
+     key TEXT PRIMARY KEY,
+     value TEXT NOT NULL
+   );
+   CREATE TABLE IF NOT EXISTS gshop_cache (
+     site TEXT NOT NULL,
+     productId TEXT NOT NULL,
+     titleKey TEXT NOT NULL,
+     at INTEGER NOT NULL,
+     source TEXT NOT NULL,
+     payload TEXT NOT NULL,
+     PRIMARY KEY (site, productId, titleKey)
+   );
+   CREATE INDEX IF NOT EXISTS gshop_cache_at ON gshop_cache(at);`,
 ];
 
 export const SCHEMA_VERSION = MIGRATIONS.length;

@@ -123,3 +123,20 @@ describe("migration 7 (alert_events.retry)", () => {
     }
   });
 });
+
+describe("migration 8 (Google Shopping KSA tables)", () => {
+  it("creates the counter, state and cache tables and is idempotent", () => {
+    const d = openDb(":memory:");
+    try {
+      const tables = () => (d.prepare("SELECT name FROM sqlite_master WHERE type = 'table'").all() as { name: string }[]).map((t) => t.name);
+      expect(tables()).toEqual(expect.arrayContaining(["gshop_usage", "gshop_state", "gshop_cache"]));
+      d.prepare("INSERT INTO gshop_usage (period, calls) VALUES ('serpapi:2026-11', 5)").run();
+      d.prepare("UPDATE schema_version SET version = 7").run();
+      migrate(d);
+      expect((d.prepare("SELECT version FROM schema_version").get() as { version: number }).version).toBe(SCHEMA_VERSION);
+      expect(d.prepare("SELECT calls FROM gshop_usage").get()).toEqual({ calls: 5 });
+    } finally {
+      d.close();
+    }
+  });
+});
