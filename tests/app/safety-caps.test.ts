@@ -119,20 +119,35 @@ describe("safety caps", () => {
     expect(((await r.json()) as { error: string }).error).toContain("100");
   });
 
-  it("re-arms a watch through PATCH at most once a minute", async () => {
+  it("re-arms a watch through PATCH at most 5 times a minute", async () => {
     const id = createWatch(state.db, { kind: "search", site: null, productId: null, query: "q", sites: ["jarir"], target: 10 }, 0);
-    expect((await watches.PATCH(jsonReq("/api/watches", "PATCH", { id, target: 9 }))).status).toBe(200);
-    const r = await watches.PATCH(jsonReq("/api/watches", "PATCH", { id, target: 8 }));
+    for (let t = 9; t > 4; t--) expect((await watches.PATCH(jsonReq("/api/watches", "PATCH", { id, target: t }))).status).toBe(200);
+    const r = await watches.PATCH(jsonReq("/api/watches", "PATCH", { id, target: 3 }));
     expect(r.status).toBe(429);
     expect(await r.json()).toEqual({ error: "Wait a minute before changing this alert again" });
     // pausing is not a re-arm
     expect((await watches.PATCH(jsonReq("/api/watches", "PATCH", { id, status: "paused" }))).status).toBe(200);
   });
 
-  it("re-arms an existing watch through POST at most once a minute too", async () => {
+  it("a failed write does not spend the re-arm limit", async () => {
+    const id = createWatch(state.db, { kind: "search", site: null, productId: null, query: "q", sites: ["jarir"], target: 10 }, 0);
+    const good = state.db;
+    const failing = { prepare: (sql: string) => (sql.startsWith("UPDATE") ? (() => { throw new Error("disk I/O error"); })() : good.prepare(sql)) };
+    state.db = failing as unknown as Db;
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    try {
+      for (let i = 0; i < 6; i++) expect((await watches.PATCH(jsonReq("/api/watches", "PATCH", { id, target: 9 }))).status).toBe(500);
+    } finally {
+      warn.mockRestore();
+      state.db = good;
+    }
+    expect((await watches.PATCH(jsonReq("/api/watches", "PATCH", { id, target: 9 }))).status).toBe(200);
+  });
+
+  it("re-arms an existing watch through POST at most 5 times a minute too", async () => {
     const body = { kind: "search", query: "q", sites: ["jarir"], target: 10 };
     expect((await watches.POST(jsonReq("/api/watches", "POST", body))).status).toBe(201);
-    expect((await watches.POST(jsonReq("/api/watches", "POST", body))).status).toBe(200);
+    for (let i = 0; i < 5; i++) expect((await watches.POST(jsonReq("/api/watches", "POST", body))).status).toBe(200);
     const r = await watches.POST(jsonReq("/api/watches", "POST", body));
     expect(r.status).toBe(429);
     expect(await r.json()).toEqual({ error: "Wait a minute before changing this alert again" });

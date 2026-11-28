@@ -9,6 +9,7 @@ import { isPickupOnly } from "@/src/lib/saved";
 import { MAX_WATCHES, limiters } from "@/src/lib/limits";
 
 const SITE_IDS = new Set(Object.keys(sites));
+const REARM_LIMITED = "Wait a minute before changing this alert again";
 
 // eslint-disable-next-line @typescript-eslint/require-await -- route handlers share one async Promise<Response> shape (callers and tests await every handler)
 export async function GET(req: Request) {
@@ -45,14 +46,16 @@ export async function POST(req: Request) {
     const existing =
       w.kind === "product" ? findProductWatch(db, w.site as string, w.productId as string) : findSearchWatch(db, w);
     if (existing) {
-      // Re-arming an existing watch: once per watch a minute, as PATCH (owner ruling: safety caps).
-      if (!limiters.rearm.take(String(existing.id))) return bad("Wait a minute before changing this alert again", 429);
+      // Re-arming an existing watch: 5 times per watch a minute, as PATCH (owner ruling: safety
+      // caps); counted only once the change is stored.
+      if (!limiters.rearm.allowed(String(existing.id))) return bad(REARM_LIMITED, 429);
       updateWatch(db, existing.id, {
         target: w.target,
         status: "active",
         lastFiredPrice: null,
         ...(w.kind === "search" ? { filters: w.filters ?? {} } : {}),
       });
+      limiters.rearm.record(String(existing.id));
       return json({ watch: getWatch(db, existing.id), updated: true });
     }
     // Owner ruling: safety caps.
@@ -80,12 +83,14 @@ export async function PATCH(req: Request) {
   try {
     const db = getDb();
     if (!getWatch(db, id)) return bad("No such watch", 404);
-    // Re-arming (a new target) once per watch a minute (owner ruling: safety caps).
-    if (target !== undefined && !limiters.rearm.take(String(id))) return bad("Wait a minute before changing this alert again", 429);
+    // Re-arming (a new target): 5 times per watch a minute (owner ruling: safety caps); counted
+    // only once the change is stored.
+    if (target !== undefined && !limiters.rearm.allowed(String(id))) return bad(REARM_LIMITED, 429);
     updateWatch(db, id, {
       ...(target !== undefined ? { target, lastFiredPrice: null } : {}),
       ...(status !== undefined ? { status } : {}),
     });
+    if (target !== undefined) limiters.rearm.record(String(id));
     return json({ watch: getWatch(db, id) });
   } catch (e) {
     return dbFailure(e);

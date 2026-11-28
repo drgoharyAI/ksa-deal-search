@@ -10,40 +10,53 @@ import "server-only";
 export const MAX_WATCHES = 100;
 /** Telegram test messages: one per this window. */
 const TELEGRAM_TEST_WINDOW_MS = 60_000;
-/** A watch re-armed through PATCH (a new target): once per watch per this window. */
+/** A watch re-armed (a new target, or POST on an existing watch): REARM_MAX times per watch per this window. */
 const REARM_WINDOW_MS = 60_000;
+const REARM_MAX = 5;
 
 export type WindowLimiter = {
-  /** True (and the window starts) when `key` is free; false inside its window. */
+  /** True when `key` has used fewer than its `max` actions in the window. */
+  allowed(key: string, now?: number): boolean;
+  /** Counts one action for `key` (after it happened). */
+  record(key: string, now?: number): void;
+  /** allowed, then record: for an action that must be held before it starts (a Telegram send). */
   take(key: string, now?: number): boolean;
-  /** Frees `key` again (the action did not happen after all). */
+  /** Frees the latest action of `key` (it did not happen after all). */
   release(key: string): void;
   clear(): void;
 };
 
-/** One action per key per `ms`. Entries past their window are dropped, so the map stays small. */
-function windowLimiter(ms: number): WindowLimiter {
-  const last = new Map<string, number>();
-  return {
+/** At most `max` actions per key per `ms`. Old entries are dropped, so the map stays small. */
+function windowLimiter(ms: number, max = 1): WindowLimiter {
+  const hits = new Map<string, number[]>();
+  const recent = (key: string, now: number) => (hits.get(key) ?? []).filter((t) => now - t < ms);
+  const api: WindowLimiter = {
+    allowed(key, now = Date.now()) {
+      return recent(key, now).length < max;
+    },
+    record(key, now = Date.now()) {
+      if (hits.size >= 1000) for (const k of [...hits.keys()]) if (!recent(k, now).length) hits.delete(k);
+      hits.set(key, [...recent(key, now), now]);
+    },
     take(key, now = Date.now()) {
-      const t = last.get(key);
-      if (t !== undefined && now - t < ms) return false;
-      if (last.size >= 1000) for (const [k, at] of last) if (now - at >= ms) last.delete(k);
-      last.set(key, now);
+      if (!api.allowed(key, now)) return false;
+      api.record(key, now);
       return true;
     },
     release(key) {
-      last.delete(key);
+      const list = hits.get(key);
+      if (list?.length) list.pop();
     },
     clear() {
-      last.clear();
+      hits.clear();
     },
   };
+  return api;
 }
 
 const g = globalThis as unknown as { __dealSearchLimits?: { telegramTest: WindowLimiter; rearm: WindowLimiter } };
 /** Shared across route modules and hot reloads. */
 export const limiters = (g.__dealSearchLimits ??= {
   telegramTest: windowLimiter(TELEGRAM_TEST_WINDOW_MS),
-  rearm: windowLimiter(REARM_WINDOW_MS),
+  rearm: windowLimiter(REARM_WINDOW_MS, REARM_MAX),
 });

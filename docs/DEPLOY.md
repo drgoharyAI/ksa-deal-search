@@ -256,7 +256,7 @@ and the stores. Normal personal use never reaches them; a restart clears them.
 |---|---|---|
 | Telegram test message | 1 per 60 s | `429 {"error":"Wait a minute before sending another test"}` |
 | Price watches | 100 | `409 {"error":"You can keep up to 100 price alerts. Delete one to add another."}` |
-| Re-arm one watch (new target) | 1 per watch per 60 s | `429 {"error":"Wait a minute before changing this alert again"}` |
+| Re-arm one watch (new target, or POST on an existing watch) | 5 per watch per 60 s, counted after the change is stored | `429 {"error":"Wait a minute before changing this alert again"}` |
 | Searches | 4 running + 8 waiting | `503 {"error":"Busy, try again in a moment"}`, `Retry-After: 5` |
 | JSON request body | 8 KB, read as a stream | `413` |
 | Check cycle | 100 watches, 20 Telegram alerts | the rest wait for the next cycle |
