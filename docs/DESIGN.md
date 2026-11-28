@@ -140,6 +140,10 @@ the card lifts 1px to `--shadow-2`. There is never a card inside a card.
 - **Toolbar.** It holds Filters (below 64rem, with a count badge), Sort (the existing sorts) and a Grid or List
   switch, which is kept in localStorage. Below 64rem it sticks under the top bar; `--topbar-h` is
   measured at runtime.
+- **Typo correction.** When the server corrected the query, one line under the head (`.results__correction`,
+  `--text-sm`, ink-2): "Showing results for **airpods 4**. Search instead for *airpdos 4*". The corrected
+  query is bold ink; the typed one is an italic link (accent underline, as in `.results__note`) that runs it
+  as typed (`noCorrect=1`, kept in the URL). No colour, badge or icon: it is a fact about the search.
 - **Active filters.** Each one is a removable chip, followed by "Clear all".
 - **Filter panel.** It is one component, `FilterChips`, placed in one of three ways. From 64rem it is a sticky
   sidebar 16.5rem wide that holds its place while the first store streams. From 48rem it is a panel that the

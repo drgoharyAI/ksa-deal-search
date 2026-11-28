@@ -112,6 +112,12 @@ Jarir's mark; see [public/stores/SOURCES.md](public/stores/SOURCES.md).
 Filler words (`best`, `cheap`, `for`, ...) need not appear in titles; the stores still get your
 exact text.
 
+**Typos are corrected** before the stores are asked (`airpdos 4` searches `airpods 4`, `cordles drill`
+searches `cordless drill`, `air pods` becomes `airpods`), with "Search instead for" to run what you
+typed. Rule-based and local: the closest word (1 edit up to 7 letters, 2 from 8) from a vocabulary of
+the app's word lists, the product titles it has seen and your past searches. Numbers, model codes
+(`wh1000xm5`, `s24`), words under 4 letters and the query syntax above are never changed.
+
 ## How it works
 
 The UI is at `/`; the page calls `POST /api/search/stream`, and `POST /api/search` returns the

@@ -376,3 +376,37 @@ The app stays public with no login, but small caps protect the owner's server, T
 - **Check cycle:** at most 100 due watches processed and 20 Telegram alerts sent per cycle; the rest wait for the next cycle (oldest checked first). Price points older than 180 days and alert events beyond the newest 1000 are pruned each cycle.
 - **Search queue:** at most 4 searches run at once, with up to 8 more waiting (first come, first served). Past that, `POST /api/search` and `POST /api/search/stream` answer `503 {"error":"Busy, try again in a moment"}` with `Retry-After: 5`. The alert checker's searches use the same lanes but always wait, never refused, so they are not starved.
 - **Request bodies:** JSON bodies are read as a stream that stops at 8 KB (searches, watches, alerts; saved and viewed products keep their 8 KB cap): `413` past that.
+
+## Typo tolerance (owner request, 2026-11-28)
+"Make search able to deal with typos." Before it, a typo went to the stores as typed (some
+auto-correct, others return junk or nothing) and our relevance filter required the typed words, so
+"airpdos" dropped every correctly spelled product. Decisions:
+- **Rule-based and local only.** No LLM, no external spelling API. English words only (Arabic is
+  already "unsupported").
+- **Correct before the store calls** (`prepareSearch`): the stores, the matcher and the eval
+  recordings all see the corrected query. The answer carries `correction: {from, to}`; the UI says
+  "Showing results for **to**. Search instead for *from*", which re-runs with `noCorrect` (API input
+  and `noCorrect=1` in the share URL). `/api/suggest` sends the sources the corrected words too
+  (the unfinished last word is kept when a vocabulary word starts with it).
+- **Vocabulary** (`src/lib/query/vocab.ts`): the data/ word lists, the matcher's own lists (brands,
+  colours, variant, accessory and part words), a curated list of product words and common brands
+  (`data/vocab-words.json`), words of titles seen in searches (in 2+ products, weighted by price
+  observations) and words of past searches that found something. In memory, rebuilt at most every
+  10 minutes, at most 15,000 words.
+- **Correction** (`src/lib/query/spell.ts`), per word: closest vocabulary word by optimal string
+  alignment distance (a swap is one edit), at most 1 edit for 4 to 7 letters and 2 from 8; fewest
+  edits, then the same first letter, then frequency. Below 6 letters only a same-first-letter word
+  (an unknown brand such as "nike" is not "bike"). Split and join: "cordlessdrill" splits into two
+  known words; "air pods" joins only into a known brand ("airpods", "playstation"). A symmetric-delete
+  index keeps a query under 1 ms. Never changed: words with a digit or symbol (model codes, prices,
+  `-case`, `>4`), words under 4 letters, known words and their plural or singular, query syntax.
+- **Bounded work** (security review): suggest checks its length before correcting; queries over 200
+  characters, words over 30 letters and lookups past 12 per query are left as they are.
+- **Safety:** a correct query is never changed. `tests/lib/spell-safety.test.ts` checks every eval
+  query and the owner's history (local database, read-only, when present): 0 false corrections.
+  A corrected search is stored in history as searched, so the vocabulary never learns the typo.
+- **Relevance safety net:** a query word of 5+ letters already matched a title word one edit away
+  (same first letter); two swapped letters now count as one edit. Exact matches are unaffected.
+- **Eval:** `eval/queries-typos.json` (40 misspellings of the labelled queries) and
+  `scripts/eval-typos.mjs`: correction accuracy, false-correction rate and p@10/recall through
+  replay. The main eval is unchanged (p@10 98, recall 92, cheapest-first 73).
