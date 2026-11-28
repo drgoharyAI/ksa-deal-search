@@ -19,6 +19,14 @@ describe("prepareSearch: typo correction", () => {
     expect(p.correction).toBeUndefined();
   });
 
+  it("does not correct a query longer than the search form allows, fast", () => {
+    const query = "samsng ".repeat(1500);
+    const t0 = performance.now();
+    const p = prepareSearch({ ...base, query });
+    expect(performance.now() - t0).toBeLessThan(50); // parse and tokenize included
+    expect(p.correction).toBeUndefined();
+  });
+
   it("noCorrect searches the query as typed", () => {
     const p = prepareSearch({ ...base, query: "airpdos 4", noCorrect: true });
     expect(p.pq.terms).toBe("airpdos 4");

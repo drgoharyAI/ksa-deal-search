@@ -4,6 +4,7 @@ import type { ParsedQuery, Product, SiteAdapter, SiteStatus } from "@/src/lib/ty
 import { parseQuery } from "@/src/lib/query/parse";
 import { expandTerms } from "@/src/lib/query/synonyms";
 import { currentSpeller } from "@/src/lib/query/vocab";
+import { MAX_CORRECT_CHARS } from "@/src/lib/query/spell";
 import { matchTerms } from "@/src/lib/query/filler";
 import { tokenizeKeepDigits } from "@/src/lib/match/tokenize";
 import { filterRelevant } from "@/src/lib/match/relevance";
@@ -227,7 +228,8 @@ export type PreparedSearch = {
 export function prepareSearch(input: SearchInput): PreparedSearch {
   // Typos are fixed before anything else, so the stores, the matcher and the recordings (eval
   // replay) all see the corrected words. English words only; operators and model codes stay.
-  const fixed = input.noCorrect ? null : currentSpeller().correct(input.query);
+  // Length first: a query past the form's limit is never corrected (bounded work).
+  const fixed = input.noCorrect || input.query.length > MAX_CORRECT_CHARS ? null : currentSpeller().correct(input.query);
   const correction = fixed?.changed ? { from: input.query, to: fixed.query } : undefined;
   const pq = parseQuery(correction ? correction.to : input.query);
   const variants = expandTerms(pq.terms);

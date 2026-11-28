@@ -62,13 +62,15 @@ const SOURCES: Source[] = [
   },
 ];
 
+/** Trimmed, single-spaced, lower case. */
+const normalizeQuery = (q: string): string => q.trim().replace(/\s+/g, " ").toLowerCase();
+
 /**
- * Trimmed, single-spaced, lower case and typo-corrected (src/lib/query/spell.ts): the cache key and
- * what the sources are sent. The last word may be unfinished, so a word the vocabulary starts with
+ * Typo-corrected (src/lib/query/spell.ts): the cache key and what the sources are sent. Called
+ * after the length check. The last word may be unfinished, so a word the vocabulary starts with
  * stays as typed.
  */
-const normalizeQuery = (q: string): string =>
-  currentSpeller().correct(q.trim().replace(/\s+/g, " ").toLowerCase(), { lastIsPrefix: true }).query;
+const correctQuery = (q: string): string => currentSpeller().correct(q, { lastIsPrefix: true }).query;
 
 // Latin letters, digits, punctuation, symbols and spaces only: drops Arabic and other scripts.
 const LATIN_ONLY = /^[\p{Script=Latin}\p{N}\p{P}\p{S}\s]+$/u;
@@ -134,8 +136,10 @@ async function fetchSource(src: Source, q: string): Promise<string[] | null> {
 }
 
 export async function getSuggestions(rawQ: string): Promise<string[]> {
-  const q = normalizeQuery(rawQ);
-  if (q.length < MIN_Q || q.length > MAX_Q) return [];
+  const typed = normalizeQuery(rawQ);
+  // Length first, on the text as typed: correction never runs on an over-long query.
+  if (typed.length < MIN_Q || typed.length > MAX_Q) return [];
+  const q = correctQuery(typed);
   const hit = cache.get(q);
   if (hit) return hit;
   const pending = inflight.get(q);

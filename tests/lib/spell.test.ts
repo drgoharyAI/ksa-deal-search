@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { osaDistance, Speller } from "@/src/lib/query/spell";
+import { MAX_CORRECT_CHARS, osaDistance, Speller } from "@/src/lib/query/spell";
 
 const vocab = (entries: Record<string, number>) => new Map(Object.entries(entries));
 
@@ -156,5 +156,35 @@ describe("Speller.correct", () => {
     const n = 50;
     for (let i = 0; i < n; i++) s.correct("samsng galaxy tabb headphnes cordles");
     expect((performance.now() - t0) / n).toBeLessThan(5);
+  });
+});
+
+describe("Speller.correct: hostile input", () => {
+  const sp = new Speller(WORDS);
+  const fast = (q: string) => {
+    const t0 = performance.now();
+    const r = sp.correct(q);
+    return { r, ms: performance.now() - t0 };
+  };
+
+  it("leaves a 10,000-character query unchanged, fast", () => {
+    const q = "samsng ".repeat(1500).slice(0, 10_000);
+    const { r, ms } = fast(q);
+    expect(r).toEqual({ query: q, changed: false });
+    expect(ms).toBeLessThan(5);
+  });
+
+  it("leaves a 200-letter word unchanged, fast", () => {
+    const q = "abcdefghijklmnopqrstuvwxy".repeat(8);
+    const { r, ms } = fast(q);
+    expect(r).toEqual({ query: q, changed: false });
+    expect(ms).toBeLessThan(5);
+  });
+
+  it("corrects at most 12 words of a query", () => {
+    const q = Array.from({ length: 20 }, () => "samsng").join(" ");
+    expect(q.length).toBeLessThanOrEqual(MAX_CORRECT_CHARS);
+    const out = sp.correct(q).query.split(" ");
+    expect(out.filter((w) => w === "samsung")).toHaveLength(12);
   });
 });

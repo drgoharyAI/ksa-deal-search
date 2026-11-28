@@ -16,6 +16,12 @@ const maxEdits = (len: number): number => (len >= 8 ? 2 : 1);
 const MIN_LEN = 4;
 /** Each side of a split must be a vocabulary word of at least this length. */
 const MIN_PART = 3;
+/** Longer words are never corrected: their delete sets grow with the square of the length. */
+const MAX_WORD = 30;
+/** At most this many words of one query are looked up in the index. */
+const MAX_FIXES = 12;
+/** A longer query (the search form allows 200 characters) is never corrected. */
+export const MAX_CORRECT_CHARS = 200;
 /** Query syntax words (src/lib/query/parse.ts) that are never corrected. */
 const SYNTAX = ["under", "below", "over", "above", "stars", "star", "riyal", "riyals"];
 
@@ -166,9 +172,11 @@ export class Speller {
   }
 
   /** The correction for one lower-case word, or null to keep it. */
-  private fix(w: string, prefix: boolean): string | null {
-    if (w.length < MIN_LEN || !LETTERS.test(w) || this.knownForm(w)) return null;
+  private fix(w: string, prefix: boolean, budget: { left: number }): string | null {
+    if (w.length < MIN_LEN || w.length > MAX_WORD || !LETTERS.test(w) || this.knownForm(w)) return null;
     if (prefix && this.isPrefix(w)) return null;
+    if (budget.left <= 0) return null;
+    budget.left--;
     return this.closest(w) ?? this.split(w);
   }
 
@@ -177,6 +185,9 @@ export class Speller {
    * `lastIsPrefix`: the last word may be unfinished (autocomplete), so a word it starts is no typo.
    */
   correct(query: string, opts: { lastIsPrefix?: boolean } = {}): Correction {
+    // Bounded work whatever the caller sends: long queries are left as they are.
+    if (query.length > MAX_CORRECT_CHARS) return { query, changed: false };
+    const budget = { left: MAX_FIXES };
     const toks = [...query.matchAll(/\S+/g)].map((m) => ({ text: m[0], at: m.index ?? 0 }));
     const out: { text: string; at: number; end: number }[] = [];
     for (let i = 0; i < toks.length; i++) {
@@ -191,7 +202,7 @@ export class Speller {
         i++;
         continue;
       }
-      const fixed = this.fix(lower, !!opts.lastIsPrefix && i === toks.length - 1);
+      const fixed = this.fix(lower, !!opts.lastIsPrefix && i === toks.length - 1, budget);
       out.push({ text: fixed ?? t.text, at: t.at, end: t.at + t.text.length });
     }
     let s = "";

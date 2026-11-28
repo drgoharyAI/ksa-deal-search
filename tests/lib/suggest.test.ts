@@ -158,6 +158,12 @@ describe("getSuggestions: typos", () => {
     expect(calls[1].url).toContain(encodeURIComponent("samsung galaxy ta"));
   });
 
+  it("checks the length before correcting: a huge query asks nothing", async () => {
+    mockFetch(ok(amazon(["x"])), ok(jarir([])));
+    expect(await getSuggestions("a".repeat(10_000))).toEqual([]);
+    expect(calls).toHaveLength(0);
+  });
+
   it("keeps a word the vocabulary starts with (still being typed)", async () => {
     mockFetch(ok(amazon([])), ok(jarir([])));
     await getSuggestions("headph");
