@@ -76,26 +76,31 @@ export function mergeSaved(server: Iterable<string>, local: ReadonlyMap<string, 
  * Save and unsave requests, one at a time per product: a quick save then unsave reaches the server
  * in that order (never a DELETE overtaken by its POST). `local` keeps what this page asked for, per
  * product. A failed request is reverted only when it was the latest for its product (a later toggle
- * already says what the user wants).
+ * already says what the user wants), and to the last state the server confirmed (before any
+ * success: the state before the first toggle), never just to the opposite of the failed wish.
  */
 export function createSaveQueue() {
   const local = new Map<string, boolean>();
+  const confirmed = new Map<string, boolean>();
   const tails = new Map<string, Promise<unknown>>();
   const seqs = new Map<string, number>();
   return {
     local: local as ReadonlyMap<string, boolean>,
-    run(key: string, on: boolean, send: () => Promise<string | null>, revert: () => void): Promise<string | null> {
+    run(key: string, on: boolean, send: () => Promise<string | null>, revert: (state: boolean) => void): Promise<string | null> {
       const seq = (seqs.get(key) ?? 0) + 1;
       seqs.set(key, seq);
+      if (!confirmed.has(key)) confirmed.set(key, local.get(key) ?? !on);
       local.set(key, on);
       const job = (tails.get(key) ?? Promise.resolve()).then(send, send);
       tails.set(key, job.catch(() => {}));
       const done = (err: string | null) => {
+        if (!err) confirmed.set(key, on);
         if (seqs.get(key) === seq) {
           tails.delete(key);
           if (err) {
-            local.set(key, !on);
-            revert();
+            const state = confirmed.get(key) ?? !on;
+            local.set(key, state);
+            revert(state);
           }
         }
         return err;
@@ -132,7 +137,7 @@ export function useFavourites(): SavedApi {
         return next;
       });
     set(on);
-    return saves.run(key, on, () => sendSave({ ...snapshotOf(p), ...(query ? { query } : {}) }, on), () => set(!on));
+    return saves.run(key, on, () => sendSave({ ...snapshotOf(p), ...(query ? { query } : {}) }, on), (state) => set(state));
   }, [saves]);
   return useMemo(() => ({ isSaved: (k: string) => keys.has(k), toggle }), [keys, toggle]);
 }

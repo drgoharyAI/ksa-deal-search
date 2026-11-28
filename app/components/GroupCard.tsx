@@ -96,6 +96,8 @@ function GroupCard({ group: g, query, compareChecked = false, comparedRows, onCo
   const setOpen = (v: boolean) => (shared ? shared.setOpen(rowKeys, v) : setLocalOpen(v));
   const listId = useId();
   const b = g.best;
+  // The header's price: the "Best price" row when there is one (never a "from" price), else the lead's.
+  const head = g.bestPrice ?? b;
   // One picture for the whole card: the lead's, else the next member's (Carrefour gives none).
   const images = [b, ...g.rows].map((p) => p.image);
   const extra = g.rows.length - VISIBLE_ROWS;
@@ -113,10 +115,11 @@ function GroupCard({ group: g, query, compareChecked = false, comparedRows, onCo
             {b.title}
           </h3>
           <p className="gcard__best">
-            {g.bestPrice ? "Best price" : "Listed at"} <span className="card__amount">{formatMoney(priceOf(b), b.currency)}</span> at{" "}
+            {g.bestPrice ? "Best price" : "Listed at"} {!g.bestPrice && isFromPrice(b) && <span className="card__from">from </span>}
+            <span className="card__amount">{formatMoney(priceOf(head), head.currency)}</span> at{" "}
             <span className="gcard__beststore">
-              <StoreLogo id={b.site} size={18} />
-              {storeLabel(b.site)}
+              <StoreLogo id={head.site} size={18} />
+              {storeLabel(head.site)}
             </span>
           </p>
           <p className="gcard__count">Prices from {stores}</p>
