@@ -8,4 +8,10 @@ export async function register() {
   installShutdownHooks(); // Docker only (NEXT_MANUAL_SIG_HANDLE): closes Chrome and the DB on SIGTERM
   const { ensureChecker } = await import("./src/lib/alerts/service");
   ensureChecker();
+  // The spelling vocabulary and its English word list (0.2 s to read), off the first search's path.
+  const { installDbVocab } = await import("./src/lib/vocab-db");
+  installDbVocab();
+  setTimeout(() => {
+    void import("./src/lib/query/vocab").then((m) => m.currentSpeller());
+  }, 0);
 }

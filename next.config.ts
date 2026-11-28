@@ -9,6 +9,8 @@ const nextConfig: NextConfig = {
   serverExternalPackages: ["api-anything"],
   // Docker: .next/standalone/server.js with only the traced node_modules (see Dockerfile).
   output: "standalone",
+  // Read with fs at runtime (src/lib/query/dictionary.ts), so not found by the import trace.
+  outputFileTracingIncludes: { "/**/*": ["./data/english-words.txt.gz"] },
 };
 
 export default nextConfig;
