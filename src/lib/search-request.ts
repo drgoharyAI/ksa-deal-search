@@ -1,7 +1,7 @@
 import "server-only";
 import { NextResponse } from "next/server";
 import { rejectCrossSite } from "@/src/lib/request-guard";
-import type { SearchInput } from "@/src/lib/pipeline";
+import type { QueryCorrection, SearchInput } from "@/src/lib/pipeline";
 import { parseQuery } from "@/src/lib/query/parse";
 import { sites } from "@/src/sites/registry";
 import type { SortKey } from "@/src/lib/rank";
@@ -11,6 +11,10 @@ import { addSearch, historyEntryFor } from "@/src/lib/history";
 import { attachInsights, insightsFor, recordObservations } from "@/src/lib/insights";
 import { recordSeen } from "@/src/lib/discover";
 import { MAX_JSON_BODY, TOO_LARGE, readJsonCapped } from "@/src/lib/api";
+import { installDbVocab } from "@/src/lib/vocab-db";
+
+// The spelling vocabulary learns from this app's own database (titles seen, past searches).
+installDbVocab();
 
 /**
  * Shared by POST /api/search and POST /api/search/stream: the same request guard and input rules,
@@ -54,14 +58,19 @@ export async function readSearchInput(req: Request): Promise<{ input: SearchInpu
       minPrice: optNum(body.minPrice),
       maxPrice: optNum(body.maxPrice),
       minRating: optNum(body.minRating),
+      ...(body.noCorrect === true ? { noCorrect: true } : {}),
     },
   };
 }
 
-/** Search history is a convenience: a database failure is logged and never fails the search. */
-export function recordHistory(input: Parameters<typeof historyEntryFor>[0], products: Product[]) {
+/**
+ * Search history is a convenience: a database failure is logged and never fails the search. A
+ * corrected search is recorded as searched (the corrected words): history feeds the spelling
+ * vocabulary, which must not learn the typo.
+ */
+export function recordHistory(input: Parameters<typeof historyEntryFor>[0], products: Product[], correction?: QueryCorrection) {
   try {
-    addSearch(getDb(), historyEntryFor(input, products, Date.now()));
+    addSearch(getDb(), historyEntryFor(correction ? { ...input, query: correction.to } : input, products, Date.now()));
   } catch (e) {
     console.warn("[history] could not record the search", e instanceof Error ? e.message : String(e));
   }

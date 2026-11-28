@@ -74,7 +74,7 @@ export async function runSearchStream(
           }
           // The last store: the same records and body as POST /api/search.
           settled = true;
-          if (result.statuses.some((s) => s.status === "ok")) recordHistory(input, result.products);
+          if (result.statuses.some((s) => s.status === "ok")) recordHistory(input, result.products, result.correction);
           emit({ type: "results", ...result, products: withInsights(result.products) });
           emit({ type: "done" });
         }),

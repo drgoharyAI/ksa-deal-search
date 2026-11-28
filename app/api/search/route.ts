@@ -20,6 +20,6 @@ export async function POST(req: Request) {
     release();
   }
   // A search where no store answered (all blocked or failed) is not a successful search.
-  if (result.statuses.some((s) => s.status === "ok")) recordHistory(input, result.products);
+  if (result.statuses.some((s) => s.status === "ok")) recordHistory(input, result.products, result.correction);
   return NextResponse.json({ ...result, products: withInsights(result.products) });
 }

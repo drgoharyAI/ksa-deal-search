@@ -4,6 +4,10 @@ import { runSearch } from "@/src/lib/pipeline";
 import { searchGate } from "@/src/lib/search-gate";
 import { formatAlertMessage, sendTelegram } from "@/src/lib/telegram";
 import { createChecker, type Checker } from "./checker";
+import { installDbVocab } from "@/src/lib/vocab-db";
+
+// A watched search is corrected as the search form's is, with the same learnt words.
+installDbVocab();
 
 /** The app's one checker, kept on globalThis so hot reloads and route modules share it. */
 const g = globalThis as unknown as { __dealSearchChecker?: Checker };
