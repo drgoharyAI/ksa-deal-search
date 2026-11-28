@@ -73,7 +73,8 @@ RUN install -d -o node -g node -m 0755 /data \
  && install -d -o root -g root -m 1777 /tmp/.X11-unix
 USER node
 VOLUME ["/data"]
-EXPOSE 3000 3001
+# Only the Next server is published; 3000 (the tunnel relay) is for cloudflared on the compose network.
+EXPOSE 3001
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=40s --retries=3 \
   CMD curl -fsS http://127.0.0.1:3000/api/health || exit 1

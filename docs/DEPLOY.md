@@ -267,8 +267,10 @@ address, and a bare `"3000:3000"` would also listen on `[::]` and be reachable f
 ufw does not filter Docker-published ports. Set `APP_BIND=192.168.1.48` in `.env` to bind one address.
 Check: `ss -tlnp | grep 3000` must show no `[::]` line.
 
-**Port 3000 is taken.** Change the left side of `ports:` in `docker-compose.yml` (for example
-`"8080:3000"`) and put `192.168.1.48:8080` in `APP_HOSTS`.
+**Port 3000 is taken.** Change only the LEFT side of `ports:` in `docker-compose.yml` (for example
+`"8080:3001"`) and put `192.168.1.48:8080` in `APP_HOSTS`. Never publish container port 3000: it is
+the tunnel relay, and anything that can reach it is treated as tunnel traffic (its CF-Connecting-IP
+is trusted for the per-client caps).
 
 ## Safety caps (owner ruling)
 
