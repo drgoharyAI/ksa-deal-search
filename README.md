@@ -19,7 +19,7 @@
 [Docker](#docker-deploy) ·
 [Quality](#quality)
 
-<img src="docs/images/hero-home.png" alt="KSA Deal Search home page: one search box, eight store toggles with their logos" width="900">
+<img src="docs/images/hero-home.png" alt="KSA Deal Search home page: one search box and the store toggles with their logos" width="900">
 
 </div>
 
@@ -82,8 +82,9 @@ Jarir's mark; see [public/stores/SOURCES.md](public/stores/SOURCES.md).
 | --- | --- |
 | **Streaming results.** Each store's results appear as it answers, with a live status per store (searching, results, no results, unavailable, failed). | **Cross-store grouping.** The same product at several stores becomes one card with one row per store, matched by model codes, brand, specs and variant words. |
 | **Honest deal badges.** "Lowest in 30 days", "Below usual price" and "Fake deal": a claimed discount that the app's own price history, or the result set, does not support. | **Smart query parsing.** Price bounds (`under 300`, `50-150`), minimum rating (`>4 stars`) and exclusions (`-case`) are read from the query text. |
-| **Relevance filtering.** Drops listings the store marks out of stock (SACO's branch-pickup-only listings stay, labelled "Branch pickup only", after the deliverable ones, with no deal badge or alert), and accessories, parts, books and other product kinds that share the query's words, and clones far below a model's usual price. Weaker matches go under "Less likely matches". | **Filter chips.** Store, brand, price range, rating and "only discounted", each with a live count. |
-| **Compare.** A side-by-side table of 2 to 4 products with their parsed specs. | **Price history sparkline.** Every search records prices to a local SQLite file (`node:sqlite`); cards and watches show the trend. |
+| **Relevance filtering.** Drops listings the store marks out of stock (eXtra, Trendyol, SHEIN and SACO say so; unknown stock is kept; SACO's branch-pickup-only listings stay, labelled "Branch pickup only", after the deliverable ones, with no deal badge or alert), and accessories, parts, books and other product kinds that share the query's words, and clones far below a model's usual price. Weaker matches go under "Less likely matches". | **Filter chips.** Store, brand, price range, rating and "only discounted", each with a live count. |
+| **Compare.** Pick 2 to 4 products into a tray (kept in the URL), then a side-by-side table with specs aligned by key, the store's was-price and discount, rating and deal check; "Lowest price" only between fixed prices in one currency, "Not listed" for missing values. Swipeable columns on phones. | **Price history sparkline.** Every search records prices to a local SQLite file (`node:sqlite`); cards and watches show the trend. |
+| **Saved, recently viewed and shareable links.** Save products (latest price and change since saving on `/saved`), see what you opened recently, and copy a link that re-runs the same search with its filters and compare picks. | **Details and related listings.** A card opens to its full title, specs, price history and "Other listings like this" from the current results. Filters sit in a sidebar on desktop and a bottom sheet on phones. |
 | **Google Shopping KSA check.** "Check other stores" asks Google Shopping (google.com.sa) for other Saudi stores' prices of the same product: confirmed lowest, others match the price, or a was-price no other store shows, with small links to each offer. SerpApi first (free plan), the owner's Chrome as the fallback; on demand only. | **Kanbkam price history.** For Amazon.sa and noon listings: "Price history: lowest SAR 269, highest SAR 659" from Kanbkam, with "Fake was-price (Kanbkam)", "Lowest in Kanbkam history" or "Near the lowest" when a rule applies; source behind an (i). Looked up lazily, 10 s apart, capped; off unless `KANBKAM_ENABLED=1`. |
 | **Telegram alerts.** Watch a product or a whole search; a background checker re-runs it on a schedule and notifies by Telegram (optional) and on the Alerts page. | **Search history and suggestions.** Re-run past searches, autocomplete from your history and from Amazon's and Jarir's public suggestions, and a "recently seen deals" home view. |
 
@@ -116,8 +117,10 @@ exact text.
 **Typos are corrected** before the stores are asked (`airpdos 4` searches `airpods 4`, `cordles drill`
 searches `cordless drill`, `air pods` becomes `airpods`), with "Search instead for" to run what you
 typed. Rule-based and local: the closest word (1 edit up to 7 letters, 2 from 8) from a vocabulary of
-the app's word lists and the product titles it has seen. Real English words, numbers, model codes
-(`wh1000xm5`, `s24`), words under 4 letters and the query syntax above are never changed.
+the app's word lists, brands and the product titles it has seen, plus a short list of misspellings
+that are real words (`gamming`, `pilow`). Real English words (a 275k-word list), numbers, model
+codes (`wh1000xm5`, `s24`), words under 4 letters and the query syntax above are never changed, and
+a word is never split. On held-out tests: 46 of 48 typos fixed, 0 of 429 correct queries changed.
 
 ## How it works
 
@@ -126,7 +129,8 @@ same result in one answer. A search runs through `src/lib/pipeline.ts`:
 
 ```mermaid
 flowchart TD
-    Q["Query text"] --> P["Parse: price bounds, rating, -exclusions, filler words"]
+    Q["Query text"] --> C["Typo correction, rule-based"]
+    C --> P["Parse: price bounds, rating, -exclusions, filler words"]
     P --> S["Synonyms from data/synonyms.json"]
     S --> AA["API Anything specs: AliExpress, Amazon, Jarir, Trendyol, eXtra, Carrefour, SACO"]
     S --> CDP["Real Chrome over CDP: noon, SHEIN"]
@@ -147,7 +151,8 @@ flowchart TD
 <details>
 <summary><b>Pipeline details</b></summary>
 
-1. **Parse** the query (`src/lib/query/`): price bounds, rating, `-exclusions`, filler words,
+1. **Correct and parse** the query (`src/lib/query/`): typo correction (`spell.ts`, unless
+   "Search instead" asked for the text as typed), price bounds, rating, `-exclusions`, filler words,
    synonyms from `data/synonyms.json`.
 2. **Fetch** every selected store in parallel through its adapter (`src/sites/<id>/search.ts`):
    build the calls, run them (API Anything or Chrome), with per-store caches and back-offs.
@@ -164,7 +169,7 @@ flowchart TD
    to history.
 
 Each store gets a status: `ok` (including an empty answer), `blocked` (the store refused; the app
-backs off) or `error`.
+backs off), `unsupported` (an Arabic-only query: "English search terms only") or `error`.
 
 </details>
 
@@ -183,13 +188,16 @@ answers NDJSON, one event per line:
 The last `results` event equals the `/api/search` answer. The pipeline is split for this into
 `prepareSearch`, per-store `fetchSite` and a pure `assembleResults`. History, observations and
 seen products are recorded once, at the end; a client that goes away stops the search (queued
-store calls are skipped) and nothing is recorded. The page falls back to `/api/search` if the
-stream fails before any event. Protocol: `src/lib/search-stream.ts`.
+store calls are skipped) and only the prices of stores that already answered are recorded. At most
+4 searches run at once with 8 waiting; past that both routes answer 503 "Busy, try again in a
+moment". The page falls back to `/api/search` if the stream fails before any event (not on a 503).
+Protocol: `src/lib/search-stream.ts`.
 
 Other routes: `GET /api/suggest` (Amazon and Jarir public autocomplete), `GET /api/discover`,
-`/api/history`, `/api/watches`, `/api/alerts`, `GET /api/health`. All API routes reject
-cross-site requests and hosts that are not loopback or listed in `APP_HOSTS`
-(`src/lib/request-guard.ts`).
+`/api/history`, `/api/watches`, `/api/alerts`, `/api/favourites`, `/api/viewed`,
+`POST /api/gshop/validate` (Google Shopping KSA check), `/api/kanbkam` (price history),
+`GET /api/health`. All API routes reject cross-site requests and hosts that are not loopback or
+listed in `APP_HOSTS` (`src/lib/request-guard.ts`), and read JSON bodies with an 8 KB cap.
 
 </details>
 
@@ -216,7 +224,10 @@ docker compose up -d --build
 
 `Dockerfile` and `docker-compose.yml` build a standalone Next.js server with Google Chrome on a
 virtual display (Xvfb) for noon and SHEIN, and a data volume for SQLite and Chrome profiles.
-Optional compose profiles add Caddy (LAN HTTPS) or `cloudflared` (Cloudflare Tunnel).
+Optional compose profiles add Caddy (LAN HTTPS) or `cloudflared` (Cloudflare Tunnel). Inside the
+container the Next server listens on 3001 (the published LAN port maps there) and port 3000 is a
+small relay used only by the tunnel: it marks tunnel traffic so per-visitor caps can trust
+Cloudflare's client address. Never publish container port 3000.
 `scripts/deploy.sh` deploys the committed tree to the VM over SSH; `scripts/backup.sh` backs up
 the data volume (database and Chrome profiles) on the VM.
 
@@ -236,6 +247,7 @@ Local development needs no configuration. Optional settings go in `.env.local` (
 | `NODE_ENV` | `production` in Docker. |
 | `CADDY_HOST` | With the `https` compose profile: the LAN name Caddy serves. |
 | `APP_BIND` | IPv4 address the published ports bind to (default `0.0.0.0`). |
+| `PORT`, `TUNNEL_RELAY_PORT` | In Docker: the Next server's port (3001) and the tunnel relay's (3000), set in the Dockerfile. |
 | `COMPOSE_PROFILES`, `TUNNEL_TOKEN` | Optional Cloudflare Tunnel (`tunnel` profile); the token goes in `.env.tunnel`. |
 | `API_ANYTHING_HOME`, `API_ANYTHING_LOCAL_ONLY` | API Anything home (default `./.aa-home`) and local-only mode (default `1`). |
 | `NOON_PROFILE_DIR`, `SHEIN_PROFILE_DIR`, `CHROME_PATH` | Chrome profile folders and Chrome binary override. |
@@ -272,7 +284,7 @@ through the real pipeline, so matching changes are measured offline. Latest numb
 
 | Query set | precision@10 | accessory@10 | wrong-model@10 | recall |
 | --- | --- | --- | --- | --- |
-| tuning (15) | 99% | 1% | 0% | 92% |
+| tuning (15) | 98% | 1% | 0% | 92% |
 | holdout (8) | 99% | 1% | 0% | 87% |
 | holdout 2 (6) | 100% | 0% | 0% | 90% |
 | holdout 3 (6) | 82% | 3% | 5% | 90% |
@@ -290,6 +302,7 @@ merge recall. Metric definitions, misses and every tuning round are in
 | `node scripts/eval.mjs [--queries "a\|b"] [--top N]` | Replay and score precision@10, accessory@10, wrong-model@10, recall; writes `eval/last-run.json`. Offline. |
 | `node scripts/eval-groups.mjs` | Score cross-store grouping against `eval/groups-gold.json` and `eval/groups-adversarial.json`. Offline. |
 | `node scripts/eval-record.mjs` | Record new store answers. Live traffic: slow, one request at a time; use sparingly. |
+| `node scripts/eval-typos.mjs` | Typo correction accuracy, false corrections on clean queries, and replay of the typo set. Offline. |
 | `node scripts/eval-dump.mjs` | Dump recorded products to TSV for labelling (`eval/LABELING.md`). |
 | `node scripts/eval-group-candidates.mjs` | List candidate pairs for grouping labels. |
 
@@ -304,7 +317,7 @@ change only when no set gets worse.
 <summary><b>Folders</b></summary>
 
 ```text
-app/            Next.js routes: pages (/, /history, /alerts) and API routes
+app/            Next.js routes: pages (/, /saved, /history, /alerts) and API routes
 src/lib/        pipeline, query parsing, matching, ranking, insights, alerts, db
 src/sites/      one adapter per store, plus the shared Chrome/CDP driver
 src/eval/       replay and metrics used by the eval scripts
@@ -336,20 +349,24 @@ public/stores/  store icons (see SOURCES.md)
 ## Roadmap
 
 The "Souq Ledger" redesign ([docs/DESIGN.md](docs/DESIGN.md): warm paper, charcoal ink, one
-palm-green accent) runs in six phases. U1 (design system, app shell, homepage) and U2 (streaming
-search and store status) are done. Still to come:
+palm-green accent) is complete: design system, streaming search, results layout and cards,
+compare, discovery features, and a responsive, accessibility and QA pass
+([docs/QA-REPORT-UX.md](docs/QA-REPORT-UX.md)). Open items:
 
-- [ ] **U3**: results layout, filters and cards (desktop filter sidebar, mobile bottom sheet)
-- [ ] **U4**: compare, designed for mobile
-- [ ] **U5**: discovery features (recently viewed, favourites, shareable result URLs)
-- [ ] **U6**: responsive, accessibility, QA and deploy
+- [ ] Jarir's real icon (a plain "J" stand-in today)
+- [ ] Better recall on a few queries that "from" prices used to hide (cheapest-first 73% in the eval)
 
 ## Security
 
-There is **no login, no user accounts and no rate limiting, by design**. Run it on your own
-machine, a trusted network, or behind a private tunnel or access layer. Anyone who can reach the
-app can run searches from your IP and read your history and watches. See
-[SECURITY.md](SECURITY.md) for what the app does to limit exposure and how to report an issue.
+There is **no login and no user accounts, by design**. Run it on your own machine, a trusted
+network, or behind a private tunnel or access layer. Anyone who can reach the app can run searches
+from your IP and read or change your history, saved items and watches.
+
+Small owner-protecting caps limit abuse: 4 searches at once (8 waiting), 1 Telegram test a
+minute, 100 watches, Google Shopping checks (30 an hour, 100 a day, 10 an hour per visitor) and
+Kanbkam lookups (30 an hour, 200 a day, 10 an hour per visitor, 15 automatic per 10 minutes).
+Store links and images are shown only on each store's own hosts. See [SECURITY.md](SECURITY.md)
+for more and how to report an issue.
 
 ## Limitations and disclaimer
 
@@ -369,10 +386,13 @@ app can run searches from your IP and read your history and watches. See
 
 ### Privacy
 
-Search history, price observations and alerts stay in a local SQLite file. Recent searches stay
-in your browser's `localStorage`. Query-box text (2 to 80 characters) is sent from the server to
-Amazon's and Jarir's public suggestion services, without cookies. Store requests go straight from
-your machine to the stores.
+Search history, price observations, saved items, recently viewed products and alerts stay in the
+app's SQLite file on its server (anyone who can open the app sees them). Recent query-box entries
+stay in your browser's `localStorage`. Query-box text (2 to 80 characters) is sent from the server
+to Amazon's and Jarir's public suggestion services, without cookies. Store requests go straight
+from the server to the stores. A Google Shopping check sends the product's name and model to
+SerpApi (or to Google from the server's Chrome); a price-history lookup sends the Amazon ASIN or
+noon SKU to Kanbkam.
 
 ## License
 

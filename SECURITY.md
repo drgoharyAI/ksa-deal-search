@@ -2,14 +2,14 @@
 
 ## Design: no authentication
 
-ksa-deal-search has **no login, no user accounts and no rate limiting, by design**. It is a
+ksa-deal-search has **no login and no user accounts, by design**. It is a
 personal tool meant to run on your own machine, a trusted home network, or behind a private
 tunnel or access layer (for example a Cloudflare Tunnel protected by Cloudflare Access, or a VPN).
 
 Anyone who can reach the app can:
 
 - run searches, which send requests to the stores from your server's IP address;
-- read and delete your search history, price watches and alert log;
+- read and change your search history, saved items, recently viewed list, price watches and alert log;
 - send a test message to your Telegram chat, if Telegram is configured.
 
 What the app does to limit exposure:
@@ -20,6 +20,13 @@ What the app does to limit exposure:
 - Secrets (`TELEGRAM_BOT_TOKEN`, `TUNNEL_TOKEN`) are read from the environment only, are never
   sent to the browser or logged, and `.env*` files are gitignored and kept out of the Docker image.
 - In Docker, Chrome runs with its sandbox enabled under a seccomp profile (`docker/`).
+- Small safety caps: 4 searches at once (8 queued, then 503), 1 Telegram test a minute, 100
+  watches, 8 KB request bodies, Google Shopping checks (30/h, 100/day, 10/h per visitor) and
+  Kanbkam lookups (30/h, 200/day, 10/h per visitor, 15 automatic per 10 minutes).
+- Per-visitor caps trust Cloudflare's client address only on requests stamped by the tunnel relay
+  (`src/lib/tunnel-relay.ts`); LAN requests share one bucket and cannot pose as tunnel traffic.
+- Store links and images are shown only on each store's own hosts (`src/lib/store-hosts.ts`).
+- Secrets also include `SERPAPI_KEY`; it is never logged and is scrubbed from error messages.
 
 Do not expose the app directly to the internet. If you publish it through a tunnel, put an
 authentication layer in front of it.
