@@ -121,6 +121,8 @@ curl -s http://127.0.0.1:3000/api/health
 | `CADDY_HOST` | Only with the `https` profile: the LAN name Caddy serves |
 | `SERPAPI_KEY` | Google Shopping KSA check through SerpApi (optional). Server-only, never logged |
 | `GSHOP_MONTHLY_BUDGET` | SerpApi searches the app may use per month (default 240; the free plan has 250) |
+| `KANBKAM_ENABLED` | `1` turns on the Kanbkam price history (kill switch: unset or `0` is off) |
+| `KANBKAM_HOURLY_CAP`, `KANBKAM_DAILY_CAP` | Lower the Kanbkam lookup caps (defaults and maximums 30 and 200) |
 
 **SerpApi key.** Put `SERPAPI_KEY=...` in `.env` on the VM, next to `docker-compose.yml`, and keep
 the file private: `chmod 600 .env` (owner read/write only). Then `docker compose up -d`. Without a
@@ -128,6 +130,16 @@ key, "Check other stores" uses the Chrome fallback on google.com.sa only (its ow
 an hour, 100 a day, 15 s apart, 2 h to 12 h back-off after a CAPTCHA). The check counts its SerpApi
 searches per plan period in the SQLite file and stops at the budget; checks are capped at 30 an hour and 100 a day overall and 10 an hour per client (`429` past that); `https://serpapi.com/account.json`
 (free) shows the plan's remaining searches.
+
+**Kanbkam price history.** Off unless `KANBKAM_ENABLED=1`; set it to `0` (and
+`docker compose up -d`) to stop every Kanbkam request at once. Only Amazon.sa and noon listings
+seen in a search, by their direct product page `https://www.kanbkam.com/sa/en/p-<id>` (never
+Kanbkam search, never a redirect). Rates: one global queue, at least 10 s between loads; at most
+30 lookups an hour and 200 a day overall (persisted in SQLite, `kanbkam_usage`) and 10 an hour per
+client; past a cap the API answers `429` without fetching. A 403, 429 or Cloudflare challenge
+backs off 24 h (persisted, `kanbkam_state`); lookups answer "paused" meanwhile. Each listing is
+cached 24 h and a miss 7 days (`kanbkam_history`, source `kanbkam`, never mixed into our own price
+observations). Automatic lookups: at most 3 deal-badged results per search, in the background.
 
 `.env` is never committed and never copied into the image (`.dockerignore`).
 

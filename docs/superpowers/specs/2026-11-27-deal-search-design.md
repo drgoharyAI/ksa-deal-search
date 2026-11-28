@@ -509,3 +509,40 @@ ruling of 2026-11-28):
   only our own sites' rows, so these never change a badge.
 - **Secrets.** The key is server-only, sent only to the fixed host serpapi.com (no user-controlled
   URL), never logged, and scrubbed from every error.
+
+## Kanbkam price history (owner request; owner informed of ToS)
+
+"Show each listing's longer price history from Kanbkam." The owner was told that Kanbkam's Terms
+forbid crawling or parsing its data for use on another site, and chose to use it anyway. It is
+kept minimal and respectful:
+
+- **Scope.** Amazon.sa (ASIN, `^[A-Z0-9]{10}$`) and noon (SKU, `N` + 8 digits + a letter, or `Z` +
+  20 hex + `Z`, the shapes in eval/recorded/noon-sa) listings seen in a search, by their direct
+  product page `https://www.kanbkam.com/sa/en/p-<id>` on a fixed host. Never Kanbkam search; a
+  redirect is never followed (an unknown id redirects to search: a miss). The id is validated
+  before it is put in the URL: no SSRF, no path injection.
+- **Read.** Plain HTTP (server-rendered behind Cloudflare). Text fields only: `#min` (Lowest
+  Price), `#max` (Highest Price), the current price, "Recent Price Drop / Raise N%", the store on
+  the buy button (must be the listing's own store) and a "since" date if shown. The chart (a base64
+  PNG) is ignored. Kanbkam's history spans about 3 to 4 years and records price changes only.
+  404, 410 or a page without a price block is a miss; 403, 429 or a Cloudflare challenge is a block.
+- **Politeness.** Off unless `KANBKAM_ENABLED=1` (the kill switch). One global queue, at least
+  10 s between loads (the last load is persisted). At most 30 lookups an hour and 200 a day
+  overall (SQLite, migration 9) and 10 an hour per client (the gshop limiter: tunnel clients by
+  CF-Connecting-IP, LAN and loopback in one bucket); past a cap, `429` with no fetch; a full
+  queue answers "busy". A block backs off 24 h (persisted). Cache: 24 h per listing, 7 days for a
+  miss; single-flight per listing.
+- **When.** Lazy: when Details, the compare dialog or a card's deal evidence is drawn for an
+  Amazon.sa or noon listing, and automatically for at most 3 deal-badged such results per search,
+  in the background after the results render. Never part of a search, never blocks one.
+- **Rules** (src/lib/kanbkam/rules.ts), on our own latest price and was-price:
+  **Fake was-price (Kanbkam)** when the store's was-price is above Kanbkam's highest-ever price for
+  the listing by more than 2%; **Lowest in Kanbkam history** when the price is at most Kanbkam's
+  lowest x 1.01; **Near the lowest** within 5% of it. Kanbkam never upgrades our deal badge: when
+  our own insight disagrees, both are shown with "Our own price history disagrees; both are shown."
+- **Storage.** `kanbkam_history` (source `kanbkam` only, enforced by a CHECK), `kanbkam_usage`,
+  `kanbkam_state`. Never written to `observations`, so our badges and trends are unaffected.
+- **UI.** One compact line, "Price history: lowest SAR 269, highest SAR 659", the verdict badge
+  when one applies, and a small "History from Kanbkam" link (https Kanbkam product pages only)
+  behind an (i) that opens on hover, focus or tap and closes with Esc (the gshop note's behaviour,
+  copied so GshopCheck stays untouched). Off: nothing is drawn.
