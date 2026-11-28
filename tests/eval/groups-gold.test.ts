@@ -65,7 +65,7 @@ describe("grouping gold sets", { timeout: 120_000 }, () => {
         const m = computeGroupMetrics(groups, g);
         sameMerged += m.sameMerged;
         if (m.differentMerged) {
-          const groupOf = new Map(groups.flatMap((x) => x.members.map((p) => [`${p.site}:${p.id}`, x.key] as const)));
+          const groupOf = new Map<string, string>(groups.flatMap((x) => x.members.map((p): [string, string] => [`${p.site}:${p.id}`, x.key])));
           for (const [a, b] of g.differentKeys) if (groupOf.get(a) && groupOf.get(a) === groupOf.get(b)) wrong.push(`${g.query}: ${a} ~ ${b}`);
         }
       }
