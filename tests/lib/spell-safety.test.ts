@@ -25,6 +25,21 @@ const heldout = JSON.parse(fs.readFileSync(path.join(root, "tests/fixtures/spell
 
 const staticSpeller = spellerFor({ titles: [], queries: [] });
 
+/**
+ * Held-out typos (written apart from eval/queries-typos.json), each with the query meant: at least
+ * 90% must be fixed, and none may be changed into anything else.
+ */
+const typos = JSON.parse(fs.readFileSync(path.join(root, "tests/fixtures/spell/heldout-typos.json"), "utf8")) as { typo: string; intended: string }[];
+
+function typoScore(sp: Speller) {
+  const fixed = typos.filter((t) => sp.correct(t.typo).query === t.intended).length;
+  const wrong = typos.filter((t) => {
+    const r = sp.correct(t.typo);
+    return r.changed && r.query !== t.intended;
+  }).map((t) => `${t.typo} -> ${sp.correct(t.typo).query}`);
+  return { rate: fixed / typos.length, wrong };
+}
+
 /** The owner's database, read-only, or null when there is none on this machine. */
 function ownerDb() {
   const file = dbPath();
@@ -49,6 +64,13 @@ describe("false corrections", () => {
     expect(changed(staticSpeller, heldout)).toEqual([]);
   });
 
+  it("fixes 90%+ of the held-out typos and miscorrects none (static vocabulary)", () => {
+    expect(typos.length).toBeGreaterThanOrEqual(40);
+    const r = typoScore(staticSpeller);
+    expect(r.wrong).toEqual([]);
+    expect(r.rate).toBeGreaterThanOrEqual(0.9);
+  });
+
   it("changes no eval query (static vocabulary)", () => {
     expect(changed(staticSpeller, evalQueries)).toEqual([]);
   });
@@ -60,6 +82,9 @@ describe("false corrections", () => {
       const learnt = readDbVocab(db);
       const sp = spellerFor(learnt);
       expect(changed(sp, [...evalQueries, ...learnt.queries, ...heldout])).toEqual([]);
+      const r = typoScore(sp);
+      expect(r.wrong).toEqual([]);
+      expect(r.rate).toBeGreaterThanOrEqual(0.9);
       expect(changed(staticSpeller, learnt.queries)).toEqual([]);
     } finally {
       db.close();
