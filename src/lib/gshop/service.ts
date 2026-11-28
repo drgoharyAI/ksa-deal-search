@@ -5,6 +5,7 @@ import { sameProduct, titleFeatures } from "@/src/lib/match/group";
 import type { Product } from "@/src/lib/types";
 import { SerpApiError, cleanQuery, serpAccount, serpImmersive, serpShopping } from "./client";
 import { scrapeGoogle, type ScrapePage } from "./scrape";
+import { clientLimiter, type ClientLimiter } from "./rate";
 import { keepOffers, noData, validateOffers, type GshopOffer, type GshopResult, type GshopSource, type NoDataReason } from "./validate";
 
 /**
@@ -55,11 +56,46 @@ export type GshopDeps = {
   /** Runs `fn` with Google's Chrome page (browser.ts); injected so tests never start Chrome. */
   withPage?: <T>(fn: (page: ScrapePage) => Promise<T>) => Promise<T>;
   sleep?: (ms: number) => Promise<void>;
+  /** Longest a Google job may hold the page (default 60 s); then the page is recycled. */
+  deadlineMs?: number;
+  /** Kills Google's Chrome page so a stuck job ends (browser.ts); injected in tests. */
+  recycle?: () => void;
 };
+
+/** A Google check (gap wait, page load, panel) never holds the queue longer than this. */
+const GOOGLE_DEADLINE_MS = 60_000;
 
 // ---------------- counters and state (gshop_usage, gshop_state) ----------------
 
-const monthKey = (now: number) => `serpapi:${new Date(now).toISOString().slice(0, 7)}`;
+const utcMonthKey = (now: number) => `serpapi:${new Date(now).toISOString().slice(0, 7)}`;
+
+/** The plan's renewal date from account.json ("YYYY-MM-DD"), as ms, or null. */
+function renewalAt(db: Db): { date: string; at: number } | null {
+  const date = getState(db, "serpapi:renewal");
+  if (!date || !/^\d{4}-\d{2}-\d{2}$/.test(date)) return null;
+  const at = Date.parse(`${date}T00:00:00Z`);
+  return Number.isFinite(at) ? { date, at } : null;
+}
+
+/**
+ * The SerpApi counting period: up to the plan's renewal date when account.json gave one that is
+ * still ahead (the free plan renews on its sign-up day, not on the 1st), else the UTC month.
+ */
+function periodKey(db: Db, now: number): string {
+  const r = renewalAt(db);
+  return r && now < r.at ? `serpapi:to-${r.date}` : utcMonthKey(now);
+}
+
+/** Stores the renewal date; the first time, the UTC month's count carries over to the new period. */
+function learnRenewal(db: Db, date: string | null, now: number): void {
+  if (!date || !/^\d{4}-\d{2}-\d{2}$/.test(date) || Date.parse(`${date}T00:00:00Z`) <= now) return;
+  const before = periodKey(db, now);
+  setState(db, "serpapi:renewal", date);
+  const after = periodKey(db, now);
+  if (after !== before) {
+    db.prepare("INSERT INTO gshop_usage (period, calls) VALUES (?, ?) ON CONFLICT (period) DO UPDATE SET calls = MAX(calls, excluded.calls)").run(after, used(db, before));
+  }
+}
 const hourKey = (now: number) => `google-h:${new Date(now).toISOString().slice(0, 13)}`;
 const dayKey = (now: number) => `google-d:${new Date(now).toISOString().slice(0, 10)}`;
 const autoKey = (now: number) => `auto:${ksaDay(now)}`;
@@ -80,7 +116,7 @@ function take(db: Db, period: string, max: number): boolean {
 
 /** Marks the month's SerpApi budget as used up (SerpApi said so). */
 function markExhausted(db: Db, now: number, budget: number): void {
-  db.prepare("INSERT INTO gshop_usage (period, calls) VALUES (?, ?) ON CONFLICT (period) DO UPDATE SET calls = MAX(calls, excluded.calls)").run(monthKey(now), budget);
+  db.prepare("INSERT INTO gshop_usage (period, calls) VALUES (?, ?) ON CONFLICT (period) DO UPDATE SET calls = MAX(calls, excluded.calls)").run(periodKey(db, now), budget);
 }
 
 function getState(db: Db, key: string): string | null {
@@ -128,7 +164,7 @@ export function gshopStatus(deps: GshopDeps): GshopStatus {
   const { db } = deps;
   const now = (deps.now ?? Date.now)();
   const cfg = gshopConfig(deps.env);
-  const left = Math.max(0, cfg.budget - used(db, monthKey(now)));
+  const left = Math.max(0, cfg.budget - used(db, periodKey(db, now)));
   const serpOk = !!cfg.key && left >= CALLS_PER_CHECK && cfg.force !== "google";
   const b = readBackoff(db, now);
   const backedOffUntil = b.blockedUntil > now ? b.blockedUntil : null;
@@ -221,9 +257,10 @@ async function viaSerpApi(deps: GshopDeps, cfg: GshopConfig, p: OurProduct, now:
   const { db } = deps;
   const key = cfg.key as string;
   const opts = { key, fetch: deps.fetch };
-  if (cfg.budget - used(db, monthKey(now)) < CALLS_PER_CHECK) return "fallback";
+  if (cfg.budget - used(db, periodKey(db, now)) < CALLS_PER_CHECK) return "fallback";
   try {
     const acct = await serpAccount(opts);
+    learnRenewal(db, acct.renewal, now);
     if (acct.searchesLeft !== null && acct.searchesLeft < CALLS_PER_CHECK) {
       markExhausted(db, now, cfg.budget);
       return "fallback";
@@ -232,12 +269,12 @@ async function viaSerpApi(deps: GshopDeps, cfg: GshopConfig, p: OurProduct, now:
     // The free account call failing says nothing about the searches: go on.
   }
   try {
-    if (!take(db, monthKey(now), cfg.budget)) return "fallback";
+    if (!take(db, periodKey(db, now), cfg.budget)) return "fallback";
     const items = await serpShopping(cleanQuery(p.title), opts);
     const ours = titleFeatures(p.title);
     const best = items.find((i) => sameProduct(ours, titleFeatures(i.title)));
     if (!best) return { source: "serpapi", at: now, offers: [], reason: "no-match" };
-    if (!take(db, monthKey(now), cfg.budget)) return "fallback";
+    if (!take(db, periodKey(db, now), cfg.budget)) return "fallback";
     const r = await serpImmersive(best.token, opts);
     return { source: "serpapi", at: now, offers: r.offers };
   } catch (e) {
@@ -281,11 +318,21 @@ async function viaGoogle(deps: GshopDeps, p: OurProduct): Promise<Fetched> {
     },
   };
   let out;
+  let timer: ReturnType<typeof setTimeout> | undefined;
   try {
-    out = await withPage((page) => scrapeGoogle(p.title, page, gates));
+    const deadline = new Promise<never>((_, reject) => {
+      timer = setTimeout(() => {
+        // Recycle the page: the stuck job's next page call throws, so the queue moves on.
+        void (async () => (deps.recycle ?? (await import("./browser")).recycleGshopBrowser)())().catch(() => undefined);
+        reject(new Error("Google check passed its deadline"));
+      }, deps.deadlineMs ?? GOOGLE_DEADLINE_MS);
+    });
+    out = await Promise.race([withPage((page) => scrapeGoogle(p.title, page, gates)), deadline]);
   } catch (e) {
-    console.warn("[gshop] Chrome unavailable", e instanceof Error ? e.message.slice(0, 200) : "error");
+    console.warn("[gshop] Google check failed", e instanceof Error ? e.message.slice(0, 200) : "error");
     return { none: "error" };
+  } finally {
+    clearTimeout(timer);
   }
   const now = clock();
   if (out.kind === "skipped") return { none: "budget" };
@@ -316,15 +363,27 @@ async function fetchOffers(deps: GshopDeps, p: OurProduct): Promise<Fetched> {
 
 // ---------------- the check ----------------
 
-export type CheckError = "unknown" | "no-price" | "auto-off" | "auto-limit";
+export type CheckError = "unknown" | "no-price" | "auto-off" | "auto-limit" | "rate";
 export type CheckAnswer = { ok: true; result: GshopResult } | { ok: false; error: CheckError };
 
-const g = globalThis as typeof globalThis & { __gshopFlights?: Map<string, Promise<CheckAnswer>> };
-const flights = () => (g.__gshopFlights ??= new Map<string, Promise<CheckAnswer>>());
+/**
+ * Safety caps on checks that would call SerpApi or Google (owner ruling: small safety caps), so
+ * nobody can drain the SerpApi month or push the app onto Google from the owner's IP. Overall caps
+ * are persisted in SQLite (UTC hour and day); the per-client cap is in memory (rate.ts). Manual and
+ * automatic checks count alike; cache hits and joined in-flight checks are free.
+ */
+export const CHECK_CAPS = { PER_HOUR: 30, PER_DAY: 100, PER_CLIENT_HOUR: 10 } as const;
+const checksHourKey = (now: number) => `checks-h:${new Date(now).toISOString().slice(0, 13)}`;
+const checksDayKey = (now: number) => `checks-d:${new Date(now).toISOString().slice(0, 10)}`;
 
-/** For tests: forget in-flight checks. */
+const g = globalThis as typeof globalThis & { __gshopFlights?: Map<string, Promise<CheckAnswer>>; __gshopClients?: ClientLimiter };
+const flights = () => (g.__gshopFlights ??= new Map<string, Promise<CheckAnswer>>());
+const clients = () => (g.__gshopClients ??= clientLimiter(CHECK_CAPS.PER_CLIENT_HOUR));
+
+/** For tests: forget in-flight checks and the per-client counts. */
 export function resetGshopFlights(): void {
   flights().clear();
+  clients().clear();
 }
 
 /** The cached result for a product, or null (never fetches). */
@@ -340,7 +399,7 @@ export function cachedCheck(deps: GshopDeps, site: string, id: string): GshopRes
  * observation: the request body is never trusted for either). Cached 24 h; one fetch per product
  * at a time.
  */
-export async function checkProduct(deps: GshopDeps, req: { site: string; id: string; auto?: boolean }): Promise<CheckAnswer> {
+export async function checkProduct(deps: GshopDeps, req: { site: string; id: string; auto?: boolean; client?: string }): Promise<CheckAnswer> {
   const { db } = deps;
   const now = (deps.now ?? Date.now)();
   const p = lookup(db, req.site, req.id);
@@ -350,10 +409,17 @@ export async function checkProduct(deps: GshopDeps, req: { site: string; id: str
   const k = `${p.site}\u0000${p.id}`;
   const running = flights().get(k);
   if (running) return running;
-  if (req.auto) {
-    if (!gshopConfig(deps.env).auto) return { ok: false, error: "auto-off" };
-    if (!take(db, autoKey(now), AUTO_DAILY)) return { ok: false, error: "auto-limit" };
-  }
+  if (req.auto && !gshopConfig(deps.env).auto) return { ok: false, error: "auto-off" };
+  // Nothing can be fetched (SerpApi out, Google backed off or at its limits): answer for free.
+  const st = gshopStatus(deps);
+  if (!st.canCheck) return { ok: true, result: noData(st.google.backedOffUntil ? "blocked" : "budget", now) };
+  const client = req.client ?? "local";
+  const room = used(db, checksHourKey(now)) < CHECK_CAPS.PER_HOUR && used(db, checksDayKey(now)) < CHECK_CAPS.PER_DAY && clients().allowed(client, now);
+  if (!room) return { ok: false, error: "rate" };
+  if (req.auto && !take(db, autoKey(now), AUTO_DAILY)) return { ok: false, error: "auto-limit" };
+  take(db, checksHourKey(now), CHECK_CAPS.PER_HOUR);
+  take(db, checksDayKey(now), CHECK_CAPS.PER_DAY);
+  clients().record(client, now);
   const run = (async (): Promise<CheckAnswer> => {
     const f = await fetchOffers(deps, p);
     if ("none" in f) return { ok: true, result: noData(f.none, (deps.now ?? Date.now)()) };

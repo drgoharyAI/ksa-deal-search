@@ -3,6 +3,7 @@ import { getDb } from "@/src/lib/db";
 import { sites } from "@/src/sites/registry";
 import { TOO_LARGE, bad, dbFailure, json, readJsonCapped } from "@/src/lib/api";
 import { cachedCheck, checkProduct, gshopStatus, type CheckError } from "@/src/lib/gshop/service";
+import { clientKeyOf } from "@/src/lib/gshop/rate";
 
 /**
  * Google Shopping KSA check (src/lib/gshop/service.ts). On demand only, never on a search.
@@ -16,12 +17,13 @@ import { cachedCheck, checkProduct, gshopStatus, type CheckError } from "@/src/l
 const SITE_IDS = new Set(Object.keys(sites));
 const MAX_BODY = 1_024;
 
-const STATUS: Record<CheckError, number> = { unknown: 404, "no-price": 409, "auto-off": 403, "auto-limit": 429 };
+const STATUS: Record<CheckError, number> = { unknown: 404, "no-price": 409, "auto-off": 403, "auto-limit": 429, rate: 429 };
 const MESSAGES: Record<CheckError, string> = {
   unknown: "Search for this product first",
   "no-price": "No deliverable price is known for this product",
   "auto-off": "Automatic checks are off",
   "auto-limit": "Today's automatic checks are used up",
+  rate: "Too many checks right now; try again later",
 };
 
 const validId = (id: unknown): id is string => typeof id === "string" && id.length > 0 && id.length <= 200;
@@ -53,7 +55,7 @@ export async function POST(req: Request) {
   if (auto !== undefined && typeof auto !== "boolean") return bad("auto must be true or false");
   try {
     const deps = { db: getDb() };
-    const answer = await checkProduct(deps, { site, id, auto: auto === true });
+    const answer = await checkProduct(deps, { site, id, auto: auto === true, client: clientKeyOf(req) });
     if (!answer.ok) return json({ error: MESSAGES[answer.error], status: gshopStatus(deps) }, STATUS[answer.error]);
     return json({ status: gshopStatus(deps), result: answer.result });
   } catch (e) {

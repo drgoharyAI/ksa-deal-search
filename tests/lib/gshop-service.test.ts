@@ -3,7 +3,7 @@ import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { openDb, type Db } from "@/src/lib/db";
 import { HOUR, DAY } from "@/src/lib/insights";
-import { checkProduct, gshopConfig, gshopStatus, resetGshopFlights, SCRAPE_LIMITS, type GshopDeps } from "@/src/lib/gshop/service";
+import { CHECK_CAPS, checkProduct, gshopConfig, gshopStatus, resetGshopFlights, SCRAPE_LIMITS, type GshopDeps } from "@/src/lib/gshop/service";
 import type { ScrapePage } from "@/src/lib/gshop/scrape";
 
 const fixture = (name: string) => fs.readFileSync(path.join(__dirname, "..", "fixtures", "gshop", name), "utf8");
@@ -15,6 +15,7 @@ let db: Db;
 let now = T0;
 let serpCalls: string[] = [];
 let accountLeft: number | null = 250;
+let renewal: string | null = null;
 let serpAnswer: (engine: string) => Response | null = () => null;
 let loads: string[] = [];
 let sleeps: number[] = [];
@@ -27,7 +28,7 @@ function seed(site = "noon-sa", id = "N1", price = 349, orig: number | null = nu
 
 const fetchStub = (async (input: RequestInfo | URL) => {
   const u = new URL(input instanceof URL ? input.href : typeof input === "string" ? input : input.url);
-  if (u.pathname === "/account.json") return new Response(JSON.stringify({ plan_searches_left: accountLeft }), { status: 200 });
+  if (u.pathname === "/account.json") return new Response(JSON.stringify({ plan_searches_left: accountLeft, plan_renewal_date: renewal }), { status: 200 });
   const engine = u.searchParams.get("engine") ?? "";
   serpCalls.push(engine);
   const custom = serpAnswer(engine);
@@ -74,6 +75,7 @@ beforeEach(() => {
   loads = [];
   sleeps = [];
   accountLeft = 250;
+  renewal = null;
   pageMode = "ok";
   serpAnswer = () => null;
   resetGshopFlights();
@@ -186,6 +188,17 @@ describe("monthly budget", () => {
     now = Date.UTC(2026, 11, 1, 0, 0, 1);
     expect(gshopStatus(deps(env)).serpapi.left).toBe(2);
   });
+  it("counts per SerpApi plan period when account.json gives the renewal date, else per UTC month", async () => {
+    renewal = "2026-12-28";
+    await checkProduct(deps(), { site: "noon-sa", id: "N1" });
+    expect(gshopStatus(deps()).serpapi.left).toBe(238);
+    // A new UTC month is not a new SerpApi period: the plan renews on the 28th.
+    now = Date.UTC(2026, 11, 2);
+    expect(gshopStatus(deps()).serpapi.left).toBe(238);
+    // Past the renewal date the count starts again.
+    now = Date.UTC(2026, 11, 28, 1);
+    expect(gshopStatus(deps()).serpapi.left).toBe(240);
+  });
   it("trusts SerpApi's own count: plan_searches_left 0 means exhausted for the month", async () => {
     accountLeft = 0;
     const a = await checkProduct(deps(), { site: "noon-sa", id: "N1" });
@@ -240,6 +253,24 @@ describe("Google fallback protections", () => {
     await checkProduct(deps({}), { site: "noon-sa", id: "N1" });
     expect(gshopStatus(deps({})).google.backedOffUntil).toBeNull();
   });
+  it("an empty page is no CAPTCHA: no data, and no back-off", async () => {
+    const a = await checkProduct({ ...deps({}), withPage: (fn) => fn({ ...fakePage(), content: async () => "<html><body></body></html>" }) }, { site: "noon-sa", id: "N1" });
+    expect(a.ok && a.result).toMatchObject({ verdict: "no-data", reason: "error" });
+    expect(gshopStatus(deps({})).google.backedOffUntil).toBeNull();
+  });
+  it("a Google job past its deadline recycles the page, answers no data and frees the single-flight", async () => {
+    let recycled = 0;
+    const stuck = { ...deps({}), deadlineMs: 20, recycle: () => {
+        recycled++;
+      }, withPage: () => new Promise<never>(() => {}) };
+    const a = await checkProduct(stuck, { site: "noon-sa", id: "N1" });
+    expect(a.ok && a.result).toMatchObject({ verdict: "no-data", reason: "error" });
+    expect(recycled).toBe(1);
+    expect(gshopStatus(deps({})).google.backedOffUntil).toBeNull();
+    // The flight is free again: the next check runs.
+    const b = await checkProduct(deps({}), { site: "noon-sa", id: "N1" });
+    expect(b.ok && b.result.source).toBe("google");
+  });
   it("a hand-edited back-off is clamped to 12 h", () => {
     db.prepare("INSERT INTO gshop_state (key, value) VALUES ('google:backoff', ?)").run(JSON.stringify({ blockedUntil: now + 30 * DAY, strikes: 99 }));
     expect(gshopStatus(deps({})).google.backedOffUntil).toBe(now + 12 * HOUR);
@@ -274,6 +305,54 @@ describe("Google fallback protections", () => {
     const a = await checkProduct(deps({ SERPAPI_KEY: KEY, GSHOP_SOURCE: "google" }), { site: "noon-sa", id: "N1" });
     expect(serpCalls).toEqual([]);
     expect(a.ok && a.result.source).toBe("google");
+  });
+});
+
+describe("safety caps on checks (review round 1)", () => {
+  const seedMany = (n: number) => {
+    for (let i = 0; i < n; i++) seed("noon-sa", `M${i}`);
+  };
+  it("are 30 checks an hour and 100 a day overall, 10 an hour per client", () => {
+    expect(CHECK_CAPS).toEqual({ PER_HOUR: 30, PER_DAY: 100, PER_CLIENT_HOUR: 10 });
+  });
+  it("stops one client at 10 an hour, with no SerpApi call past the cap; cache hits stay free", async () => {
+    seedMany(12);
+    for (let i = 0; i < 10; i++) expect((await checkProduct(deps(), { site: "noon-sa", id: `M${i}`, client: "cf:203.0.113.9" })).ok).toBe(true);
+    const calls = serpCalls.length;
+    expect(await checkProduct(deps(), { site: "noon-sa", id: "M10", client: "cf:203.0.113.9" })).toEqual({ ok: false, error: "rate" });
+    expect(serpCalls).toHaveLength(calls);
+    // A cached product costs nothing and is still answered.
+    expect((await checkProduct(deps(), { site: "noon-sa", id: "M0", client: "cf:203.0.113.9" })).ok).toBe(true);
+    // Another client still has room.
+    expect((await checkProduct(deps(), { site: "noon-sa", id: "M11", client: "cf:198.51.100.7" })).ok).toBe(true);
+  });
+  it("an attacker rotating client addresses stops at 30 an hour and 100 a day; the budget is not drained", { timeout: 30_000 }, async () => {
+    seedMany(150);
+    let refused = 0;
+    for (let i = 0; i < 150; i++) {
+      const a = await checkProduct(deps(), { site: "noon-sa", id: `M${i}`, client: `cf:10.0.${i}.1` });
+      if (!a.ok) refused++;
+    }
+    expect(refused).toBe(120);
+    expect(serpCalls).toHaveLength(60);
+    expect(gshopStatus(deps()).serpapi.left).toBe(180);
+    // Next hours: the day cap (100) holds.
+    for (let h = 1; h <= 4; h++) {
+      now += HOUR;
+      for (let i = 0; i < 40; i++) {
+        seed("noon-sa", `H${h}-${i}`);
+        await checkProduct(deps(), { site: "noon-sa", id: `H${h}-${i}`, client: `cf:10.1.${h}.${i}` });
+      }
+    }
+    expect(serpCalls).toHaveLength(200);
+    expect(gshopStatus(deps()).serpapi.left).toBe(40);
+  });
+  it("automatic checks count toward the same caps", async () => {
+    const env = { SERPAPI_KEY: KEY, GSHOP_AUTO: "1" };
+    const hour = new Date(now).toISOString().slice(0, 13);
+    db.prepare("INSERT INTO gshop_usage (period, calls) VALUES (?, 30)").run(`checks-h:${hour}`);
+    expect(await checkProduct(deps(env), { site: "noon-sa", id: "N1", auto: true })).toEqual({ ok: false, error: "rate" });
+    expect(serpCalls).toEqual([]);
   });
 });
 

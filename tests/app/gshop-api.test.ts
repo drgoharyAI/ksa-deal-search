@@ -32,6 +32,7 @@ vi.mock("@/src/lib/gshop/browser", () => ({
 const { openDb } = await import("@/src/lib/db");
 const { resetGshopFlights } = await import("@/src/lib/gshop/service");
 const route = await import("@/app/api/gshop/validate/route");
+const { clientKeyOf } = await import("@/src/lib/gshop/rate");
 
 const BASE = "http://127.0.0.1:3000/api/gshop/validate";
 const JSON_TYPE = { "content-type": "application/json" };
@@ -88,6 +89,39 @@ describe("/api/gshop/validate", () => {
     expect((await route.POST(post({ site: "noon-sa", id: 5 }))).status).toBe(400);
     expect((await route.POST(post({ site: "noon-sa", id: "N1", auto: "yes" }))).status).toBe(400);
     expect((await route.GET(new Request(`${BASE}?site=evil&id=N1`))).status).toBe(400);
+  });
+  it("answers 429 past the per-client cap, with no Google call; the tunnel's CF-Connecting-IP is the client", async () => {
+    process.env.APP_HOSTS = "deals.example.com";
+    for (let i = 0; i < 12; i++) {
+      state.db.prepare("INSERT INTO seen_products (site, productId, title, url, currency, lastSeen) VALUES ('noon-sa', ?, 'JBL Flip 6 Portable Bluetooth Speaker Waterproof Wireless', 'https://www.noon.com/saudi-en/x/p/', 'SAR', ?)").run(`R${i}`, Date.now());
+      state.db.prepare("INSERT INTO observations (site, productId, price, origPrice, at) VALUES ('noon-sa', ?, 349, NULL, ?)").run(`R${i}`, Date.now() - 60_000);
+    }
+    const tunnel = (id: string, ip: string) =>
+      new Request("https://deals.example.com/api/gshop/validate", { method: "POST", headers: { ...JSON_TYPE, host: "deals.example.com", "cf-connecting-ip": ip }, body: JSON.stringify({ site: "noon-sa", id }) });
+    expect(clientKeyOf(tunnel("x", "203.0.113.5"), process.env)).toBe("cf:203.0.113.5");
+    // On the LAN, a client-sent X-Forwarded-For or CF-Connecting-IP is ignored.
+    expect(clientKeyOf(new Request(BASE, { headers: { "x-forwarded-for": "1.2.3.4", "cf-connecting-ip": "5.6.7.8" } }), process.env)).toBe("local");
+    // SerpApi answers from the documented fixtures (no live call, no Chrome).
+    process.env.SERPAPI_KEY = "test-key";
+    let serp = 0;
+    vi.stubGlobal("fetch", async (input: RequestInfo | URL) => {
+      const u = new URL(input instanceof URL ? input.href : typeof input === "string" ? input : input.url);
+      if (u.pathname === "/account.json") return new Response(JSON.stringify({ plan_searches_left: 250 }));
+      serp++;
+      const name = u.searchParams.get("engine") === "google_shopping" ? "serpapi-shopping-jbl.json" : "serpapi-immersive-jbl.json";
+      return new Response(fs.readFileSync(path.join(__dirname, "..", "fixtures", "gshop", name), "utf8"));
+    });
+    try {
+      for (let i = 0; i < 10; i++) expect((await route.POST(tunnel(`R${i}`, "203.0.113.5"))).status).toBe(200);
+      expect(serp).toBe(20);
+      const r = await route.POST(tunnel("R10", "203.0.113.5"));
+      expect(r.status).toBe(429);
+      expect(await r.json()).toMatchObject({ error: "Too many checks right now; try again later" });
+      expect(serp).toBe(20);
+      expect(state.loads).toBe(0);
+    } finally {
+      vi.unstubAllGlobals();
+    }
   });
   it("refuses a product never seen, and automatic checks while they are off", async () => {
     expect((await route.POST(post({ site: "noon-sa", id: "NOPE" }))).status).toBe(404);
