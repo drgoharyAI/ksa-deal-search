@@ -9,6 +9,7 @@ import ResultCard, { type CardVariant } from "./ResultCard";
 import GroupCard from "./GroupCard";
 import Button from "./ui/Button";
 import { GshopAuto } from "./GshopCheck";
+import { KanbkamAuto } from "./KanbkamHistory";
 
 /** Cards drawn per step: a search can return 400+ cards, too many to mount at once on a phone. */
 export const RESULTS_STEP = 48;
@@ -134,6 +135,7 @@ export default function ResultTiers({ products, items: given, query, compare, vi
   return (
     <div ref={root} className="rtiers">
       <GshopAuto products={singles} />
+      <KanbkamAuto products={singles} />
       {tiers}
       {footer}
       {status}
