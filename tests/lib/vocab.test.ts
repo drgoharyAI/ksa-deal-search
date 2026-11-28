@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { openDb, type Db } from "@/src/lib/db";
 import { buildVocab, currentSpeller, readDbVocab, resetVocab, setVocabSource, staticVocab, VOCAB_MAX, VOCAB_TTL_MS } from "@/src/lib/query/vocab";
 
@@ -154,6 +154,31 @@ describe("currentSpeller", () => {
     await new Promise((r) => setTimeout(r, 10));
     expect(reads).toBe(2);
     expect(currentSpeller(t0 + VOCAB_TTL_MS + 1).correct("hoverbaord").query).toBe("hoverbaord");
+  });
+
+  it("uses the curated misspellings, trusted product words and model nouns", () => {
+    const sp = currentSpeller();
+    expect(sp.correct("gamming mous pad").query).toBe("gaming mouse pad");
+    expect(sp.correct("labtop").query).toBe("laptop");
+    expect(sp.correct("ninja creami").changed).toBe(false);
+  });
+
+  it("a failed background rebuild keeps the old speller and tries again later", async () => {
+    let fail = false;
+    setVocabSource(() => {
+      if (fail) throw new Error("boom");
+      return { titles: [], queries: [] };
+    });
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const first = currentSpeller(1);
+    fail = true;
+    expect(currentSpeller(1 + VOCAB_TTL_MS)).toBe(first);
+    await new Promise((r) => setTimeout(r, 10));
+    fail = false;
+    currentSpeller(2 + VOCAB_TTL_MS); // the rebuild did not stick in "rebuilding"
+    await new Promise((r) => setTimeout(r, 10));
+    expect(currentSpeller(3 + VOCAB_TTL_MS)).not.toBe(first);
+    warn.mockRestore();
   });
 
   it("falls back to the static vocabulary when the source throws", () => {

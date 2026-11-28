@@ -6,6 +6,7 @@ import accessoryWords from "@/data/accessory-words.json";
 import partWords from "@/data/part-words.json";
 import otherProductWords from "@/data/other-product-words.json";
 import curated from "@/data/vocab-words.json";
+import misspellings from "@/data/misspellings.json";
 import { matcherWords } from "@/src/lib/match/group";
 import { Speller } from "./spell";
 import { englishWords } from "./dictionary";
@@ -139,7 +140,13 @@ export function resetVocab(): void {
 /** The app's speller over these learnt words: vocabulary, brand joins, dictionary, title evidence. */
 export function spellerFor(db: DbVocab): Speller {
   const titles = titleVocab(db.titles);
-  return new Speller(buildVocab(db, VOCAB_MAX, titles), { joinable: joinable(), dictionary: englishWords(), titleFreq: titles });
+  return new Speller(buildVocab(db, VOCAB_MAX, titles), {
+    joinable: joinable(),
+    dictionary: englishWords(),
+    titleFreq: titles,
+    trusted: [...curated, ...brands],
+    overrides: new Map(Object.entries(misspellings)),
+  });
 }
 
 function build(): Speller {
@@ -166,8 +173,14 @@ export function currentSpeller(now = Date.now()): Speller {
   if (now - s.builtAt >= VOCAB_TTL_MS && !s.rebuilding) {
     s.rebuilding = true;
     setTimeout(() => {
-      if (g.__vocab !== s) return; // reset or replaced meanwhile
-      g.__vocab = { speller: build(), builtAt: now };
+      try {
+        if (g.__vocab !== s) return; // reset or replaced meanwhile
+        g.__vocab = { speller: build(), builtAt: now };
+      } catch (e) {
+        console.warn("[vocab] rebuild failed; the old vocabulary stays", e instanceof Error ? e.message : String(e));
+      } finally {
+        s.rebuilding = false; // a failed rebuild is tried again on a later request
+      }
     }, 0);
   }
   return s.speller;
