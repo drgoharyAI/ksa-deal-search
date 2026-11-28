@@ -6,7 +6,7 @@ import type { DealBadge } from "@/src/lib/types";
  * own observations or deal badges: a verdict is shown next to our badge, never instead of it.
  */
 
-export type KanbkamVerdictKind = "fake-was" | "lowest" | "near-lowest";
+type KanbkamVerdictKind = "fake-was" | "lowest" | "near-lowest";
 export type KanbkamVerdict = { kind: KanbkamVerdictKind; label: string };
 
 /** What a lookup answers: the listing's history, or that Kanbkam has none for it. */
@@ -29,7 +29,7 @@ const FAKE_WAS_MARGIN = 1.02;
 const LOWEST_MARGIN = 1.01;
 const NEAR_MARGIN = 1.05;
 
-export const VERDICT_LABELS: Record<KanbkamVerdictKind, string> = {
+const VERDICT_LABELS: Record<KanbkamVerdictKind, string> = {
   "fake-was": "Fake was-price (Kanbkam)",
   lowest: "Lowest in Kanbkam history",
   "near-lowest": "Near the lowest",
