@@ -44,7 +44,7 @@ describe("normalizeSearchItem", () => {
     expect(p.site).toBe("aliexpress");
     expect(p.origPrice).toBeCloseTo(39.55, 2);
     expect(p.image).toBe("https://a/b.jpg");
-    expect(p.url).toBe("https://www.aliexpress.com/item/1.html");
+    expect(p.url).toBe("https://www.aliexpress.com/item/1.html?_randl_currency=SAR&_randl_shipto=SA");
     expect(p.detailStatus).toBe("ok");
     expect(p.finalPrice).toBe(7.91);
     expect(p.shipping).toBeNull();
@@ -113,5 +113,15 @@ describe("searchCalls", () => {
     expect(searchCalls({ terms: "¿¿", exclude: [] }, ["¿", "usb-c"])).toEqual([
       { op: "search", args: { q: "usb-c", page: "1", sort: "default" } },
     ]);
+  });
+});
+
+describe("AliExpress links open on the KSA storefront", () => {
+  it("carries ship-to SA and SAR, and passes the store-host check", async () => {
+    const { itemUrl } = await import("@/src/sites/aliexpress/search");
+    const { storeLink } = await import("@/src/lib/store-hosts");
+    const url = itemUrl("1005006760169389");
+    expect(url).toBe("https://www.aliexpress.com/item/1005006760169389.html?_randl_currency=SAR&_randl_shipto=SA");
+    expect(storeLink("aliexpress", url)).toBe(url);
   });
 });

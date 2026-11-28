@@ -4,6 +4,15 @@ import { itemId } from "@/src/lib/item-id";
 const round2 = (n: number) => Math.round(n * 100) / 100;
 
 /** Lowercase, drop non-alphanumerics, join words with "-". "" if nothing usable. */
+/**
+ * Product link that opens on the Saudi storefront: AliExpress reads these two parameters and sets
+ * its region cookie to ship-to SA and currency SAR (checked live: aep_usuc_f=...c_tp=SAR&region=SA),
+ * whatever region the visitor's browser had before. Without them the page shows the visitor's last
+ * region, so prices and shipping may not be the KSA ones.
+ */
+const KSA_PARAMS = "_randl_currency=SAR&_randl_shipto=SA";
+export const itemUrl = (id: string): string => `https://www.aliexpress.com/item/${id}.html?${KSA_PARAMS}`;
+
 export function slugify(terms: string): string {
   return terms
     .toLowerCase()
@@ -55,7 +64,7 @@ export function normalizeSearchItem(raw: unknown): Product | null {
     rating: num(r.rating),
     soldCount: parseSold(typeof r.sold === "string" ? r.sold : undefined),
     image: img.startsWith("//") ? `https:${img}` : img,
-    url: `https://www.aliexpress.com/item/${id}.html`,
+    url: itemUrl(id),
     shipping: null,
     finalPrice: price,
     detailStatus: "ok",
