@@ -1,0 +1,213 @@
+{
+ "_comment": "Recorded live from SerpApi on 2026-11-28 (engine=google_immersive_product, more_stores=true) for the first result above; key not present; page_token shortened.",
+ "search_metadata": {
+  "id": "6b0a34d812ba36e8160db2bd",
+  "status": "Success",
+  "created_at": "2026-11-28 01:56:40 UTC",
+  "processed_at": "2026-11-28 01:56:40 UTC",
+  "total_time_taken": 2.13
+ },
+ "search_parameters": {
+  "engine": "google_immersive_product",
+  "page_token": "LIVE-TOKEN-TRIMMED",
+  "more_stores": true
+ },
+ "product_results": {
+  "title": "JBL Flip 6 Portable Bluetooth Speaker Waterproof Wireless",
+  "brand": "JBL",
+  "rating": 4.4,
+  "reviews": 1815,
+  "stores": [
+   {
+    "name": "Amazon.sa",
+    "link": "https://www.amazon.sa/-/en/JBL-Portable-Bluetooth-Waterproof-Wireless/dp/B09HGVNLFK?source=ps-sl-shoppingads-lpcontext&ref_=fplfs&psc=1&smid=A2XPWB6MYN7ZDK",
+    "title": "JBL Flip 6 Gray Portable Bluetooth Speaker Waterproof Wireless",
+    "details_and_offers": [
+     "In stock online",
+     "Free delivery"
+    ],
+    "price": "SAR 349.00",
+    "extracted_price": 349.0,
+    "shipping": "Free",
+    "total": "SAR 349.00",
+    "extracted_total": 349.0
+   },
+   {
+    "name": "Abdulwahed",
+    "link": "https://www.abdulwahed.com/en/product/jbl-flip-6-speaker-jblflip6grey-p-1089301?srsltid=AYCX9vIwMVJw92-dK-Hda3WU9uexK1NF-tjJ_L6u-4LX5DsrYgcupVaooM8",
+    "title": "JBL Flip 6 Speaker (JBLFLIP6GREY)",
+    "details_and_offers": [
+     "In stock online",
+     "Free delivery between Dec 1 – 5"
+    ],
+    "discount": "Sale",
+    "price": "SAR 349.00",
+    "extracted_price": 349.0,
+    "original_price": "SAR 499.00",
+    "extracted_original_price": 499.0,
+    "shipping": "Free",
+    "total": "SAR 349.00",
+    "extracted_total": 349.0
+   },
+   {
+    "name": "Links",
+    "link": "https://www.links.hr/hr/zvucnik-jbl-flip-6-bluetooth-vodootporan-20w-sivi-020208045",
+    "title": "Zvučnik JBL Flip 6, bluetooth, vodootporan, 20W, sivi",
+    "details_and_offers": [
+     "In stock online"
+    ],
+    "price": "SAR 410.69",
+    "extracted_price": 410.69,
+    "total": "SAR 410.69",
+    "extracted_total": 410.69
+   },
+   {
+    "name": "Samma3a.com",
+    "link": "https://www.samma3a.com/en-sa/products/jbl-flip-6-wireless-speaker-grey?variant=47979823661301&country=SA&currency=AED&utm_medium=product_sync&utm_source=google&utm_content=sag_organic&utm_campaign=sag_organic&srsltid=AYCX9vIoIb2gy_XCb6rAW7QeNYJ90atRjXhF5KJBizNY3La0IiW8LID1ous",
+    "title": "JBL Flip 6 Portable Waterproof Wireless Speaker - Grey",
+    "details_and_offers": [
+     "In stock online",
+     "Free delivery between Mon - Tue",
+     "30-day returns"
+    ],
+    "price": "SAR 407.51",
+    "extracted_price": 407.51,
+    "shipping": "Free",
+    "total": "SAR 407.51",
+    "extracted_total": 407.51
+   },
+   {
+    "name": "Amazon.sa",
+    "link": "https://www.amazon.sa/%D8%AC%D9%8A%D9%87-%D8%A8%D9%8A-%D8%A7%D9%84-%D8%A7%D9%88%D8%B1%D9%8A%D8%AC%D9%8A%D9%86%D8%A7%D9%84-%D8%A8%D8%A7%D8%AA%D8%AC%D8%A7%D9%87%D9%8A%D9%86%D8%8C/dp/B09HGVNLFK?source=ps-sl-shoppingads-lpcontext&ref_=fplfs&psc=1&smid=A2XPWB6MYN7ZDK",
+    "title": "مكبر صوت فليب 6 من جيه بي ال، محمول ومقاوم للماء بتصنيف Ip67 مع صوت جيه بي ال اوريجينال برو باتجاهين، بطارية تدوم لـ 12 ساعة، حماية امنة للشحن عبر USB",
+    "details_and_offers": [
+     "In stock online",
+     "Free delivery"
+    ],
+    "price": "SAR 349.00",
+    "extracted_price": 349.0,
+    "shipping": "Free",
+    "total": "SAR 349.00",
+    "extracted_total": 349.0
+   },
+   {
+    "name": "Abdulwahed",
+    "link": "https://www.abdulwahed.com/ar/product/jbl-flip-6-speaker-jblflip6grey-p-1089301?srsltid=AYCX9vKOYXwQ_upTKvdKg1wtHp8qBCaX0-Y0_D8WACruPgIRYvuqLojPdqM",
+    "title": "سماعة JBL Flip 6 لون رمادي (JBLFLIP6GREY)",
+    "details_and_offers": [
+     "In stock online",
+     "Free delivery between Dec 1 – 5"
+    ],
+    "discount": "Sale",
+    "price": "SAR 349.00",
+    "extracted_price": 349.0,
+    "original_price": "SAR 499.00",
+    "extracted_original_price": 499.0,
+    "shipping": "Free",
+    "total": "SAR 349.00",
+    "extracted_total": 349.0
+   },
+   {
+    "name": "Carrefour KSA",
+    "link": "https://www.carrefourksa.com/mafsau/en/bluetooth-speakers/jbl-speaker-bt-port-flip-6-grey/p/720889?utm_source=google&utm_medium=surfaces&utm_campaign=shopping_feed&utm_content=free_google_shopping_clicksHomeCinema&Audio=&srsltid=AYCX9vIdeoCFr3RzXqKvRSTCafuxfOlSNYUf_9vuGj5LRKKBNanQ1qCmJbI",
+    "title": "JBL Flip 6, Portable Bluetooth Speaker - Grey",
+    "rating": 4.5,
+    "reviews": 24,
+    "details_and_offers": [
+     "Out of stock online",
+     "Next-day delivery SAR 9",
+     "7-day returns"
+    ],
+    "price": "SAR 499.00",
+    "extracted_price": 499.0,
+    "shipping": "+ SAR 9.00",
+    "shipping_extracted": 9.0,
+    "total": "SAR 508.00",
+    "extracted_total": 508.0
+   },
+   {
+    "name": "Doos.sa",
+    "link": "https://doos.sa/en/market/product/jbl-flip-6-gray-portable-bluetooth-speaker-waterproof-wireless-12917",
+    "title": "Jbl Flip 6 Gray Portable Bluetooth Speaker Waterproof Wireless",
+    "details_and_offers": [
+     "Out of stock online"
+    ],
+    "price": "SAR 499.00",
+    "extracted_price": 499.0,
+    "total": "SAR 499.00",
+    "extracted_total": 499.0
+   },
+   {
+    "name": "友和 Yoho",
+    "link": "https://www.yohohongkong.com/en-us/product/55269-JBL-Flip-6-Portable-Waterproof-Speaker-Grey-JBLFLIP6GRY?srsltid=AYCX9vK-yY8T4u4WgL70GS3koifHnKzYeNSmnlphnR7jPYMB2EN3D02XJoY",
+    "title": "Mastercard $100 OFF | JBL Flip 6 Portable Waterproof Speaker - Grey JBLFLIP6GRY",
+    "details_and_offers": [
+     "Out of stock online",
+     "Delivery SAR 36.89"
+    ],
+    "price": "SAR 349.21",
+    "extracted_price": 349.21,
+    "shipping": "+ SAR 36.89",
+    "shipping_extracted": 36.89,
+    "total": "SAR 386.10",
+    "extracted_total": 386.1
+   },
+   {
+    "name": "Etoren.com",
+    "link": "https://www.etoren.com/products/jbl-flip-6-bluetooth-speaker-grey-stone?utm_source=google&utm_medium=free%20shopping&utm_campaign=free%20shopping&utm_content=free%20google%20shopping%20clicks",
+    "title": "JBL Flip 6 Bluetooth Speaker Grey Stone at Etoren",
+    "details_and_offers": [
+     "Out of stock online",
+     "Delivery between Dec 4 – 8 SAR 150.04"
+    ],
+    "price": "SAR 472.60",
+    "extracted_price": 472.6,
+    "shipping": "+ SAR 150.04",
+    "shipping_extracted": 150.04,
+    "total": "SAR 622.64",
+    "extracted_total": 622.64
+   },
+   {
+    "name": "Level-Up",
+    "link": "https://level-up.gg/ar/products/jbl-portable-speaker-flip-6-black?variant=44590001422570&country=AE&currency=KWD&utm_medium=product_sync&utm_source=google&utm_content=sag_organic&utm_campaign=sag_organic&srsltid=AYCX9vJ8bsLsXL4O-QMp80QF52Pp_v-ijswqmIjPaMKWdcodYFZBy2wZPUo",
+    "title": "جي بي ال مكبر صوت محمول فليب 6 رمادي",
+    "details_and_offers": [
+     "Out of stock online",
+     "14-day returns"
+    ],
+    "price": "SAR 436.54",
+    "extracted_price": 436.54,
+    "total": "SAR 436.54",
+    "extracted_total": 436.54
+   },
+   {
+    "name": "Level-Up",
+    "link": "https://level-up.gg/products/jbl-portable-speaker-flip-6-black?variant=44590001422570&country=AE&currency=KWD&utm_medium=product_sync&utm_source=google&utm_content=sag_organic&utm_campaign=sag_organic&srsltid=AYCX9vIAzmzWnYZyDl9qNdJEj1N3XJ0RTSK415I9M2JsAuyJ5chpSt6iaMo",
+    "title": "JBL PORTABLE SPEAKER FLIP 6 Grey",
+    "details_and_offers": [
+     "Out of stock online",
+     "14-day returns"
+    ],
+    "price": "SAR 436.54",
+    "extracted_price": 436.54,
+    "total": "SAR 436.54",
+    "extracted_total": 436.54
+   },
+   {
+    "name": "Carrefour KSA",
+    "link": "https://www.carrefourksa.com/mafsau/ar/bluetooth-speakers/jbl-speaker-bt-port-flip-6-grey/p/720889?srsltid=AYCX9vIXr1xAVIKTYxijRa_uIyUmjGqKydftC3QaCCzob9qKcmAzo0Y7Pio",
+    "title": "جي بي ال فليب 6، مكبر صوت بلوتوث محمول، - رمادي",
+    "rating": 4.5,
+    "reviews": 24,
+    "details_and_offers": [
+     "Out of stock online",
+     "7-day returns"
+    ],
+    "price": "SAR 499.00",
+    "extracted_price": 499.0,
+    "total": "SAR 499.00",
+    "extracted_total": 499.0
+   }
+  ]
+ }
+}

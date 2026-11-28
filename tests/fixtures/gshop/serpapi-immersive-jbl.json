@@ -1,0 +1,29 @@
+{
+  "_comment": "Shaped after https://serpapi.com/google-immersive-product-api (product_results.stores[] fields as documented on 2026-11-28); values are illustrative.",
+  "search_metadata": {
+    "id": "fixture-immersive-1",
+    "status": "Success",
+    "json_endpoint": "https://serpapi.com/searches/fixture/fixture-immersive-1.json",
+    "created_at": "2026-11-28 08:00:03 UTC",
+    "processed_at": "2026-11-28 08:00:03 UTC",
+    "total_time_taken": 1.4
+  },
+  "search_parameters": { "engine": "google_immersive_product", "page_token": "TOKEN-FLIP6", "more_stores": "true" },
+  "product_results": {
+    "thumbnails": ["https://serpapi.com/t.webp"],
+    "title": "JBL Flip 6 Portable Bluetooth Speaker Waterproof Wireless",
+    "brand": "JBL",
+    "reviews": 2900,
+    "rating": 4.5,
+    "price_range": "SAR 329.00 - SAR 499.00",
+    "stores": [
+      { "name": "Amazon.sa", "logo": "https://serpapi.com/l1.png", "link": "https://www.amazon.sa/dp/B09TEST", "title": "JBL Flip 6 Portable Bluetooth Speaker, Waterproof, Black", "rating": 4.4, "reviews": 1800, "payment_methods": "PayPal accepted", "tag": "Best price", "details_and_offers": ["Free delivery"], "price": "SAR 329.00", "extracted_price": 329.0, "shipping": "Free delivery", "shipping_extracted": 0, "total": "SAR 329.00", "extracted_total": 329.0 },
+      { "name": "Jarir Bookstore", "logo": "https://serpapi.com/l2.png", "link": "https://www.jarir.com/sa-en/jbl-flip-6-black.html", "title": "JBL Flip 6 Portable Speaker Black", "rating": 4.6, "reviews": 300, "details_and_offers": ["In stock online"], "discount": "20% off", "price": "SAR 399.00", "extracted_price": 399.0, "original_price": "SAR 499.00", "extracted_original_price": 499.0, "shipping": "SAR 15.00 delivery", "shipping_extracted": 15.0, "total": "SAR 414.00", "extracted_total": 414.0 },
+      { "name": "Danube", "logo": "https://serpapi.com/l3.png", "link": "https://www.danube.sa/en/p/jbl-flip-6", "title": "JBL Flip 6 Waterproof Portable Bluetooth Speaker", "price": "SAR 449.00", "extracted_price": 449.0, "shipping": "Free delivery", "shipping_extracted": 0, "total": "SAR 449.00", "extracted_total": 449.0 },
+      { "name": "Desertcart.ae", "logo": "https://serpapi.com/l4.png", "link": "https://www.desertcart.ae/products/1", "title": "JBL Flip 6", "price": "SAR 300.00", "extracted_price": 300.0 },
+      { "name": "eBay", "logo": "https://serpapi.com/l5.png", "link": "https://www.ebay.com/itm/1", "title": "JBL Flip 6", "price": "$80.00", "extracted_price": 80.0 },
+      { "name": "Abdulwahed", "logo": "https://serpapi.com/l6.png", "link": "https://abdulwahed.com/products/jbl-flip-6", "title": "JBL Flip 6 + Case Logic bundle", "price": "SAR 379.00", "extracted_price": 379.0 }
+    ],
+    "stores_next_page_token": "NEXT"
+  }
+}

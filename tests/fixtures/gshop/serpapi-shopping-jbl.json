@@ -1,0 +1,56 @@
+{
+  "_comment": "Shaped after https://serpapi.com/google-shopping-api (response example, fields as documented on 2026-11-28); values are illustrative for gl=sa.",
+  "search_metadata": {
+    "id": "fixture-shopping-1",
+    "status": "Success",
+    "json_endpoint": "https://serpapi.com/searches/fixture/fixture-shopping-1.json",
+    "created_at": "2026-11-28 08:00:00 UTC",
+    "processed_at": "2026-11-28 08:00:00 UTC",
+    "google_shopping_url": "https://www.google.com.sa/search?udm=28&q=JBL+Flip+6&hl=en&gl=sa",
+    "total_time_taken": 2.1
+  },
+  "search_parameters": { "engine": "google_shopping", "q": "JBL Flip 6 Portable Bluetooth Speaker Waterproof Wireless", "google_domain": "google.com.sa", "hl": "en", "gl": "sa", "device": "desktop" },
+  "search_information": { "shopping_results_state": "Results for exact spelling" },
+  "shopping_results": [
+    {
+      "position": 1,
+      "title": "JBL Flip 7 Portable Bluetooth Speaker",
+      "product_id": "111",
+      "product_link": "https://www.google.com.sa/search?ibp=oshop&q=JBL+Flip+7&prds=catalogid:111&gl=sa&udm=28",
+      "immersive_product_page_token": "TOKEN-FLIP7",
+      "serpapi_immersive_product_api": "https://serpapi.com/search.json?engine=google_immersive_product&page_token=TOKEN-FLIP7",
+      "source": "Amazon.sa",
+      "source_icon": "https://serpapi.com/icon.png",
+      "multiple_sources": true,
+      "price": "SAR 549.00",
+      "extracted_price": 549.0,
+      "rating": 4.7,
+      "reviews": 120,
+      "extensions": ["Free delivery"],
+      "thumbnail": "https://serpapi.com/thumb1.webp",
+      "serpapi_thumbnail": "https://serpapi.com/thumb1.webp",
+      "delivery": "Free delivery"
+    },
+    {
+      "position": 2,
+      "title": "JBL Flip 6 Portable Bluetooth Speaker Waterproof Wireless",
+      "product_id": "5053887856104557232",
+      "product_link": "https://www.google.com.sa/search?ibp=oshop&q=JBL+Flip+6&prds=catalogid:5053887856104557232&gl=sa&udm=28",
+      "immersive_product_page_token": "TOKEN-FLIP6",
+      "serpapi_immersive_product_api": "https://serpapi.com/search.json?engine=google_immersive_product&page_token=TOKEN-FLIP6",
+      "source": "Abdulwahed",
+      "source_icon": "https://serpapi.com/icon2.png",
+      "multiple_sources": true,
+      "price": "SAR 349.00",
+      "extracted_price": 349.0,
+      "rating": 4.5,
+      "reviews": 2900,
+      "snippet": "Good bass",
+      "extensions": ["SALE"],
+      "thumbnail": "https://serpapi.com/thumb2.webp",
+      "serpapi_thumbnail": "https://serpapi.com/thumb2.webp",
+      "delivery": "Free delivery"
+    }
+  ],
+  "filters": []
+}
