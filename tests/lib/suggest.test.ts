@@ -149,3 +149,18 @@ describe("getSuggestions / GET /api/suggest", () => {
     expect(calls).toHaveLength(2);
   });
 });
+
+describe("getSuggestions: typos", () => {
+  it("asks the sources for the corrected words, keeping an unfinished last word", async () => {
+    mockFetch(ok(amazon(["samsung galaxy tab s9"])), ok(jarir([])));
+    expect(await getSuggestions("samsng galaxy ta")).toEqual(["samsung galaxy tab s9"]);
+    expect(calls[0].url).toContain("prefix=samsung+galaxy+ta");
+    expect(calls[1].url).toContain(encodeURIComponent("samsung galaxy ta"));
+  });
+
+  it("keeps a word the vocabulary starts with (still being typed)", async () => {
+    mockFetch(ok(amazon([])), ok(jarir([])));
+    await getSuggestions("headph");
+    expect(calls[0].url).toContain("prefix=headph");
+  });
+});

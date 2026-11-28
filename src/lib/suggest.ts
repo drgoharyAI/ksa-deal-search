@@ -1,5 +1,9 @@
 import "server-only";
 import { TtlCache } from "./cache";
+import { currentSpeller } from "./query/vocab";
+import { installDbVocab } from "./vocab-db";
+
+installDbVocab();
 
 /**
  * Search suggestions (autocomplete) from the stores' own public suggestion services. No LLM.
@@ -58,8 +62,13 @@ const SOURCES: Source[] = [
   },
 ];
 
-/** Trimmed, single-spaced, lower case: the cache key and what the sources are sent. */
-const normalizeQuery = (q: string): string => q.trim().replace(/\s+/g, " ").toLowerCase();
+/**
+ * Trimmed, single-spaced, lower case and typo-corrected (src/lib/query/spell.ts): the cache key and
+ * what the sources are sent. The last word may be unfinished, so a word the vocabulary starts with
+ * stays as typed.
+ */
+const normalizeQuery = (q: string): string =>
+  currentSpeller().correct(q.trim().replace(/\s+/g, " ").toLowerCase(), { lastIsPrefix: true }).query;
 
 // Latin letters, digits, punctuation, symbols and spaces only: drops Arabic and other scripts.
 const LATIN_ONLY = /^[\p{Script=Latin}\p{N}\p{P}\p{S}\s]+$/u;
