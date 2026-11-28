@@ -27,6 +27,21 @@ function parseLeadingNumber(v: unknown): number | null {
   return Number.isFinite(n) ? n : null;
 }
 
+const text = (v: unknown): string => (typeof v === "string" ? v.replace(/\s+/g, " ").trim() : "");
+
+/**
+ * The card's title. Since late 2026 Amazon puts the brand alone in a first h2 ("JBL") and the
+ * product name, without the brand, in a second h2.a-text-normal ("Flip 6 Bluetooth Box ...").
+ * The spec reads both (api-specs/amazon-sa.json); the brand is put back in front unless the name
+ * already starts with it. `titleAny` (the first h2) is the fallback for a card with neither.
+ */
+export function cardTitle(r: Record<string, unknown>): string {
+  const name = text(r.title) || text(r.titleAny);
+  const brand = text(r.brand);
+  if (!brand || !name || brand === name || name.toLowerCase().startsWith(brand.toLowerCase())) return name;
+  return `${brand} ${name}`;
+}
+
 export function normalizeSearchItem(raw: unknown): Product | null {
   if (!raw || typeof raw !== "object") return null;
   const r = raw as Record<string, unknown>;
@@ -43,7 +58,7 @@ export function normalizeSearchItem(raw: unknown): Product | null {
   return {
     site: "amazon-sa",
     id,
-    title: typeof r.title === "string" ? r.title : "",
+    title: cardTitle(r),
     listPrice: price,
     origPrice,
     discountPct,
