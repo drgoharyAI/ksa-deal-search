@@ -129,6 +129,15 @@ describe("safety caps", () => {
     expect((await watches.PATCH(jsonReq("/api/watches", "PATCH", { id, status: "paused" }))).status).toBe(200);
   });
 
+  it("re-arms an existing watch through POST at most once a minute too", async () => {
+    const body = { kind: "search", query: "q", sites: ["jarir"], target: 10 };
+    expect((await watches.POST(jsonReq("/api/watches", "POST", body))).status).toBe(201);
+    expect((await watches.POST(jsonReq("/api/watches", "POST", body))).status).toBe(200);
+    const r = await watches.POST(jsonReq("/api/watches", "POST", body));
+    expect(r.status).toBe(429);
+    expect(await r.json()).toEqual({ error: "Wait a minute before changing this alert again" });
+  });
+
   it("answers 503 with Retry-After when every lane and the line are full", async () => {
     const gate = searchGate();
     const held = await Promise.all(Array.from({ length: 4 }, () => gate.acquire("user")));

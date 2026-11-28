@@ -45,6 +45,8 @@ export async function POST(req: Request) {
     const existing =
       w.kind === "product" ? findProductWatch(db, w.site as string, w.productId as string) : findSearchWatch(db, w);
     if (existing) {
+      // Re-arming an existing watch: once per watch a minute, as PATCH (owner ruling: safety caps).
+      if (!limiters.rearm.take(String(existing.id))) return bad("Wait a minute before changing this alert again", 429);
       updateWatch(db, existing.id, {
         target: w.target,
         status: "active",

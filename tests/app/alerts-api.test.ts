@@ -46,6 +46,7 @@ const search = await import("@/app/api/search/route");
 const { addEvent } = await import("@/src/lib/alerts/repo");
 const { recordSeen } = await import("@/src/lib/discover");
 const { addFavourite } = await import("@/src/lib/saved");
+const { limiters } = await import("@/src/lib/limits");
 
 const BASE = "http://127.0.0.1:3000";
 const jsonReq = (path: string, method: string, body: unknown, headers: Record<string, string> = {}) =>
@@ -55,6 +56,8 @@ const plain = (path: string, method = "GET", headers: Record<string, string> = {
 const productBody = { kind: "product", site: "jarir", productId: "J1", query: "airpods 4", target: 470, title: "AirPods 4", url: "https://www.jarir.com/sa-en/J1", price: 499 };
 
 beforeEach(() => {
+  limiters.rearm.clear();
+  limiters.telegramTest.clear();
   state.db = openDb(":memory:");
   state.dbFails = false;
   vi.unstubAllEnvs();
@@ -109,6 +112,7 @@ describe("/api/watches", () => {
     expect(list.watches).toHaveLength(2);
     expect(list.watches.find((w) => w.id === watch.id)).toMatchObject({ lowest: 499, lastPrice: 499, points: [{ price: 499 }] });
 
+    limiters.rearm.clear(); // a minute later: the POST above re-armed this watch
     const p = await watches.PATCH(jsonReq("/api/watches", "PATCH", { id: watch.id, status: "paused", target: 450 }));
     expect(await p.json()).toMatchObject({ watch: { status: "paused", target: 450, lastFiredPrice: null } });
     expect((await watches.PATCH(jsonReq("/api/watches", "PATCH", { id: 999, status: "paused" }))).status).toBe(404);
