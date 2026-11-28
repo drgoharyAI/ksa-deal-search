@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import fs from "node:fs";
 import path from "node:path";
 import { dbPath } from "@/src/lib/db";
-import { buildVocab, readDbVocab, staticVocab } from "@/src/lib/query/vocab";
+import { readDbVocab, spellerFor } from "@/src/lib/query/vocab";
 import { Speller } from "@/src/lib/query/spell";
 import { matcherWords } from "@/src/lib/match/group";
 import brands from "@/data/brands.json";
@@ -17,8 +17,13 @@ const evalQueries = fs
   .filter((f) => /^queries(?!-typos).*\.json$/.test(f))
   .flatMap((f) => JSON.parse(fs.readFileSync(path.join(root, "eval", f), "utf8")) as string[]);
 
-const joinable = new Set(brands.filter((b) => b.length >= 5));
-const staticSpeller = new Speller(staticVocab(), { joinable });
+/**
+ * Held out: 400+ real shopping queries (product nouns, brands, models, compound names) written
+ * apart from the eval queries and the curated vocabulary. None may be changed.
+ */
+const heldout = JSON.parse(fs.readFileSync(path.join(root, "tests/fixtures/spell/heldout-queries.json"), "utf8")) as string[];
+
+const staticSpeller = spellerFor({ titles: [], queries: [] });
 
 /** The owner's database, read-only, or null when there is none on this machine. */
 function ownerDb() {
@@ -39,6 +44,11 @@ describe("false corrections", () => {
     expect(evalQueries.length).toBeGreaterThanOrEqual(40);
   });
 
+  it("changes no held-out shopping query (static vocabulary)", () => {
+    expect(heldout.length).toBeGreaterThanOrEqual(300);
+    expect(changed(staticSpeller, heldout)).toEqual([]);
+  });
+
   it("changes no eval query (static vocabulary)", () => {
     expect(changed(staticSpeller, evalQueries)).toEqual([]);
   });
@@ -48,8 +58,8 @@ describe("false corrections", () => {
     if (!db) return; // no local database: nothing more to check
     try {
       const learnt = readDbVocab(db);
-      const sp = new Speller(buildVocab(learnt), { joinable });
-      expect(changed(sp, [...evalQueries, ...learnt.queries])).toEqual([]);
+      const sp = spellerFor(learnt);
+      expect(changed(sp, [...evalQueries, ...learnt.queries, ...heldout])).toEqual([]);
       expect(changed(staticSpeller, learnt.queries)).toEqual([]);
     } finally {
       db.close();

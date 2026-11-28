@@ -6,16 +6,25 @@
  * instead of being compared with every word.
  *
  * Left alone, always: words with a digit or a symbol (model codes, prices, "usb-c", "-case",
- * ">4"), words of fewer than 4 letters, non-Latin words, vocabulary words and their plural or
- * singular, and protected words. A correct query is never changed (tests/lib/spell-safety.test.ts).
+ * ">4"), words of fewer than 4 letters, non-Latin words, English dictionary words, vocabulary
+ * words and their plural or singular, and protected words. A word is never split in two; two words
+ * join only into a known brand ("air pods"). A correct query is never changed: every eval query
+ * and 400+ held-out shopping queries (tests/lib/spell-safety.test.ts).
  */
 
 /** Edits allowed for a query word of `len` letters: 1 from 4 to 7, 2 from 8. */
 const maxEdits = (len: number): number => (len >= 8 ? 2 : 1);
 /** Words shorter than this are never corrected. */
 const MIN_LEN = 4;
-/** Each side of a split must be a vocabulary word of at least this length. */
-const MIN_PART = 3;
+/**
+ * A change of letters only (no letter added, dropped or swapped) can turn a real word or a name
+ * into another word ("shark" / "sharp"): it needs the target seen in at least this many product
+ * titles, and 10 times as often as the typed word.
+ */
+const SUB_MIN_TITLES = 10;
+const SUB_MARGIN = 10;
+/** Shorter words are never corrected by a letter change alone ("padel" is no typo of "panel"). */
+const SUB_MIN_LEN = 6;
 /** Words shorter than this are only corrected to a word with the same first letter. */
 const SAME_FIRST_BELOW = 6;
 /** Longer words are never corrected: their delete sets grow with the square of the length. */
@@ -79,8 +88,12 @@ function deletes(w: string, depth: number): Set<string> {
 export type SpellerOptions = {
   /** Words never corrected (brand and model words, query syntax), whatever their frequency. */
   protect?: Iterable<string>;
-  /** Closed compounds two typed words join into ("air pods" -> "airpods"). */
+  /** Closed compounds two typed words join into ("air pods" -> "airpods"); vocabulary words only. */
   joinable?: Iterable<string>;
+  /** Real words (a large English list, src/lib/query/dictionary.ts): never corrected. */
+  dictionary?: { has(w: string): boolean };
+  /** Product-title frequency of each word: the evidence a letter change needs. */
+  titleFreq?: Map<string, number>;
 };
 
 export type Correction = { query: string; changed: boolean };
@@ -89,12 +102,16 @@ export class Speller {
   private readonly freq: Map<string, number>;
   private readonly protect: Set<string>;
   private readonly joinable: Set<string>;
+  private readonly dictionary: { has(w: string): boolean };
+  private readonly titleFreq: Map<string, number>;
   private readonly index = new Map<string, string[]>();
   private sorted: string[] | null = null;
 
   /** `words`: vocabulary word -> frequency (higher wins a tie). Non-letter entries are ignored. */
   constructor(words: Map<string, number>, opts: SpellerOptions = {}) {
-    this.freq = new Map([...words].filter(([w]) => LETTERS.test(w)));
+    this.freq = new Map([...words].filter(([w]) => LETTERS.test(w) && w.length <= MAX_WORD));
+    this.dictionary = opts.dictionary ?? new Set<string>();
+    this.titleFreq = opts.titleFreq ?? new Map<string, number>();
     this.protect = new Set([...(opts.protect ?? []), ...SYNTAX]);
     this.joinable = new Set(opts.joinable ?? []);
     for (const w of this.freq.keys()) {
@@ -118,7 +135,7 @@ export class Speller {
 
   /** Known, or the plural or singular of a known word ("chargers", "glass"). */
   private knownForm(w: string): boolean {
-    if (this.known(w)) return true;
+    if (this.known(w) || this.dictionary.has(w)) return true;
     // Not for a word ending in "s": "cordles" is a typo of "cordless", not its singular.
     if (!w.endsWith("s") && (this.known(`${w}s`) || this.known(`${w}es`))) return true;
     if (w.endsWith("es") && this.known(w.slice(0, -2))) return true;
@@ -139,40 +156,44 @@ export class Speller {
     return lo < s.length && s[lo].startsWith(p);
   }
 
-  /** The closest vocabulary word: fewest edits, then the same first letter, then the most frequent. */
+  /** The closest vocabulary word: fewest edits, then the same first letter, then the same length, then the most frequent. */
   private closest(w: string): string | null {
     const max = maxEdits(w.length);
     const seen = new Set<string>();
-    let best: { w: string; d: number; first: number; f: number } | null = null;
+    let best: { w: string; d: number; first: number; len: number; f: number } | null = null;
     for (const del of deletes(w, max)) {
       for (const cand of this.index.get(del) ?? []) {
         if (seen.has(cand)) continue;
         seen.add(cand);
         const d = osaDistance(w, cand, max);
-        if (d > max) continue;
+        if (d > max || (this.lettersChanged(w, cand, d) && !this.titleBacked(w, cand))) continue;
         const first = cand[0] === w[0] ? 1 : 0;
         // A short word with another first letter is more often a name we do not know ("nike").
         if (!first && w.length < SAME_FIRST_BELOW) continue;
         const f = this.freq.get(cand) ?? 0;
-        if (!best || d < best.d || (d === best.d && (first > best.first || (first === best.first && f > best.f)))) {
-          best = { w: cand, d, first, f };
+        const len = cand.length === w.length ? 1 : 0;
+        const rank = (b: NonNullable<typeof best>) => b.d - d || first - b.first || len - b.len || f - b.f;
+        if (!best || rank(best) > 0) {
+          best = { w: cand, d, first, len, f };
         }
       }
     }
     return best?.w ?? null;
   }
 
-  /** Two vocabulary words written together ("cordlessdrill"), the most frequent pair. */
-  private split(w: string): string | null {
-    let best: { s: string; f: number } | null = null;
-    for (let i = MIN_PART; i <= w.length - MIN_PART; i++) {
-      const a = w.slice(0, i);
-      const b = w.slice(i);
-      if (!this.freq.has(a) || !this.freq.has(b)) continue;
-      const f = Math.min(this.freq.get(a) ?? 0, this.freq.get(b) ?? 0);
-      if (!best || f > best.f) best = { s: `${a} ${b}`, f };
-    }
-    return best?.s ?? null;
+  /** Only letters changed: same length and as many differing positions as edits (no swap). */
+  private lettersChanged(w: string, cand: string, d: number): boolean {
+    if (w.length !== cand.length) return false;
+    let diff = 0;
+    for (let i = 0; i < w.length; i++) if (w[i] !== cand[i]) diff++;
+    return diff === d;
+  }
+
+  /** The target is clearly more frequent in product titles than the typed word (6+ letters only). */
+  private titleBacked(w: string, cand: string): boolean {
+    if (w.length < SUB_MIN_LEN) return false;
+    const t = this.titleFreq.get(cand) ?? 0;
+    return t >= SUB_MIN_TITLES && t >= SUB_MARGIN * (this.titleFreq.get(w) ?? 0);
   }
 
   /** The correction for one lower-case word, or null to keep it. */
@@ -181,7 +202,7 @@ export class Speller {
     if (prefix && this.isPrefix(w)) return null;
     if (budget.left <= 0) return null;
     budget.left--;
-    return this.closest(w) ?? this.split(w);
+    return this.closest(w);
   }
 
   /**
@@ -201,7 +222,7 @@ export class Speller {
       const joined = next ? lower + next.text.toLowerCase() : "";
       // Not when the pair ends the query while typing: "air p" may become "air pods".
       const joinAllowed = !(opts.lastIsPrefix && i + 1 === toks.length - 1);
-      if (next && joinAllowed && LETTERS.test(joined) && this.joinable.has(joined) && !this.freq.has(`${lower} ${next.text.toLowerCase()}`)) {
+      if (next && joinAllowed && LETTERS.test(joined) && this.joinable.has(joined) && this.freq.has(joined) && !this.freq.has(`${lower} ${next.text.toLowerCase()}`)) {
         out.push({ text: joined, at: t.at, end: next.at + next.text.length });
         i++;
         continue;

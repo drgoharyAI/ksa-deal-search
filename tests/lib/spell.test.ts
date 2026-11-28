@@ -77,15 +77,20 @@ describe("Speller.correct", () => {
     expect(s.correct("fyer").query).toBe("fryer");
   });
 
+  it("prefers a swap that keeps the length over a dropped letter", () => {
+    // "iorn" is one swap from "iron" and one deletion from "ion" (frequent in "Li-ion" titles).
+    expect(new Speller(vocab({ iron: 5, ion: 80 })).correct("steam iorn").query).toBe("steam iron");
+  });
+
   it("breaks ties by frequency", () => {
     // "fyer" is one edit from both "fryer" (35) and "flyer" (1).
     expect(sp.correct("fyer").query).toBe("fryer");
   });
 
   it("prefers a candidate with the same first letter", () => {
-    // "cike" is one edit from both; "bike" is far more frequent.
-    const s = new Speller(vocab({ bike: 100, cake: 1 }));
-    expect(s.correct("cike").query).toBe("cake");
+    // "rater" is one added letter from both; "crater" is far more frequent.
+    const s = new Speller(vocab({ crater: 100, rafter: 1 }));
+    expect(s.correct("rater").query).toBe("rafter");
   });
 
   it("never changes a correct query", () => {
@@ -119,17 +124,40 @@ describe("Speller.correct", () => {
     const s = new Speller(WORDS, { joinable: new Set(["airpods", "playstation"]) });
     expect(s.correct("air pods pro").query).toBe("airpods pro");
     expect(s.correct("play station 5").query).toBe("playstation 5");
+    // Only into a vocabulary word: "zorb box" stays apart though "zorbbox" is listed.
+    expect(new Speller(WORDS, { joinable: new Set(["zorbbox"]) }).correct("zorb box").changed).toBe(false);
     // A pair that is not a known compound stays apart.
     expect(s.correct("air fryer").changed).toBe(false);
   });
 
-  it("splits a run-together pair of known words", () => {
-    expect(sp.correct("cordlessdrill").query).toBe("cordless drill");
-    expect(sp.correct("robotvacuum").query).toBe("robot vacuum");
+  it("never splits a word (\"paperwhite\", \"quietcomfort\" are names)", () => {
+    const s = new Speller(vocab({ paper: 50, white: 50, quiet: 20, comfort: 20, cordless: 30, drill: 30 }));
+    for (const w of ["paperwhite", "quietcomfort", "cordlessdrill"]) expect(s.correct(w).changed, w).toBe(false);
   });
 
   it("does not split a known word", () => {
     expect(sp.correct("playstation").changed).toBe(false);
+  });
+
+  it("never corrects a dictionary word", () => {
+    const s = new Speller(vocab({ sharp: 100, case: 100, plus: 100, cord: 100 }), { dictionary: new Set(["shark", "cast", "plug", "core"]) });
+    expect(s.correct("shark cast plug core")).toEqual({ query: "shark cast plug core", changed: false });
+  });
+
+  it("substitutes a letter only toward a word clearly frequent in product titles", () => {
+    // "vaccum" -> "vacuum" changes one letter: a real word or name could look like that.
+    expect(new Speller(vocab({ vacuum: 5 })).correct("vaccum").changed).toBe(false);
+    expect(new Speller(vocab({ vacuum: 5 }), { titleFreq: vocab({ vacuum: 3 }) }).correct("vaccum").changed).toBe(false);
+    expect(new Speller(vocab({ vacuum: 25 }), { titleFreq: vocab({ vacuum: 20 }) }).correct("vaccum").query).toBe("vacuum");
+    // Below 6 letters, never a letter change: "padel" is a sport, not a typo of "panel".
+    expect(new Speller(vocab({ panel: 90 }), { titleFreq: vocab({ panel: 90 }) }).correct("padel").changed).toBe(false);
+    // Insertions, deletions and swaps need no title evidence.
+    expect(new Speller(vocab({ vacuum: 5 })).correct("vacum").query).toBe("vacuum");
+  });
+
+  it("ignores vocabulary words longer than 30 letters", () => {
+    const long = "a".repeat(29) + "bc";
+    expect(new Speller(vocab({ [long]: 9 })).correct(long.slice(0, 30)).changed).toBe(false);
   });
 
   it("protects listed words even when not frequent", () => {
