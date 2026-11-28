@@ -24,9 +24,12 @@ const CARDS_TIMEOUT_MS = 12_000;
 export const FULL_PAGE = 40;
 /**
  * noon's "no results" page. No such page is recorded (eval/recorded/noon-sa has none), so the
- * check is conservative: no product card, and one of these phrases in the (saudi-en) page text.
+ * check is conservative: no product card at that moment, and one of these phrases in the (saudi-en)
+ * page text. "0 results for" must be a bare 0 ("Showing 1,240 results for" and "10 results for"
+ * do not count).
  */
-const NO_RESULTS_RE = "no results found|couldn.t find (any|anything|what you|a match)|we could not find|0 results for";
+export const NO_RESULTS_RE =
+  "no results found|couldn.t find (any|anything|what you|a match)|we could not find|(?<![\\d.,])\\b0 results for";
 const MIN_GAP_MS = 2_000;
 const CACHE_TTL_MS = 600_000;
 const BLOCK_BACKOFF_MS = 10 * 60_000;
