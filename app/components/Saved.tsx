@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { responseError } from "./ui/ErrorState";
 import type { Product } from "@/src/lib/types";
 import { savedKey, snapshotOf, type ProductSnapshot, type SavedItem } from "@/src/lib/saved-shared";
 
@@ -43,8 +44,7 @@ export async function sendSave(snap: ProductSnapshot & { query?: string | null }
       : await send(`/api/favourites?${new URLSearchParams({ site: snap.site, id: snap.id }).toString()}`, { method: "DELETE" });
     // Unsaving one already gone is what was asked for.
     if (r.ok || (!on && r.status === 404)) return null;
-    const d = (await r.json().catch(() => null)) as { error?: string } | null;
-    return d?.error ?? (on ? "Could not save; try again" : "Could not remove; try again");
+    return await responseError(r, on ? "Could not save; try again" : "Could not remove; try again");
   } catch {
     return "Could not reach the app server";
   }

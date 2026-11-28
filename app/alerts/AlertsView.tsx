@@ -6,7 +6,7 @@ import AppHeader, { ALERTS_SEEN_EVENT } from "../components/AppHeader";
 import AppFooter from "../components/AppFooter";
 import Button from "../components/ui/Button";
 import EmptyState from "../components/ui/EmptyState";
-import ErrorState from "../components/ui/ErrorState";
+import ErrorState, { responseError } from "../components/ui/ErrorState";
 import SectionHeader from "../components/ui/SectionHeader";
 import StoreMark from "../components/ui/StoreMark";
 import Sparkline from "../components/Sparkline";
@@ -92,10 +92,7 @@ export default function AlertsView() {
         method === "DELETE"
           ? await fetch(`/api/watches?id=${String(body.id)}`, { method })
           : await fetch("/api/watches", { method, headers: JSON_HEADERS, body: JSON.stringify(body) });
-      if (!r.ok) {
-        const d = (await r.json().catch(() => null)) as { error?: string } | null;
-        return d?.error ?? "Could not save the change";
-      }
+      if (!r.ok) return await responseError(r, "Could not save the change");
       await load();
       return null;
     } catch {
@@ -107,8 +104,7 @@ export default function AlertsView() {
     setTest({ busy: true, text: null, ok: false });
     try {
       const r = await fetch("/api/alerts/test-telegram", { method: "POST", headers: JSON_HEADERS, body: "{}" });
-      const d = (await r.json().catch(() => null)) as { error?: string } | null;
-      setTest({ busy: false, ok: r.ok, text: r.ok ? "Sent. Check your Telegram chat." : (d?.error ?? "The test message failed") });
+      setTest({ busy: false, ok: r.ok, text: r.ok ? "Sent. Check your Telegram chat." : await responseError(r, "The test message failed") });
     } catch {
       setTest({ busy: false, ok: false, text: "Could not reach the app server" });
     }

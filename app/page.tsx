@@ -13,7 +13,7 @@ import HomeSuggestions from "./components/HomeSuggestions";
 import HomeDiscover from "./components/HomeDiscover";
 import Button from "./components/ui/Button";
 import EmptyState from "./components/ui/EmptyState";
-import ErrorState from "./components/ui/ErrorState";
+import ErrorState, { responseError } from "./components/ui/ErrorState";
 import { SkeletonCard } from "./components/ui/Skeleton";
 import WatchForm, { postWatch } from "./components/WatchForm";
 import { cheapestConfident, defaultTarget, priceOf } from "@/src/lib/alerts/shared";
@@ -39,7 +39,7 @@ import { allMembers, buildUnits, viewItems } from "@/src/lib/view";
 import type { GroupRef } from "@/src/lib/match/group";
 import { GroupOpenContext, type GroupOpen } from "./components/GroupCard";
 import {
-  initStream, liveSummary, readEvents, reduceStream, settle, showStoppedEmpty, STOPPED_EMPTY, stopStream, stoppedEarlyNotice, storeEntries, streamFromPayload, type SearchPayload, type StreamEvent, type StreamState,
+  initStream, liveSummary, readEvents, reduceStream, settle, showStoppedEmpty, STOPPED_EMPTY, stopStream, stoppedEarlyNotice, storeEntries, searchRefusal, allUnsupported, ENGLISH_ONLY_EMPTY, streamFromPayload, type SearchPayload, type StreamEvent, type StreamState,
 } from "@/src/lib/search-stream";
 
 type Filters = { minPrice?: number; maxPrice?: number; minRating?: number };
@@ -423,10 +423,15 @@ export default function Home() {
     async function plain() {
       try {
         const res = await request("/api/search");
-        const data = (await res.json().catch(() => null)) as (SearchPayload & { error?: string }) | null;
+        if (!res.ok) {
+          const msg = await responseError(res, "The search failed; try again");
+          if (!ctrl.signal.aborted) fail(msg);
+          return;
+        }
+        const data = (await res.json().catch(() => null)) as SearchPayload | null;
         if (ctrl.signal.aborted) return;
-        if (!res.ok || !data || !Array.isArray(data.products)) {
-          fail(data?.error ?? "The search failed; try again");
+        if (!data || !Array.isArray(data.products)) {
+          fail("The search failed; try again");
           return;
         }
         setRun({ ...meta, stream: streamFromPayload(v.sites, { ...data, statuses: data.statuses ?? [] }) });
@@ -459,11 +464,12 @@ export default function Home() {
       if (ctrl.signal.aborted) return;
       const type = res.headers.get("content-type") ?? "";
       if (!res.ok || !type.includes("ndjson") || !res.body) {
-        // An input error answers JSON with a message, as /api/search would: show it.
-        const data = (await res.json().catch(() => null)) as { error?: string } | null;
-        if (ctrl.signal.aborted) return;
-        if (res.status >= 400 && res.status < 500 && typeof data?.error === "string") fail(data.error);
-        else await plain();
+        // An input error or a safety cap (busy 503, too large 413, 429) answers JSON with a
+        // message: show it. Busy is never retried on /api/search (the same gate guards it).
+        if (searchRefusal(res.status)) {
+          const msg = await responseError(res, "The search failed; try again");
+          if (!ctrl.signal.aborted) fail(msg);
+        } else await plain();
         return;
       }
       try {
@@ -567,7 +573,7 @@ export default function Home() {
             {live}
           </p>
 
-          {formError && <ErrorState message={formError} onRetry={() => void search()} retryLabel="Search again" />}
+          {formError && <ErrorState message={formError} onRetry={() => void search()} retryLabel="Retry" />}
 
           <StatusBar stores={stores} stopped={!!run?.stream.stopped} />
 
@@ -694,6 +700,9 @@ export default function Home() {
                       </Button>
                     }
                   />
+                ) : results && !loading && run && allUnsupported(run.stream) ? (
+                  // No store could search these words (they send English terms only): not "no match".
+                  <EmptyState title={ENGLISH_ONLY_EMPTY.title} body={ENGLISH_ONLY_EMPTY.body} />
                 ) : results && !loading ? (
                   <EmptyState
                     title={results.reason ?? "No products matched your search"}

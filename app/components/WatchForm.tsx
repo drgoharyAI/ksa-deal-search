@@ -1,6 +1,7 @@
 "use client";
 
 import { useId, useState } from "react";
+import { responseError } from "./ui/ErrorState";
 import Button from "./ui/Button";
 import Input from "./ui/Input";
 
@@ -80,8 +81,7 @@ export async function postWatch(body: Record<string, unknown>): Promise<string |
   try {
     const r = await fetch("/api/watches", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) });
     if (r.ok) return null;
-    const d = (await r.json().catch(() => null)) as { error?: string } | null;
-    return d?.error ?? "Could not save the alert";
+    return await responseError(r, "Could not save the alert");
   } catch {
     return "Could not reach the app server";
   }

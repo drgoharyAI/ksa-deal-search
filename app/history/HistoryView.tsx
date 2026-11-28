@@ -19,6 +19,11 @@ type State = { phase: "loading" } | { phase: "error"; message: string } | { phas
 
 const plural = (n: number) => `${n} ${n === 1 ? "result" : "results"}`;
 
+/** The cheapest match's price; a "from" price (the store's lowest option) says so: "from SAR 99". */
+export function CheapestPrice({ cheapest: c }: { cheapest: Pick<NonNullable<HistoryEntry["cheapest"]>, "price" | "currency" | "from"> }) {
+  return <strong className="row__price">{c.from ? `from ${formatMoney(c.price, c.currency)}` : formatMoney(c.price, c.currency)}</strong>;
+}
+
 /**
  * A search's cheapest match: a link to its own store's page only (the store-host allowlist), plain
  * text when the stored URL is not one.
@@ -124,7 +129,7 @@ export default function HistoryView() {
                   {e.cheapest && (
                     <p className="row__detail">
                       Cheapest match <CheapestLink cheapest={e.cheapest} />{" "}
-                      at {storeLabel(e.cheapest.site)}, <strong className="row__price">{formatMoney(e.cheapest.price, e.cheapest.currency)}</strong>
+                      at {storeLabel(e.cheapest.site)}, <CheapestPrice cheapest={e.cheapest} />
                     </p>
                   )}
                 </div>

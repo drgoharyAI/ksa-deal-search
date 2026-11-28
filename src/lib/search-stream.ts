@@ -22,11 +22,12 @@ import type { Product, SiteStatus } from "@/src/lib/types";
  * - ok: answered with `count` listings in the current results;
  * - empty: answered, nothing in the results;
  * - unavailable: refusing us (blocked, rate-limited or backing off); `retryAt` (ms) when known;
- * - failed: the request failed or the answer could not be read.
+ * - failed: the request failed or the answer could not be read;
+ * - unsupported: not asked, the query has no words the store can search (English terms only).
  * A state this client does not know yet (a newer server) is kept as sent: the status row shows it
  * from its label map, with a fallback, and counts it as not answered.
  */
-type KnownState = "searching" | "ok" | "empty" | "unavailable" | "failed";
+type KnownState = "searching" | "ok" | "empty" | "unavailable" | "failed" | "unsupported";
 type StoreState = KnownState | (string & {});
 
 export type StoreEntry = {
@@ -68,6 +69,7 @@ export function countsOf(payload: Pick<SearchPayload, "products" | "groupExtras"
 export function storeEntryOf(status: SiteStatus, count: number, retryAt?: number): StoreEntry {
   if (status.status === "blocked") return retryAt !== undefined ? { store: status.site, state: "unavailable", retryAt } : { store: status.site, state: "unavailable" };
   if (status.status === "error") return { store: status.site, state: "failed" };
+  if (status.status === "unsupported") return { store: status.site, state: "unsupported" };
   const base: StoreEntry = count > 0 ? { store: status.site, state: "ok", count } : { store: status.site, state: "empty" };
   return status.message ? { ...base, partial: true } : base;
 }
@@ -189,6 +191,7 @@ export function liveSummary(s: StreamState, resultCount: number): string {
     if (!s.results) return `Searching ${n(entries.length, "store", "stores")}`;
     return "Showing the first results; more stores are still searching";
   }
+  if (allUnsupported(s)) return ENGLISH_ONLY_EMPTY.title;
   const answered = entries.filter((e) => e.state === "ok" || e.state === "empty").length;
   const head = `${n(resultCount, "result", "results")} from ${answered} of ${n(entries.length, "store", "stores")}`;
   if (s.stopped) return `Search stopped; ${head}`;
@@ -238,6 +241,20 @@ export function stoppedEarlyNotice(s: StreamState): string | null {
   const answered = entries.filter((e) => e.state === "ok" || e.state === "empty").length;
   if (answered === 0) return "The search stopped early, before any store answered.";
   return `The search stopped early; showing results from ${answered} of ${n(entries.length, "store", "stores")}.`;
+}
+
+/**
+ * A failed search response the page shows as is (its JSON `error`), never retried on the plain
+ * /api/search: a 4xx (bad input, too large, too many) or busy (503; the same gate guards both).
+ */
+export const searchRefusal = (status: number): boolean => (status >= 400 && status < 500) || status === 503;
+
+/** The empty state when no store could search the query (every one sends English terms only). */
+export const ENGLISH_ONLY_EMPTY = { title: "Search in English, e.g. 'wireless earbuds'", body: "The stores search English product names only." } as const;
+
+/** Whether the search ended with every store "unsupported" (an Arabic-only query, say). */
+export function allUnsupported(s: StreamState): boolean {
+  return s.done && s.order.length > 0 && s.order.every((id) => s.stores[id]?.state === "unsupported");
 }
 
 /** The empty state after Stop with nothing found yet: most stores never answered, so not "no match". */

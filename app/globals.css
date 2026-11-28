@@ -175,7 +175,7 @@
 .storestatus__label, .storestatus__detail { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .storestatus__detail { font-weight: 400; color: var(--color-muted); }
 .storestatus__item--ok .storestatus__state { font-weight: 500; color: var(--color-ink); }
-.storestatus__item--empty .storestatus__state, .storestatus__item--stopped .storestatus__state, .storestatus__item--searching .storestatus__state, .storestatus__item--other .storestatus__state { color: var(--color-muted); }
+.storestatus__item--empty .storestatus__state, .storestatus__item--stopped .storestatus__state, .storestatus__item--searching .storestatus__state, .storestatus__item--other .storestatus__state, .storestatus__item--unsupported .storestatus__state { color: var(--color-muted); }
 .storestatus__item--unavailable .storestatus__state { font-weight: 500; color: var(--color-warn-ink); }
 .storestatus__item--failed .storestatus__state { font-weight: 500; color: var(--color-error); }
 /* Searching: a short hairline drifting along the cell's foot. Not progress: it never fills. */

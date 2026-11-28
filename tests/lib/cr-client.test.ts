@@ -174,3 +174,74 @@ describe("History: the cheapest match links only to its own store (finding 7)", 
     }
   });
 });
+
+describe("English-only stores: the 'unsupported' status (follow-up 1)", async () => {
+  const { storeEntryOf, allUnsupported, ENGLISH_ONLY_EMPTY, streamFromPayload } = await import("@/src/lib/search-stream");
+  it("maps to its own state, labelled 'English only' with the server's detail", () => {
+    const e = storeEntryOf({ site: "jarir", status: "unsupported", message: "English search terms only" }, 0);
+    expect(e).toEqual({ store: "jarir", state: "unsupported" });
+    expect(storeStateText(e)).toEqual({ text: "English only", detail: "English search terms only", full: "English only, English search terms only" });
+    expect(renderToStaticMarkup(h(StatusBar, { stores: [e] }))).toContain("storestatus__item--unsupported");
+  });
+  it("every store unsupported: the English-only empty state, not 'No products matched'", () => {
+    const statuses = ["jarir", "noon-sa"].map((site) => ({ site, status: "unsupported" as const, message: "English search terms only" }));
+    const s = streamFromPayload(["jarir", "noon-sa"], { products: [], statuses });
+    expect(allUnsupported(s)).toBe(true);
+    expect(ENGLISH_ONLY_EMPTY.title).toBe("Search in English, e.g. 'wireless earbuds'");
+    expect(liveSummary(s, 0)).toBe(ENGLISH_ONLY_EMPTY.title);
+    const mixed = streamFromPayload(["jarir", "noon-sa"], { products: [], statuses: [statuses[0], { site: "noon-sa", status: "ok" }] });
+    expect(allUnsupported(mixed)).toBe(false);
+  });
+});
+
+describe("safety caps are shown kindly (follow-up 2)", async () => {
+  const { responseError } = await import("@/app/components/ui/ErrorState");
+  const { searchRefusal } = await import("@/src/lib/search-stream");
+  const { postWatch } = await import("@/app/components/WatchForm");
+  const { sendSave } = await import("@/app/components/Saved");
+  const json = (status: number, body: unknown) => new Response(JSON.stringify(body), { status, headers: { "content-type": "application/json" } });
+  it("uses the server's error string for every cap", async () => {
+    const caps: [number, string][] = [
+      [503, "Busy, try again in a moment"],
+      [429, "Wait a minute before sending another test"],
+      [409, "You can keep up to 100 price alerts. Delete one to add another."],
+      [429, "Wait a minute before changing this alert again"],
+      [413, "The request is too large"],
+    ];
+    for (const [status, error] of caps) expect(await responseError(json(status, { error }), "fallback")).toBe(error);
+  });
+  it("falls back to words for the status when the body is not JSON, else the caller's text", async () => {
+    expect(await responseError(new Response("<html>", { status: 503 }), "x")).toBe("Busy, try again in a moment");
+    expect(await responseError(new Response("", { status: 413 }), "x")).toBe("The request is too large");
+    expect(await responseError(new Response("", { status: 500 }), "The search failed")).toBe("The search failed");
+  });
+  it("a busy (503) or refused search is shown, never retried on /api/search; a 502 still falls back", () => {
+    expect(searchRefusal(503)).toBe(true);
+    expect(searchRefusal(413)).toBe(true);
+    expect(searchRefusal(429)).toBe(true);
+    expect(searchRefusal(502)).toBe(false);
+    expect(searchRefusal(500)).toBe(false);
+  });
+  it("watch POST and save pass the cap message through", async () => {
+    const real = globalThis.fetch;
+    globalThis.fetch = vi.fn(async () => json(409, { error: "You can keep up to 100 price alerts. Delete one to add another." }));
+    try {
+      expect(await postWatch({ kind: "search" })).toBe("You can keep up to 100 price alerts. Delete one to add another.");
+    } finally {
+      globalThis.fetch = real;
+    }
+    const send = vi.fn(async () => json(413, { error: "The request is too large" })) as unknown as typeof fetch;
+    expect(await sendSave({ site: "jarir", id: "1", title: "t", price: 1, currency: "SAR", url: "https://www.jarir.com/1", image: "" }, true, send)).toBe("The request is too large");
+  });
+});
+
+describe("History: a 'from' cheapest price says so (follow-up 3)", async () => {
+  const { CheapestPrice } = await import("@/app/history/HistoryView");
+  it("prefixes 'from' only when the stored match is a from price", () => {
+    const from = renderToStaticMarkup(h(CheapestPrice, { cheapest: { price: 99, currency: "SAR", from: true } }));
+    const fixed = renderToStaticMarkup(h(CheapestPrice, { cheapest: { price: 99, currency: "SAR" } }));
+    expect(from).toMatch(/>from .*99/);
+    expect(fixed).not.toContain("from");
+    expect(fixed).toContain("99");
+  });
+});

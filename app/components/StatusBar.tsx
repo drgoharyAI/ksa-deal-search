@@ -22,10 +22,11 @@ const STATE_LABELS: Record<string, { text: string; full: string }> = {
   empty: { text: "No results", full: "No results" },
   unavailable: { text: "Unavailable", full: "Temporarily unavailable" },
   failed: { text: "Failed", full: "Failed" },
+  unsupported: { text: "English only", full: "English only" },
 };
 
 /** The states the row styles by name; any other (newer) state is drawn as "other". */
-const STYLED = new Set(["searching", "stopped", "ok", "empty", "unavailable", "failed"]);
+const STYLED = new Set(["searching", "stopped", "ok", "empty", "unavailable", "failed", "unsupported"]);
 
 /** A state name this client does not know, in words: "arabic-only" reads "Arabic only". */
 const fallbackLabel = (state: string): string => {
@@ -48,6 +49,8 @@ export function storeStateText(e: StoreEntry, stopped = false, formatTime = cloc
       return withFull(STATE_LABELS.empty.text, e.partial ? "some pages failed" : undefined);
     case "unavailable":
       return withFull(STATE_LABELS.unavailable.text, e.retryAt !== undefined ? `try after ${formatTime(e.retryAt)}` : undefined, STATE_LABELS.unavailable.full);
+    case "unsupported":
+      return withFull(STATE_LABELS.unsupported.text, "English search terms only");
     default: {
       const label = STATE_LABELS[e.state] ?? { text: fallbackLabel(e.state), full: fallbackLabel(e.state) };
       return withFull(label.text, undefined, label.full);
