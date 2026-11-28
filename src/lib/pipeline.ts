@@ -80,6 +80,15 @@ const EMPTY_CLASSES = new Set(["input"]);
  */
 export const MAX_TITLE = 1000;
 
+/** The host of a URL for a log line ("(not a URL)" otherwise): no path or query. */
+const hostOf = (url: unknown): string => {
+  try {
+    return typeof url === "string" ? new URL(url).hostname.slice(0, 100) : "(not a URL)";
+  } catch {
+    return "(not a URL)";
+  }
+};
+
 const isNum = (n: number | undefined): n is number => typeof n === "number" && Number.isFinite(n);
 
 /** One store's answer: its products (normalized, unfiltered) and its status. */
@@ -140,6 +149,8 @@ export async function fetchSite(
 
     const products: Product[] = [];
     const hostChecked = STORE_HOST_SITES.includes(adapter.id);
+    let offHost = 0;
+    let offHostName = "";
     for (const raw of raws) {
       try {
         const p = adapter.normalizeSearchItem(raw);
@@ -149,7 +160,11 @@ export async function fetchSite(
         // Every registered store has rules (tests/lib/store-hosts.test.ts); a test-only fake has none.
         if (hostChecked) {
           const url = storeLink(adapter.id, p.url);
-          if (!url) continue;
+          if (!url) {
+            offHost += 1;
+            offHostName ||= hostOf(p.url);
+            continue;
+          }
           p.url = url;
           p.image = p.image ? (storeImage(adapter.id, p.image) ?? "") : "";
         }
@@ -161,6 +176,9 @@ export async function fetchSite(
         // skip malformed item
       }
     }
+
+    // One line per store per search: the count and a host, never a URL (it may carry query data).
+    if (offHost) console.warn("[search] listings dropped: link off the store's hosts", adapter.id, offHost, offHostName);
 
     let status: SiteStatus = { site: adapter.id, status: "ok" };
     if (failed.length && !results.some((r) => r.ok)) {
