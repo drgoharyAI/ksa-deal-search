@@ -79,6 +79,11 @@ describe("readDbVocab", () => {
     db.prepare("INSERT INTO searches (at, query, sites, sort, filters, resultCount) VALUES (?, ?, ?, ?, ?, ?)").run(1, "dewalt drill", "[]", "price", "{}", 3);
     expect(readDbVocab(db)).toEqual({ titles: [{ title: "DeWalt Drill", weight: 4 }], queries: ["dewalt drill"] });
   });
+
+  it("skips past queries that found nothing (a typo searched as typed must not become a word)", () => {
+    db.prepare("INSERT INTO searches (at, query, sites, sort, filters, resultCount) VALUES (?, ?, ?, ?, ?, ?)").run(1, "airpdos 4", "[]", "price", "{}", 0);
+    expect(readDbVocab(db).queries).toEqual([]);
+  });
 });
 
 describe("currentSpeller", () => {

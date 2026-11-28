@@ -74,7 +74,7 @@ export function buildVocab(db: DbVocab, max = VOCAB_MAX): Map<string, number> {
   return out;
 }
 
-/** Titles seen (weight 1 + their price observations) and past queries, read only. */
+/** Titles seen (weight 1 + their price observations) and past queries that found something, read only. */
 export function readDbVocab(db: DatabaseSync): DbVocab {
   const titles = db
     .prepare(
@@ -82,7 +82,7 @@ export function readDbVocab(db: DatabaseSync): DbVocab {
        FROM seen_products s ORDER BY s.lastSeen DESC LIMIT 20000`,
     )
     .all() as { title: string; weight: number }[];
-  const queries = (db.prepare("SELECT DISTINCT query FROM searches ORDER BY id DESC LIMIT 2000").all() as { query: string }[]).map((r) => r.query);
+  const queries = (db.prepare("SELECT DISTINCT query FROM searches WHERE resultCount > 0 ORDER BY id DESC LIMIT 2000").all() as { query: string }[]).map((r) => r.query);
   return { titles: titles.map((t) => ({ title: t.title, weight: t.weight })), queries };
 }
 
