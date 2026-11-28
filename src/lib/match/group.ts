@@ -945,7 +945,7 @@ function modelPrev(f: TitleFeatures, generic: (w: string) => boolean): Map<strin
 }
 
 /** Hard evidence of different products (see the module comment). */
-function conflicts(a: TitleFeatures, b: TitleFeatures): boolean {
+export function conflicts(a: TitleFeatures, b: TitleFeatures): boolean {
   if (a.brand && b.brand && a.brand !== b.brand) return true;
   if (a.knownBrand && b.knownBrand && a.knownBrand !== b.knownBrand) return true;
   if (a.variantKey !== b.variantKey || a.accessory !== b.accessory) return true;
