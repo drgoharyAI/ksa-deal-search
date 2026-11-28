@@ -197,6 +197,31 @@ const MIGRATIONS: (string | ((db: Db) => void))[] = [
      PRIMARY KEY (site, productId, titleKey)
    );
    CREATE INDEX IF NOT EXISTS gshop_cache_at ON gshop_cache(at);`,
+  // 9: Kanbkam price history (src/lib/kanbkam): each Amazon.sa / noon listing's history as Kanbkam
+  // shows it (source 'kanbkam' only: never mixed into our own observations), the lookup counters
+  // per UTC hour and day, and small state values (the last load, the 24 h back-off). Idempotent.
+  `CREATE TABLE IF NOT EXISTS kanbkam_history (
+     site TEXT NOT NULL,
+     productId TEXT NOT NULL,
+     source TEXT NOT NULL DEFAULT 'kanbkam' CHECK (source = 'kanbkam'),
+     status TEXT NOT NULL CHECK (status IN ('ok', 'missing')),
+     minPrice REAL,
+     maxPrice REAL,
+     currentPrice REAL,
+     dropPct REAL,
+     since TEXT,
+     at INTEGER NOT NULL,
+     PRIMARY KEY (site, productId)
+   );
+   CREATE INDEX IF NOT EXISTS kanbkam_history_at ON kanbkam_history(at);
+   CREATE TABLE IF NOT EXISTS kanbkam_usage (
+     period TEXT PRIMARY KEY,
+     calls INTEGER NOT NULL DEFAULT 0
+   );
+   CREATE TABLE IF NOT EXISTS kanbkam_state (
+     key TEXT PRIMARY KEY,
+     value TEXT NOT NULL
+   );`,
 ];
 
 export const SCHEMA_VERSION = MIGRATIONS.length;
