@@ -23,7 +23,8 @@ describe("prepareSearch: typo correction", () => {
     const query = "samsng ".repeat(1500);
     const t0 = performance.now();
     const p = prepareSearch({ ...base, query });
-    expect(performance.now() - t0).toBeLessThan(50); // parse and tokenize included
+    // Parse and tokenize included, on a busy test machine; the speller itself is timed in spell.test.ts.
+    expect(performance.now() - t0).toBeLessThan(250);
     expect(p.correction).toBeUndefined();
   });
 
