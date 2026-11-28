@@ -24,7 +24,7 @@ describe("serpShopping (engine=google_shopping)", () => {
     const items = await serpShopping("jbl flip 6", { key: KEY, fetch: s.fetch });
     const u = s.calls[0].url;
     expect(u.origin + u.pathname).toBe("https://serpapi.com/search.json");
-    expect(Object.fromEntries(u.searchParams)).toEqual({ engine: "google_shopping", q: "jbl flip 6", google_domain: "google.com.sa", gl: "sa", hl: "en", api_key: KEY });
+    expect(Object.fromEntries(u.searchParams)).toEqual({ engine: "google_shopping", q: "jbl flip 6", google_domain: "google.com.sa", gl: "sa", hl: "en", location: "Riyadh,Riyadh Province,Saudi Arabia", api_key: KEY });
     expect(items).toHaveLength(2);
     expect(items[1]).toEqual({ title: "JBL Flip 6 Portable Bluetooth Speaker Waterproof Wireless", productId: "5053887856104557232", token: "TOKEN-FLIP6", source: "Abdulwahed", price: 349, currency: "SAR" });
   });

@@ -16,14 +16,17 @@ import { isKsaUrl } from "./links";
  *   search_metadata.status Success | Processing | Queued | Error.
  * - https://serpapi.com/account-api: GET https://serpapi.com/account.json, free (not counted);
  *   plan_searches_left, total_searches_left.
- * `location` is documented as city-level and optional; gl=sa + google_domain=google.com.sa set the
- * market, so no location is sent (an unknown location name is an error).
+ * `location` pins the search to Riyadh (a canonical name from https://serpapi.com/locations.json).
+ * Without it the same query was answered from SerpApi's varying proxy locations: on 2026-11-28
+ * "JBL Flip 6" gave 8 Flip 6 offers at 01:56 UTC and 40 unrelated speakers (no Flip 6) at 02:59
+ * and 09:39; with the location it gave 21 Flip 6 offers (Amazon.sa, noon, LuLu, Doos.sa).
  *
  * The host is fixed (no user-controlled URL). The key goes only into the query string of these
  * requests; it is never logged and is scrubbed from every error message.
  */
 
 const SEARCH = "https://serpapi.com/search.json";
+const SERP_LOCATION = "Riyadh,Riyadh Province,Saudi Arabia";
 const ACCOUNT = "https://serpapi.com/account.json";
 const SERPAPI_TIMEOUT_MS = 20_000;
 /** Answers are a few hundred KB; anything past this is refused. */
@@ -153,7 +156,7 @@ export type ShoppingItem = { title: string; productId: string; token: string; so
 
 /** Step 1: Google Shopping results for the cleaned title (one billed search). */
 export async function serpShopping(q: string, opts: SerpOpts): Promise<ShoppingItem[]> {
-  const body = await getJson(SEARCH, { engine: "google_shopping", q, google_domain: "google.com.sa", gl: "sa", hl: "en" }, opts);
+  const body = await getJson(SEARCH, { engine: "google_shopping", q, google_domain: "google.com.sa", gl: "sa", hl: "en", location: SERP_LOCATION }, opts);
   failedSearch(body, opts.key);
   const list = Array.isArray(body.shopping_results) ? (body.shopping_results as Record<string, unknown>[]) : [];
   return list.slice(0, 60).flatMap((r) => {

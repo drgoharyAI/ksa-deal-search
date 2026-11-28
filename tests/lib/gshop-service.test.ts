@@ -170,6 +170,27 @@ describe("live production check (2026-11-28): a long query brought unrelated res
   });
 });
 
+describe("live production check (2026-11-28, 09:39 UTC): SerpApi answered from a non-Saudi location", () => {
+  it("a no-match is kept only 2 h, then the product is checked again (a real answer keeps 24 h)", async () => {
+    serpAnswer = (e) => (e === "google_shopping" ? new Response(JSON.stringify({ search_metadata: { status: "Success" }, shopping_results: [] }), { status: 200 }) : null);
+    await checkProduct(deps(), { site: "noon-sa", id: "N1" });
+    now += HOUR;
+    await checkProduct(deps(), { site: "noon-sa", id: "N1" });
+    expect(serpCalls).toEqual(["google_shopping"]);
+    now += HOUR + 1;
+    await checkProduct(deps(), { site: "noon-sa", id: "N1" });
+    expect(serpCalls).toEqual(["google_shopping", "google_shopping"]);
+  });
+  it("pinned to Riyadh, the same query finds the Flip 6 (21 of 40 results) and the check reaches the store offers", async () => {
+    db.prepare("INSERT INTO seen_products (site, productId, title, url, currency, lastSeen) VALUES ('amazon-sa', 'B09HGVNLFK', 'JBL Flip 6 Gray Portable Bluetooth Speaker Waterproof Wireless', 'https://www.amazon.sa/dp/B09HGVNLFK', 'SAR', ?)").run(now);
+    db.prepare("INSERT INTO observations (site, productId, price, origPrice, at) VALUES ('amazon-sa', 'B09HGVNLFK', 349, NULL, ?)").run(now - HOUR);
+    serpAnswer = (e) => new Response(fixture(e === "google_shopping" ? "serpapi-live-shopping-riyadh-jbl-flip-6.json" : "serpapi-live-immersive-jbl-flip-6.json"), { status: 200 });
+    const a = await checkProduct(deps(), { site: "amazon-sa", id: "B09HGVNLFK" });
+    expect(serpCalls).toEqual(["google_shopping", "google_immersive_product"]);
+    expect(a.ok && a.result.verdict).toBe("not-unique");
+  });
+});
+
 describe("live Google recording (jbl flip 6, 2026-11-28)", () => {
   it("the Chrome path on the recorded page and panel: Abdulwahed at SAR 349 matches amazon.sa's price", async () => {
     db.prepare("INSERT INTO seen_products (site, productId, title, url, currency, lastSeen) VALUES ('amazon-sa', 'B09HGVNLFK', 'JBL Flip 6 Gray Portable Bluetooth Speaker Waterproof Wireless', 'https://www.amazon.sa/dp/B09HGVNLFK', 'SAR', ?)").run(now);

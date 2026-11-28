@@ -24,6 +24,8 @@ const MAX_BUDGET = 250;
 const CALLS_PER_CHECK = 2;
 const AUTO_DAILY = 5;
 const CACHE_TTL = DAY;
+/** A no-match or no-data answer is kept only briefly: one odd answer must not hide a product for a day. */
+const NO_MATCH_TTL = 2 * 60 * 60 * 1000;
 
 /** Chrome fallback limits, to protect the owner's home IP. */
 export const SCRAPE_LIMITS = {
@@ -202,6 +204,7 @@ function cacheGet(db: Db, p: OurProduct, now: number): Captured | null {
   if (!row || now - row.at >= CACHE_TTL || now < row.at) return null;
   try {
     const v = JSON.parse(row.payload) as { offers?: GshopOffer[]; reason?: NoDataReason };
+    if (v.reason && now - row.at >= NO_MATCH_TTL) return null;
     return { source: row.source === "google" ? "google" : "serpapi", at: row.at, offers: Array.isArray(v.offers) ? v.offers : [], ...(v.reason && { reason: v.reason }) };
   } catch {
     return null;
