@@ -115,11 +115,14 @@ async function processWatch(deps: CheckerDeps, id: number, outcomes: Map<string,
     updateWatch(db, w.id, { lastCheckedAt: now, lastCheckStatus: blocked ? "blocked" : "error" });
     return true;
   }
-  const full = stores.length > 0 && answered.length === stores.length && answered.every((o) => o.full);
+  const strict = stores.length > 0 && answered.length === stores.length && answered.every((o) => o.full);
   const hit =
     w.kind === "product"
       ? (answered.flatMap((o) => o.listings).find((p) => p.site === w.site && p.id === w.productId) ?? null)
       : cheapestConfident(filterFor(w, answered.flatMap((o) => o.products))); // the search form's filters, applied to each store's answer
+  // A product watch whose own product was found has its answer, even if another page failed;
+  // a search watch needs every request of every store (a missing page may hold the cheapest).
+  const full = strict || (w.kind === "product" && hit !== null && answered.length === stores.length);
   if (!hit) {
     // A watched product its store now marks out of stock says so, rather than "not found".
     const gone = w.kind === "product" && answered.some((o) => o.outOfStock.has(`${w.site}${SEP}${w.productId}`));

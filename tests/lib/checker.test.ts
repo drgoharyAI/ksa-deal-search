@@ -349,8 +349,8 @@ describe("code review round: alert checker", () => {
     expect(listPricePoints(db, id).map((p) => p.price)).toEqual([95, 95]);
   });
 
-  it("a store answer with failed requests is partial too", async () => {
-    const id = productWatch(450);
+  it("a store answer with failed requests is partial for a search watch", async () => {
+    const id = searchWatch(450, ["amazon-sa"]);
     answers["amazon-sa"] = { products: [prod("amazon-sa", "B0X", 440)] };
     await tick();
     answers["amazon-sa"] = { products: [prod("amazon-sa", "B0X", 500)], message: "1 of 3 requests failed" };
@@ -359,6 +359,20 @@ describe("code review round: alert checker", () => {
     answers["amazon-sa"] = { products: [prod("amazon-sa", "B0X", 500)] };
     await tick();
     expect(getWatch(db, id)?.lastFiredPrice).toBeNull();
+  });
+
+  it("a product watch whose product was found has its answer even when another page failed", async () => {
+    const id = productWatch(450);
+    answers["amazon-sa"] = { products: [prod("amazon-sa", "B0X", 440)] };
+    await tick();
+    answers["amazon-sa"] = { products: [prod("amazon-sa", "B0X", 500)], message: "1 of 2 requests failed" };
+    await tick();
+    expect(getWatch(db, id)).toMatchObject({ lastFiredPrice: null, lastCheckStatus: "ok", lastPrice: 500 });
+    expect(listPricePoints(db, id).map((p) => p.price)).toEqual([440, 500]);
+    // not found while a page failed stays partial (the product may be on that page)
+    answers["amazon-sa"] = { products: [], message: "1 of 2 requests failed" };
+    await tick();
+    expect(getWatch(db, id)?.lastCheckStatus).toBe("partial");
   });
 
   it("re-reads each watch: a deleted one is skipped, a paused one too, a new target is used", async () => {

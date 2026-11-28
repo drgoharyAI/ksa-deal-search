@@ -166,9 +166,15 @@ const MIGRATIONS: (string | ((db: Db) => void))[] = [
     addColumn(db, "favourites", "pickupOnly", "INTEGER NOT NULL DEFAULT 0");
   },
   // 7: an alert event whose Telegram send failed and is to be retried says so (retry = 1), so a
-  // manual re-arm (a new target) is never mistaken for a retry. Idempotent.
+  // manual re-arm (a new target) is never mistaken for a retry. Idempotent. Before it, a failed
+  // send left the watch armed with an unsent latest event: that event is flagged, so the next
+  // cycle retries it instead of adding a duplicate.
   (db) => {
     addColumn(db, "alert_events", "retry", "INTEGER NOT NULL DEFAULT 0");
+    db.exec(`UPDATE alert_events SET retry = 1
+             WHERE sent = 0
+               AND id IN (SELECT max(id) FROM alert_events WHERE watchId IS NOT NULL GROUP BY watchId)
+               AND watchId IN (SELECT id FROM watches WHERE lastFiredPrice IS NULL)`);
   },
 ];
 
