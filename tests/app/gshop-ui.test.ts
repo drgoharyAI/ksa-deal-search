@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import { GshopEvidence, GshopPanel, SourceInfo, budgetLine, checkedAgo } from "@/app/components/GshopCheck";
+import { GshopEvidence, GshopPanel, INFO_CLOSED, SourceInfo, budgetLine, checkedAgo, infoOpen, infoReducer, type InfoEvent } from "@/app/components/GshopCheck";
 import type { GshopResult } from "@/src/lib/gshop/validate";
 import type { GshopStatus } from "@/src/lib/gshop/service";
 
@@ -71,6 +71,43 @@ describe("SourceInfo", () => {
   });
 });
 
+describe("the (i) note's state machine (review round 1)", () => {
+  const run = (...events: InfoEvent[]) => events.reduce(infoReducer, INFO_CLOSED);
+  it("hover opens, leaving closes", () => {
+    expect(infoOpen(run("enter"))).toBe(true);
+    expect(infoOpen(run("enter", "leave"))).toBe(false);
+  });
+  it("keyboard focus opens, blur closes", () => {
+    expect(infoOpen(run("focus"))).toBe(true);
+    expect(infoOpen(run("focus", "blur"))).toBe(false);
+  });
+  it("a tap (enter + focus + click) opens and stays open; a second tap closes", () => {
+    expect(infoOpen(run("enter", "focus", "click"))).toBe(true);
+    expect(infoOpen(run("enter", "focus", "click", "click"))).toBe(false);
+  });
+  it("a mouse click pins it: leaving does not close it, a second click does", () => {
+    expect(infoOpen(run("enter", "focus", "click", "leave"))).toBe(true);
+    expect(infoOpen(run("enter", "focus", "click", "leave", "enter", "click"))).toBe(false);
+  });
+  it("Esc closes it whatever opened it, until the pointer or focus comes back", () => {
+    for (const how of [["enter"], ["focus"], ["enter", "focus", "click"]] as InfoEvent[][]) expect(infoOpen(run(...how, "escape"))).toBe(false);
+    expect(infoOpen(run("enter", "escape", "leave", "enter"))).toBe(true);
+  });
+  it("closed by a click, it stays closed while the button keeps focus, even as the pointer leaves (browser run)", () => {
+    expect(infoOpen(run("enter", "focus", "click", "click", "leave"))).toBe(false);
+    expect(infoOpen(run("enter", "focus", "click", "click", "leave", "blur", "focus"))).toBe(true);
+  });
+  it("keyboard focus opens it again right after a press outside, even before the pointer's leave fires (browser run)", () => {
+    expect(infoOpen(run("enter", "focus", "click", "click", "outside", "blur", "focus"))).toBe(true);
+  });
+  it("Esc then Tab away, with the pointer still leaving, stays closed (browser run)", () => {
+    expect(infoOpen(run("enter", "focus", "escape", "blur"))).toBe(false);
+  });
+  it("a press outside closes a pinned note", () => {
+    expect(infoOpen(run("enter", "focus", "click", "leave", "outside"))).toBe(false);
+  });
+});
+
 describe("check panel", () => {
   const panel = (s: GshopStatus | null, r: GshopResult | null = null, extra: { busy?: boolean; error?: string } = {}) =>
     renderToStaticMarkup(createElement(GshopPanel, { status: s, result: r, busy: extra.busy ?? false, error: extra.error ?? null, onCheck: () => {}, now: NOW }));
@@ -98,6 +135,11 @@ describe("check panel", () => {
     expect(panel(status(), result({}))).toContain("Google Shopping KSA: 2 other stores");
     expect(panel(status(), null, { busy: true })).toContain('aria-busy="true"');
     expect(panel(status(), null, { error: "Search for this product first" })).toContain("Search for this product first");
+  });
+  it("says 'too many checks' calmly: a status note, not an alert", () => {
+    const out = renderToStaticMarkup(createElement(GshopPanel, { status: status(), result: null, busy: false, error: "Too many checks right now; try again later", calm: true, onCheck: () => {}, now: NOW }));
+    expect(out).toContain('<p class="details__note" role="status">Too many checks right now; try again later</p>');
+    expect(out).not.toContain('role="alert"');
   });
   it("words the budget and the time", () => {
     expect(budgetLine(status({ left: 1 }))).toBe("SerpApi limit reached; using Google directly");

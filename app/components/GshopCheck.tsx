@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useId, useRef, useState, useSyncExternalStore } from "react";
+import { useCallback, useEffect, useId, useLayoutEffect, useReducer, useRef, useState, useSyncExternalStore } from "react";
 import type { Product } from "@/src/lib/types";
 import { formatMoney } from "@/src/lib/money";
 import { safeOfferLink } from "@/src/lib/gshop/links";
@@ -43,7 +43,7 @@ function useGshopResult(p: Product): GshopResult | null {
   );
 }
 
-type Answer = { status?: GshopStatus; result?: GshopResult | null; error?: string };
+type Answer = { status?: GshopStatus; result?: GshopResult | null; error?: string; calm?: boolean };
 
 async function call(p: Product, method: "GET" | "POST", auto = false): Promise<Answer> {
   const res =
@@ -53,7 +53,9 @@ async function call(p: Product, method: "GET" | "POST", auto = false): Promise<A
   const body = (await res.json().catch(() => ({}))) as Answer;
   if (body.status) lastStatus = body.status;
   if (body.result) publish(keyOf(p), body.result);
-  return res.ok ? body : { ...body, error: body.error ?? "The check failed. Try again later." };
+  if (res.ok) return body;
+  // 429: a cap was reached; nothing failed, so it is said calmly.
+  return { ...body, error: body.error ?? "The check failed. Try again later.", calm: res.status === 429 };
 }
 
 // ---------------- wording ----------------
@@ -94,44 +96,108 @@ function cannotCheck(s: GshopStatus): string {
 // ---------------- the (i) source note ----------------
 
 /**
- * A small (i) button (44px target) whose note shows on hover, keyboard focus and tap, and closes
- * with Esc. The note describes the button (aria-describedby), so screen readers read it too.
+ * The (i) note's state: open on hover or keyboard focus; a click or tap pins it open (hover-leave
+ * does not close a pinned note) and a second one closes it; Esc or a press outside closes it,
+ * whatever opened it, until the pointer or focus comes back (WCAG 1.4.13). Pure, for tests.
+ */
+export type InfoState = { hover: boolean; focus: boolean; pinned: boolean; dismissed: boolean };
+export type InfoEvent = "enter" | "leave" | "focus" | "blur" | "click" | "escape" | "outside";
+export const INFO_CLOSED: InfoState = { hover: false, focus: false, pinned: false, dismissed: false };
+
+export const infoOpen = (s: InfoState) => s.pinned || (!s.dismissed && (s.hover || s.focus));
+
+export function infoReducer(s: InfoState, e: InfoEvent): InfoState {
+  // A dismissal lasts until the pointer and focus have both left; a fresh hover or focus then opens again.
+  const away = !s.hover && !s.focus;
+  switch (e) {
+    case "enter":
+      return { ...s, hover: true, dismissed: away ? false : s.dismissed };
+    case "leave":
+      return { ...s, hover: false, dismissed: s.focus ? s.dismissed : false };
+    case "focus":
+      return { ...s, focus: true, dismissed: s.focus ? s.dismissed : false };
+    case "blur":
+      return { ...s, focus: false, pinned: false, dismissed: s.hover ? s.dismissed : false };
+    case "click":
+      return s.pinned ? { ...s, pinned: false, dismissed: true } : { ...s, pinned: true, dismissed: false };
+    case "escape":
+    case "outside":
+      return { ...s, pinned: false, dismissed: true };
+  }
+}
+
+/** Hover-leave waits this long, so the pointer can move onto the note. */
+const LEAVE_DELAY_MS = 150;
+
+/**
+ * A small (i) button (44px target) whose note shows on hover, keyboard focus and tap (see
+ * infoReducer). The note describes the button (aria-describedby), so screen readers read it too.
  */
 export function SourceInfo({ text }: { text: string }) {
-  const [open, setOpen] = useState(false);
+  const [state, dispatch] = useReducer(infoReducer, INFO_CLOSED);
+  const open = infoOpen(state);
   const id = useId();
   const ref = useRef<HTMLSpanElement>(null);
+  const note = useRef<HTMLSpanElement>(null);
+  const leaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Keep the open note inside the viewport (a phone puts the (i) near the right edge).
+  useLayoutEffect(() => {
+    const el = note.current;
+    if (!el || !open) return;
+    el.style.transform = "";
+    const r = el.getBoundingClientRect();
+    const over = r.right - (document.documentElement.clientWidth - 8);
+    if (over > 0) el.style.transform = `translateX(${-Math.min(over, r.left - 8)}px)`;
+  }, [open]);
+  const cancelLeave = () => {
+    if (leaveTimer.current) clearTimeout(leaveTimer.current);
+    leaveTimer.current = null;
+  };
+  useEffect(() => cancelLeave, []);
   useEffect(() => {
     if (!open) return;
     const onDown = (e: PointerEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+      if (ref.current && !ref.current.contains(e.target as Node)) dispatch("outside");
+    };
+    // Esc closes the note whatever opened it, wherever focus is.
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") dispatch("escape");
     };
     document.addEventListener("pointerdown", onDown);
-    return () => document.removeEventListener("pointerdown", onDown);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("pointerdown", onDown);
+      document.removeEventListener("keydown", onKey);
+    };
   }, [open]);
   return (
-    <span className="info" ref={ref} onMouseEnter={() => setOpen(true)} onMouseLeave={() => setOpen(false)}>
+    <span
+      className="info"
+      ref={ref}
+      onMouseEnter={() => {
+        cancelLeave();
+        dispatch("enter");
+      }}
+      onMouseLeave={() => {
+        cancelLeave();
+        leaveTimer.current = setTimeout(() => dispatch("leave"), LEAVE_DELAY_MS);
+      }}
+    >
       <button
         type="button"
         className="info__button"
         aria-label="Source"
         aria-describedby={id}
         aria-expanded={open}
-        onFocus={() => setOpen(true)}
-        onBlur={() => setOpen(false)}
-        onClick={() => setOpen((o) => !o)}
-        onKeyDown={(e) => {
-          if (e.key === "Escape" && open) {
-            e.stopPropagation();
-            setOpen(false);
-          }
-        }}
+        onFocus={() => dispatch("focus")}
+        onBlur={() => dispatch("blur")}
+        onClick={() => dispatch("click")}
       >
         <span className="info__icon" aria-hidden="true">
           i
         </span>
       </button>
-      <span id={id} role="tooltip" className="info__note" hidden={!open}>
+      <span id={id} ref={note} role="tooltip" className="info__note" hidden={!open}>
         {text}
       </span>
     </span>
@@ -190,10 +256,10 @@ export function GshopEvidence({ result: r, now }: { result: GshopResult; now?: n
 
 // ---------------- the panel (Details, compare) ----------------
 
-type PanelProps = { status: GshopStatus | null; result: GshopResult | null; busy: boolean; error: string | null; onCheck: () => void; now?: number };
+type PanelProps = { status: GshopStatus | null; result: GshopResult | null; busy: boolean; error: string | null; calm?: boolean; onCheck: () => void; now?: number };
 
 /** The "Check other stores" block (pure, exported for tests). */
-export function GshopPanel({ status, result, busy, error, onCheck, now }: PanelProps) {
+export function GshopPanel({ status, result, busy, error, calm = false, onCheck, now }: PanelProps) {
   const noteId = useId();
   const blocked = status !== null && !status.canCheck;
   return (
@@ -209,11 +275,16 @@ export function GshopPanel({ status, result, busy, error, onCheck, now }: PanelP
           {cannotCheck(status)}
         </p>
       )}
-      {error && (
-        <p className="details__note gshop-check__error" role="alert">
-          {error}
-        </p>
-      )}
+      {error &&
+        (calm ? (
+          <p className="details__note" role="status">
+            {error}
+          </p>
+        ) : (
+          <p className="details__note gshop-check__error" role="alert">
+            {error}
+          </p>
+        ))}
       {result && <GshopEvidence result={result} now={now} />}
       <p className="details__note">Other Saudi stores&apos; prices from Google Shopping, checked only when you ask. Check the store page before you buy.</p>
     </div>
@@ -224,7 +295,7 @@ export function GshopPanel({ status, result, busy, error, onCheck, now }: PanelP
 export default function GshopCheck({ product: p }: { product: Product }) {
   const [status, setStatus] = useState<GshopStatus | null>(lastStatus);
   const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<{ text: string; calm: boolean } | null>(null);
   const result = useGshopResult(p);
   useEffect(() => {
     let live = true;
@@ -243,12 +314,12 @@ export default function GshopCheck({ product: p }: { product: Product }) {
     call(p, "POST")
       .then((a) => {
         if (a.status) setStatus(a.status);
-        if (a.error) setError(a.error);
+        if (a.error) setError({ text: a.error, calm: a.calm === true });
       })
-      .catch(() => setError("The check failed. Try again later."))
+      .catch(() => setError({ text: "The check failed. Try again later.", calm: false }))
       .finally(() => setBusy(false));
   }, [p]);
-  return <GshopPanel status={status} result={result} busy={busy} error={error} onCheck={onCheck} />;
+  return <GshopPanel status={status} result={result} busy={busy} error={error?.text ?? null} calm={error?.calm} onCheck={onCheck} />;
 }
 
 /** On a card with a deal badge: the evidence line once the product was checked on this page. */

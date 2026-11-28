@@ -677,7 +677,7 @@
 .info__icon { display: inline-grid; place-items: center; width: 16px; height: 16px; border: 1px solid currentColor; border-radius: var(--radius-pill); font-family: var(--font-display); font-size: var(--text-xs); font-style: italic; line-height: 1; }
 .info__button:hover, .info__button[aria-expanded="true"] { color: var(--color-ink); }
 .info__button:focus-visible { outline: 2px solid var(--color-focus); outline-offset: -8px; border-radius: var(--radius-pill); }
-.info__note { position: absolute; z-index: 5; inset-block-start: calc(100% + var(--space-2xs)); inset-inline-start: 0; width: max-content; max-width: min(18rem, 70vw); padding: var(--space-2xs) var(--space-xs); border-radius: var(--radius-sm); background: var(--color-surface); box-shadow: var(--shadow-2); color: var(--color-ink-2); font-size: var(--text-xs); line-height: 1.4; }
+.info__note { position: absolute; z-index: 5; inset-block-start: 100%; inset-inline-start: 0; width: max-content; max-width: min(18rem, 70vw); padding: var(--space-2xs) var(--space-xs); border-radius: var(--radius-sm); background: var(--color-surface); box-shadow: var(--shadow-2); color: var(--color-ink-2); font-size: var(--text-xs); line-height: 1.4; }
 .info__note[hidden] { display: none; }
 .gshop-check { display: grid; gap: var(--space-xs); }
 .gshop-check__row { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-xs); }
