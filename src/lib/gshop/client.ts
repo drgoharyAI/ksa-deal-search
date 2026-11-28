@@ -114,17 +114,29 @@ export function currencyOf(text: string): string {
   return "?";
 }
 
-/** A short search phrase from a store title: no brackets or punctuation, the first 7 words. */
+/** Words after a model number that still name the model ("iPhone 15 Pro Max", "Galaxy S24 Ultra"). */
+const MODEL_QUALIFIERS = new Set(["pro", "max", "plus", "ultra", "mini", "lite", "se", "fe", "air", "neo", "xl", "xxl", "slim", "edge"]);
+
+/**
+ * The search phrase for a store title: the product's name up to its model number ("JBL Flip 6"),
+ * plus model words right after it ("Pro Max"); colours, sizes and marketing words are left out.
+ * Without a model number, the first 4 words. Live 2026-11-28: the 7-word "JBL Flip 6 Gray Portable
+ * Bluetooth Speaker" brought Google Shopping 40 unrelated speakers and no Flip 6.
+ */
 export function cleanQuery(title: string): string {
   const noBrackets = title.replace(/\([^)]{0,200}\)|\[[^\]]{0,200}\]/g, " ");
-  const head = noBrackets.split(/ [-|–—] |،/)[0];
-  return head
-    .replace(/[^\p{L}\p{N}\s.+-]/gu, " ")
+  const head = noBrackets.split(/ [-|–—] |،|,/)[0];
+  const words = head
+    .replace(/[^\p{L}\p{N}\s.+/-]/gu, " ")
     .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, 7)
-    .join(" ")
-    .slice(0, 100);
+    .filter(Boolean);
+  const model = words.slice(0, 6).findIndex((w) => /\d/.test(w));
+  let out = words.slice(0, 4);
+  if (model >= 0) {
+    out = words.slice(0, model + 1);
+    for (let i = model + 1; i < words.length && out.length < 6 && MODEL_QUALIFIERS.has(words[i].toLowerCase()); i++) out.push(words[i]);
+  }
+  return out.join(" ").slice(0, 100);
 }
 
 export type ShoppingItem = { title: string; productId: string; token: string; source: string; price: number | null; currency: string };

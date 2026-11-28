@@ -40,7 +40,7 @@ describe("scrapeGoogle", () => {
       panelHtml: fixture("google-panel-jbl-flip-6.html"),
     });
     const r = await scrapeGoogle(TITLE, page, { beforeLoad: allow, beforePanel: allow });
-    expect(log[0]).toBe("goto https://www.google.com.sa/search?udm=28&hl=en&gl=sa&q=JBL+Flip+6+Portable+Bluetooth+Speaker+Waterproof");
+    expect(log[0]).toBe("goto https://www.google.com.sa/search?udm=28&hl=en&gl=sa&q=JBL+Flip+6");
     expect(log[1]).toMatch(/^click \d+$/);
     expect(r.kind).toBe("ok");
     if (r.kind !== "ok") return;

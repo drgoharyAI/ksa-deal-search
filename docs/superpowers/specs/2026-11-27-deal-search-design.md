@@ -452,7 +452,7 @@ ruling of 2026-11-28):
   clients share one bucket. Over a cap: `429 {"error":"Too many checks right now; try again
   later"}` and no SerpApi or Google call; the UI shows it as a calm status note.
 - **Source order.** 1. **SerpApi** (`SERPAPI_KEY`, free plan 250/month): `google_shopping` on
-  google.com.sa (gl=sa, hl=en) for the cleaned title, then `google_immersive_product`
+  google.com.sa (gl=sa, hl=en) for the product's name up to its model number ("JBL Flip 6"; a long title once brought only unrelated results), then `google_immersive_product`
   (`more_stores=true`) for the best matching product: per-store offers with direct links, price,
   original price and shipping. 2. Otherwise the **owner's Chrome** on
   `https://www.google.com.sa/search?udm=28&hl=en&gl=sa&q=...` (its own profile and queue, never

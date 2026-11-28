@@ -144,6 +144,32 @@ describe("live SerpApi recording (jbl flip 6, 2026-11-28)", () => {
   });
 });
 
+describe("live production check (2026-11-28): a long query brought unrelated results", () => {
+  it("asks Google Shopping for the product's name and model only (\"JBL Flip 6\"), not the long title", async () => {
+    db.prepare("INSERT INTO seen_products (site, productId, title, url, currency, lastSeen) VALUES ('amazon-sa', 'B09HGVNLFK', 'JBL Flip 6 Gray Portable Bluetooth Speaker Waterproof Wireless', 'https://www.amazon.sa/dp/B09HGVNLFK', 'SAR', ?)").run(now);
+    db.prepare("INSERT INTO observations (site, productId, price, origPrice, at) VALUES ('amazon-sa', 'B09HGVNLFK', 349, NULL, ?)").run(now - HOUR);
+    const queries: string[] = [];
+    const recording = (async (input: RequestInfo | URL) => {
+      const u = new URL(input instanceof URL ? input.href : typeof input === "string" ? input : input.url);
+      if (u.pathname === "/account.json") return new Response(JSON.stringify({ plan_searches_left: 239 }));
+      const engine = u.searchParams.get("engine");
+      if (engine === "google_shopping") queries.push(u.searchParams.get("q") ?? "");
+      return new Response(fixture(engine === "google_shopping" ? "serpapi-live-shopping-jbl-flip-6.json" : "serpapi-live-immersive-jbl-flip-6.json"));
+    }) as typeof fetch;
+    const a = await checkProduct({ ...deps(), fetch: recording }, { site: "amazon-sa", id: "B09HGVNLFK" });
+    expect(queries).toEqual(["JBL Flip 6"]);
+    expect(a.ok && a.result.verdict).toBe("not-unique");
+  });
+  it("the recorded unrelated answer itself has no match: no immersive call, no data (as seen in production)", async () => {
+    db.prepare("INSERT INTO seen_products (site, productId, title, url, currency, lastSeen) VALUES ('amazon-sa', 'B09HGVNLFK', 'JBL Flip 6 Gray Portable Bluetooth Speaker Waterproof Wireless', 'https://www.amazon.sa/dp/B09HGVNLFK', 'SAR', ?)").run(now);
+    db.prepare("INSERT INTO observations (site, productId, price, origPrice, at) VALUES ('amazon-sa', 'B09HGVNLFK', 349, NULL, ?)").run(now - HOUR);
+    serpAnswer = (e) => (e === "google_shopping" ? new Response(fixture("serpapi-live-shopping-long-query-noise.json")) : null);
+    const a = await checkProduct(deps(), { site: "amazon-sa", id: "B09HGVNLFK" });
+    expect(serpCalls).toEqual(["google_shopping"]);
+    expect(a.ok && a.result).toMatchObject({ verdict: "no-data", reason: "no-match", source: "serpapi" });
+  });
+});
+
 describe("live Google recording (jbl flip 6, 2026-11-28)", () => {
   it("the Chrome path on the recorded page and panel: Abdulwahed at SAR 349 matches amazon.sa's price", async () => {
     db.prepare("INSERT INTO seen_products (site, productId, title, url, currency, lastSeen) VALUES ('amazon-sa', 'B09HGVNLFK', 'JBL Flip 6 Gray Portable Bluetooth Speaker Waterproof Wireless', 'https://www.amazon.sa/dp/B09HGVNLFK', 'SAR', ?)").run(now);

@@ -116,8 +116,14 @@ describe("errors", () => {
 });
 
 describe("helpers", () => {
-  it("cleanQuery keeps the first words of the title, without punctuation", () => {
-    expect(cleanQuery("JBL Flip 6 Portable Bluetooth Speaker, Waterproof (IP67), Black - 12 Hours Playtime")).toBe("JBL Flip 6 Portable Bluetooth Speaker Waterproof");
+  it("cleanQuery keeps the product's name up to its model number, not colours or marketing words (live, 2026-11-28)", () => {
+    // The 7-word query "JBL Flip 6 Gray Portable Bluetooth Speaker" got 40 unrelated speakers from Google.
+    expect(cleanQuery("JBL Flip 6 Gray Portable Bluetooth Speaker Waterproof Wireless")).toBe("JBL Flip 6");
+    expect(cleanQuery("JBL Flip 6 Portable Bluetooth Speaker, Waterproof (IP67), Black - 12 Hours Playtime")).toBe("JBL Flip 6");
+    expect(cleanQuery("Apple iPhone 15 Pro Max 256GB Natural Titanium")).toBe("Apple iPhone 15 Pro Max");
+    expect(cleanQuery("Samsung Galaxy S24 Ultra, 512GB, Titanium Black")).toBe("Samsung Galaxy S24 Ultra");
+    expect(cleanQuery("Philips Essential Airfryer XL HD9270/91")).toBe("Philips Essential Airfryer XL HD9270/91");
+    expect(cleanQuery("Philips Essential Airfryer Black Large Capacity Rapid Air")).toBe("Philips Essential Airfryer Black");
     expect(cleanQuery("  ")).toBe("");
   });
   it("currencyOf reads SAR and other currencies from Google's price text", () => {
