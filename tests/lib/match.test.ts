@@ -54,6 +54,11 @@ describe("scoreRelevance", () => {
     expect(scoreRelevance([["iphone"]], "Mobile Phone Dust Plug")).toBe(0);
     expect(scoreRelevance([["keyboard"]], "Mechanical Keybord")).toBe(1);
   });
+  it("counts two swapped letters as one typo (5+ letters)", () => {
+    expect(scoreRelevance([["speakre"]], "JBL Flip 6 Speaker")).toBe(1);
+    expect(matchesAllTokens([["airpdos"]], "Apple AirPods 4")).toBe(true);
+    expect(scoreRelevance([["paly"]], "Play Mat")).toBe(0); // 4 letters: too short
+  });
   it("does not typo-match short tokens", () => {
     expect(scoreRelevance([["cab"]], "Cat")).toBe(0);
   });

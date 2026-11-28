@@ -3,12 +3,17 @@ import { tokenize, tokenizeKeepDigits, tokenForms, hasDigit } from "./tokenize";
 import { aliasPhrases } from "./aliases";
 import { specMatches } from "./spec";
 
+/** One substitution, insertion, deletion or swap of two adjacent letters apart. */
 function withinOneEdit(a: string, b: string): boolean {
   if (Math.abs(a.length - b.length) > 1) return false;
   let i = 0;
   while (i < a.length && i < b.length && a[i] === b[i]) i++;
   if (i === a.length || i === b.length) return true; // differ by trailing char only
-  if (a.length === b.length) return a.slice(i + 1) === b.slice(i + 1);
+  if (a.length === b.length) {
+    if (a.slice(i + 1) === b.slice(i + 1)) return true;
+    // Two adjacent letters swapped ("airpdos" / "airpods") is one typo.
+    return a[i] === b[i + 1] && a[i + 1] === b[i] && a.slice(i + 2) === b.slice(i + 2);
+  }
   const [s, l] = a.length < b.length ? [a, b] : [b, a];
   return s.slice(i) === l.slice(i + 1);
 }
