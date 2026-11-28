@@ -61,7 +61,7 @@ function mainSection(html: string): string | null {
 const MIN = /id="min"[^>]{0,200}>\s{0,200}([\d,]{1,12}(?:\.\d{1,4})?)\s{0,200}</;
 const MAX = /id="max"[^>]{0,200}>\s{0,200}([\d,]{1,12}(?:\.\d{1,4})?)\s{0,200}</;
 const CURRENT = /id="priceNumber"[^>]{0,200}>\s{0,200}([\d,]{1,12}(?:\.\d{1,4})?)\s{0,200}</;
-const CHANGE = /Recent Price (Drop|Increase|Rise)\s{0,20}<\/span>\s{0,400}<span[^>]{0,200}>\s{0,200}([+-]?\d{1,4}(?:\.\d{1,3})?)\s{0,5}%/;
+const CHANGE = /Recent Price (Drop|Increase|Raise|Rise)\s{0,20}<\/span>\s{0,400}<span[^>]{0,200}>\s{0,200}([+-]?\d{1,4}(?:\.\d{1,3})?)\s{0,5}%/;
 const STORE = /data-gtmid="product-buy\|([a-z]{2,20})\|/;
 const SINCE = /\b[Ss]ince\s{1,5}([A-Z][a-z]{2,8}\.? \d{1,2},? \d{4}|\d{4}-\d{2}-\d{2}|\d{1,2}\/\d{1,2}\/\d{4})/;
 const TITLE = /<h1[^>]{0,200}>([^<]{1,600})<\/h1>/;
@@ -107,38 +107,36 @@ export function classifyKanbkam(site: string, status: number, html: string): Kan
 
 type FetchOpts = { fetch?: typeof globalThis.fetch; timeoutMs?: number };
 
-/** A same-host https redirect target on Kanbkam, else null. */
-function kanbkamRedirect(location: string | null, base: string): string | null {
-  if (!location) return null;
+/**
+ * A redirect to Kanbkam's own search: what Kanbkam answers for an id it does not know (live check,
+ * 2026-11-28: 302 to /sa/en/search/l?q=p). Never followed: Kanbkam search is never loaded.
+ */
+function redirectsToSearch(location: string | null, base: string): boolean {
+  if (!location) return false;
   try {
     const u = new URL(location, base);
-    return u.protocol === "https:" && (u.hostname === "www.kanbkam.com" || u.hostname === "kanbkam.com") && !u.port && !u.username && u.pathname.startsWith("/sa/en/") ? u.toString() : null;
+    return u.protocol === "https:" && (u.hostname === "www.kanbkam.com" || u.hostname === "kanbkam.com") && u.pathname.startsWith("/sa/en/search");
   } catch {
-    return null;
+    return false;
   }
 }
 
 /**
- * Loads one listing's product page (one request; at most one more for a redirect that stays on
- * Kanbkam) and classifies it. Never throws.
+ * Loads one listing's product page (exactly one request; a redirect is never followed) and
+ * classifies it. Never throws.
  */
 export async function fetchKanbkam(site: string, id: string, opts: FetchOpts = {}): Promise<KanbkamFetch> {
   const first = kanbkamProductUrl(site, id);
   if (!first) return { kind: "error", message: "invalid id" };
   const doFetch = opts.fetch ?? globalThis.fetch;
-  const init = (): RequestInit => ({
+  const init: RequestInit = {
     redirect: "manual",
     signal: AbortSignal.timeout(opts.timeoutMs ?? TIMEOUT_MS),
     headers: { "user-agent": USER_AGENT, accept: "text/html", "accept-language": "en-US,en;q=0.9" },
-  });
+  };
   try {
-    let res = await doFetch(first, init());
-    if (res.status >= 300 && res.status < 400) {
-      const next = kanbkamRedirect(res.headers.get("location"), first);
-      if (!next) return { kind: "error", message: "redirect off Kanbkam" };
-      res = await doFetch(next, init());
-      if (res.status >= 300 && res.status < 400) return { kind: "error", message: "too many redirects" };
-    }
+    const res = await doFetch(first, init);
+    if (res.status >= 300 && res.status < 400) return redirectsToSearch(res.headers.get("location"), first) ? { kind: "missing" } : { kind: "error", message: "redirect" };
     const declared = Number(res.headers.get("content-length"));
     if (Number.isFinite(declared) && declared > MAX_PAGE) return { kind: "error", message: "page too large" };
     const html = await res.text();

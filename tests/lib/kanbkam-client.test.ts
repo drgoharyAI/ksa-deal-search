@@ -23,6 +23,11 @@ describe("parseKanbkamPage (trimmed pages from the spike)", () => {
     const p = parseKanbkamPage(fixture("amazon-B09NCDFTYK.html"));
     expect(p).toMatchObject({ min: 269, max: 499, current: 269, dropPct: -35.3, store: "amazon" });
   });
+  it("reads a noon listing (live check page): comma prices and a 'Recent Price Raise'", () => {
+    expect(parseKanbkamPage(fixture("noon-N70208041V.html"))).toMatchObject({ min: 1898.99, max: 1898.99, current: 1899, dropPct: 0, store: "noon" });
+    const up = fixture("noon-N70208041V.html").replace(">0%<", ">4.2%<");
+    expect(parseKanbkamPage(up)).toMatchObject({ dropPct: 4.2 });
+  });
   it("reads a 'since' date when the page shows one", () => {
     const html = fixture("amazon-B09HGPKY7Q.html").replace("</ul>", '</ul><p class="tracked">Tracked since Mar 14, 2022</p>');
     expect(parseKanbkamPage(html)).toMatchObject({ since: "Mar 14, 2022" });
@@ -158,18 +163,18 @@ describe("fetchKanbkam", () => {
     expect(await fetchKanbkam("amazon-sa", "../admin", { fetch: fake })).toEqual({ kind: "error", message: "invalid id" });
     expect(calls).toBe(0);
   });
-  it("follows one redirect only within Kanbkam; anything else is an error", async () => {
+  it("never follows a redirect: Kanbkam's redirect to its search (live check, unknown id) is a miss", async () => {
     const urls: string[] = [];
     const hop = (to: string) =>
       (async (url: string) => {
         urls.push(url);
-        return urls.length === 1 ? new Response(null, { status: 301, headers: { location: to } }) : new Response(html, { status: 200 });
+        return new Response(null, { status: 302, headers: { location: to } });
       }) as unknown as typeof fetch;
-    expect(await fetchKanbkam("amazon-sa", "B09HGPKY7Q", { fetch: hop("/sa/en/jbl-flip-6-B09HGPKY7Q") })).toMatchObject({ kind: "ok" });
-    expect(urls[1]).toBe("https://www.kanbkam.com/sa/en/jbl-flip-6-B09HGPKY7Q");
-    urls.length = 0;
-    expect(await fetchKanbkam("amazon-sa", "B09HGPKY7Q", { fetch: hop("https://evil.example/x") })).toEqual({ kind: "error", message: "redirect off Kanbkam" });
-    expect(urls).toHaveLength(1);
+    expect(await fetchKanbkam("amazon-sa", "B000000000", { fetch: hop("https://www.kanbkam.com/sa/en/search/l?q=p") })).toEqual({ kind: "missing" });
+    expect(await fetchKanbkam("amazon-sa", "B000000000", { fetch: hop("/sa/en/search/l?q=p") })).toEqual({ kind: "missing" });
+    expect(await fetchKanbkam("amazon-sa", "B09HGPKY7Q", { fetch: hop("/sa/en/jbl-flip-6-B09HGPKY7Q") })).toEqual({ kind: "error", message: "redirect" });
+    expect(await fetchKanbkam("amazon-sa", "B09HGPKY7Q", { fetch: hop("https://evil.example/sa/en/search/x") })).toEqual({ kind: "error", message: "redirect" });
+    expect(urls).toHaveLength(4);
   });
   it("a network failure or timeout is an error", async () => {
     const fail = (async () => {
