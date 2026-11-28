@@ -14,3 +14,4 @@ export { groupProducts, orderGroups, titleFeatures, sameProduct, modelCodes } fr
 export { computeGroupMetrics } from "./groups";
 export { dedupeByStore } from "@/src/lib/match/dedupe";
 export { rank } from "@/src/lib/rank";
+export { currentSpeller, setVocabSource, readDbVocab, resetVocab } from "@/src/lib/query/vocab";
