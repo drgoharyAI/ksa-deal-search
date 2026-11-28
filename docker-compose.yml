@@ -13,7 +13,10 @@ services:
     # IPv4 only. A bare "3000:3000" also listens on [::], and the VM has a global IPv6 address,
     # so the app would be reachable from the internet. ufw does not filter Docker-published ports.
     ports:
-      - "${APP_BIND:-0.0.0.0}:3000:3000"
+      # The LAN port goes straight to the Next server (3001). Container port 3000 is the tunnel relay,
+      # reached only by cloudflared on the compose network: LAN requests can never pass as tunnel
+      # traffic (see src/lib/tunnel-relay.ts).
+      - "${APP_BIND:-0.0.0.0}:3000:3001"
     env_file: .env
     environment:
       NODE_ENV: production

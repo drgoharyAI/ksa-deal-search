@@ -37,7 +37,8 @@ and Xvfb run without extra privileges. Set "Start at boot" in the VM's Options.
    `XAUTHORITY=/tmp/.deal-search-Xauthority`, which Chrome inherits) and waits for it;
 2. runs `node scripts/install-specs.mjs` (copies `api-specs/` into `API_ANYTHING_HOME=/data/aa-home`
    and seeds the AliExpress KSA cookie);
-3. `exec node server.js` (Next.js standalone) on `0.0.0.0:3000`.
+3. `exec node server.js` (Next.js standalone) on `0.0.0.0:3001`, plus the tunnel relay on `0.0.0.0:3000`
+   (started in `instrumentation.ts`). The LAN port `192.168.1.48:3000` maps to 3001.
 
 | Path in `/data` | Content |
 |---|---|
@@ -249,7 +250,8 @@ ls -la /data`, `df -h` on the VM.
 
 **Public hostname (Cloudflare Tunnel).** `cloudflared` (compose profile `tunnel`) opens an outbound-only
 tunnel; no inbound port is needed. The tunnel `deal-search` is remotely managed in Cloudflare:
-ingress `deals.example.com -> http://app:3000`, DNS `deals` CNAME `<tunnel-id>.cfargotunnel.com` (proxied).
+ingress `deals.example.com -> http://app:3000` (the relay: it stamps tunnel traffic with a per-process
+secret header, so the per-client caps can trust CF-Connecting-IP; LAN traffic reaches 3001 and is never stamped), DNS `deals` CNAME `<tunnel-id>.cfargotunnel.com` (proxied).
 On the VM: `.env` has `COMPOSE_PROFILES=tunnel` and `deals.example.com` in `APP_HOSTS`; the token is
 in `.env.tunnel` (`TUNNEL_TOKEN=<token>`, mode 600), read only by `cloudflared`, never by the app.
 The app has no login and no limits (owner decision), so anyone with the URL can use it: put Cloudflare Access (or another login) in front of a public hostname.

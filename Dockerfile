@@ -47,7 +47,10 @@ ENV NODE_ENV=production \
     NEXT_TELEMETRY_DISABLED=1 \
     # Our handler (src/lib/shutdown-hooks.ts) closes Chrome and the DB on SIGTERM instead of Next's.
     NEXT_MANUAL_SIG_HANDLE=true \
-    PORT=3000 \
+    # 3001: the Next server (the LAN port maps here). 3000: the tunnel relay that marks tunnel
+    # traffic (src/lib/tunnel-relay.ts); cloudflared and the healthcheck use it.
+    PORT=3001 \
+    TUNNEL_RELAY_PORT=3000 \
     HOSTNAME=0.0.0.0 \
     DISPLAY=:99 \
     CHROME_PATH=/usr/bin/google-chrome-stable \
@@ -70,7 +73,7 @@ RUN install -d -o node -g node -m 0755 /data \
  && install -d -o root -g root -m 1777 /tmp/.X11-unix
 USER node
 VOLUME ["/data"]
-EXPOSE 3000
+EXPOSE 3000 3001
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=40s --retries=3 \
   CMD curl -fsS http://127.0.0.1:3000/api/health || exit 1

@@ -98,9 +98,10 @@ describe("/api/gshop/validate", () => {
     }
     const tunnel = (id: string, ip: string) =>
       new Request("https://deals.example.com/api/gshop/validate", { method: "POST", headers: { ...JSON_TYPE, host: "deals.example.com", "cf-connecting-ip": ip }, body: JSON.stringify({ site: "noon-sa", id }) });
-    expect(clientKeyOf(tunnel("x", "203.0.113.5"), process.env)).toBe("cf:203.0.113.5");
-    // On the LAN, a client-sent X-Forwarded-For or CF-Connecting-IP is ignored.
-    expect(clientKeyOf(new Request(BASE, { headers: { "x-forwarded-for": "1.2.3.4", "cf-connecting-ip": "5.6.7.8" } }), process.env)).toBe("local");
+    // Not stamped by the tunnel relay: even a tunnel Host with CF-Connecting-IP is "local"
+    // (tests/lib/tunnel-relay.test.ts covers the stamped case).
+    expect(clientKeyOf(tunnel("x", "203.0.113.5"))).toBe("local");
+    expect(clientKeyOf(new Request(BASE, { headers: { "x-forwarded-for": "1.2.3.4", "cf-connecting-ip": "5.6.7.8" } }))).toBe("local");
     // SerpApi answers from the documented fixtures (no live call, no Chrome).
     process.env.SERPAPI_KEY = "test-key";
     let serp = 0;
