@@ -1209,3 +1209,14 @@ export function groupRefs(groups: ProductGroup[]): GroupRef[] {
     .filter((g) => g.members.length > 1)
     .map((g) => ({ key: g.key, memberKeys: g.members.map(keyOf), bestKey: keyOf(g.best), colors: g.colors }));
 }
+
+/**
+ * Every word the matcher's own lists know (brands, product lines, colours, variant, accessory,
+ * part and add-on words): the spelling vocabulary keeps them (src/lib/query/vocab.ts).
+ */
+export function matcherWords(): string[] {
+  return [
+    ...KNOWN_BRANDS, ...GENERIC_LEAD, ...COLORS, ...VARIANT_WORDS, ...ACCESSORY_NOUNS, ...ADDON_NOUNS,
+    ...PART_NOUNS, ...LINE_WORDS, ...COUNT_WORDS, ...EXTRA_WORDS,
+  ];
+}
