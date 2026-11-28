@@ -90,6 +90,7 @@ describe("lookupHistory", () => {
         url: "https://www.kanbkam.com/sa/en/p-B09HGPKY7Q",
         checkedAt: T0,
         verdicts: [{ kind: "lowest", label: "Lowest in Kanbkam history" }],
+        short: false,
       },
     });
     expect(fetches.map((f) => f.url)).toEqual(["https://www.kanbkam.com/sa/en/p-B09HGPKY7Q"]);
@@ -207,6 +208,12 @@ describe("lookupHistory", () => {
     const all = await Promise.all(Array.from({ length: n }, (_, i) => look(asin(i + 1), `cf:10.2.${i}.1`)));
     expect(all.filter((r) => !r.ok)).toEqual([{ ok: false, error: "busy" }]);
     expect(fetches).toHaveLength(KANBKAM_LIMITS.MAX_QUEUE);
+  });
+  it("live noon N70208041V (min = max = 1898.99, our was-price 2299): short history, no fake verdict", async () => {
+    seen("noon-sa", "N70208041V", 1999, 2299);
+    answer = () => new Response(fs.readFileSync(path.join(__dirname, "..", "fixtures", "kanbkam", "noon-N70208041V.html"), "utf8"), { status: 200 });
+    const r = await lookupHistory(deps(), { site: "noon-sa", id: "N70208041V" });
+    expect(r).toMatchObject({ ok: true, result: { status: "ok", min: 1898.99, max: 1898.99, short: true, verdicts: [] } });
   });
   it("looks up a noon listing by its SKU", async () => {
     seen("noon-sa", "N70208041V", 1999, 2299);

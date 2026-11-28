@@ -691,3 +691,4 @@
 .khist__verdict { padding: 0 var(--space-xs); border: 1px solid var(--color-rule-2); border-radius: var(--radius-xs); background: var(--color-paper-2); color: var(--color-ink-2); font-weight: 500; line-height: 1.7; }
 .khist__verdict--lowest, .khist__verdict--near-lowest { border-color: var(--color-accent-edge); background: var(--color-accent-well); color: var(--color-accent-strong); }
 .khist__verdict--fake-was { border-color: var(--color-warn-edge); background: var(--color-warn-well); color: var(--color-warn-ink); }
+.khist__short { color: var(--color-muted); font-style: italic; }

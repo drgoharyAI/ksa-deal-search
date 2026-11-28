@@ -198,6 +198,7 @@ export function KanbkamPanel({ status, result, busy, error, calm = true, deal }:
               {v.label}
             </span>
           ))}
+          {result.short && <span className="khist__short">Short price history</span>}
           <HistoryInfo href={result.url} />
         </p>
         {disagree && <p className="khist__note">Our own price history disagrees; both are shown.</p>}

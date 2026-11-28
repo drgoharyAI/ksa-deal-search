@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { kanbkamDisagrees, kanbkamVerdicts } from "@/src/lib/kanbkam/rules";
+import { kanbkamDisagrees, kanbkamVerdicts, shortHistory } from "@/src/lib/kanbkam/rules";
 
 const hist = { min: 269, max: 659 };
 
@@ -47,5 +47,30 @@ describe("kanbkamDisagrees (Kanbkam never upgrades a deal; both are shown)", () 
     expect(kanbkamDisagrees("fake-deal", v(400, 800))).toBe(false);
     expect(kanbkamDisagrees(undefined, v(269, null))).toBe(false);
     expect(kanbkamDisagrees("normal", v(400, null))).toBe(false);
+  });
+});
+
+describe("minimum-history guard (coordinator ruling)", () => {
+  const NOW = Date.UTC(2026, 10, 28);
+  it("min = max (no recorded change) is a short history: no verdict at all", () => {
+    // Live noon N70208041V: min = max = 1898.99, our was-price 2299.
+    const h = { min: 1898.99, max: 1898.99, since: null };
+    expect(shortHistory(h, NOW)).toBe(true);
+    expect(kanbkamVerdicts({ price: 1999, was: 2299 }, h, NOW)).toEqual([]);
+    expect(kanbkamVerdicts({ price: 1898.99, was: null }, h, NOW)).toEqual([]);
+  });
+  it("a 'since' date under 30 days old is a short history", () => {
+    expect(shortHistory({ min: 269, max: 659, since: "2026-11-10" }, NOW)).toBe(true);
+    expect(kanbkamVerdicts({ price: 269, was: 800 }, { min: 269, max: 659, since: "Nov 10, 2026" }, NOW)).toEqual([]);
+  });
+  it("an unreadable 'since' date is treated as short (cannot prove 30 days)", () => {
+    expect(shortHistory({ min: 269, max: 659, since: "recently" }, NOW)).toBe(true);
+  });
+  it("a change recorded and a 'since' date 30 days old or more (or none) is meaningful", () => {
+    expect(shortHistory({ min: 269, max: 659, since: null }, NOW)).toBe(false);
+    expect(shortHistory({ min: 269, max: 659, since: "2026-10-29" }, NOW)).toBe(false);
+    expect(shortHistory({ min: 269, max: 659, since: "Mar 14, 2022" }, NOW)).toBe(false);
+    expect(shortHistory({ min: 269, max: 659, since: "14/03/2022" }, NOW)).toBe(false);
+    expect(kanbkamVerdicts({ price: 269, was: 800 }, { min: 269, max: 659, since: "Mar 14, 2022" }, NOW).map((v) => v.kind)).toEqual(["fake-was", "lowest"]);
   });
 });

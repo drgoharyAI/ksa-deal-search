@@ -21,6 +21,8 @@ export type KanbkamResult =
       url: string;
       checkedAt: number;
       verdicts: KanbkamVerdict[];
+      /** Too little history to judge (no recorded change, or tracked under 30 days): no verdict. */
+      short: boolean;
     }
   | { status: "missing"; url: string; checkedAt: number };
 
@@ -37,9 +39,32 @@ const VERDICT_LABELS: Record<KanbkamVerdictKind, string> = {
 
 const verdict = (kind: KanbkamVerdictKind): KanbkamVerdict => ({ kind, label: VERDICT_LABELS[kind] });
 
+const MIN_HISTORY_MS = 30 * 24 * 3_600_000;
+
+type History = { min: number; max: number; since?: string | null };
+
+/** "Mar 14, 2022", "2022-03-14" or "14/03/2022" (day first) as ms, or null. */
+function sinceAt(since: string): number | null {
+  const dmy = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec(since);
+  const at = dmy ? Date.UTC(Number(dmy[3]), Number(dmy[2]) - 1, Number(dmy[1])) : Date.parse(since);
+  return Number.isFinite(at) ? at : null;
+}
+
+/**
+ * Kanbkam's history is too short to judge (owner ruling): no recorded change (min = max), or a
+ * "since" date under 30 days old or unreadable. Then the numbers show with "Short price history"
+ * and no verdict.
+ */
+export function shortHistory(h: History, now: number = Date.now()): boolean {
+  if (!(h.min < h.max)) return true;
+  if (!h.since) return false;
+  const at = sinceAt(h.since);
+  return at === null || now - at < MIN_HISTORY_MS;
+}
+
 /** The verdicts for our listing's current price and was-price against Kanbkam's lowest and highest. */
-export function kanbkamVerdicts(ours: { price: number; was: number | null }, h: { min: number; max: number }): KanbkamVerdict[] {
-  if (!(ours.price > 0) || !(h.min > 0) || !(h.max >= h.min)) return [];
+export function kanbkamVerdicts(ours: { price: number; was: number | null }, h: History, now: number = Date.now()): KanbkamVerdict[] {
+  if (!(ours.price > 0) || !(h.min > 0) || !(h.max >= h.min) || shortHistory(h, now)) return [];
   const out: KanbkamVerdict[] = [];
   if (ours.was !== null && ours.was > h.max * FAKE_WAS_MARGIN) out.push(verdict("fake-was"));
   if (ours.price <= h.min * LOWEST_MARGIN) out.push(verdict("lowest"));

@@ -19,6 +19,7 @@ const ok = (o: Partial<Extract<KanbkamResult, { status: "ok" }>> = {}): KanbkamR
   url: "https://www.kanbkam.com/sa/en/p-B09HGPKY7Q",
   checkedAt: NOW - 3_600_000,
   verdicts: [],
+  short: false,
   ...o,
 });
 type PanelProps = Parameters<typeof KanbkamPanel>[0];
@@ -52,6 +53,13 @@ describe("KanbkamPanel states", () => {
     expect(out).toContain("Lowest in Kanbkam history");
     expect(out).toContain("Our own price history disagrees");
     expect(panel({ result: ok({ verdicts: [{ kind: "lowest", label: "Lowest in Kanbkam history" }] }), deal: "lowest-30d" })).not.toContain("disagrees");
+  });
+  it("a short history: the numbers, a muted 'Short price history' note, no verdict", () => {
+    const out = panel({ result: ok({ min: 1898.99, max: 1898.99, short: true }) });
+    expect(out).toContain(`Price history: lowest SAR${NBSP}1,898.99, highest SAR${NBSP}1,898.99`);
+    expect(out).toContain('<span class="khist__short">Short price history</span>');
+    expect(out).not.toContain("khist__verdict");
+    expect(panel({ result: ok() })).not.toContain("Short price history");
   });
   it("not on Kanbkam: says so plainly", () => {
     expect(panel({ result: { status: "missing", url: "https://www.kanbkam.com/sa/en/p-B09HGPKY7Q", checkedAt: NOW } })).toContain("Price history: none found for this listing");

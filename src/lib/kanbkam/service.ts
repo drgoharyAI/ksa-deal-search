@@ -3,7 +3,7 @@ import type { Db } from "@/src/lib/db";
 import { clientLimiter, type ClientLimiter } from "@/src/lib/gshop/rate";
 import { fetchKanbkam, type KanbkamFetch } from "./client";
 import { kanbkamProductUrl, validKanbkamId } from "./links";
-import { kanbkamVerdicts, type KanbkamResult } from "./rules";
+import { kanbkamVerdicts, shortHistory, type KanbkamResult } from "./rules";
 
 /**
  * Kanbkam price-history lookups (spec decision "Kanbkam price history (owner request; owner
@@ -110,11 +110,11 @@ function ours(db: Db, site: string, id: string): Ours | null {
 
 type Row = { status: string; minPrice: number | null; maxPrice: number | null; currentPrice: number | null; dropPct: number | null; since: string | null; at: number };
 
-function resultOf(site: string, id: string, row: Row, o: Ours): KanbkamResult {
+function resultOf(site: string, id: string, row: Row, o: Ours, now: number): KanbkamResult {
   const url = kanbkamProductUrl(site, id) ?? "";
   if (row.status !== "ok" || row.minPrice === null || row.maxPrice === null) return { status: "missing", url, checkedAt: row.at };
-  const h = { min: row.minPrice, max: row.maxPrice };
-  return { status: "ok", ...h, current: row.currentPrice, dropPct: row.dropPct, since: row.since, url, checkedAt: row.at, verdicts: kanbkamVerdicts(o, h) };
+  const h = { min: row.minPrice, max: row.maxPrice, since: row.since };
+  return { status: "ok", ...h, current: row.currentPrice, dropPct: row.dropPct, url, checkedAt: row.at, verdicts: kanbkamVerdicts(o, h, now), short: shortHistory(h, now) };
 }
 
 function cacheGet(db: Db, site: string, id: string, now: number): Row | null {
@@ -169,8 +169,9 @@ export function cachedHistory(deps: KanbkamDeps, site: string, id: string): Kanb
   if (!validKanbkamId(site, id)) return null;
   const o = ours(deps.db, site, id);
   if (!o) return null;
-  const row = cacheGet(deps.db, site, id, (deps.now ?? Date.now)());
-  return row ? resultOf(site, id, row, o) : null;
+  const now = (deps.now ?? Date.now)();
+  const row = cacheGet(deps.db, site, id, now);
+  return row ? resultOf(site, id, row, o, now) : null;
 }
 
 /**
@@ -190,7 +191,7 @@ export function lookupHistory(deps: KanbkamDeps, req: { site: string; id: string
   if (!o) return no("unknown");
   const now = clock();
   const cached = cacheGet(db, site, id, now);
-  if (cached) return Promise.resolve({ ok: true, result: resultOf(site, id, cached, o) });
+  if (cached) return Promise.resolve({ ok: true, result: resultOf(site, id, cached, o, now) });
   const s = shared();
   const k = `${site}\u0000${id}`;
   const running = s.flights.get(k);
@@ -219,7 +220,7 @@ export function lookupHistory(deps: KanbkamDeps, req: { site: string; id: string
       console.warn("[kanbkam] lookup failed", f.message);
       return { ok: false, error: "failed" };
     }
-    return { ok: true, result: resultOf(site, id, cachePut(db, site, id, f, at), ours(db, site, id) ?? o) };
+    return { ok: true, result: resultOf(site, id, cachePut(db, site, id, f, at), ours(db, site, id) ?? o, at) };
   }).finally(() => s.flights.delete(k));
   s.flights.set(k, run);
   return run;

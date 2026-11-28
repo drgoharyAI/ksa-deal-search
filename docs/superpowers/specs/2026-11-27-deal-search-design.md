@@ -540,6 +540,11 @@ kept minimal and respectful:
   the listing by more than 2%; **Lowest in Kanbkam history** when the price is at most Kanbkam's
   lowest x 1.01; **Near the lowest** within 5% of it. Kanbkam never upgrades our deal badge: when
   our own insight disagrees, both are shown with "Our own price history disagrees; both are shown."
+  **Minimum history** (coordinator ruling): verdicts fire only when the history is meaningful,
+  min < max (at least one recorded change) and, if a "since" date is shown, at least 30 days old
+  (an unreadable date counts as short). Otherwise the numbers show with a muted "Short price
+  history" note and no verdict (live noon N70208041V: min = max = SAR 1,898.99, was 2,299: no
+  fake verdict).
 - **Storage.** `kanbkam_history` (source `kanbkam` only, enforced by a CHECK), `kanbkam_usage`,
   `kanbkam_state`. Never written to `observations`, so our badges and trends are unaffected.
 - **UI.** One compact line, "Price history: lowest SAR 269, highest SAR 659", the verdict badge
