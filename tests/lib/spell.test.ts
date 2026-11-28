@@ -155,6 +155,43 @@ describe("Speller.correct", () => {
     expect(new Speller(vocab({ vacuum: 5 })).correct("vacum").query).toBe("vacuum");
   });
 
+  it("leaves a word whose 1-edit candidate is gated, rather than reach a farther word", () => {
+    // "sneekers": "sneakers" is a letter change without evidence; "speakers" is 2 edits away.
+    const s = new Speller(vocab({ sneakers: 5, speakers: 90 }), { titleFreq: vocab({ speakers: 90 }) });
+    expect(s.correct("sneekers").changed).toBe(false);
+  });
+
+  it("allows a letter change toward a trusted product word when it is the only one", () => {
+    const words = vocab({ laptop: 5, monitor: 5, sneakers: 5, speakers: 90, samsung: 5 });
+    const s = new Speller(words, { trusted: new Set(["laptop", "monitor", "sneakers", "samsung"]), titleFreq: vocab({ speakers: 90 }) });
+    expect(s.correct("labtop moniter sneekers sansung").query).toBe("laptop monitor sneakers samsung");
+    // Two trusted letter changes: ambiguous, left alone.
+    const two = new Speller(vocab({ caper: 5, cater: 5 }), { trusted: new Set(["caper", "cater"]) });
+    expect(two.correct("cazer").changed).toBe(false);
+    // An added letter beats a trusted letter change: "chargr" is "charger", not "charge".
+    expect(new Speller(vocab({ charge: 50, charger: 5 }), { trusted: new Set(["charge", "charger"]) }).correct("chargr").query).toBe("charger");
+    // Under 5 letters: no.
+    expect(new Speller(vocab({ lamp: 5 }), { trusted: new Set(["lamp"]) }).correct("lamb").changed).toBe(false);
+  });
+
+  it("prefers a trusted word over a title word at the same distance (store-title poisoning)", () => {
+    const s = new Speller(vocab({ samsung: 5, samsnug: 1500 }), { trusted: new Set(["samsung"]) });
+    expect(s.correct("samsng tv").query).toBe("samsung tv");
+  });
+
+  it("applies the curated misspelling overrides before the dictionary", () => {
+    const s = new Speller(vocab({ gaming: 5 }), { dictionary: new Set(["gamming", "mous"]), overrides: new Map([["gamming", "gaming"], ["mous", "mouse"]]) });
+    expect(s.correct("gamming mous pad").query).toBe("gaming mouse pad");
+  });
+
+  it("keeps a typed plural", () => {
+    const s = new Speller(vocab({ earphone: 50, earphones: 5 }), { trusted: new Set(["earphone", "earphones"]) });
+    expect(s.correct("earphons").query).toBe("earphones");
+    expect(s.correct("earphne").query).toBe("earphone");
+    // Only a typed final "s" counts: "earbusd" swaps two letters of "earbuds".
+    expect(new Speller(vocab({ earbud: 50, earbuds: 5 })).correct("earbusd").query).toBe("earbuds");
+  });
+
   it("ignores vocabulary words longer than 30 letters", () => {
     const long = "a".repeat(29) + "bc";
     expect(new Speller(vocab({ [long]: 9 })).correct(long.slice(0, 30)).changed).toBe(false);

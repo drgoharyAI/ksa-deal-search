@@ -25,6 +25,8 @@ const SUB_MIN_TITLES = 10;
 const SUB_MARGIN = 10;
 /** Shorter words are never corrected by a letter change alone ("padel" is no typo of "panel"). */
 const SUB_MIN_LEN = 6;
+/** A letter change toward a trusted product word needs this many letters. */
+const TRUSTED_MIN_LEN = 5;
 /** Words shorter than this are only corrected to a word with the same first letter. */
 const SAME_FIRST_BELOW = 6;
 /** Longer words are never corrected: their delete sets grow with the square of the length. */
@@ -94,6 +96,13 @@ export type SpellerOptions = {
   dictionary?: { has(w: string): boolean };
   /** Product-title frequency of each word: the evidence a letter change needs. */
   titleFreq?: Map<string, number>;
+  /**
+   * Curated product words and brands: a one-letter change of a 5+ letter word toward one of them
+   * needs no title evidence, when it is the only such candidate ("labtop" -> "laptop").
+   */
+  trusted?: Iterable<string>;
+  /** Curated misspellings that are also dictionary words ("gamming" -> "gaming"), applied first. */
+  overrides?: Map<string, string>;
 };
 
 export type Correction = { query: string; changed: boolean };
@@ -104,6 +113,8 @@ export class Speller {
   private readonly joinable: Set<string>;
   private readonly dictionary: { has(w: string): boolean };
   private readonly titleFreq: Map<string, number>;
+  private readonly trusted: Set<string>;
+  private readonly overrides: Map<string, string>;
   private readonly index = new Map<string, string[]>();
   private sorted: string[] | null = null;
 
@@ -112,6 +123,8 @@ export class Speller {
     this.freq = new Map([...words].filter(([w]) => LETTERS.test(w) && w.length <= MAX_WORD));
     this.dictionary = opts.dictionary ?? new Set<string>();
     this.titleFreq = opts.titleFreq ?? new Map<string, number>();
+    this.trusted = new Set(opts.trusted ?? []);
+    this.overrides = opts.overrides ?? new Map<string, string>();
     this.protect = new Set([...(opts.protect ?? []), ...SYNTAX]);
     this.joinable = new Set(opts.joinable ?? []);
     for (const w of this.freq.keys()) {
@@ -156,29 +169,53 @@ export class Speller {
     return lo < s.length && s[lo].startsWith(p);
   }
 
-  /** The closest vocabulary word: fewest edits, then the same first letter, then the same length, then the most frequent. */
+  /**
+   * The closest vocabulary word: fewest edits, then the same first letter, then the same plural
+   * form, then a real edit over a trusted letter change, then the same length, then a trusted
+   * (curated) word over a learnt one, so store titles cannot outvote a brand, then the most
+   * frequent. A letter-change-only candidate needs title
+   * evidence (or, for one trusted product word, none); when a nearer candidate was refused for
+   * lack of it, the word stays as typed rather than going to a farther one ("sneekers" is not
+   * "speakers").
+   */
   private closest(w: string): string | null {
     const max = maxEdits(w.length);
+    type Cand = { w: string; d: number; first: number; plural: number; edit: number; len: number; trust: number; f: number };
+    const ok: Cand[] = [];
+    const trustedSubs: Cand[] = [];
+    let gated = Infinity;
     const seen = new Set<string>();
-    let best: { w: string; d: number; first: number; len: number; f: number } | null = null;
     for (const del of deletes(w, max)) {
       for (const cand of this.index.get(del) ?? []) {
         if (seen.has(cand)) continue;
         seen.add(cand);
         const d = osaDistance(w, cand, max);
-        if (d > max || (this.lettersChanged(w, cand, d) && !this.titleBacked(w, cand))) continue;
+        if (d > max) continue;
         const first = cand[0] === w[0] ? 1 : 0;
         // A short word with another first letter is more often a name we do not know ("nike").
         if (!first && w.length < SAME_FIRST_BELOW) continue;
-        const f = this.freq.get(cand) ?? 0;
-        const len = cand.length === w.length ? 1 : 0;
-        const rank = (b: NonNullable<typeof best>) => b.d - d || first - b.first || len - b.len || f - b.f;
-        if (!best || rank(best) > 0) {
-          best = { w: cand, d, first, len, f };
-        }
+        const c: Cand = {
+          w: cand,
+          d,
+          first,
+          // A typed final "s" is a plural to keep ("earphons" -> "earphones", not "earphone").
+          plural: w.endsWith("s") && cand.endsWith("s") ? 1 : 0,
+          edit: 1, // a letter added, dropped or swapped (0: only changed, the weaker match)
+          len: cand.length === w.length ? 1 : 0,
+          trust: this.trusted.has(cand) ? 1 : 0,
+          f: this.freq.get(cand) ?? 0,
+        };
+        if (!this.lettersChanged(w, cand, d) || this.titleBacked(w, cand)) ok.push(c);
+        else if (d === 1 && w.length >= TRUSTED_MIN_LEN && this.trusted.has(cand)) trustedSubs.push(c);
+        else gated = Math.min(gated, d);
       }
     }
-    return best?.w ?? null;
+    if (trustedSubs.length === 1) ok.push({ ...trustedSubs[0], edit: 0 });
+    else if (trustedSubs.length > 1) gated = Math.min(gated, 1);
+    const rank = (a: Cand, b: Cand) => a.d - b.d || b.first - a.first || b.plural - a.plural || b.edit - a.edit || b.len - a.len || b.trust - a.trust || b.f - a.f;
+    const best = ok.sort(rank)[0];
+    if (!best || gated < best.d) return null;
+    return best.w;
   }
 
   /** Only letters changed: same length and as many differing positions as edits (no swap). */
@@ -198,6 +235,8 @@ export class Speller {
 
   /** The correction for one lower-case word, or null to keep it. */
   private fix(w: string, prefix: boolean, budget: { left: number }): string | null {
+    const override = this.overrides.get(w);
+    if (override) return override; // curated, checked before the dictionary
     if (w.length < MIN_LEN || w.length > MAX_WORD || !LETTERS.test(w) || this.knownForm(w)) return null;
     if (prefix && this.isPrefix(w)) return null;
     if (budget.left <= 0) return null;
