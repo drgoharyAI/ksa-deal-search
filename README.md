@@ -115,7 +115,7 @@ exact text.
 **Typos are corrected** before the stores are asked (`airpdos 4` searches `airpods 4`, `cordles drill`
 searches `cordless drill`, `air pods` becomes `airpods`), with "Search instead for" to run what you
 typed. Rule-based and local: the closest word (1 edit up to 7 letters, 2 from 8) from a vocabulary of
-the app's word lists, the product titles it has seen and your past searches. Numbers, model codes
+the app's word lists and the product titles it has seen. Real English words, numbers, model codes
 (`wh1000xm5`, `s24`), words under 4 letters and the query syntax above are never changed.
 
 ## How it works

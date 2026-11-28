@@ -390,23 +390,36 @@ auto-correct, others return junk or nothing) and our relevance filter required t
   (the unfinished last word is kept when a vocabulary word starts with it).
 - **Vocabulary** (`src/lib/query/vocab.ts`): the data/ word lists, the matcher's own lists (brands,
   colours, variant, accessory and part words), a curated list of product words and common brands
-  (`data/vocab-words.json`), words of titles seen in searches (in 2+ products, weighted by price
-  observations) and words of past searches that found something. In memory, rebuilt at most every
-  10 minutes, at most 15,000 words.
+  (`data/vocab-words.json`) and words of titles seen in searches (in 2+ products, weighted by price
+  observations, each title capped). Past searches only add capped weight to words already known: a
+  query alone never teaches a word, and searches run as typed are skipped (so repeating a typo
+  cannot make it a word). In memory, at most 15,000 words of up to 30 letters; rebuilt at most
+  every 10 minutes, after the request (the old one answers meanwhile).
+- **Real words are never corrected:** a large English word list (`data/english-words.txt.gz`,
+  the npm package an-array-of-english-words 2.0.0, MIT: 274,937 words, 0.7 MB gzipped) is read
+  lazily and warmed at server start. Without it, words outside the small vocabulary were
+  "corrected" (shark to sharp, cast to case, plug to plus).
 - **Correction** (`src/lib/query/spell.ts`), per word: closest vocabulary word by optimal string
   alignment distance (a swap is one edit), at most 1 edit for 4 to 7 letters and 2 from 8; fewest
   edits, then the same first letter, then frequency. Below 6 letters only a same-first-letter word
-  (an unknown brand such as "nike" is not "bike"). Split and join: "cordlessdrill" splits into two
-  known words; "air pods" joins only into a known brand ("airpods", "playstation"). A symmetric-delete
-  index keeps a query under 1 ms. Never changed: words with a digit or symbol (model codes, prices,
+  (an unknown brand such as "nike" is not "bike"), and then a word of the same length. A
+  letter-change-only correction (no letter added, dropped or swapped) needs 6+ letters and a target
+  seen in 10+ product titles, 10 times as often as the typed word ("padel" stays). No splits
+  ("paperwhite", "quietcomfort" are names); "air pods" joins only into a known brand in the
+  vocabulary ("airpods", "playstation"). A symmetric-delete index keeps a query under 2 ms. Never changed: words with a digit or symbol (model codes, prices,
   `-case`, `>4`), words under 4 letters, known words and their plural or singular, query syntax.
 - **Bounded work** (security review): suggest checks its length before correcting; queries over 200
   characters, words over 30 letters and lookups past 12 per query are left as they are.
 - **Safety:** a correct query is never changed. `tests/lib/spell-safety.test.ts` checks every eval
-  query and the owner's history (local database, read-only, when present): 0 false corrections.
+  query, 429 held-out real shopping queries (`tests/fixtures/spell/heldout-queries.json`, written
+  apart from the eval and the curated list) and the owner's history (local database, read-only,
+  when present): 0 false corrections (68 of the held-out queries were changed before the review fixes).
+- **Watches:** a watch saved after "Search instead" keeps `noCorrect` in its filters JSON (no schema
+  change) and the checker searches it as typed; History re-run links carry `noCorrect=1`.
   A corrected search is stored in history as searched, so the vocabulary never learns the typo.
 - **Relevance safety net:** a query word of 5+ letters already matched a title word one edit away
   (same first letter); two swapped letters now count as one edit. Exact matches are unaffected.
 - **Eval:** `eval/queries-typos.json` (40 misspellings of the labelled queries) and
-  `scripts/eval-typos.mjs`: correction accuracy, false-correction rate and p@10/recall through
-  replay. The main eval is unchanged (p@10 98, recall 92, cheapest-first 73).
+  `scripts/eval-typos.mjs`: correction accuracy (39/40: "vaccum" is a letter change without title
+  evidence), false-correction rate (0) and p@10/recall through replay (typos 93/88, clean 96/90).
+  The main eval is unchanged (p@10 98, recall 92, cheapest-first 73).
