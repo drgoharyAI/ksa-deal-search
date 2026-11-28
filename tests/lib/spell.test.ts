@@ -71,6 +71,12 @@ describe("Speller.correct", () => {
     expect(sp.correct("chrgr").query).toBe("chrgr"); // 5 chars, 2 edits away: left alone
   });
 
+  it("below 6 letters, only corrects to a word with the same first letter", () => {
+    const s = new Speller(vocab({ bike: 100, fryer: 10 }));
+    expect(s.correct("nike").changed).toBe(false); // an unknown brand, not a typo of "bike"
+    expect(s.correct("fyer").query).toBe("fryer");
+  });
+
   it("breaks ties by frequency", () => {
     // "fyer" is one edit from both "fryer" (35) and "flyer" (1).
     expect(sp.correct("fyer").query).toBe("fryer");

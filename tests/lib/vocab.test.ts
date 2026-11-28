@@ -15,6 +15,10 @@ describe("staticVocab", () => {
     for (const w of ["galaxy", "tab", "flip", "anc", "pro", "ultra", "black"]) expect(v.has(w), w).toBe(true);
   });
 
+  it("holds common brands sold in Saudi stores that the matcher does not list", () => {
+    for (const w of ["tefal", "nike", "adidas", "braun", "dewalt", "makita", "ninja", "delonghi", "kenwood", "sandisk"]) expect(v.has(w), w).toBe(true);
+  });
+
   it("keeps letters-only words", () => {
     for (const w of v.keys()) expect(w).toMatch(/^[a-z]+$/);
   });

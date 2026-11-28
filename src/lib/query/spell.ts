@@ -16,6 +16,8 @@ const maxEdits = (len: number): number => (len >= 8 ? 2 : 1);
 const MIN_LEN = 4;
 /** Each side of a split must be a vocabulary word of at least this length. */
 const MIN_PART = 3;
+/** Words shorter than this are only corrected to a word with the same first letter. */
+const SAME_FIRST_BELOW = 6;
 /** Longer words are never corrected: their delete sets grow with the square of the length. */
 const MAX_WORD = 30;
 /** At most this many words of one query are looked up in the index. */
@@ -149,6 +151,8 @@ export class Speller {
         const d = osaDistance(w, cand, max);
         if (d > max) continue;
         const first = cand[0] === w[0] ? 1 : 0;
+        // A short word with another first letter is more often a name we do not know ("nike").
+        if (!first && w.length < SAME_FIRST_BELOW) continue;
         const f = this.freq.get(cand) ?? 0;
         if (!best || d < best.d || (d === best.d && (first > best.first || (first === best.first && f > best.f)))) {
           best = { w: cand, d, first, f };
