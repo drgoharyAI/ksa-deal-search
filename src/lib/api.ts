@@ -17,7 +17,7 @@ export const TOO_LARGE = Symbol("too-large");
  * whole. A declared Content-Length over the cap is refused before reading. undefined when the body
  * cannot be read.
  */
-export async function readTextCapped(req: Request, max: number): Promise<string | typeof TOO_LARGE | undefined> {
+async function readTextCapped(req: Request, max: number): Promise<string | typeof TOO_LARGE | undefined> {
   const declared = Number(req.headers.get("content-length"));
   if (Number.isFinite(declared) && declared > max) return TOO_LARGE;
   if (!req.body) return "";

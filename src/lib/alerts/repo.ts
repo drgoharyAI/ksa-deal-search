@@ -170,7 +170,7 @@ export function pendingEvent(db: Db, watchId: number): AlertEvent | null {
 }
 
 /** Ends the watch's pending retries (re-armed). */
-export function clearRetry(db: Db, watchId: number): void {
+function clearRetry(db: Db, watchId: number): void {
   db.prepare("UPDATE alert_events SET retry = 0 WHERE watchId = ? AND retry = 1").run(watchId);
 }
 
@@ -180,9 +180,9 @@ export function updateEvent(db: Db, id: number, patch: { newPrice: number; sent:
 }
 
 /** Price points are kept this long (owner ruling: safety caps). */
-export const PRICE_POINT_DAYS = 180;
+const PRICE_POINT_DAYS = 180;
 /** Alert events kept: the newest this many. */
-export const MAX_EVENTS = 1000;
+const MAX_EVENTS = 1000;
 
 /** Drops price points older than PRICE_POINT_DAYS and alert events beyond the newest MAX_EVENTS. */
 export function pruneAlertHistory(db: Db, now: number): void {

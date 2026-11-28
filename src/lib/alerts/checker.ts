@@ -49,8 +49,8 @@ export type CheckerDeps = {
 };
 
 /** Owner ruling, safety caps: watches processed and Telegram alerts sent per cycle. */
-export const MAX_WATCHES_PER_CYCLE = 100;
-export const MAX_SENDS_PER_CYCLE = 20;
+const MAX_WATCHES_PER_CYCLE = 100;
+const MAX_SENDS_PER_CYCLE = 20;
 
 export type CycleReport = { checked: number; groups: number; fired: number; retried: number; failedGroups: number; deferred: number };
 
@@ -241,7 +241,7 @@ export async function runCycle(deps: CheckerDeps): Promise<CycleReport> {
 }
 
 /** setTimeout's largest delay; a longer one fires at once (Node clamps it to 1 ms). */
-export const MAX_TIMER_MS = 2 ** 31 - 1;
+const MAX_TIMER_MS = 2 ** 31 - 1;
 
 export type Checker = {
   readonly running: boolean;

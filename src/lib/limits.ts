@@ -9,9 +9,9 @@ import "server-only";
 /** Saved price watches, at most. */
 export const MAX_WATCHES = 100;
 /** Telegram test messages: one per this window. */
-export const TELEGRAM_TEST_WINDOW_MS = 60_000;
+const TELEGRAM_TEST_WINDOW_MS = 60_000;
 /** A watch re-armed through PATCH (a new target): once per watch per this window. */
-export const REARM_WINDOW_MS = 60_000;
+const REARM_WINDOW_MS = 60_000;
 
 export type WindowLimiter = {
   /** True (and the window starts) when `key` is free; false inside its window. */
@@ -22,7 +22,7 @@ export type WindowLimiter = {
 };
 
 /** One action per key per `ms`. Entries past their window are dropped, so the map stays small. */
-export function windowLimiter(ms: number): WindowLimiter {
+function windowLimiter(ms: number): WindowLimiter {
   const last = new Map<string, number>();
   return {
     take(key, now = Date.now()) {

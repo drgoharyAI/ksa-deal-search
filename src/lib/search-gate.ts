@@ -6,12 +6,12 @@ import "server-only";
  * first served. Past that an HTTP search is refused (the routes answer 503 BUSY with Retry-After).
  * A checker search is never refused: it waits in the same line, so it is never starved.
  */
-export const MAX_RUNNING = 4;
-export const MAX_WAITING = 8;
-export const BUSY = { error: "Busy, try again in a moment" } as const;
-export const RETRY_AFTER_S = 5;
+const MAX_RUNNING = 4;
+const MAX_WAITING = 8;
+const BUSY = { error: "Busy, try again in a moment" } as const;
+const RETRY_AFTER_S = 5;
 
-export type Release = () => void;
+type Release = () => void;
 type Waiter = { kind: "user" | "checker"; grant: (r: Release) => void };
 
 export type SearchGate = {
