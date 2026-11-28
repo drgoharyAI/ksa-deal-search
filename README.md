@@ -239,7 +239,7 @@ Local development needs no configuration. Optional settings go in `.env.local` (
 | `COMPOSE_PROFILES`, `TUNNEL_TOKEN` | Optional Cloudflare Tunnel (`tunnel` profile); the token goes in `.env.tunnel`. |
 | `API_ANYTHING_HOME`, `API_ANYTHING_LOCAL_ONLY` | API Anything home (default `./.aa-home`) and local-only mode (default `1`). |
 | `NOON_PROFILE_DIR`, `SHEIN_PROFILE_DIR`, `CHROME_PATH` | Chrome profile folders and Chrome binary override. |
-| `SERPAPI_KEY`, `GSHOP_MONTHLY_BUDGET` | Google Shopping KSA check: SerpApi key (server-only, never logged) and its monthly cap (default 240 of the free plan's 250). Without a key the check uses the owner's Chrome on google.com.sa (20 loads an hour, 100 a day, 15 s apart, 2 h to 12 h back-off after a CAPTCHA). |
+| `SERPAPI_KEY`, `GSHOP_MONTHLY_BUDGET` | Google Shopping KSA check: SerpApi key (server-only, never logged) and its monthly cap (default 240 of the free plan's 250). Without a key the check uses the owner's Chrome on google.com.sa (20 loads an hour, 100 a day, 15 s apart, 2 h to 12 h back-off after a CAPTCHA). Checks are capped at 30 an hour and 100 a day overall, 10 an hour per client. |
 | `GSHOP_AUTO`, `GSHOP_SOURCE`, `GSHOP_PROFILE_DIR` | `1` also checks up to 5 deal-badged results a day (default off); force `serpapi` or `google`; Google's Chrome profile folder. |
 | `DEAL_SEARCH_DB` | SQLite file for history, prices and alerts (default under `%LOCALAPPDATA%\deal-search` or `~/.local/share/deal-search`). |
 

@@ -443,6 +443,14 @@ ruling of 2026-11-28):
   Optional `GSHOP_AUTO=1` (off by default) also checks up to 5 deal-badged results a day.
   The request names only `{site, id}`: the title comes from `seen_products` and the price and
   was-price from the latest observation, so a client cannot spend checks on arbitrary queries.
+- **Safety caps on checks** (owner ruling "small safety caps", review round 1): every check that
+  would call SerpApi or Google counts (cache hits and joined in-flight checks are free; manual and
+  automatic alike): 30 an hour and 100 a day overall, persisted in SQLite (UTC hour and day), and
+  10 an hour per client in memory (a bounded map). The client is CF-Connecting-IP only through the
+  tunnel (a Host in APP_HOSTS that is not loopback or LAN); App Router handlers do not see the
+  socket address and a LAN client's X-Forwarded-For is never trusted, so all LAN and loopback
+  clients share one bucket. Over a cap: `429 {"error":"Too many checks right now; try again
+  later"}` and no SerpApi or Google call; the UI shows it as a calm status note.
 - **Source order.** 1. **SerpApi** (`SERPAPI_KEY`, free plan 250/month): `google_shopping` on
   google.com.sa (gl=sa, hl=en) for the cleaned title, then `google_immersive_product`
   (`more_stores=true`) for the best matching product: per-store offers with direct links, price,
@@ -456,14 +464,16 @@ ruling of 2026-11-28):
   a link; SerpApi gives direct merchant links. 3. Otherwise "no data".
   SerpApi falls back to Chrome when its month is used up, when it is down (timeout, 5xx, hourly
   limit) or refuses the key; without a key, Chrome is the only source.
-- **SerpApi budget.** A monthly counter in SQLite (`gshop_usage`, UTC month) counts every billed
+- **SerpApi budget.** A counter in SQLite (`gshop_usage`) per plan period (up to account.json's
+  `plan_renewal_date` once seen, e.g. the 28th for the free plan; else the UTC month) counts every billed
   request (1 or 2 per check) and hard-stops at `GSHOP_MONTHLY_BUDGET` (default 240, under the 250
   plan). A check starts only with 2 left. SerpApi's own count wins: the free `account.json`
   (`plan_searches_left` < 2) or a "run out of searches" error marks the month used up.
 - **Chrome limits** (the owner's home IP): 20 Google requests an hour, 100 a day, page loads at
-  least 15 s apart, at most 2 requests per check (the page and the panel click). A CAPTCHA
-  (`/sorry/`, "unusual traffic", a reCAPTCHA), a consent wall, an empty or timed-out page stops
-  Google for 2 h, doubling per consecutive block to 12 h, persisted in SQLite (`gshop_state`,
+  least 15 s apart, at most 2 requests per check (the page and the panel click), and a 60 s job
+  deadline that recycles the page and frees the single-flight. Only a real CAPTCHA (`/sorry/`,
+  "unusual traffic", a reCAPTCHA) or a consent wall (an empty or timed-out page is an error for
+  that check only) stops Google for 2 h, doubling per consecutive block to 12 h, persisted in SQLite (`gshop_state`,
   clamped on read) and reset by the first good page. Captchas are never solved.
 - **Cache and single-flight.** Each product's captured offers are kept 24 h (`gshop_cache`, keyed
   by site, product id and normalized title); the verdict is recomputed from them with the current
@@ -474,7 +484,12 @@ ruling of 2026-11-28):
   Google's product cluster (API or panel; the cluster itself was matched by `sameProduct`) must
   not conflict (`conflicts`: bundles, packs, other models such as Flip 7 for Flip 6), since its
   title is often short or Arabic. An API or panel offer also needs a .sa host, a known Saudi
-  merchant domain or a known Saudi merchant name. One offer per store, its lowest. Verdicts:
+  merchant domain. With a link or the merchant's site, the host decides whatever the name (a
+  "Sharaf DG" on uae.sharafdg.com is out; noon only on /saudi-); with no link (the Google grid) the
+  name must be a Saudi-only store (Abdulwahed, Saeel, Danube, ...) or carry a Saudi marker (".sa",
+  "KSA"); chains that also sell abroad (noon, Carrefour, LuLu, Sharaf DG, Jarir, eXtra, Amazon)
+  never count by name alone. SerpApi's `foreign` flag is set from the currency and the host. One
+  offer per store, its lowest. Verdicts:
   **confirmed** (our price <= 0.98 x the lowest of at least 2 other Saudi offers), **not unique**
   (our price > 0.98 x the lowest other, 1 offer is enough), **fake was-price** (our was-price
   > 1.05 x the highest other current price, at least 3 offers, and no other store shows the same

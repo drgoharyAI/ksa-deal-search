@@ -126,7 +126,7 @@ curl -s http://127.0.0.1:3000/api/health
 the file private: `chmod 600 .env` (owner read/write only). Then `docker compose up -d`. Without a
 key, "Check other stores" uses the Chrome fallback on google.com.sa only (its own profile, 20 loads
 an hour, 100 a day, 15 s apart, 2 h to 12 h back-off after a CAPTCHA). The check counts its SerpApi
-searches per month in the SQLite file and stops at the budget; `https://serpapi.com/account.json`
+searches per plan period in the SQLite file and stops at the budget; checks are capped at 30 an hour and 100 a day overall and 10 an hour per client (`429` past that); `https://serpapi.com/account.json`
 (free) shows the plan's remaining searches.
 
 `.env` is never committed and never copied into the image (`.dockerignore`).
