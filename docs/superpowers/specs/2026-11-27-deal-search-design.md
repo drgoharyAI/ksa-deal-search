@@ -423,3 +423,65 @@ auto-correct, others return junk or nothing) and our relevance filter required t
   `scripts/eval-typos.mjs`: correction accuracy (39/40: "vaccum" is a letter change without title
   evidence), false-correction rate (0) and p@10/recall through replay (typos 93/88, clean 96/90).
   The main eval is unchanged (p@10 98, recall 92, cheapest-first 73).
+
+## Google Shopping KSA validator (owner request, SerpApi free tier)
+"Use Google Shopping KSA (google.com.sa) as an independent validator of real vs fake deals", with
+small links to the other stores' captured offers. Our deal badges come from our own price history;
+Google Shopping lists many more Saudi stores. Decisions (the source order is the owner's final
+ruling of 2026-11-28):
+- **On demand only.** "Check other stores" in Details and in the compare dialog, through
+  `POST /api/gshop/validate` (`rejectCrossSite`, JSON only, 1 KB capped body). Never on a search.
+  Optional `GSHOP_AUTO=1` (off by default) also checks up to 5 deal-badged results a day.
+  The request names only `{site, id}`: the title comes from `seen_products` and the price and
+  was-price from the latest observation, so a client cannot spend checks on arbitrary queries.
+- **Source order.** 1. **SerpApi** (`SERPAPI_KEY`, free plan 250/month): `google_shopping` on
+  google.com.sa (gl=sa, hl=en) for the cleaned title, then `google_immersive_product`
+  (`more_stores=true`) for the best matching product: per-store offers with direct links, price,
+  original price and shipping. 2. Otherwise the **owner's Chrome** on
+  `https://www.google.com.sa/search?udm=28&hl=en&gl=sa&q=...` (its own profile and queue, never
+  noon's): the results grid gives title, SAR price, was-price, store and Google's "foreign price"
+  label; one click on the best card opens its product panel, the only place with merchant links
+  (Google `/url?q=` redirects are decoded; `/aclk` ad links are dropped). Live check 2026-11-28:
+  the panel's store rows link only through opaque `/goto?url=` redirects, so on this path the
+  stores show as name, price and domain (read from the row's favicon URL) in plain text, without
+  a link; SerpApi gives direct merchant links. 3. Otherwise "no data".
+  SerpApi falls back to Chrome when its month is used up, when it is down (timeout, 5xx, hourly
+  limit) or refuses the key; without a key, Chrome is the only source.
+- **SerpApi budget.** A monthly counter in SQLite (`gshop_usage`, UTC month) counts every billed
+  request (1 or 2 per check) and hard-stops at `GSHOP_MONTHLY_BUDGET` (default 240, under the 250
+  plan). A check starts only with 2 left. SerpApi's own count wins: the free `account.json`
+  (`plan_searches_left` < 2) or a "run out of searches" error marks the month used up.
+- **Chrome limits** (the owner's home IP): 20 Google requests an hour, 100 a day, page loads at
+  least 15 s apart, at most 2 requests per check (the page and the panel click). A CAPTCHA
+  (`/sorry/`, "unusual traffic", a reCAPTCHA), a consent wall, an empty or timed-out page stops
+  Google for 2 h, doubling per consecutive block to 12 h, persisted in SQLite (`gshop_state`,
+  clamped on read) and reset by the first good page. Captchas are never solved.
+- **Cache and single-flight.** Each product's captured offers are kept 24 h (`gshop_cache`, keyed
+  by site, product id and normalized title); the verdict is recomputed from them with the current
+  price. One fetch per product at a time.
+- **Rules** (`src/lib/gshop/validate.ts`, pure, no AI). Kept offers: SAR, no foreign price, not
+  pre-owned, not a denied merchant (eBay, AliExpress, foreign TLDs such as .ae and .co.za), not
+  our own store, and the same product: a results-grid card by `sameProduct`; a store inside
+  Google's product cluster (API or panel; the cluster itself was matched by `sameProduct`) must
+  not conflict (`conflicts`: bundles, packs, other models such as Flip 7 for Flip 6), since its
+  title is often short or Arabic. An API or panel offer also needs a .sa host, a known Saudi
+  merchant domain or a known Saudi merchant name. One offer per store, its lowest. Verdicts:
+  **confirmed** (our price <= 0.98 x the lowest of at least 2 other Saudi offers), **not unique**
+  (our price > 0.98 x the lowest other, 1 offer is enough), **fake was-price** (our was-price
+  > 1.05 x the highest other current price, at least 3 offers, and no other store shows the same
+  was-price within 1%; checked first), else **no data**.
+- **Evidence.** A quiet verdict badge ("Checked: confirmed lowest", "Others match this price",
+  "Was-price not seen elsewhere"), the line "Google Shopping KSA: N other stores, lowest SAR X at
+  STORE", and each other store as a small link (name, price, domain). A link is drawn only when it
+  is https, has no userinfo or port, no punycode label, and its host is .sa or ends with a known
+  Saudi merchant domain (noon.com only on /saudi-); otherwise name and price are plain text. The
+  source ("Google Shopping via SerpApi" or "Google Shopping (google.com.sa)") and "checked N h ago"
+  sit behind a small (i) button (aria-label "Source", aria-describedby, shown on hover, focus and
+  tap, Esc closes). The card's deal badge shows the same evidence once a product was checked.
+  Near the button: "N SerpApi checks left this month", or "SerpApi limit reached; using Google
+  directly".
+- **History.** Kept offers are also recorded as observations (`site = "gshop:<store domain>"`,
+  `productId = "<our site>:<our id>"`): a cross-store price history for our product. Badges read
+  only our own sites' rows, so these never change a badge.
+- **Secrets.** The key is server-only, sent only to the fixed host serpapi.com (no user-controlled
+  URL), never logged, and scrubbed from every error.
