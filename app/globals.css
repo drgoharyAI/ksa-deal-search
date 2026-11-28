@@ -656,3 +656,30 @@
   .save__btn:active { transform: none; }
   .btn:active:not(:disabled), .qchip:active, .achip:active, .seg__btn:active, .card:hover, .dcard:hover { transform: none; }
 }
+
+/* Google Shopping KSA evidence (GshopCheck.tsx): a quiet verdict, the other stores as small links,
+ * the source behind a small (i) with a full 44px target. */
+.gshop { display: grid; gap: var(--space-2xs); margin-top: var(--space-2xs); font-size: var(--text-xs); color: var(--color-ink-2); }
+.gshop__head { display: flex; align-items: center; gap: var(--space-2xs); margin: 0; }
+.gshop__verdict { padding: 0 var(--space-xs); border: 1px solid var(--color-rule-2); border-radius: var(--radius-xs); background: var(--color-paper-2); color: var(--color-ink-2); font-weight: 500; line-height: 1.7; }
+.gshop__verdict--confirmed { border-color: var(--color-accent-edge); background: var(--color-accent-well); color: var(--color-accent-strong); }
+.gshop__verdict--fake-was { border-color: var(--color-warn-edge); background: var(--color-warn-well); color: var(--color-warn-ink); }
+.gshop__line { margin: 0; line-height: 1.5; }
+.gshop__offers { display: flex; flex-wrap: wrap; gap: var(--space-3xs) var(--space-sm); margin: 0; padding: 0; list-style: none; }
+.gshop__offer { line-height: 1.6; }
+.gshop__offer a { color: var(--color-ink); text-decoration-color: var(--color-rule-2); text-underline-offset: 0.16em; }
+.gshop__offer a:hover { text-decoration-color: var(--color-accent); }
+.gshop__offer a:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
+.gshop__price { font-weight: 600; font-variant-numeric: tabular-nums; }
+.gshop__domain { color: var(--color-muted); }
+.info { position: relative; display: inline-flex; }
+.info__button { display: inline-grid; place-items: center; width: var(--target); height: var(--target); margin: calc((var(--target) - 18px) / -2); padding: 0; border: 0; background: transparent; color: var(--color-muted); cursor: pointer; }
+.info__icon { display: inline-grid; place-items: center; width: 16px; height: 16px; border: 1px solid currentColor; border-radius: var(--radius-pill); font-family: var(--font-display); font-size: var(--text-xs); font-style: italic; line-height: 1; }
+.info__button:hover, .info__button[aria-expanded="true"] { color: var(--color-ink); }
+.info__button:focus-visible { outline: 2px solid var(--color-focus); outline-offset: -8px; border-radius: var(--radius-pill); }
+.info__note { position: absolute; z-index: 5; inset-block-start: calc(100% + var(--space-2xs)); inset-inline-start: 0; width: max-content; max-width: min(18rem, 70vw); padding: var(--space-2xs) var(--space-xs); border-radius: var(--radius-sm); background: var(--color-surface); box-shadow: var(--shadow-2); color: var(--color-ink-2); font-size: var(--text-xs); line-height: 1.4; }
+.info__note[hidden] { display: none; }
+.gshop-check { display: grid; gap: var(--space-xs); }
+.gshop-check__row { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-xs); }
+.gshop-check__budget { font-size: var(--text-xs); color: var(--color-muted); }
+.gshop-check__error { color: var(--color-error); }

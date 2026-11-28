@@ -11,6 +11,7 @@ import { Trend, dealExplanation } from "./ResultCard";
 import { viewHandlers } from "./Saved";
 import Button from "./ui/Button";
 import StoreMark from "./ui/StoreMark";
+import GshopCheck from "./GshopCheck";
 
 /**
  * What an expanded card reads from the results on screen: other listings like this one (from the
@@ -109,6 +110,10 @@ export function DetailsBody({ p, exclude, source }: { p: Product; exclude?: read
           </p>
         ) : null}
         {!history && !p.deal && <p className="details__note">No price history yet. Searches that list it again build one.</p>}
+      </div>
+      <div className="details__part">
+        <h4 className="details__head">Other Saudi stores</h4>
+        <GshopCheck product={p} />
       </div>
       <div className="details__part">
         {href ? (

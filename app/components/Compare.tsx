@@ -13,6 +13,7 @@ import Button from "./ui/Button";
 import StoreMark from "./ui/StoreMark";
 import Badge from "./ui/Badge";
 import { SaveToggle, viewHandlers } from "./Saved";
+import GshopCheck from "./GshopCheck";
 
 /** What a ticked product that is not in the current results is called. */
 const GONE = "No longer in results";
@@ -306,6 +307,14 @@ export function CompareDialog({ items, missing = [], open, onClose, onRemove, br
                 ))}
               </tr>
             ))}
+            <tr className="cmp__gshop">
+              <th scope="row">Other Saudi stores</th>
+              {items.map((p) => (
+                <td key={productKey(p)}>
+                  <GshopCheck product={p} />
+                </td>
+              ))}
+            </tr>
             <tr className="cmp__links">
               <th scope="row">Store link</th>
               {items.map((p) => {

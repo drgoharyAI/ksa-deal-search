@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { Product } from "@/src/lib/types";
 import { isLikelyMatch } from "@/src/lib/rank";
 import { leadOf, type ViewItem } from "@/src/lib/view";
@@ -8,6 +8,7 @@ import { productKey } from "@/src/lib/specs";
 import ResultCard, { type CardVariant } from "./ResultCard";
 import GroupCard from "./GroupCard";
 import Button from "./ui/Button";
+import { GshopAuto } from "./GshopCheck";
 
 /** Cards drawn per step: a search can return 400+ cards, too many to mount at once on a phone. */
 export const RESULTS_STEP = 48;
@@ -67,6 +68,8 @@ export default function ResultTiers({ products, items: given, query, compare, vi
     else setLocal(next);
   }, [onLimit]);
   const items = all.length > limit ? all.slice(0, limit) : all;
+  // Single-product cards on screen, for the optional automatic Google Shopping checks.
+  const singles = useMemo(() => items.flatMap((i) => (i.kind === "product" ? [i.product] : [])), [items]);
   const more = all.length - items.length;
   const hasMore = more > 0;
   const sentinel = useRef<HTMLDivElement>(null);
@@ -130,6 +133,7 @@ export default function ResultTiers({ products, items: given, query, compare, vi
     );
   return (
     <div ref={root} className="rtiers">
+      <GshopAuto products={singles} />
       {tiers}
       {footer}
       {status}

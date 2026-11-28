@@ -16,6 +16,7 @@ import Badge from "./ui/Badge";
 import StoreMark from "./ui/StoreMark";
 import { SaveToggle, SavedContext, viewHandlers } from "./Saved";
 import CardDetails from "./CardDetails";
+import { GshopCardLine } from "./GshopCheck";
 
 const DEAL_EXPLAIN: Record<DealInsight["badge"], string> = {
   "fake-deal": "The discount does not hold up against the prices we've seen",
@@ -224,6 +225,7 @@ function ResultCard({ product: p, query, compareChecked = false, onCompare, vari
           </p>
         )}
         {p.deal && <DealBadge deal={p.deal} />}
+        {p.deal && <GshopCardLine product={p} />}
         {p.trend && p.trend.points.length >= 2 && <Trend trend={p.trend} title={p.title} />}
         <div className="card__actions">
           {href ? (
